@@ -243,7 +243,9 @@ test("the dossier choreography is scroll-linked, gated and never hides a landing
   );
   assert.match(motion, /^@supports[^{]*\{ @media \(prefers-reduced-motion: no-preference\) \{/);
   const rules = [...motion.matchAll(/(html[^{]*)\{([^}]*)\}/g)];
-  assert.equal(rules.length, 5);
+  // 2026-11-23 (owner: phones equal PC in high quality mode): Android's flat
+  // lift is gone, so four rules remain and none is Android-specific.
+  assert.equal(rules.length, 4);
   for (const [, selector, declarations] of rules) {
     for (const gate of [
       ':not([data-world-effects="economy"])',
@@ -259,17 +261,12 @@ test("the dossier choreography is scroll-linked, gated and never hides a landing
     if (range) assert.match(range[1], /entry 100%$/);
   }
   const frames = (name) => dossier.match(new RegExp(`@keyframes ${name} \\{(.*?\\} )\\}`))[1];
-  for (const name of ["dossier-rise", "dossier-lift", "dossier-lift-flat"]) {
+  for (const name of ["dossier-rise", "dossier-lift"]) {
     for (const [, property] of frames(name).matchAll(/([\w-]+):/g)) {
       assert.ok(["opacity", "translate", "scale"].includes(property), `${name} ${property}`);
     }
   }
-  // Android's large cards slide without the fade, as in the Motion edition.
-  assert.doesNotMatch(frames("dossier-lift-flat"), /opacity/);
-  assert.match(
-    motion,
-    /html:not\(\[data-world-effects="economy"\]\)\[data-android-renderer\][^{]*\.manager-page :is\(\.form-pickup-card, \.rider-special-site-card\) \{ animation-name: dossier-lift-flat; \}/,
-  );
+  assert.doesNotMatch(motion, /data-android-renderer/);
 });
 
 test("the Final Stage synopsis reads at a book measure with labels on the 11px floor", () => {

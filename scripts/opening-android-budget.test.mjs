@@ -13,9 +13,13 @@ const body = (selector) => {
 // Measured on a Galaxy profile (412 x 915 at DPR 3.5, 4x CPU): once the title
 // held, 120 compositor and main frames a second, 262 MB of tiles and 10
 // render passes; with these rules 0 frames a second, 105 MB and 4 passes.
-test("Android drops the grain and the bloom's blur on the opening", () => {
-  assert.match(body("html[data-android-renderer] .cine-grain"), /display: none;/);
-  assert.match(body("html[data-android-renderer] .cine-impact-bloom::before"), /filter: none;/);
+// 2026-11-23 (owner: phones equal PC in high quality mode): the grain and the
+// bloom are visible effects, so only lightweight Android drops them now.
+test("lightweight Android drops the grain and the bloom's blur on the opening", () => {
+  const economy = 'html[data-world-effects="economy"][data-android-renderer]';
+  assert.match(body(`${economy} .cine-grain`), /display: none;/);
+  assert.match(body(`${economy} .cine-impact-bloom::before`), /filter: none;/);
+  assert.doesNotMatch(rules, /html\[data-android-renderer\] \.cine-(?:grain|impact-bloom)/);
 });
 
 test("the held title is still on Android: HUD rotations pause, scene layers merge", () => {

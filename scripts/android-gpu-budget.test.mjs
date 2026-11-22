@@ -153,17 +153,17 @@ test("no blurred shadow over 48px on Android's poster frame, topbar or Zeus butt
   for (const blur of blurRadii(declaration(topbar, "box-shadow"))) assert.equal(blur, 0);
   assert.equal(declaration(topbar, "transition"), "none");
 
+  // 2026-11-23 (owner: phones equal PC in high quality mode): the Zeus
+  // button keeps its PC halo on capable Android; every Android Zeus rule is
+  // now scoped to the lightweight renderer.
   const android = styleRules(stripComments(await read("src/styles-android-performance.css")));
-  const zeus = android.find(({ selector }) =>
-    /^html[^ ]*\[data-android-renderer\] \.zeus-button/.test(selector),
-  );
-  assert.ok(zeus?.selector.startsWith(ANDROID_FULL), zeus?.selector);
-  // Dragging and the return spinner keep their own glow.
-  assert.match(
-    zeus.selector,
-    /:not\(\[data-dragging="true"\]\):not\(\[data-return-loading="true"\]\)$/,
-  );
-  for (const blur of blurRadii(declaration(zeus.body, "box-shadow"))) assert.equal(blur, 0);
+  const zeus = android.filter(({ selector }) => /\.zeus-button/.test(selector));
+  assert.ok(zeus.length > 0);
+  for (const { selector } of zeus) {
+    for (const part of splitTopLevel(selector)) {
+      assert.match(part, /^html\[data-world-effects="economy"\]\[data-android-renderer\] /, part);
+    }
+  }
 
   // Every other renderer keeps the full halo.
   const base = styleRules(stripComments(await read("src/styles-world-mirage.css"))).find(
@@ -172,117 +172,68 @@ test("no blurred shadow over 48px on Android's poster frame, topbar or Zeus butt
   assert.ok(Math.max(...blurRadii(declaration(base.body, "box-shadow"))) >= 160);
 });
 
-test("Android animates no image clip-path, no iris and no panel opacity surface", async () => {
+// 2026-11-23 (owner: phones equal PC in high quality mode): the scroll
+// reveals' PC keyframes are compositor-only now, so Android runs them as PC
+// does and the clip-path stand-ins (mr-rise-in, mr-fade-in, mx-lift-flat) are
+// gone. The Samsung Internet 28-30 limit (no composited clip-path) is now
+// guarded on the keyframes themselves. The iris stays at rest on Android:
+// it is part of the tile-memory budget.
+test("Android animates no clip-path reveal and no iris", async () => {
   const rules = styleRules(await mirageTier());
   const all = styleRules(stripComments(await read("src/styles-world-mirage.css")));
+  const target = ".finale-sticky::before";
+  const rule = androidRule(rules, target);
+  assert.equal(declaration(rule.body, "animation"), "none", target);
+  // The override restates every gate of the scroll rule it refines, so it
+  // applies exactly while that rule does.
+  const refined = all.find(
+    ({ selector, body }) =>
+      !selector.startsWith(ANDROID_FULL) &&
+      selector.endsWith(target) &&
+      /animation-timeline/.test(body),
+  );
+  assert.ok(refined, target);
+  const gates = htmlQualifiers(refined.selector);
+  assert.ok(gates.length >= 3, refined.selector);
+  const android = htmlQualifiers(rule.selector);
+  for (const gate of gates) assert.ok(android.includes(gate), `${target} lacks ${gate}`);
+  assert.ok(android.includes("[data-android-renderer]"), target);
+
+  // Every scroll-linked Mirage reveal that Android now runs moves only
+  // opacity and transforms, so none of them needs the main thread.
+  const css = stripComments(await read("src/styles-world-mirage.css"));
   for (const target of [
     ":is(.signal > img, .other-archive-card > img, .dante-visual img)",
-    ".finale-sticky::before",
+    ".threat-copy h3",
+    ".threat-copy .system-label",
+    ".finale-content > span",
+    ".mr-endmark :is(span, b)",
   ]) {
-    const rule = androidRule(rules, target);
-    assert.equal(declaration(rule.body, "animation"), "none", target);
-    // The override restates every gate of the scroll rule it refines, so it
-    // applies exactly while that rule does.
-    const refined = all.find(
+    const reveal = all.find(
       ({ selector, body }) =>
         !selector.startsWith(ANDROID_FULL) &&
         selector.endsWith(target) &&
         /animation-timeline/.test(body),
     );
-    assert.ok(refined, target);
-    const gates = htmlQualifiers(refined.selector);
-    assert.ok(gates.length >= 3, refined.selector);
-    const android = htmlQualifiers(rule.selector);
-    for (const gate of gates) assert.ok(android.includes(gate), `${target} lacks ${gate}`);
-    assert.ok(android.includes("[data-android-renderer]"), target);
+    assert.ok(reveal, target);
+    assert.equal(androidRule(rules, target), undefined, `${target} has no Android stand-in`);
+    const name = declaration(reveal.body, "animation").split(" ")[0];
+    const frames = css.match(new RegExp(`@keyframes ${name} \\{([\\s\\S]*?\\})\\s*\\}`))?.[1];
+    assert.ok(frames, name);
+    for (const [, property] of frames.matchAll(/([\w-]+)\s*:/g)) {
+      assert.ok(["opacity", "translate", "scale", "rotate", "transform"].includes(property), `${name}: ${property}`);
+    }
   }
 
   const motion = stripComments(await read("src/styles-motion-edition.css"));
-  const motionRules = styleRules(motion);
-  const lift = motionRules.find(
-    ({ selector }) =>
-      selector ===
-      `${ANDROID_FULL} .site-shell.film-edition.motion-on :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive)`,
-  );
-  assert.equal(declaration(lift.body, "animation-name"), "mx-lift-flat");
-  const flat = motion.match(/@keyframes mx-lift-flat \{([\s\S]*?\})\s*\}/)?.[1] ?? "";
-  assert.match(flat, /translate:/);
-  assert.doesNotMatch(flat, /opacity/);
-  const settle = motionRules.find(
-    ({ selector }) =>
-      selector === `${ANDROID_FULL} .site-shell.film-edition.motion-on .finale-backdrop img`,
-  );
-  assert.equal(declaration(settle.body, "animation"), "none");
+  assert.doesNotMatch(motion, /\[data-android-renderer\]/);
 });
 
-test("the compositor reveals keep the timeline, range and cadence of the wipes they replace", async () => {
-  const all = styleRules(stripComments(await read("src/styles-world-mirage.css")));
-  const rises = styleRules(await mirageTier()).filter(({ body }) =>
-    /animation: mr-(?:rise|fade)-in /.test(body),
-  );
-  assert.equal(rises.length, 5);
-  const members = (selector) => {
-    const target = selector.slice(
-      selector.indexOf(".site-shell.film-edition.mirage-edition ") + 40,
-    );
-    return /^:is\(.*\)$/.test(target) ? splitTopLevel(target.slice(4, -1)) : [target];
-  };
-  for (const rise of rises) {
-    const wipe = all.find(
-      ({ selector, body }) =>
-        !selector.startsWith(ANDROID_FULL) &&
-        members(rise.selector).every((member) => members(selector).includes(member)) &&
-        /animation-timeline/.test(body),
-    );
-    assert.ok(wipe, rise.selector);
-    assert.match(declaration(wipe.body, "animation"), /^mr-(?:type|wipe) /);
-    for (const property of ["animation-timeline", "animation-range"]) {
-      assert.equal(declaration(rise.body, property), declaration(wipe.body, property), property);
-    }
-    // Same easing or steps: the labels keep their typing cadence.
-    const timing = (value) => value.replace(/^mr-[\w-]+ /, "");
-    assert.equal(
-      timing(declaration(rise.body, "animation")),
-      timing(declaration(wipe.body, "animation")),
-    );
-  }
-  for (const name of ["mr-rise-in", "mr-fade-in"]) {
-    const frames = (await mirageTier()).match(
-      new RegExp(`@keyframes ${name} \\{([\\s\\S]*?\\})\\s*\\}`),
-    )?.[1];
-    assert.ok(frames, name);
-    for (const [, property] of frames.matchAll(/([\w-]+)\s*:/g)) {
-      assert.ok(["opacity", "translate"].includes(property), property);
-    }
-  }
-  // An inline box ignores translate, and a reveal that animates it there
-  // falls back to the main thread: the inline archive label only fades.
-  const label = styleRules(await mirageTier()).find(({ selector }) =>
-    selector.endsWith(".threat-copy .system-label"),
-  );
-  assert.match(declaration(label.body, "animation"), /^mr-fade-in /);
-});
-
-test("no blend mode on a layer that animates on Android", async () => {
-  const css = stripComments(await read("src/styles-world-mirage.css"));
-  const rules = styleRules(css);
-  const key = (selector) => selector.split(" ").at(-1);
-  const animated = new Set(
-    rules
-      .filter(({ body }) => /(?:^|;)\s*animation(?:-name)?:(?!\s*none)/.test(body))
-      .flatMap(({ selector }) => splitTopLevel(selector).map(key)),
-  );
-  const blended = rules.filter(
-    ({ selector, body }) =>
-      !selector.startsWith(ANDROID_FULL) &&
-      /mix-blend-mode:\s*(?!normal)/.test(body) &&
-      animated.has(key(selector)),
-  );
-  assert.ok(blended.length > 0);
-  for (const { selector } of blended) {
-    const android = androidRule(rules, ` ${key(selector)}`);
-    assert.equal(declaration(android?.body ?? "", "mix-blend-mode"), "normal", selector);
-  }
+// 2026-11-23: the beam's screen blend was a perf trim outside the tile
+// budget; Android now blends it as PC does.
+test("Android blends the hero beam as PC does", async () => {
+  const rules = styleRules(await mirageTier());
+  assert.equal(androidRule(rules, ".mr-hero-beam"), undefined);
 });
 
 test("the hero HUD clips without becoming a composited scroller", async () => {

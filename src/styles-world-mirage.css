@@ -2979,13 +2979,12 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   display: none;
 }
 
-/* Screen-blending the beam while its boot sweep runs cost a render pass over
-   the hero; at 5-12% alpha on the dark bay, normal blending reads the same. */
-html:not([data-world-effects="economy"])[data-android-renderer]
-  .site-shell.film-edition.mirage-edition
-  .mr-hero-beam {
-  mix-blend-mode: normal;
-}
+/* 2026-11-23 (owner: phones equal PC in high quality mode): the beam keeps
+   its PC screen blend on Android (it was a perf trim, not part of the tile
+   budget). Everything left in this tier is one of the two kept workarounds:
+   the tile-memory budget (floor, frame shadows, curtains, bracket overlays,
+   iris, topbar shadow) and the Samsung clip-path stand-ins (the scroll
+   rules below). */
 
 html:not([data-world-effects="economy"])[data-android-renderer]
   .site-shell.film-edition.mirage-edition
@@ -3105,64 +3104,11 @@ html:not([data-world-effects="economy"])[data-android-renderer]
 
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      :is(
-        .section-index > small,
-        .story-heading .eyebrow > span,
-        .records-heading .eyebrow > span
-      ) {
-      animation: mr-rise-in var(--mr-ease-out) both;
-      animation-timeline: view(block);
-      animation-range: entry 0% entry 100%;
-    }
-
-    /* Its eyebrow already rises in (mr-rise-soft); a composited child under
-       that fade would add a render pass. */
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      .section-title
-      .eyebrow
-      > span {
-      animation: none;
-    }
-
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      .threat-copy
-      h3 {
-      animation: mr-rise-in var(--mr-ease-io) both;
-      animation-timeline: --mr-archive;
-      animation-range: entry 0px entry 140px;
-    }
-
-    /* The archive label is an inline box, which translate does not move:
-       with it in the keyframes the reveal fell back to the main thread. */
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      .threat-copy
-      .system-label {
-      animation: mr-fade-in var(--mr-ease-out) both;
-      animation-timeline: --mr-archive;
-      animation-range: entry 0px entry 60px;
-    }
-
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      :is(.signal > img, .other-archive-card > img, .dante-visual img) {
-      animation: none;
-    }
-
+    /* 2026-11-23 (owner: phones equal PC in high quality mode): the scroll
+       reveals' PC keyframes (mr-type, mr-wipe, mr-materialize) now move
+       opacity and translate only, so Samsung Internet 28-30's main-thread
+       clip-path no longer applies to them and Android runs the PC reveals.
+       The iris stays at rest: it is part of the tile-memory budget. */
     html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
         [data-loading]
       ):not([data-dialog-open])
@@ -3170,42 +3116,5 @@ html:not([data-world-effects="economy"])[data-android-renderer]
       .finale-sticky::before {
       animation: none;
     }
-
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      .finale-content
-      > span {
-      animation: mr-rise-in var(--mr-ease-out) both;
-      animation-timeline: --mr-finale;
-      animation-range: entry 40px entry 220px;
-    }
-
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .site-shell.film-edition.mirage-edition
-      .mr-endmark
-      :is(span, b) {
-      animation: mr-rise-in var(--mr-ease-out) both;
-      animation-timeline: view(block);
-      animation-range: entry 0% entry 100%;
-    }
-  }
-}
-
-/* The compositor stand-in for the clip-path reveals: to each element's
-   resting opacity and position. */
-@keyframes mr-rise-in {
-  from {
-    opacity: 0;
-    translate: 0 8px;
-  }
-}
-
-@keyframes mr-fade-in {
-  from {
-    opacity: 0;
   }
 }

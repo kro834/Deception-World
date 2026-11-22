@@ -209,7 +209,12 @@ export function useLiquidPointerLight() {
     };
 
     const track = () => {
-      if (document.documentElement.hasAttribute("data-android-renderer")) return trackPressesOnly();
+      // 2026-11-23 (owner: phones equal PC in high quality mode): only
+      // lightweight Android follows presses alone; high quality Android
+      // tracks the pointer as every other renderer does.
+      const root = document.documentElement;
+      if (root.hasAttribute("data-android-renderer") && root.dataset.worldEffects === "economy")
+        return trackPressesOnly();
       resumePointer = true;
       document.addEventListener("pointerover", onPointerOver, { passive: true });
       document.addEventListener("pointermove", onPointerMove, { passive: true });

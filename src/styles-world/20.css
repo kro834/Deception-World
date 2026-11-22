@@ -870,12 +870,14 @@
 /* Android: the seal's pulse (box-shadow and filter) and the title's shine
    (background-position) cannot run on the compositor, so each repainted the
    portrait frame and the status block every frame. The seal still arrives
-   and rests unlit; the title rests on the gold end of its shine. */
-html[data-android-renderer] .sovereign-apex-seal {
+   and rests unlit; the title rests on the gold end of its shine.
+   2026-11-23 (owner: phones equal PC in high quality mode): lightweight
+   Android only; in high mode both are small boxes and animate as on PC. */
+html[data-world-effects="economy"][data-android-renderer] .sovereign-apex-seal {
   animation: sovereignSealIn 0.92s 0.44s cubic-bezier(0.16, 0.9, 0.2, 1) both;
 }
 
-html[data-android-renderer] .is-sovereign .manager-display-name {
+html[data-world-effects="economy"][data-android-renderer] .is-sovereign .manager-display-name {
   background-position: 0 50%;
   animation: none;
 }

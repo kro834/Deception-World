@@ -1,6 +1,10 @@
 /* iOS/iPadOS 18: keep gesture geometry and transform transitions, avoid
-   repeated backdrop sampling on fixed chrome and interactive glass. */
-html[data-ios18-renderer="true"]
+   repeated backdrop sampling on fixed chrome and interactive glass.
+   2026-11-23, owner: 「高品質モードで、スマホでもPC版と同クオリティになる様にして」.
+   This was a performance trim (2e723f88; no rendering bug was ever named and
+   device fps was never measured), so it now applies to the lightweight
+   renderer only. In high quality mode iOS 18 gets the PC glass and glows. */
+html[data-world-effects="economy"][data-ios18-renderer="true"]
   :is(
     .topbar,
     .manager-topbar,
@@ -17,10 +21,10 @@ html[data-ios18-renderer="true"]
   backdrop-filter: none !important;
   background-color: #101b29;
 }
-html[data-ios18-renderer="true"] :is(.liquid-pointer-glow, .liquid-contact-glow) {
+html[data-world-effects="economy"][data-ios18-renderer="true"] :is(.liquid-pointer-glow, .liquid-contact-glow) {
   display: none !important;
 }
-html[data-ios18-renderer="true"]
+html[data-world-effects="economy"][data-ios18-renderer="true"]
   :is(.manager-glow, .rider-archive-glow, .rxs-hero-ambient, .dream-aurora) {
   filter: none !important;
   opacity: 0.12;

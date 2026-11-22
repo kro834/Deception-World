@@ -2207,3 +2207,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   height: 16px;
   pointer-events: none;
   color: rgb(232 238 248 / 0.62);
+  font: 600 0.5rem/1 var(--font-sans);
+  letter-spacing: 0.3em;
+}

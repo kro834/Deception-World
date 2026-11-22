@@ -57,23 +57,13 @@ html[data-family="gallery"] {
   --fx-b: var(--sh-l2, #c9a15a);
 }
 
-/* Touch screens (phones, tablets) keep the controls' glow but not the
-   large surfaces' bloom: their first paint while scrolling stays cheap. */
-@media (hover: none) and (pointer: coarse) {
-  html[data-family] {
-    --fx-bloom: 0;
-  }
-}
-
-html[data-family][data-world-effects="economy"],
-html[data-family][data-ios18-renderer="true"] {
+/* 2026-11-23 (owner: phones equal PC in high quality mode): touch screens,
+   iOS 18 and Android keep the full glow, bloom and scan; only the
+   lightweight renderer drops them. */
+html[data-family][data-world-effects="economy"] {
   --fx-glow: 0;
   --fx-bloom: 0;
   --fx-scan: linear-gradient(transparent, transparent);
-}
-
-html[data-family][data-android-renderer]:not([data-world-effects="economy"]) {
-  --fx-glow: 0.6;
 }
 
 /* The chrome's shared material (styles-command-chrome.css reads these):
@@ -1100,20 +1090,11 @@ html[data-family="library"]
     drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-bloom)), transparent));
 }
 
-html:is([data-world-effects="economy"], [data-ios18-renderer="true"], [data-android-renderer])
+html[data-world-effects="economy"]
   body
   :is(.library-page, .search-page).command-records.command-records.command-records.command-records
   h1:nth-child(n) {
   filter: drop-shadow(0 5px 1px #0005);
-}
-
-@media (hover: none) and (pointer: coarse) {
-  html[data-family="library"]
-    body
-    :is(.library-page, .search-page).command-records.command-records.command-records.command-records
-    h1:nth-child(n) {
-    filter: drop-shadow(0 5px 1px #0005);
-  }
 }
 
 html[data-family="dossier"]
@@ -1123,18 +1104,11 @@ html[data-family="dossier"]
   filter: drop-shadow(0 0 20px color-mix(in srgb, var(--fx-a) calc(55% * var(--fx-bloom)), transparent));
 }
 
-/* Economy, iOS 18, Android and touch screens: the drop-shadow filters
-   cost a layer; drop them (the spectrum fills stay). */
-html:is([data-world-effects="economy"], [data-ios18-renderer="true"], [data-android-renderer])
-  body
-  :is(.anime-work-title b, .manager-display-name) {
+/* Economy: the drop-shadow filters cost a layer; drop them (the spectrum
+   fills stay). Since 2026-11-23 phones, iOS 18 and Android keep them in high
+   quality mode, as on PC. */
+html[data-world-effects="economy"] body :is(.anime-work-title b, .manager-display-name) {
   filter: none !important;
-}
-
-@media (hover: none) and (pointer: coarse) {
-  html[data-family] body :is(.anime-work-title b, .manager-display-name) {
-    filter: none !important;
-  }
 }
 
 /* ---------- 8. Reduced transparency and forced colours ---------- */

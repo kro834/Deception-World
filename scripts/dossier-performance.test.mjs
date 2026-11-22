@@ -54,7 +54,9 @@ test("the manager glow ring is static: its rotation was invisible and kept a 58r
   assert.match(ring.body, /box-shadow:/);
 });
 
-test("on Android the sovereign seal arrives but does not pulse, and the title shine rests", async () => {
+// 2026-11-23 (owner: phones equal PC in high quality mode): the seal pulse and
+// the title shine are trimmed on lightweight Android only.
+test("on lightweight Android the sovereign seal arrives but does not pulse, and the title shine rests", async () => {
   const css = stripComments(await read("src/styles-world/20.css"));
   const rules = styleRules(css);
   // Every other renderer keeps both loops in this sheet; the Zeus route's own
@@ -65,13 +67,14 @@ test("on Android the sovereign seal arrives but does not pulse, and the title sh
   assert.match(title.body, /animation: sovereignTitleShine [^;]*infinite;/);
 
   const androidSeal = rules.find(
-    ({ selector }) => selector === "html[data-android-renderer] .sovereign-apex-seal",
+    ({ selector }) => selector === 'html[data-world-effects="economy"][data-android-renderer] .sovereign-apex-seal',
   );
   assert.match(androidSeal.body, /animation: sovereignSealIn [^;]*both;/);
   assert.doesNotMatch(androidSeal.body, /sovereignSealPulse|infinite/);
   const androidTitle = rules.find(
     ({ selector }) =>
-      selector === "html[data-android-renderer] .is-sovereign .manager-display-name",
+      selector ===
+      'html[data-world-effects="economy"][data-android-renderer] .is-sovereign .manager-display-name',
   );
   assert.match(androidTitle.body, /animation: none;/);
   // It rests on the gold end of the shine (its 50% frame), as under reduced motion.

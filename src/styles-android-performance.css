@@ -1,30 +1,32 @@
 /* Android compositing budget (html[data-android-renderer]).
 
-   Capable Android (Pixel, Galaxy S, Samsung Internet) runs the World: the
-   Mirage boot, Motion and Mirage scroll choreography, film motion and the key
-   art. Its lite tier drops only the layers measured as heavy on Android GPUs
-   (the "Android lite tier" sections of styles-world-mirage.css and
-   styles-motion-edition.css, and the Zeus halo below). Weak Android is chosen
-   by capability in rendering-profile.js (html[data-world-effects="economy"]),
-   never by model, and only then are decoration loops frozen. What stays
-   specific to every Android renderer:
+   2026-11-23, owner: 「高品質モードで、スマホでもPC版と同クオリティになる様にして」.
+   In high quality mode Android now gets the PC rendering: every reduction
+   below is scoped to the lightweight renderer
+   (html[data-world-effects="economy"]), the only reduced tier. The two
+   Android workarounds that stay in high mode live in styles-world-mirage.css
+   (the tile-memory budget and the Samsung clip-path stand-ins). The notes
+   below describe what lightweight Android gets.
+
+   Lightweight Android also freezes decoration loops (the economy rules
+   further down). What it drops besides:
    - no backdrop-filter, with opaque surfaces instead (backdrop sampling is the
      heaviest GPU operation on Mali and Xclipse);
    - the fixed full-screen grain, the blurred orbs and the hover/pointer glows
      are hidden (nearly invisible, and costly as full-screen layers);
    - reading progress is driven by the compositor (scroll(root block)), never
      by a per-frame --page-progress write, and only one line is drawn. */
-html[data-android-renderer] body *,
-html[data-android-renderer] body *::before,
-html[data-android-renderer] body *::after,
-html[data-android-renderer] dialog::backdrop {
+html[data-world-effects="economy"][data-android-renderer] body *,
+html[data-world-effects="economy"][data-android-renderer] body *::before,
+html[data-world-effects="economy"][data-android-renderer] body *::after,
+html[data-world-effects="economy"][data-android-renderer] dialog::backdrop {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
 /* The closed menus retain their normal visibility rules. Open surfaces need a
    readable backing now that their background is no longer blurred. */
-html[data-android-renderer]
+html[data-world-effects="economy"][data-android-renderer]
   :is(
     .topbar,
     .manager-topbar,
@@ -39,30 +41,20 @@ html[data-android-renderer]
   background-color: #101b29;
 }
 
-html[data-android-renderer]
+html[data-world-effects="economy"][data-android-renderer]
   :is(.grain, .ambient-orb, .world-column-orbit-glow, .liquid-contact-glow, .liquid-pointer-glow) {
   display: none !important;
-}
-
-/* Android lite tier: the fixed Zeus button keeps its rim and ring but not the
-   34px blurred halo, which enlarged a layer that is always on screen. Dragging
-   and the return spinner keep their own glow. */
-html:not([data-world-effects="economy"])[data-android-renderer]
-  .zeus-button:not([data-dragging="true"]):not([data-return-loading="true"]) {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.86),
-    0 0 0 3px rgb(14 29 28 / 0.72);
 }
 
 /* Keep the held rim and scale, but bound the always-visible drag layer.
    Pointer movement changes individual translate; no filter or shadow tween
    needs to be repainted across the screen on Chrome / Samsung Internet. */
-html[data-android-renderer] .zeus-button {
+html[data-world-effects="economy"][data-android-renderer] .zeus-button {
   will-change: auto;
   transition-property: opacity, transform, visibility;
 }
 
-html[data-android-renderer] .zeus-button[data-dragging="true"] {
+html[data-world-effects="economy"][data-android-renderer] .zeus-button[data-dragging="true"] {
   filter: none;
   will-change: transform, translate;
   box-shadow:
@@ -144,18 +136,18 @@ html[data-android-renderer][data-world-effects="economy"]
 /* Dream Chapter on Android: opaque dossier backdrop (since backdrop-filter is
    off), bounded shadow blur radii on large programme and portrait plates, and
    no idle hover-transition state machines on touch cards. */
-html[data-android-renderer] .dream-dossier-dialog {
+html[data-world-effects="economy"][data-android-renderer] .dream-dossier-dialog {
   background-color: rgb(8 6 12 / 96%);
 }
 
-html[data-android-renderer] .dream-page.dream-page .dream-programme-desk {
+html[data-world-effects="economy"][data-android-renderer] .dream-page.dream-page .dream-programme-desk {
   box-shadow:
     inset 0 1px 0 rgb(243 224 176 / 24%),
     inset 0 -1px 0 rgb(200 164 92 / 16%),
     0 16px 28px rgb(0 0 0 / 48%);
 }
 
-html[data-android-renderer]
+html[data-world-effects="economy"][data-android-renderer]
   .dream-page.dream-page
   :is(
     .dream-programme-ticket,
