@@ -2,8 +2,8 @@
    The ring system — foundation (2026-11-22).
    Owner: 「サイト全体に、円環型の構成と動的で弾んだアニメーションを」
           「展開時は弾む様なアニメーションにして。」
-   Root sheet, linked after styles-fx-motion.css / the spectrum in
-   src/routes/__root.tsx. Driven by src/lib/ring-motion.js, which sets
+   Root sheet, linked right after styles-fx-motion.css in
+   src/routes/__root.tsx (before the spectrum and the optional glass). Driven by src/lib/ring-motion.js, which sets
    html[data-ring-ready] and keeps data-ring-in / --ring-p / --ring-kick.
    The shared chrome that uses it lives in styles-ring-chrome.css; each page
    family applies it from its own styles-ring-<group>.css.
@@ -12,7 +12,7 @@
    touches an element that does not ask for it.
 
    TOKENS
-     --ring-spring-soft     ζ .84   640 ms   large surfaces
+     --ring-spring-soft     ζ 1.0   660 ms   large surfaces (no overshoot)
      --ring-spring          ζ .62   620 ms   controls, cards (8 % overshoot)
      --ring-spring-bounce   ζ .45   700 ms   anything that expands (21 %)
      --ring-spring-elastic  ζ .32   880 ms   small ornaments (35 %)
@@ -66,7 +66,7 @@
   --ring-spring-bounce: cubic-bezier(0.3, 1.6, 0.42, 1);
   --ring-spring-elastic: cubic-bezier(0.32, 1.9, 0.4, 0.96);
   --ring-spring-snap: cubic-bezier(0.3, 0.9, 0.3, 1);
-  --ring-dur-soft: 640ms;
+  --ring-dur-soft: 660ms;
   --ring-dur-spring: 620ms;
   --ring-dur-bounce: 700ms;
   --ring-dur-elastic: 880ms;
@@ -113,7 +113,7 @@
 @supports (transition-timing-function: linear(0, 1)) {
   :root {
     /* Sampled from src/lib/ring-motion.js (RING_SPRINGS); the test pins them. */
-    --ring-spring-soft: linear(0, 0.024, 0.083, 0.163, 0.255, 0.35, 0.443, 0.53, 0.61, 0.682, 0.744, 0.798, 0.843, 0.88, 0.911, 0.936, 0.955, 0.97, 0.982, 0.991, 0.997, 1.001, 1.004, 1.006, 1.007, 1.007, 1.007, 1.007, 1.006, 1.006, 1.005, 1.004, 1.004, 1.003, 1.002, 1.002, 1);
+    --ring-spring-soft: linear(0, 0.024, 0.084, 0.162, 0.248, 0.336, 0.421, 0.499, 0.571, 0.635, 0.691, 0.74, 0.782, 0.818, 0.848, 0.874, 0.896, 0.914, 0.929, 0.942, 0.952, 0.961, 0.968, 0.974, 0.979, 0.983, 0.986, 0.989, 0.991, 0.993, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 1);
     --ring-spring: linear(0, 0.034, 0.121, 0.24, 0.373, 0.508, 0.636, 0.75, 0.847, 0.925, 0.986, 1.03, 1.059, 1.076, 1.083, 1.082, 1.077, 1.068, 1.057, 1.046, 1.035, 1.025, 1.016, 1.009, 1.003, 0.999, 0.996, 0.994, 0.993, 0.993, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998, 1);
     --ring-spring-bounce: linear(0, 0.054, 0.191, 0.375, 0.574, 0.763, 0.927, 1.054, 1.141, 1.191, 1.208, 1.199, 1.171, 1.134, 1.093, 1.053, 1.018, 0.991, 0.972, 0.961, 0.957, 0.958, 0.964, 0.971, 0.98, 0.988, 0.996, 1.001, 1.006, 1.008, 1.009, 1.009, 1.008, 1.006, 1.004, 1.003, 1);
     --ring-spring-elastic: linear(0, 0.111, 0.379, 0.705, 1.004, 1.221, 1.332, 1.343, 1.279, 1.174, 1.06, 0.965, 0.903, 0.878, 0.886, 0.916, 0.955, 0.993, 1.022, 1.039, 1.043, 1.037, 1.024, 1.01, 0.998, 0.989, 0.985, 0.986, 0.989, 0.993, 0.998, 1.002, 1.004, 1.005, 1.005, 1.003, 1);
@@ -178,8 +178,9 @@
    Each child is placed by rotate → translate → counter-rotate, so it stays
    upright and no trigonometry is needed. The container is a square of
    2 × (--ring-r + half an item). Set --ring-n on the parent and --ring-i on
-   each child (0-based); the first twelve children get --ring-i from
-   :nth-child when it is not set inline.
+   each child (0-based); the first twelve items get --ring-i from their
+   place among the items (a track or core before them does not count) when
+   it is not set inline.
    ================================================================ */
 
 .ring-orbit,
@@ -240,18 +241,18 @@
   pointer-events: none;
 }
 
-.ring-orbit-item:nth-child(1) { --ring-i: 0; }
-.ring-orbit-item:nth-child(2) { --ring-i: 1; }
-.ring-orbit-item:nth-child(3) { --ring-i: 2; }
-.ring-orbit-item:nth-child(4) { --ring-i: 3; }
-.ring-orbit-item:nth-child(5) { --ring-i: 4; }
-.ring-orbit-item:nth-child(6) { --ring-i: 5; }
-.ring-orbit-item:nth-child(7) { --ring-i: 6; }
-.ring-orbit-item:nth-child(8) { --ring-i: 7; }
-.ring-orbit-item:nth-child(9) { --ring-i: 8; }
-.ring-orbit-item:nth-child(10) { --ring-i: 9; }
-.ring-orbit-item:nth-child(11) { --ring-i: 10; }
-.ring-orbit-item:nth-child(12) { --ring-i: 11; }
+.ring-orbit-item:nth-child(1 of .ring-orbit-item) { --ring-i: 0; }
+.ring-orbit-item:nth-child(2 of .ring-orbit-item) { --ring-i: 1; }
+.ring-orbit-item:nth-child(3 of .ring-orbit-item) { --ring-i: 2; }
+.ring-orbit-item:nth-child(4 of .ring-orbit-item) { --ring-i: 3; }
+.ring-orbit-item:nth-child(5 of .ring-orbit-item) { --ring-i: 4; }
+.ring-orbit-item:nth-child(6 of .ring-orbit-item) { --ring-i: 5; }
+.ring-orbit-item:nth-child(7 of .ring-orbit-item) { --ring-i: 6; }
+.ring-orbit-item:nth-child(8 of .ring-orbit-item) { --ring-i: 7; }
+.ring-orbit-item:nth-child(9 of .ring-orbit-item) { --ring-i: 8; }
+.ring-orbit-item:nth-child(10 of .ring-orbit-item) { --ring-i: 9; }
+.ring-orbit-item:nth-child(11 of .ring-orbit-item) { --ring-i: 10; }
+.ring-orbit-item:nth-child(12 of .ring-orbit-item) { --ring-i: 11; }
 
 /* ================================================================
    3. Circular progress. --ring-p is 0..1. The fill is a conic gradient

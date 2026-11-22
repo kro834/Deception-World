@@ -115,7 +115,15 @@ test("ring keyframes move compositor properties only, and no sheet blurs", () =>
 test("the suit-up engines and their covers are never selected", () => {
   for (const file of sheets) {
     const css = strip(read(file));
-    assert.doesNotMatch(css, /\.(?:rxs|exs|ffs|ils|mus)-/, file);
+    // The special sites' page chrome may wear the ring, whatever its class
+    // prefix; the suit-up, entry and call staging and their canvases may not
+    // be selected at all (their look, timings and end frames are pinned).
+    assert.doesNotMatch(
+      css,
+      /\.[a-z0-9]+-[a-z0-9-]*(?:suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call)(?![a-z])/,
+      file,
+    );
+    assert.doesNotMatch(css, /(?:^|[\s>+~,])canvas(?![a-z-])/m, file);
     for (const rule of css.matchAll(/([^{}]*\.load-gate[^{}]*)\{/g)) {
       assert.match(rule[1], /:not\(\.rider-route-dive\)/, `${file}: ${rule[1].trim()}`);
     }

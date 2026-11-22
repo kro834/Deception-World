@@ -31,8 +31,9 @@
 
 /** The presets. Overshoot = exp(-πζ / √(1 − ζ²)), ζ = damping / (2√stiffness). */
 export const RING_SPRINGS = /** @type {const} */ ({
-  // ζ 0.84: almost no overshoot. Large surfaces, layout-scale moves.
-  soft: { stiffness: 170, damping: 22 },
+  // ζ 1.0 (critically damped): no overshoot at all. Large and full-viewport
+  // surfaces, where a rebound would open a gap at the screen edge.
+  soft: { stiffness: 170, damping: 26 },
   // ζ 0.62: 8 % overshoot. The default for controls and cards.
   spring: { stiffness: 260, damping: 20 },
   // ζ 0.45: 21 % overshoot. Anything that expands or unfolds, and its children.
@@ -158,8 +159,12 @@ export function watchRingMotion(doc = document) {
   let pull = 0;
   let wroteKick = false;
 
+  // The scroll rings, queried once and again only after the DOM changed
+  // around them: a scroll frame must not search the document.
+  /** @type {Element[] | null} */
+  let rings = null;
   const writeProgress = () => {
-    const rings = doc.querySelectorAll(SCROLL);
+    rings ??= Array.from(doc.querySelectorAll(SCROLL));
     if (!rings.length) return;
     const max = root.scrollHeight - root.clientHeight;
     const value = (max > 0 ? Math.min(1, Math.max(0, root.scrollTop / max)) : 0).toFixed(4);
@@ -224,8 +229,15 @@ export function watchRingMotion(doc = document) {
         observeEnters(el);
         if (!ring && (el.matches(SCROLL) || el.querySelector(SCROLL))) ring = true;
       }
+      for (const node of record.removedNodes) {
+        if (ring || node.nodeType !== 1) continue;
+        const el = /** @type {Element} */ (node);
+        if (el.matches(SCROLL) || el.querySelector(SCROLL)) ring = true;
+      }
     }
-    if (ring && !frame) frame = view.requestAnimationFrame(tick);
+    if (!ring) return;
+    rings = null;
+    if (!frame) frame = view.requestAnimationFrame(tick);
   });
 
   const body = doc.body ?? root;
@@ -254,6 +266,7 @@ export function watchRingMotion(doc = document) {
     if (wroteKick) writeKick(null);
     for (const ring of doc.querySelectorAll(SCROLL))
       /** @type {HTMLElement} */ (ring).style.removeProperty("--ring-p");
+    rings = null;
     root.removeAttribute(READY);
   };
 }

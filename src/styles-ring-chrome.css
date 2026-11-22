@@ -1,6 +1,6 @@
 /* ================================================================
    The ring system on the shared chrome (2026-11-22).
-   Root sheet, linked right after styles-ring.css. It dresses what every
+   Root sheet, linked right after styles-ring.css (before the spectrum). It dresses what every
    page shares in the ring language and gives every expansion its bounce:
      1. the menu trigger: a ring whose stroke is the page's scroll progress
      2. the topbar: a round sigil, a pill track for the chapter links
@@ -367,8 +367,9 @@ html[data-family]:not([data-button-style="liquid"])
 }
 
 @media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
-  /* The panel is a full-viewport layer: it rides the soft spring (no
-     overshoot, so no gap ever opens at its edge) and leaves on the snap.
+  /* The panel is a full-viewport layer: it rides the soft spring
+     (critically damped: it never passes its rest position, so no gap opens
+     at the screen edge); its close keeps the menu's own quick transition.
      A drag in progress keeps the swipe's own, transition-free tracking. */
   html[data-family]:not([data-world-effects="economy"])
     body
@@ -485,7 +486,9 @@ html[data-family]:not([data-button-style="liquid"])
     body
     dialog.quick-search[open]
     .quick-search-group
-    :is(.quick-search-option) {
+    .quick-search-option:not(#ring-x) {
+    /* :not(#ring-x): the motion layer names its own row animation from a
+       longer selector; the rows follow the sheet on the ring's spring. */
     animation: ring-row-in var(--ring-dur-spring) var(--ring-spring) backwards;
     animation-delay: calc(90ms + var(--fx-row, 0) * 30ms);
   }

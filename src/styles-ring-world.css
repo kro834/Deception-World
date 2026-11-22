@@ -69,20 +69,22 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring > i {
 html[data-family="world"] body .rider-console .rider-ring-dial-ring > i::before {
   content: "";
   position: absolute;
-  top: -4px;
-  left: calc(50% - 5px);
-  width: 10px;
-  height: 10px;
-  border: 1.5px solid rgb(255 255 255 / 0.7);
+  top: -3px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  /* Unlit nodes are quiet ticks: they may cross the artwork, so they carry
+     no fill and never read as a mark on a face. */
+  border: 1px solid rgb(255 255 255 / 0.55);
   border-radius: 50%;
-  background: rgb(6 16 27 / 0.55);
+  background: none;
   box-sizing: border-box;
 }
 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring > i.is-on::before {
   border-color: #fff;
   background: var(--ring-tone);
-  scale: 2;
+  scale: 2.4;
   box-shadow: 0 0 0 4px rgb(6 16 27 / 0.6);
 }
 
