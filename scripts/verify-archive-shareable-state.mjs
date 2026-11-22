@@ -6,6 +6,8 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { checkedUrl } from "./browser-guard.mjs";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8082");
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
@@ -85,6 +87,7 @@ try {
     frame = await ready(page, "saga");
     assert.deepEqual(await archiveState(frame), { form: "integral", a: "rock", b: "extreme" });
     await page.locator(".side-panel-trigger").click();
+    await showMenuRow(page, '.side-panel-links a[href="/world#top"]');
     await page.locator('.side-panel-links a[href="/world#top"]').click();
     await page.waitForURL("**/world#top");
     await page.goBack();

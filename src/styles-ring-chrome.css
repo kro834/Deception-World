@@ -40,9 +40,7 @@ html[data-family="dream"] {
    on every page.
    ================================================================ */
 
-html[data-family]:not([data-button-style="liquid"])
-  body
-  .side-panel-trigger:not(#ring-x#ring-x) {
+html[data-family]:not([data-button-style="liquid"]) body .side-panel-trigger:not(#ring-x#ring-x) {
   --ring-p: 0;
   --ring-w: 2.5px;
   /* !important: the shell, streamline, command and spectrum sheets each
@@ -50,8 +48,7 @@ html[data-family]:not([data-button-style="liquid"])
   border-radius: 50% !important;
   background:
     radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.3), transparent 58%),
-    radial-gradient(circle at 72% 86%, rgb(var(--ring-pink-rgb) / 0.22), transparent 60%),
-    #07101c !important;
+    radial-gradient(circle at 72% 86%, rgb(var(--ring-pink-rgb) / 0.22), transparent 60%), #07101c !important;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.18),
     0 8px 22px -12px rgb(var(--ring-key-rgb) / 0.7) !important;
@@ -162,7 +159,11 @@ html[data-family]:not([data-button-style="liquid"])
    track and the current one is a lit pill. Boxes are unchanged.
    ================================================================ */
 
-html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil.brand-sigil,
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  .brand-sigil.brand-sigil,
 html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil.brand-sigil {
   border: 0;
   border-radius: 50%;
@@ -265,88 +266,933 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar > na
 }
 
 /* ================================================================
-   3. The side menu. The artbook menu keeps its hierarchy, tiles and copy.
-   The ring system adds: a halo behind the page, round controls, and the
-   expansion rule (the panel arrives on the soft spring; its groups and
-   tiles spring in with overshoot, staggered; closing is the quick snap).
+   3. The side menu: the orbital navigator (軌道儀, owner 2026-11-23:
+   「m1 d1で。」). The menu's seven regions are planets on one dial; the
+   region at the focus point shows its groups as rows that follow the dial's
+   curve. Every group, row and string of the menu is the same markup as
+   before (world-chrome.tsx): this section only places it.
+   - Side layout (wide, or a short landscape screen): the dial on the left,
+     the focused region's rows to its right.
+   - Bottom layout (phones, portrait tablets): the dial under the thumb, the
+     rows above it; the rim's far planets peek over the bottom edge.
+   Each planet's place is one transform read from --orbit-turn (set by the
+   component), so a turn is a compositor transition on the bounce spring.
    ================================================================ */
 
-/* The halo: three static rings off the top-right corner, painted on the
-   panel's own background (it does not scroll with the content). */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+  --orbit-vh: 100vh;
+  --orbit-step: 51.4286deg;
+  --orbit-r: min(270px, 30vh, 19vw);
+  --orbit-disc: clamp(62px, 21vh, 96px);
+  --orbit-cx: max(var(--orbit-r) + var(--orbit-disc) * 0.7 + 26px, 27vw);
+  --orbit-cy: calc(var(--orbit-vh) / 2);
+  --orbit-focus: 0deg;
+  --orbit-gap: clamp(112px, 10vw, 150px);
+  --orbit-list: calc(var(--orbit-cx) + var(--orbit-r) + var(--orbit-gap));
+  --orbit-line: rgb(var(--ring-key-rgb) / 0.22);
+  display: grid;
+  grid-template-areas: none;
+  grid-template-columns: minmax(0, 340px) minmax(0, 340px);
+  grid-template-rows: minmax(28px, 1fr) auto auto auto minmax(28px, 1fr);
+  gap: 14px 22px;
+  align-content: stretch;
+  justify-content: start;
+  padding: 0 40px 0 var(--orbit-list);
+  overflow-x: clip;
+}
+
+@supports (height: 100dvh) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    --orbit-vh: 100dvh;
+  }
+}
+
+/* The halo: static rings round the dial, painted on the panel's own
+   background (it does not scroll with the rows). */
 html[data-family]:not([data-family="dream"])
   body
-  #site-side-panel#site-side-panel#site-side-panel.side-panel:not(#ring-x) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
   /* !important: the menu's own sheets set this background with it. */
   background-image:
     radial-gradient(
-      circle at calc(100% - 40px) -40px,
-      transparent 259px,
-      rgb(var(--ring-key-rgb) / 0.22) 260px 261px,
-      transparent 262px
+      circle at var(--orbit-cx) var(--orbit-cy),
+      transparent calc(var(--orbit-r) + 109px),
+      rgb(var(--ring-key-rgb) / 0.16) calc(var(--orbit-r) + 110px) calc(var(--orbit-r) + 111px),
+      transparent calc(var(--orbit-r) + 112px)
     ),
     radial-gradient(
-      circle at calc(100% - 40px) -40px,
-      transparent 379px,
-      rgb(var(--ring-pink-rgb) / 0.14) 380px 381px,
-      transparent 382px
+      circle at var(--orbit-cx) var(--orbit-cy),
+      transparent calc(var(--orbit-r) + 219px),
+      rgb(var(--ring-pink-rgb) / 0.1) calc(var(--orbit-r) + 220px) calc(var(--orbit-r) + 221px),
+      transparent calc(var(--orbit-r) + 222px)
     ),
     radial-gradient(
-      circle at calc(100% - 40px) -40px,
-      transparent 519px,
-      rgb(var(--ring-gold-rgb) / 0.12) 520px 521px,
-      transparent 522px
-    ),
-    radial-gradient(64% 40% at 96% 0%, rgb(122 232 255 / 0.17), transparent 70%),
-    radial-gradient(50% 34% at 48% 24%, rgb(157 134 255 / 0.11), transparent 72%),
-    radial-gradient(54% 38% at 4% 100%, rgb(240 210 150 / 0.13), transparent 70%) !important;
+      circle at var(--orbit-cx) var(--orbit-cy),
+      rgb(36 140 255 / 0.2),
+      transparent calc(var(--orbit-r) + 160px)
+    ) !important;
 }
 
-/* Round controls: the close button is a ring, the index a pill track. */
-html[data-family]:not([data-button-style="liquid"])
-  body
-  #site-side-panel#site-side-panel
-  .side-panel-close.side-panel-close {
+/* The head no longer takes a row: it is a zero-height sticky anchor at the
+   panel's top-left corner, and its four parts are placed from it. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-head {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  grid-area: 1 / 1 / 2 / -1;
+  align-self: start;
+  display: block;
+  width: auto;
+  height: 0;
+  min-height: 0;
+  margin: 0 -40px 0 calc(var(--orbit-list) * -1);
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-head::before,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-head::after {
+  content: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-head
+  > * {
+  position: absolute;
+  margin: 0;
+  pointer-events: auto;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-heading {
+  left: var(--orbit-cx);
+  top: calc(var(--orbit-cy) - 12px - var(--orbit-r) * 0.12);
+  width: max-content;
+  max-width: calc(var(--orbit-r) * 2 - var(--orbit-disc) - 24px);
+  translate: -50% -100%;
+  font-size: clamp(20px, 3.6vh, 30px);
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-close {
+  top: 18px;
+  right: 20px;
+  left: auto;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border-color: rgb(var(--ring-key-rgb) / 0.5);
 }
 
-html[data-family]:not([data-button-style="liquid"])
-  body
-  #site-side-panel#site-side-panel
-  .command-atlas-index.command-atlas-index {
-  border-radius: 30px;
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock {
+  left: var(--orbit-cx);
+  top: calc(var(--orbit-cy) + var(--orbit-r) * 0.06);
+  display: block;
+  width: min(250px, calc(var(--orbit-r) * 2 - var(--orbit-disc) - 36px));
+  translate: -50% 0;
 }
 
-html[data-family]:not([data-button-style="liquid"])
-  body
-  #site-side-panel#site-side-panel
-  .command-atlas-index.command-atlas-index
-  > button {
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock {
+  z-index: 2;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock::before,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock::after,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock
+  > ::before,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock
+  > ::after {
+  content: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-search-dock
+  > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  margin: 0;
+  padding: 0 18px;
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.36);
   border-radius: var(--ring-radius-pill);
+  background: rgb(var(--ring-key-rgb) / 0.08);
+  background-image: none;
+  box-shadow: none;
+  font-size: 15px;
 }
 
-/* The artbook tiles keep their pictures, copy and grid; their corners take
-   the ring's card radius so every surface in the menu is cut from a circle. */
-html[data-family]:not([data-button-style="liquid"])
-  body
-  #site-side-panel#site-side-panel:not(#ring-x)
+/* The dial. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index {
+  left: calc(var(--orbit-cx) - var(--orbit-r));
+  top: calc(var(--orbit-cy) - var(--orbit-r));
+  display: block;
+  width: calc(var(--orbit-r) * 2);
+  height: calc(var(--orbit-r) * 2);
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+  touch-action: none;
+  cursor: grab;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-dragging]
+  .command-atlas-index {
+  cursor: grabbing;
+}
+
+/* The orbit's line: one prism stroke. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: var(--ring-prism) border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* The thread from the focused planet to its rows. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index::after {
+  content: "";
+  position: absolute;
+  left: calc(100% + var(--orbit-disc) * 0.61 + 6px);
+  top: 50%;
+  width: calc(var(--orbit-gap) - var(--orbit-disc) * 0.61 - 22px);
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--ring-key), rgb(var(--ring-key-rgb) / 0.2));
+  pointer-events: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index
+  > button {
+  --orbit-a: calc(var(--orbit-focus) + (var(--orbit-i) - var(--orbit-turn)) * var(--orbit-step));
+  --orbit-s: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--orbit-disc);
+  height: var(--orbit-disc);
+  min-width: 0;
+  min-height: 0;
+  margin: calc(var(--orbit-disc) / -2);
+  padding: 5px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, #1a2c46, #0a1424 70%) padding-box,
+    var(--ring-prism) border-box;
+  box-shadow: none;
+  color: var(--ring-paper);
+  /* Out along its spoke, then upright again whatever the dial's angle. */
+  transform: rotate(var(--orbit-a)) translateX(var(--orbit-r)) rotate(calc(var(--orbit-a) * -1))
+    scale(var(--orbit-s));
+  translate: none;
+  touch-action: none;
+  cursor: pointer;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index
+  > button
+  > span {
+  display: block;
+  font-size: clamp(10.5px, 1.5vh, 12.5px);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index
+  > button[aria-selected="true"] {
+  --orbit-s: 1.22;
+  background:
+    radial-gradient(circle at 34% 28%, #2b74c8, #0f2a52 72%) padding-box,
+    var(--ring-prism) border-box;
+  box-shadow: 0 0 0 7px rgb(var(--ring-key-rgb) / 0.12);
+}
+
+/* One region in view: the rest of the atlas is out of the layout (and out
+   of the tab order) until its planet is at the focus point. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="find"]
+  > .side-panel-group:not([data-atlas-group="find"]),
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="sections"]
+  > .side-panel-group:not([data-atlas-group="sections"]),
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="special"]
+  > .side-panel-group:not([data-atlas-group="special"]),
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="stories"]
+  > .side-panel-group:not([data-atlas-group="stories"]),
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+  > .side-panel-group:not(
+    [data-atlas-group="riders"],
+    [data-atlas-group="rikuei"],
+    [data-atlas-group="related"],
+    [data-atlas-group="unmanaged"]
+  ),
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="information"]
+  > .side-panel-group:not([data-atlas-group="information"]),
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="system"]
+  > .side-panel-group:not([data-atlas-group="system"]) {
+  display: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-group {
+  grid-area: 2 / 1 / 5 / -1;
+  align-self: center;
+  display: block;
+  width: auto;
+  max-width: 420px;
+  min-width: 0;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* 人物 keeps its four groups: the riders in one column, 六詠, the related
+   files and the unmanaged file in the next, each group apart by a gap. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-group[data-atlas-group="riders"] {
+  grid-area: 2 / 1 / 5 / 2;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-group[data-atlas-group="rikuei"] {
+  grid-area: 2 / 2 / 3 / 3;
+  align-self: end;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-group[data-atlas-group="related"] {
+  grid-area: 3 / 2 / 4 / 3;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  > .side-panel-group[data-atlas-group="unmanaged"] {
+  grid-area: 4 / 2 / 5 / 3;
+  align-self: start;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* A row: a pill with its picture (or a ring dot) and its text as written. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .side-panel-links
   > :is(a, button) {
-  border-radius: 22px !important;
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  /* !important: the page-section rows are sized to their text by the
+     artbook sheets with it. */
+  width: auto !important;
+  height: auto;
+  min-height: 50px;
+  margin: 0;
+  padding: 5px 18px 5px 22px;
+  overflow: hidden;
+  border: 1px solid var(--orbit-line);
+  border-radius: var(--ring-radius-pill) !important;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.07), rgb(255 255 255 / 0.025));
+  box-shadow: none;
+  color: var(--ring-paper);
+  font-size: 15px;
+  text-align: left;
+  translate: var(--orbit-hug, 0px) 0;
+  align-self: stretch;
+  justify-self: stretch;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-@keyframes ring-menu-group {
-  from {
-    opacity: 0;
-    translate: 0 28px;
-    scale: 0.96;
+/* The hub's search is always in reach: the group's copy of it steps aside. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > .side-panel-quick-search {
+  display: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button)::before,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button)::after {
+  content: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button):has(> img) {
+  padding-left: 6px;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button)
+  > * {
+  align-self: center;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button)
+  > img {
+  position: static;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  margin: 0;
+  border: 2px solid rgb(var(--ring-key-rgb) / 0.6);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  opacity: 1;
+  filter: none;
+  -webkit-mask: none;
+  mask: none;
+  transform: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button)
+  > span {
+  position: static;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button):not(.side-panel-zeus-toggle)
+  > i {
+  position: static;
+  margin: 0 0 0 auto;
+  padding: 0 0 0 8px;
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+/* The settings toggles keep their two lines and their switch. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > .side-panel-zeus-toggle {
+  padding-left: 22px;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > .side-panel-zeus-toggle
+  > span {
+  display: grid;
+  gap: 1px;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > .side-panel-zeus-toggle
+  > i {
+  margin-left: auto;
+}
+
+/* Rows that are not a single link: the bookmark control and the quality
+   switch sit in the same pill. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > .library-current-control {
+  display: flex;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  translate: var(--orbit-hug, 0px) 0;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > .library-current-control
+  > button {
+  flex: 1;
+  min-height: 50px;
+  margin: 0;
+  padding: 5px 18px 5px 22px;
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.5);
+  border-radius: var(--ring-radius-pill);
+  background: rgb(var(--ring-gold-rgb) / 0.08);
+  box-shadow: none;
+  color: var(--ring-paper);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > fieldset {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 18px 10px 22px;
+  border: 1px solid var(--orbit-line);
+  border-radius: 28px;
+  translate: var(--orbit-hug, 0px) 0;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > fieldset
+  > button {
+  min-height: 44px !important;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .side-panel-links
+  > :is(a, button)[aria-current] {
+  border-color: var(--ring-key);
+  background: rgb(var(--ring-key-rgb) / 0.16);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button):hover {
+    border-color: rgb(var(--ring-key-rgb) / 0.7);
+    background: rgb(var(--ring-key-rgb) / 0.13);
   }
 }
 
-@keyframes ring-menu-tile {
+/* The page's own scene heads its rows: its art in a ring, its name beside. */
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0 0 10px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  translate: var(--orbit-hug, 0px) 0;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-scene::before,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-scene::after {
+  content: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-scene
+  > img {
+  position: static;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border: 2px solid rgb(var(--ring-key-rgb) / 0.6);
+  border-radius: 50%;
+  object-fit: cover;
+  opacity: 1;
+  filter: none;
+  -webkit-mask: none;
+  mask: none;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-scene
+  > figcaption {
+  position: static;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-shadow: none;
+}
+
+/* ---- Bottom layout: phones and portrait tablets. ---- */
+@media (max-width: 1019px) and (min-height: 561px), (max-width: 639px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    --orbit-cx: 50%;
+    --orbit-sink: 118px;
+    --orbit-cy: calc(var(--orbit-vh) - var(--orbit-sink));
+    --orbit-r: min(190px, 50vw - 55px, 21vh);
+    --orbit-disc: clamp(68px, 9vw, 88px);
+    --orbit-focus: -90deg;
+    --orbit-zone: calc(var(--orbit-sink) + var(--orbit-r) + var(--orbit-disc) * 0.61 + 18px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(76px, 1fr) auto auto auto;
+    gap: 8px;
+    justify-content: stretch;
+    padding: 0 16px var(--orbit-zone);
+  }
+
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    background-image: radial-gradient(
+      circle at var(--orbit-cx) var(--orbit-cy),
+      rgb(36 140 255 / 0.22),
+      transparent calc(var(--orbit-r) + 190px)
+    ) !important;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-head {
+    margin: 0 -16px;
+  }
+
+  /* Rows scroll under the title above and behind the dial's plate below. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-head::before {
+    content: "";
+    display: block;
+    z-index: -1;
+    opacity: 1;
+    position: absolute;
+    inset: 0 0 auto;
+    height: 76px;
+    background: linear-gradient(180deg, var(--ring-ink) 62px, rgb(var(--ring-ink-rgb) / 0));
+    pointer-events: none;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-head::after {
+    content: "";
+    display: block;
+    z-index: -1;
+    opacity: 1;
+    position: absolute;
+    inset: calc(var(--orbit-vh) - var(--orbit-zone) - 4px) 0 auto;
+    height: calc(var(--orbit-zone) + 4px);
+    background: linear-gradient(180deg, rgb(var(--ring-ink-rgb) / 0), #06101e 26px);
+    pointer-events: none;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-heading {
+    left: 20px;
+    top: 22px;
+    max-width: calc(100% - 96px);
+    translate: none;
+    font-size: 26px;
+    text-align: left;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-close {
+    top: 14px;
+    right: 16px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock {
+    top: calc(var(--orbit-cy) - 50px);
+    width: min(200px, calc(var(--orbit-r) * 2 - var(--orbit-disc) - 30px));
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > * {
+    min-height: 44px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index::after {
+    left: 50%;
+    top: calc(var(--orbit-disc) * -0.61 - 14px);
+    width: 2px;
+    height: 12px;
+    margin: 0 0 0 -1px;
+    background: var(--ring-key);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button {
+    padding: 2px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button
+    > span {
+    font-size: 10.5px;
+    line-height: 1.15;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-group {
+    grid-area: 2 / 1 / 5 / -1;
+    align-self: end;
+    max-width: none;
+  }
+
+  /* 2026-11-23 (review): 人物 on a phone packs both columns from the top,
+     and the unmanaged file sits under the riders, so neither column leaves
+     an empty run above its list. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="riders"] {
+    grid-area: 2 / 1 / 4 / 2;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="unmanaged"] {
+    grid-area: 4 / 1 / 5 / 2;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="rikuei"] {
+    grid-area: 2 / 2 / 3 / 3;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="related"] {
+    grid-area: 3 / 2 / 5 / 3;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links {
+    gap: 4px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button) {
+    min-height: 46px;
+    padding-left: 18px;
+    translate: none;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button):has(> img) {
+    padding-left: 6px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(.library-current-control, fieldset) {
+    translate: none;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > .library-current-control
+    > button {
+    min-height: 46px;
+    padding-left: 16px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-scene {
+    translate: none;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links
+    > :is(a, button) {
+    gap: 8px;
+    padding-right: 10px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links
+    > :is(a, button)
+    > span {
+    font-size: 13px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links
+    > :is(a, button)
+    > img {
+    width: 34px;
+    height: 34px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links
+    > :is(a, button)
+    > i {
+    padding-left: 2px;
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 1019px) and (min-height: 561px) and (max-height: 700px),
+  (max-width: 639px) and (max-height: 700px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    --orbit-sink: 92px;
+  }
+}
+
+/* A short landscape screen keeps the side layout with compact rows. */
+@media (min-width: 640px) and (max-height: 560px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    --orbit-gap: 104px;
+    gap: 8px 10px;
+    padding-right: 16px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-head {
+    margin-right: -16px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-close {
+    top: 10px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button) {
+    min-height: 44px;
+    gap: 8px;
+    padding-right: 10px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)
+    > span {
+    font-size: 13px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)
+    > img {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@keyframes ring-orbit-dial {
   from {
     opacity: 0;
-    scale: 0.82;
+    rotate: -70deg;
+    scale: 0.8;
+  }
+}
+
+@keyframes ring-orbit-face {
+  from {
+    rotate: 70deg;
+  }
+}
+
+@keyframes ring-orbit-hub {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+}
+
+@keyframes ring-orbit-row {
+  from {
+    opacity: 0;
+    translate: calc(var(--orbit-hug, 0px) - 44px) 0;
+    scale: 0.88;
+  }
+}
+
+@keyframes ring-orbit-row-rise {
+  from {
+    opacity: 0;
+    translate: 0 34px;
+    scale: 0.88;
   }
 }
 
@@ -355,14 +1201,6 @@ html[data-family]:not([data-button-style="liquid"])
     opacity: 0;
     scale: 0.4;
     rotate: -90deg;
-  }
-}
-
-@keyframes ring-menu-chip {
-  from {
-    opacity: 0;
-    translate: 0 -12px;
-    scale: 0.7;
   }
 }
 
@@ -377,81 +1215,107 @@ html[data-family]:not([data-button-style="liquid"])
     transition-timing-function: var(--ring-spring-soft);
   }
 
-  /* Groups spring up one after another (60 ms apart). Backwards fill only:
-     a group is never left transformed, and every row is tappable from the
-     first frame (the entries into the suit-up scenes start at once). */
-  html[data-family]:not([data-world-effects="economy"])
+  /* A turn: every planet rides the bounce spring to its detent; the chosen
+     one grows on the same curve. */
+  html:not([data-world-effects="economy"])
     body
-    #site-side-panel#site-side-panel.side-panel[data-open="true"]
-    > .side-panel-group {
-    animation: ring-menu-group var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: calc(90ms + var(--ring-g, 0) * 60ms);
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button {
+    transition:
+      transform var(--ring-dur-bounce) var(--ring-spring-bounce),
+      box-shadow 220ms ease;
   }
 
-  /* The head's controls: the close ring spins in, the index chips drop in. */
-  html[data-family]:not([data-world-effects="economy"])
+  /* The finger owns the dial while it drags. */
+  html:not([data-world-effects="economy"])
     body
-    #site-side-panel#site-side-panel.side-panel[data-open="true"]
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-dragging]
+    .command-atlas-index
+    > button {
+    transition: box-shadow 220ms ease;
+  }
+
+  /* Opening: the dial spins in and settles, its labels staying upright;
+     the hub and the close ring pop. */
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
+    .command-atlas-index {
+    animation: ring-orbit-dial var(--ring-dur-bounce) var(--ring-spring-bounce) 60ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
+    .command-atlas-index
+    > button
+    > span {
+    animation: ring-orbit-face var(--ring-dur-bounce) var(--ring-spring-bounce) 60ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
+    :is(.command-atlas-heading, .side-panel-search-dock) {
+    animation: ring-orbit-hub var(--ring-dur-bounce) var(--ring-spring-bounce) 200ms backwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
     .side-panel-close {
     animation: ring-menu-control var(--ring-dur-elastic) var(--ring-spring-elastic) 120ms backwards;
   }
 
-  html[data-family]:not([data-world-effects="economy"])
+  /* A region's rows spring out of the focused planet, one after another.
+     They restart whenever their group comes into the layout (a turn of the
+     dial, or the menu opening). Backwards fill only: every row is tappable
+     from its first frame. */
+  html:not([data-world-effects="economy"])
     body
-    #site-side-panel#site-side-panel.side-panel[data-open="true"]
-    .command-atlas-index
-    > button {
-    animation: ring-menu-chip var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: calc(80ms + var(--ring-i, 0) * 34ms);
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
+    :is(.side-panel-links > :is(a, button), .command-atlas-scene) {
+    animation: ring-orbit-row var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(70ms + var(--orbit-n, 0) * 32ms);
   }
 }
 
-/* Tiles pop inside their group on a desktop pointer only: a phone's menu
-   holds dozens of pictures, and one layer per group is its budget. */
-@media (forced-colors: none) and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) and (min-width: 900px) {
-  html[data-family]:not([data-world-effects="economy"])
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) and (max-width: 1019px) and (min-height: 561px),
+  (forced-colors: none) and (prefers-reduced-motion: no-preference) and (max-width: 639px) {
+  html:not([data-world-effects="economy"])
     body
-    #site-side-panel#site-side-panel.side-panel[data-open="true"]
-    > .side-panel-group
-    .side-panel-links
-    > :is(a, button) {
-    animation: ring-menu-tile var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: calc(140ms + var(--ring-g, 0) * 60ms + var(--fx-row, 0) * 36ms);
-  }
-
-  /* A tile leans up on hover and lands back on the spring. */
-  html[data-family]:not([data-world-effects="economy"])
-    body
-    #site-side-panel#site-side-panel
-    .command-atlas-index
-    > button {
-    transition:
-      background-color 180ms ease,
-      box-shadow 220ms ease,
-      translate var(--ring-dur-spring) var(--ring-spring);
-  }
-
-  html[data-family]:not([data-world-effects="economy"])
-    body
-    #site-side-panel#site-side-panel
-    .command-atlas-index
-    > button:hover {
-    translate: 0 -2px;
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
+    :is(.side-panel-links > :is(a, button), .command-atlas-scene) {
+    animation-name: ring-orbit-row-rise;
   }
 }
 
-/* The cascade's indices: groups in document order, index chips in a row. */
-#site-side-panel > .side-panel-group:nth-of-type(2) { --ring-g: 1; }
-#site-side-panel > .side-panel-group:nth-of-type(3) { --ring-g: 2; }
-#site-side-panel > .side-panel-group:nth-of-type(4) { --ring-g: 3; }
-#site-side-panel > .side-panel-group:nth-of-type(5) { --ring-g: 4; }
-#site-side-panel > .side-panel-group:nth-of-type(n + 6) { --ring-g: 5; }
-#site-side-panel .command-atlas-index > :nth-child(2) { --ring-i: 1; }
-#site-side-panel .command-atlas-index > :nth-child(3) { --ring-i: 2; }
-#site-side-panel .command-atlas-index > :nth-child(4) { --ring-i: 3; }
-#site-side-panel .command-atlas-index > :nth-child(5) { --ring-i: 4; }
-#site-side-panel .command-atlas-index > :nth-child(6) { --ring-i: 5; }
-#site-side-panel .command-atlas-index > :nth-child(n + 7) { --ring-i: 6; }
+/* The cascade's order inside a group. */
+#site-side-panel .side-panel-links > :nth-child(2) {
+  --orbit-n: 1;
+}
+#site-side-panel .side-panel-links > :nth-child(3) {
+  --orbit-n: 2;
+}
+#site-side-panel .side-panel-links > :nth-child(4) {
+  --orbit-n: 3;
+}
+#site-side-panel .side-panel-links > :nth-child(5) {
+  --orbit-n: 4;
+}
+#site-side-panel .side-panel-links > :nth-child(6) {
+  --orbit-n: 5;
+}
+#site-side-panel .side-panel-links > :nth-child(7) {
+  --orbit-n: 6;
+}
+#site-side-panel .side-panel-links > :nth-child(8) {
+  --orbit-n: 7;
+}
+#site-side-panel .side-panel-links > :nth-child(n + 9) {
+  --orbit-n: 8;
+}
 
 /* ================================================================
    4. The expansion rule on the shared surfaces. Each of these opens on
@@ -511,10 +1375,18 @@ html[data-family]:not([data-button-style="liquid"])
   }
 }
 
-#site-announcement-dialog .site-announcement-list > :nth-child(2) { --ring-i: 1; }
-#site-announcement-dialog .site-announcement-list > :nth-child(3) { --ring-i: 2; }
-#site-announcement-dialog .site-announcement-list > :nth-child(4) { --ring-i: 3; }
-#site-announcement-dialog .site-announcement-list > :nth-child(n + 5) { --ring-i: 4; }
+#site-announcement-dialog .site-announcement-list > :nth-child(2) {
+  --ring-i: 1;
+}
+#site-announcement-dialog .site-announcement-list > :nth-child(3) {
+  --ring-i: 2;
+}
+#site-announcement-dialog .site-announcement-list > :nth-child(4) {
+  --ring-i: 3;
+}
+#site-announcement-dialog .site-announcement-list > :nth-child(n + 5) {
+  --ring-i: 4;
+}
 
 /* ================================================================
    5. The route cover. The file shutter keeps its clocks, panels and
@@ -529,7 +1401,10 @@ html[data-family]:not([data-button-style="liquid"])
 /* The sovereign gate keeps its own orbit mark and status lines at the
    centre, and a cut-in fills the view with its own stage: the band would
    cross them, so it stands aside there. */
-html body .load-gate.has-cine:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate) > .dwc-lock::after {
+html
+  body
+  .load-gate.has-cine:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate)
+  > .dwc-lock::after {
   /* The glass band's inner edge is at about 0.78 of its half-width; the
      picture is sized so that edge clears the carried file's corners. */
   /* Never larger than the screen: when the held frame is the whole view
@@ -553,7 +1428,9 @@ html body .load-gate.has-cine:not(.rider-route-dive):not(.rider-route-cutin):not
    frame; the band lets go from around that frame, growing away from it. */
 html
   body
-  .load-gate.has-cine.has-landing.is-revealing:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate)
+  .load-gate.has-cine.has-landing.is-revealing:not(.rider-route-dive):not(.rider-route-cutin):not(
+    .is-sovereign-gate
+  )
   > .dwc-lock::after {
   --ring-d: min(calc(hypot(var(--lw, 240) * 1px, var(--lh, 320) * 1px) * 1.3 + 24px), 92vmin);
   top: calc(var(--ly, 0) * 1px + var(--lh, 0) * 0.5px - var(--ring-d) / 2);
@@ -588,7 +1465,9 @@ html
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate).is-covering
+    .load-gate.has-cine.is-cine-full:not(.rider-route-dive):not(.rider-route-cutin):not(
+      .is-sovereign-gate
+    ).is-covering
     > .dwc-lock::after {
     /* Starts as the carried file is landing in the held frame (the carry
        takes 320 ms), so the band closes around it instead of crossing it. */
@@ -597,7 +1476,9 @@ html
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate).is-revealing
+    .load-gate.has-cine.is-cine-full:not(.rider-route-dive):not(.rider-route-cutin):not(
+      .is-sovereign-gate
+    ).is-revealing
     > .dwc-lock::after {
     animation: ring-cover-release 420ms cubic-bezier(0.3, 0, 0.2, 1) both;
   }

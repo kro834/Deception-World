@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
@@ -16,6 +18,7 @@ try {
       const refuseChunk = (route) => route.abort("failed");
       await page.route("**/assets/rexonance-saga-*.js", refuseChunk);
       await page.locator(".side-panel-trigger").click();
+      await showMenuRow(page, '.side-panel-links a[href="/rexonance-saga#top"]');
       await page.locator('.side-panel-links a[href="/rexonance-saga#top"]').click();
       await page.locator(".app-load-error").waitFor({ timeout: 20000 });
       assert.match(

@@ -182,6 +182,10 @@ try {
     for (const path of ["/riders/saga", "/riders/cipher"]) {
       await page.goto(`${base}${path}`);
       await settle(page);
+      // 2026-11-23: the file is an exploded view; the form records are in
+      // the layout once 変身記録 is chosen.
+      await page.locator('.dossier-reader a[href="#form-records"]').click();
+      await settle(page);
       const cards = await page.locator(".form-pickup-card").count();
       for (let i = 0; i < cards; i += 1) {
         await scrollToStable(

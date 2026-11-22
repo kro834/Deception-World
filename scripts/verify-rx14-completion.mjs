@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8134";
 const out = process.env.AUDIT_OUT || "/private/tmp/rx14-completion";
@@ -147,6 +149,7 @@ try {
     await page.getByRole("button", { name: "メニューを開く", exact: true }).click();
     await page.locator(".side-panel[data-open='true']").waitFor();
     await settleMotion(page.locator(".side-panel"));
+    await showMenuRow(page, ".side-panel-links > a[href^='/managers/zeus#']");
     const menuChapters = page.locator(".side-panel-links > a[href^='/managers/zeus#']");
     assert.equal(await menuChapters.count(), await chapterRows.count());
     const group = await page.locator(".side-panel-rikuei").evaluate((node) => {

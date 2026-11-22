@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://localhost:8080";
 const engine = process.env.PW_ENGINE || "chromium";
@@ -227,6 +229,7 @@ async function checkSidePanel(page, viewport) {
     record(viewport, "side panel scroll (content fits)", panelMetrics);
   }
 
+  await showMenuRow(page, ".side-panel-announcement-trigger");
   await panel.locator(".side-panel-announcement-trigger").click();
   const announcement = page.locator("#site-announcement-dialog[open]");
   await announcement.waitFor({ state: "visible" });

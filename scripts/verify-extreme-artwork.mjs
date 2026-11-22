@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { mkdir, readFile } from "node:fs/promises";
 import { chromium, request } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const output = process.env.OUTPUT_DIR || "/private/tmp/extreme-artwork";
@@ -98,6 +100,7 @@ try {
     await page.keyboard.press("Escape");
     await dialog.waitFor({ state: "hidden" });
     await page.locator(".side-panel-trigger").click();
+    await showMenuRow(page, '.side-panel-links a[href="/gallery"]');
     await page.locator('.side-panel-links a[href="/gallery"]').click();
     await page.waitForURL(base + "/gallery");
     await page.locator(".gallery-filters button").nth(1).click();

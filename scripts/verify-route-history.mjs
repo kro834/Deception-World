@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
@@ -36,6 +38,7 @@ try {
     await page.waitForURL("**/world*");
     await page.waitForTimeout(1800);
     await openMenu(page);
+    await showMenuRow(page, '.side-panel-links a[href="/riders/saga"]');
     await page.locator('.side-panel-links a[href="/riders/saga"]').click();
     await page.waitForFunction(() => document.documentElement.dataset.loading === "true");
     await page.goBack({ waitUntil: "domcontentloaded" });
@@ -54,6 +57,7 @@ try {
     });
 
     await openMenu(page);
+    await showMenuRow(page, '.side-panel-links a[href="/riders/saga"]');
     await page.locator('.side-panel-links a[href="/riders/saga"]').click();
     await page.waitForURL("**/riders/saga");
     await page.waitForFunction(
@@ -67,6 +71,7 @@ try {
     await page.goto(new URL("/rexonance-saga", base).href, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1500);
     await openMenu(page);
+    await showMenuRow(page, '.side-panel-links a[href="/rexonance-saga#performance"]');
     await page.locator('.side-panel-links a[href="/rexonance-saga#performance"]').click();
     assert.equal(
       await page.locator(".load-gate").count(),
