@@ -1,4 +1,5 @@
 import { FIRE_BOUNDS, FIRE_GRID, farFromEmberPosition, farFromFractureOrigins, rasterFarFromFire } from "./far-from-flame-field.ts";
+import { fireGridStepped, fireRasterTook } from "./far-from-fire-noise.ts";
 import { drawFarFromNanoGather } from "./far-from-ultra-intake.ts";
 import { drawFarFromFormPlumes } from "./far-from-form-plumes.ts";
 
@@ -16,7 +17,11 @@ type Raster = {
 const buffers = new WeakMap<CanvasRenderingContext2D, Raster>();
 
 function drawMantle(context: CanvasRenderingContext2D, u: number, tone: number, coarse: boolean, sourceForm: string) {
-  const [w, h] = coarse ? FIRE_GRID.touch : FIRE_GRID.desktop;
+  // The lightweight renderer's touch grid, or a touch screen that could not
+  // hold the desktop grid (far-from-fire-noise.ts: the governor).
+  const view = context.canvas.ownerDocument.defaultView;
+  const small = coarse || fireGridStepped(view);
+  const [w, h] = small ? FIRE_GRID.touch : FIRE_GRID.desktop;
   let buffer = buffers.get(context);
   if (!buffer || buffer.surface.width !== w || buffer.surface.height !== h) {
     const surface = context.canvas.ownerDocument.createElement("canvas");
@@ -28,7 +33,9 @@ function drawMantle(context: CanvasRenderingContext2D, u: number, tone: number, 
     buffer = { surface, ctx, image, words: new Uint32Array(image.data.buffer) };
     buffers.set(context, buffer);
   }
+  const began = small ? 0 : performance.now();
   rasterFarFromFire(buffer.words, w, h, u, tone, sourceForm);
+  if (!small) fireRasterTook(performance.now() - began);
   buffer.ctx.putImageData(buffer.image, 0, 0);
   context.drawImage(buffer.surface, FIRE_BOUNDS.left, FIRE_BOUNDS.top, FIRE_BOUNDS.width, FIRE_BOUNDS.height);
 }

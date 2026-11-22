@@ -131,10 +131,20 @@ export function rasterFarFromFire(pixels: Uint32Array, width: number, height: nu
   const invW = 1 / (1 + .68 * burst), invH = 1 / (1 + .23 * burst);
   const at = u * 8.2;
   const commonBand = Math.max(0, tone) * 32;
+  const attached = 1 - liftOff;
+  // (2026-11-23: the same picture for less work, so a phone can draw the
+  // desktop grid. Every shortcut below leaves each pixel's value exactly as
+  // the full expression gives it: only terms multiplied by an exact 0 are
+  // skipped.)
+  // Before the fire has risen and after it has faded, with no tears glowing,
+  // every density is 0: nothing is drawn.
+  if (fade === 0 && !(tearGlow > 0)) { pixels.fill(0, 0, width * height); return; }
   for (let row = 0, i = 0; row < height; row++) {
     const fy = FIRE_BOUNDS.top + (row + .5) * FIRE_BOUNDS.height / height;
     const y = .39 + (fy - .39 + .066 * burst) * invH;
     const trimY = ramp(FIRE_BOUNDS.top, -.27, fy) * (1 - ramp(.997, 1.075, fy));
+    // A row the trim takes whole.
+    if (trimY === 0) { pixels.fill(0, i, i + width); i += width; continue; }
     const gy = Math.max(0, Math.min(FH - 1.001, y * MASK_HEIGHT + TOP - .5));
     const sy = gy | 0, ty = gy - sy;
     const by = Math.max(0, Math.min(FH - 1.001, fy * MASK_HEIGHT + TOP - .5));
@@ -151,6 +161,10 @@ export function rasterFarFromFire(pixels: Uint32Array, width: number, height: nu
       const lift = surface[fi+2] * ul + surface[fi+5] * ur + surface[low+2] * ll + surface[low+5] * lr;
       const heightOff = Math.min(lift, Math.max(0, d) * 2.55);
       if (heightOff > .46 || arrival > spread + .17) { pixels[i] = 0; continue; }
+      // 1 inside the armour, 0 in the air, between them only on its edge.
+      const skin = 1 - ramp(-.005, .005, d);
+      // Inside the armour only the attached sheet and the tears draw.
+      if (skin === 1 && attached === 0 && !(tearGlow > 0)) { pixels[i] = 0; continue; }
       const q = sampleNoise(x * 5.3 + 17, y * 3.2 + at);
       const roll = sampleNoise(x * 8.4 + q * 2.1 + 41, y * 5.1 + at * 1.2);
       const reach = .15 + .14 * q + .074 * (1 - Math.min(1, Math.abs(x - .5) * 2));
@@ -164,39 +178,46 @@ export function rasterFarFromFire(pixels: Uint32Array, width: number, height: nu
       const sheetFlow = detail * .45 + shear * .21 + fine * .25 + q * .09;
       const fresh = ramp(-.018, .14, spread - arrival + (q - .5) * .17 + (draft - .4) * .08 - heightOff * .64);
       if (!fresh) { pixels[i] = 0; continue; }
-      const skin = 1 - ramp(-.005, .005, d);
-      const rim = skin * (1 - ramp(.002, .023, -d)) * (.42 + .58 * ramp(.27, .72, draft));
       const clean = complete * ramp(0, .30, spread - arrival);
-      const sheet = skin * (.26 + .21 * clean + (.69 - .16 * clean) * ramp(.35, .71, sheetFlow));
       // A dark folded channel borders each incandescent lip. Both run up the
       // body with the flow and become finer at the end of complete combustion.
       const fold = shear + .35 * detail + .12 * fine;
       const lip = 1 - ramp(.013, .084, Math.abs(fold - .73));
       const channel = 1 - ramp(.018, .13, Math.abs(fold - .615));
-      // A hot tongue is a thin folded surface. The coarser rising noise
-      // supplies its lift, but the broad interior stays optically thin.
-      const billow = sampleNoise(x * 40 + shear * 5.5 + roll * 4.3, y * 21 + detail * 4.1 + at * 2.35);
-      const strands = shear * .42 + detail * .29 + billow * .20 + fine * .09;
-      const curledEdge = 1 - ramp(.012, .094, Math.abs(strands - .58));
-      const threshold = .30 + .62 * fall + (1 - fresh) * .30;
-      const core = ramp(threshold, threshold + .22, draft);
-      const halo = ramp(threshold - .18, threshold + .21, draft);
-      const below = Math.max(0, (surface[low] - surface[fi]) * MASK_HEIGHT);
-      const heel = ramp(.84, .945, y) * clamp(below * 1.2);
-      const ground = 1 - heel * ramp(.001, .035, d + (roll - .5) * .019);
-      const peel = (1 - liftOff) + liftOff * ramp(-.001, .073, d + (shear - .5) * .085);
-      // The departing skin falls into sparse bright strands. The filament
-      // briefly holds its temperature as the surrounding gas loses density.
-      const strand = (1 - ramp(.009, .060, Math.abs(strands - .595))) * ramp(.34, .72, shear);
-      const breakup = 1 - liftOff * (.34 + .60 * ramp(.29, .71, billow * .52 + fine * .48)) * (1 - .84 * strand);
-      const depth = .19 + .37 * ramp(.22, .80, strands) + .44 * curledEdge;
-      const plume = (1 - skin) * (.69 * core + .31 * halo) * depth * (1 - .42 * fall)
-        * (1 - ramp(.71, 1, fall)) * ground * peel * breakup;
-      const attached = 1 - liftOff;
-      let density = (plume * (1 + .4 * liftOff * strand) + (sheet * .89 + rim * .56) * attached) * fresh * fade;
-      let temp = (.23 + .39 * strands + .42 * curledEdge + .15 * lip - .22 * channel - .16 * fall)
-        * (1 - skin) * (.45 + .55 * core)
-        + (sheet * (.32 + .30 * sheetFlow + .50 * lip - .34 * channel) + rim * .50) * attached;
+      let density: number, temp: number, plume = 0, strand = 0;
+      if (skin === 1) {
+        // The armour's own surface: the sheet and its rim (no plume).
+        const rim = (1 - ramp(.002, .023, -d)) * (.42 + .58 * ramp(.27, .72, draft));
+        const sheet = .26 + .21 * clean + (.69 - .16 * clean) * ramp(.35, .71, sheetFlow);
+        density = (sheet * .89 + rim * .56) * attached * fresh * fade;
+        temp = (sheet * (.32 + .30 * sheetFlow + .50 * lip - .34 * channel) + rim * .50) * attached;
+      } else {
+        const rim = skin === 0 ? 0 : skin * (1 - ramp(.002, .023, -d)) * (.42 + .58 * ramp(.27, .72, draft));
+        const sheet = skin === 0 ? 0 : skin * (.26 + .21 * clean + (.69 - .16 * clean) * ramp(.35, .71, sheetFlow));
+        // A hot tongue is a thin folded surface. The coarser rising noise
+        // supplies its lift, but the broad interior stays optically thin.
+        const billow = sampleNoise(x * 40 + shear * 5.5 + roll * 4.3, y * 21 + detail * 4.1 + at * 2.35);
+        const strands = shear * .42 + detail * .29 + billow * .20 + fine * .09;
+        const curledEdge = 1 - ramp(.012, .094, Math.abs(strands - .58));
+        const threshold = .30 + .62 * fall + (1 - fresh) * .30;
+        const core = ramp(threshold, threshold + .22, draft);
+        const halo = ramp(threshold - .18, threshold + .21, draft);
+        const below = Math.max(0, (surface[low] - surface[fi]) * MASK_HEIGHT);
+        const heel = ramp(.84, .945, y) * clamp(below * 1.2);
+        const ground = 1 - heel * ramp(.001, .035, d + (roll - .5) * .019);
+        const peel = (1 - liftOff) + liftOff * ramp(-.001, .073, d + (shear - .5) * .085);
+        // The departing skin falls into sparse bright strands. The filament
+        // briefly holds its temperature as the surrounding gas loses density.
+        strand = (1 - ramp(.009, .060, Math.abs(strands - .595))) * ramp(.34, .72, shear);
+        const breakup = 1 - liftOff * (.34 + .60 * ramp(.29, .71, billow * .52 + fine * .48)) * (1 - .84 * strand);
+        const depth = .19 + .37 * ramp(.22, .80, strands) + .44 * curledEdge;
+        plume = (1 - skin) * (.69 * core + .31 * halo) * depth * (1 - .42 * fall)
+          * (1 - ramp(.71, 1, fall)) * ground * peel * breakup;
+        density = (plume * (1 + .4 * liftOff * strand) + (sheet * .89 + rim * .56) * attached) * fresh * fade;
+        temp = (.23 + .39 * strands + .42 * curledEdge + .15 * lip - .22 * channel - .16 * fall)
+          * (1 - skin) * (.45 + .55 * core)
+          + (sheet * (.32 + .30 * sheetFlow + .50 * lip - .34 * channel) + rim * .50) * attached;
+      }
       temp = temp * (.92 + .17 * clean) + .055 * fresh;
       if (tearGlow > 0) {
         // The glowing fissures stay on the original armour while its fire flies outward.
