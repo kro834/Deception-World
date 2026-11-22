@@ -67,11 +67,42 @@ async function checkEnd(page, label) {
     }
     const links = [...nav.querySelectorAll("a[href]")];
     const tops = links.map((link) => link.getBoundingClientRect().top + scrollY);
+    // Owner (2026-11-22: 円環型の構成), 2026-11-23: on six and eight files the
+    // roster is a ring (styles-ring-dossier.css). Its links read clockwise
+    // from the top in the list's order, so within the ring "what sits next"
+    // is the next file round the ring, not the next one down the screen.
+    const roster = nav.querySelector(".dossier-roster");
+    const ring =
+      roster && getComputedStyle(roster.querySelector("li")).position === "absolute" ? roster : null;
+    const onRing = (link) => Boolean(ring && ring.contains(link));
     for (let i = 1; i < links.length; i += 1) {
+      if (onRing(links[i]) && onRing(links[i - 1])) continue;
+      // 2026-11-23: on the split stage the index's links stand in the left
+      // column and the roster in the right one (the world-map link joined the
+      // index after this check was written). Side by side reads across.
+      const here = links[i].getBoundingClientRect();
+      const before = links[i - 1].getBoundingClientRect();
+      if (here.left >= before.right - 1) continue;
       if (tops[i] < tops[i - 1] - 4) {
         problems.push(
           `${links[i].getAttribute("aria-label")} (${Math.round(tops[i])}) sits above ${links[i - 1].getAttribute("aria-label")} (${Math.round(tops[i - 1])})`,
         );
+      }
+    }
+    if (ring) {
+      const box = ring.getBoundingClientRect();
+      const angles = links.filter(onRing).map((link) => {
+        const tile = link.getBoundingClientRect();
+        const x = tile.left + tile.width / 2 - (box.left + box.width / 2);
+        const y = tile.top + tile.height / 2 - (box.top + box.height / 2);
+        // 0 at the top, growing clockwise; the top tile may sit a hair left of it.
+        const angle = ((Math.atan2(x, -y) * 180) / Math.PI + 360) % 360;
+        return angle > 355 ? angle - 360 : angle;
+      });
+      for (let i = 1; i < angles.length; i += 1) {
+        if (angles[i] <= angles[i - 1]) {
+          problems.push(`ring tile ${i} (${Math.round(angles[i])}°) is not clockwise of tile ${i - 1} (${Math.round(angles[i - 1])}°)`);
+        }
       }
     }
     for (const link of links) {
@@ -124,7 +155,9 @@ try {
       // are reachable and land where they say.
       await page.goto(`${base}/riders/realm`);
       await settle(page);
-      const back = page.locator(".manager-pagination .dossier-index-return");
+      // 2026-11-23: the index holds two return links since the world-map
+      // link joined it; this step presses the way back to the list.
+      const back = page.locator(".manager-pagination .dossier-index-return:not(.is-world-map)");
       await back.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
       await back.click();
       await page.waitForURL("**/world#riders-return");

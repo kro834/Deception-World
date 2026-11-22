@@ -42,7 +42,11 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2.6px),
+    #000 calc(100% - 2px)
+  );
   mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
 }
 
@@ -116,5 +120,1721 @@ html[data-family="world"] body .rider-console .rider-tabs > button > i {
 @media (forced-colors: active) {
   html[data-family="world"] body .rider-console .rider-ring-dial-ring::before {
     background: CanvasText;
+  }
+}
+
+/* ================================================================
+   Phase 2 (2026-11-23): the rest of the World in the ring system.
+   The page's own markup is pinned (world-annex.test.mjs), so the rings
+   are built on the existing lists: each list item is placed on its ring
+   by top/left from fixed unit-circle coordinates per :nth-child, which
+   leaves every transform free for whoever already owns it.
+   The page's older sheets reach four ids of weight, so each rule here
+   carries five (:not(#r) matches everything and adds an id's weight).
+   ================================================================ */
+
+/* Unit-circle coordinates, clockwise from the top. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  :is(.ws-map, .signal-array, .ws-doors)
+  > :nth-child(1) {
+  --ring-x: 0;
+  --ring-y: -1;
+}
+
+/* ---------- 1. 目次: the six chapters on one ring ---------- */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > .ws-contents {
+  --ws-ring-size: min(740px, 100vw - 32px);
+  --ws-ring-item: calc(var(--ws-ring-size) * 0.225);
+  --ws-ring-r: 38%;
+  display: grid;
+  justify-items: center;
+  padding-inline: 16px;
+}
+
+/* The heading rests at the ring's centre, in the same grid cell. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > h2 {
+  grid-area: 1 / 1;
+  align-self: start;
+  z-index: 2;
+  margin: calc(var(--ws-ring-size) / 2 - 0.9em) 0 0;
+  padding: 0 0 12px;
+  background-position: 50% 100%;
+  background-size: 56px 2px;
+  font-size: clamp(24px, 2.8vw, 42px);
+  text-align: center;
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > .ws-map {
+  grid-area: 1 / 1;
+  position: relative;
+  display: block;
+  width: var(--ws-ring-size);
+  height: var(--ws-ring-size);
+  margin: 0 0 calc(var(--ws-ring-size) * 0.1);
+}
+
+/* The orbit's line (radius 38%) and a halo round the heading. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::before,
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::before {
+  inset: 12%;
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.26);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::after {
+  inset: 32%;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(100% - 1.5px),
+      rgb(var(--ring-gold-rgb) / 0.34) calc(100% - 1.5px) 100%,
+      transparent 100%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(76% - 1px),
+      rgb(var(--ring-pink-rgb) / 0.24) calc(76% - 1px) 76%,
+      transparent 76%
+    ),
+    radial-gradient(closest-side, rgb(var(--ring-key-rgb) / 0.1), transparent 72%);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(2) {
+  --ring-x: 0.866;
+  --ring-y: -0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(3) {
+  --ring-x: 0.866;
+  --ring-y: 0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(4) {
+  --ring-x: 0;
+  --ring-y: 1;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(5) {
+  --ring-x: -0.866;
+  --ring-y: 0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(6) {
+  --ring-x: -0.866;
+  --ring-y: -0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% + var(--ring-y) * var(--ws-ring-r));
+  left: calc(50% + var(--ring-x) * var(--ws-ring-r));
+  width: var(--ws-ring-item);
+  height: var(--ws-ring-item);
+  margin: calc(var(--ws-ring-item) / -2) 0 0 calc(var(--ws-ring-item) / -2);
+}
+
+/* Each chapter is a round lens in the ring frame. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(120% 120% at 22% 12%, rgb(var(--ws-card-tone-rgb) / 0.34), transparent 58%),
+    #07101c;
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--ring-prism);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* The chapter's own heading hangs under its lens; the numeral is a small
+   node on the frame (in the lens itself where a chapter has no picture). */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li .ws-map-label {
+  position: absolute;
+  top: calc(100% + 24px);
+  left: 50%;
+  display: block;
+  width: max-content;
+  max-width: min(13em, calc(var(--ws-ring-item) * 1.4));
+  min-height: 0;
+  padding: 0;
+  translate: -50% 0;
+  font-size: clamp(11px, 1.1vw, 15px);
+  line-height: 1.35;
+  text-align: center;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li
+  .ws-map-label
+  > b {
+  position: absolute;
+  top: -39px;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgb(var(--ws-card-tone-rgb) / 0.8);
+  border-radius: 50%;
+  background: #07101c;
+  translate: -50% 0;
+  font-size: 9px;
+  line-height: 1;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li[data-phase="annex"]
+  .ws-map-label {
+  top: calc(100% + 16px);
+  padding: 0;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li[data-phase="annex"]
+  .ws-map-label
+  > b {
+  top: calc(-16px - var(--ws-ring-item) / 2);
+  width: auto;
+  height: auto;
+  border: 0;
+  background: none;
+  translate: -50% -50%;
+  font-size: clamp(18px, 2.7vw, 36px);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li
+  .ws-map-label
+  > i {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li
+  > a:focus-visible {
+  outline-offset: 11px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The ring turns into place; the lenses counter-turn and pop along it. */
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in] {
+    animation: ring-orbit-turn var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li
+    > a {
+    animation: ring-orbit-counter var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(2)
+    > a {
+    animation-delay: 40ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(3)
+    > a {
+    animation-delay: 80ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(4)
+    > a {
+    animation-delay: 120ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(5)
+    > a {
+    animation-delay: 160ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(6)
+    > a {
+    animation-delay: 200ms;
+  }
+}
+
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a {
+    transition: scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a::after {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:active {
+    scale: 0.93;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:active::after {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:hover {
+    translate: none;
+    scale: 1.08;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:hover::after {
+    rotate: 90deg;
+  }
+}
+
+/* ---------- 2. 六詠: the six on one ring, their heading at its centre ---------- */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array {
+  position: relative;
+  display: block;
+  width: min(660px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+  margin: 8px auto 76px;
+  padding: 0;
+}
+
+/* The old row's floor line has no place on a ring. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array::after {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array::before {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.26);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(2) {
+  --ring-x: 0.866;
+  --ring-y: -0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(3) {
+  --ring-x: 0.866;
+  --ring-y: 0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(4) {
+  --ring-x: 0;
+  --ring-y: 1;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(5) {
+  --ring-x: -0.866;
+  --ring-y: 0.5;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(6) {
+  --ring-x: -0.866;
+  --ring-y: -0.5;
+}
+
+/* A round portrait in the ring frame. The card keeps its own arrival
+   (mx-rise) and its picture stays the route cover's lift target. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal {
+  position: absolute;
+  top: calc(50% + var(--ring-y) * var(--rk-ring-r, 38%) - var(--rk-ring-item, 22.5%) / 2);
+  left: calc(50% + var(--ring-x) * var(--rk-ring-r, 38%) - var(--rk-ring-item, 22.5%) / 2);
+  display: block;
+  width: var(--rk-ring-item, 22.5%);
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 50%;
+  overflow: visible;
+  background: #07101c;
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal::before {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  width: auto;
+  height: auto;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--ring-prism);
+  box-shadow: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* The rank is a node on the frame; the name hangs under the portrait. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > span {
+  position: absolute;
+  top: auto;
+  bottom: -22px;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  background: #07101c;
+  translate: -50% 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > b {
+  position: absolute;
+  top: calc(100% + 28px);
+  left: 50%;
+  width: max-content;
+  max-width: 150%;
+  padding: 0;
+  translate: -50% 0;
+  font-size: clamp(12px, 1.2vw, 16px);
+  line-height: 1.35;
+  text-align: center;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > i {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > em {
+  inset: 2% 2% auto auto;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal:focus-visible {
+  outline-offset: 11px;
+}
+
+/* The heading moves into the ring: same grid cell as the six. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  .manager-archive-tabs {
+  grid-area: 1 / 1;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  .manager-archive-panel {
+  grid-area: 2 / 1;
+}
+
+/* The panel's fixed height held a row of cards; the ring sets its own. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers {
+  height: auto;
+  min-height: 0;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  > .threat-copy {
+  grid-area: 2 / 1;
+  place-self: center;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  justify-items: center;
+  width: calc(min(660px, 100%) * 0.42);
+  margin: 8px 0 76px;
+  padding: 0;
+  border: 0;
+  /* Under the first portrait's name, not on it. */
+  translate: 0 14px;
+  text-align: center;
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  > .threat-copy
+  > h3 {
+  margin: 0;
+  font-size: clamp(14px, 2.1vw, 27px);
+  line-height: 1.12;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  > .threat-copy
+  > p {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: clamp(11px, 1vw, 13px);
+  line-height: 1.6;
+}
+
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal::after {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:active::after {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:hover::after {
+    rotate: 90deg;
+  }
+}
+
+/* ---------- 3. The special sites' doors: four on a ring, ファーフロム
+   (last, a little larger, as the owner set it) at the centre ---------- */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors {
+  position: relative;
+  display: block;
+  width: min(600px, 100%);
+  aspect-ratio: 1;
+  margin: 28px auto 84px;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors::before {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.28);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors > :nth-child(1) {
+  --ring-x: -0.707;
+  --ring-y: -0.707;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors > :nth-child(2) {
+  --ring-x: 0.707;
+  --ring-y: -0.707;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors > :nth-child(3) {
+  --ring-x: 0.707;
+  --ring-y: 0.707;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors > :nth-child(4) {
+  --ring-x: -0.707;
+  --ring-y: 0.707;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors > :nth-child(5) {
+  --ring-x: 0;
+  --ring-y: 0;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a {
+  --ws-door-size: 21%;
+  position: absolute;
+  top: calc(50% + var(--ring-y) * 41% - var(--ws-door-size) / 2);
+  left: calc(50% + var(--ring-x) * 41% - var(--ws-door-size) / 2);
+  display: block;
+  width: var(--ws-door-size);
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  overflow: visible;
+  background: #07101c;
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
+  clip-path: none;
+}
+
+/* The ghost numeral and the sweep belonged to the plate. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a::before {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  width: auto;
+  height: auto;
+  padding: 2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    var(--ws-door),
+    #fff8 0.2turn,
+    var(--ws-door-2) 0.5turn,
+    var(--ring-gold) 0.78turn,
+    var(--ws-door)
+  );
+  opacity: 1;
+  transform: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a
+  > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 16%;
+  box-shadow: none;
+  clip-path: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a
+  > span {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  width: max-content;
+  max-width: 160%;
+  translate: -50% 0;
+  font-size: clamp(11px, 1.15vw, 15px);
+  line-height: 1.35;
+  text-align: center;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  --ws-door-size: 27%;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a.is-far-from
+  > span {
+  max-width: 120%;
+  font-size: clamp(12px, 1.3vw, 17px);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a
+  > i {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a:focus-visible {
+  outline-offset: 11px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in] {
+    animation: ring-orbit-turn var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a
+    > img {
+    animation: ring-pop-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(2)
+    > img {
+    animation-delay: 40ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(3)
+    > img {
+    animation-delay: 80ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(4)
+    > img {
+    animation-delay: 120ms;
+  }
+
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(5)
+    > img {
+    animation-delay: 180ms;
+  }
+}
+
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a {
+    transition: scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a::after {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:active {
+    scale: 0.93;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:active::after {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:hover {
+    translate: none;
+    scale: 1.08;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:hover::after {
+    rotate: 90deg;
+  }
+}
+
+/* ---------- 4. The chapter rail: a dial of six nodes that turns to the
+   chapter in view (it was a vertical dot rail) ---------- */
+@media (min-width: 1360px) and (min-height: 640px) and (forced-colors: none) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail {
+    width: 58px;
+    height: 58px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail::before {
+    display: none;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-radius: 50%;
+    /* The chapter in view rests at the left, toward the page. */
+    rotate: calc((var(--ws-rail-at, 1) - 1) * -60deg - 90deg);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::before,
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::after {
+    inset: 0;
+    top: 0;
+    left: 0;
+    width: auto;
+    height: auto;
+    border-radius: 50%;
+    translate: none;
+    scale: none;
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 2.1px),
+      #000 calc(100% - 1.5px)
+    );
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2.1px), #000 calc(100% - 1.5px));
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::before {
+    background: rgb(var(--ring-key-rgb) / 0.26);
+  }
+
+  /* The lit arc: from the first chapter round to the one in view. */
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::after {
+    background: conic-gradient(
+      from 0deg,
+      var(--ring-key) 0turn,
+      var(--ring-pink) calc((var(--ws-rail-at, 1) - 1) / 6 * 1turn),
+      transparent calc((var(--ws-rail-at, 1) - 1) / 6 * 1turn)
+    );
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    li {
+    position: absolute;
+    top: calc(50% + var(--ring-y) * 50% - 3.5px);
+    left: calc(50% + var(--ring-x) * 50% - 3.5px);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    li::before {
+    display: none;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-rail li:nth-child(1) {
+    --ring-x: 0;
+    --ring-y: -1;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-rail li:nth-child(2) {
+    --ring-x: 0.866;
+    --ring-y: -0.5;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-rail li:nth-child(3) {
+    --ring-x: 0.866;
+    --ring-y: 0.5;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-rail li:nth-child(4) {
+    --ring-x: 0;
+    --ring-y: 1;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-rail li:nth-child(5) {
+    --ring-x: -0.866;
+    --ring-y: 0.5;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-rail li:nth-child(6) {
+    --ring-x: -0.866;
+    --ring-y: -0.5;
+  }
+}
+
+@media (min-width: 1360px) and (min-height: 640px) and (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > .ws-rail
+    > ol {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > .ws-rail
+    li {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      background-color 240ms ease,
+      border-color 240ms ease,
+      box-shadow 240ms ease;
+  }
+}
+
+/* ---------- 5. Chapter breaks: the numeral stands in a double ring ---------- */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.section-index, .wa-chapter)
+  > span {
+  position: relative;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.section-index, .wa-chapter)
+  > span::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin: -0.75em 0 0 -0.75em;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--ring-prism);
+  /* The outer ring: an outline, so it takes no layout. */
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.4);
+  outline-offset: 10px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* ---------- 6. One material: radii cut from circles ----------
+   Panels 28px, dense cards 22px, artwork 18px (never a circle: the page
+   shows it whole), controls pills or circles. Paint only: no geometry of a
+   measured rail changes. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(#manager-archive, .world-column, .episode-archive, .wa-contents-inner, .wa-directory) {
+  border-radius: var(--ring-radius-card);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(
+    .story-layout,
+    #world-exploration > section,
+    .world-exploration-index > *,
+    .world-column-content,
+    .episode-card-surface,
+    .world-stage-context,
+    .wa-plate,
+    .wa-contents-inner :is(a, button),
+    .dante-archive,
+    .other-archive-card
+  ) {
+  border-image: none;
+  border-radius: 22px;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.wa-plate, .dante-archive, .other-archive-card, #world-exploration > section) {
+  overflow: hidden;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .world-poster-media,
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .world-poster-media::before {
+  border-radius: 18px;
+}
+
+/* The poster's halo: three rings behind the key visual. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .artwork-stage--world
+  .artwork-stage__halo {
+  /* Wider than the stage, so the rings sweep round the poster's frame
+     instead of hiding behind it. */
+  inset: 50% auto auto 50%;
+  width: 132%;
+  height: auto;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(100% - 1.5px),
+      rgb(var(--ring-key-rgb) / 0.4) calc(100% - 1.5px) 100%,
+      transparent 100%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(86% - 1px),
+      rgb(var(--ring-gold-rgb) / 0.3) calc(86% - 1px) 86%,
+      transparent 86%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(72% - 1px),
+      rgb(var(--ring-pink-rgb) / 0.26) calc(72% - 1px) 72%,
+      transparent 72%
+    );
+  opacity: 1;
+}
+
+/* Text controls are pills; icon controls are circles. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.primary-action, .world-stage-controls, .wa-open, footer > a) {
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.episode-controls button, .episode-pickup-plus) {
+  /* A phone rule in the command sheets sets this radius with !important. */
+  border-radius: 50% !important;
+  clip-path: none;
+}
+
+/* The measured rails (六詠 / 管理外 / その他 / 犬, the columns): a pill
+   track, a pill lens. Radius only. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.manager-archive-tabs, .world-column-tabs) {
+  border-radius: 22px;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.manager-archive-tabs, .world-column-tabs)
+  :is(.liquid-rail-surface, .liquid-selection-lens, .liquid-selection-surface, button) {
+  border-radius: 20px;
+}
+
+/* ---------- 7. 人物一覧: every portrait in a ring frame ---------- */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait {
+  width: min(82%, 260px);
+  height: auto;
+  aspect-ratio: 1;
+  margin: 22px auto 6px;
+  border: 0;
+  border-radius: 50%;
+  background: #07101c;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait
+  > img {
+  position: absolute;
+  inset: 7px;
+  width: calc(100% - 14px);
+  height: calc(100% - 14px);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait::before {
+  display: none;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--ring-prism);
+  opacity: 1;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* ---------- 8. THE EXPANSION RULE on the World's own surfaces ----------
+   The record viewers already stage an opening (styles-pickup-cinema.css);
+   the same elements now spring: the sheet scales in with overshoot, its
+   rows cascade on the bounce. Closing keeps the viewers' own plain fade. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #episode-pickup-dialog[open]
+    .episode-pickup-panel,
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .world-column-dialog[open]
+    .world-column-dialog-card {
+    animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 50%;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #episode-pickup-dialog[open]
+    .episode-pickup-item {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(100ms + var(--pc-step, 0) * var(--ring-stagger));
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .world-column-dialog[open]
+    .world-column-dialog-copy-stack {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) 140ms backwards;
+  }
+
+  /* Disclosures (a person's profile, an office's documents): the body
+     drops open from its summary and settles. */
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    :is(.wa-profile, .wa-doc)[open]
+    > :not(summary) {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    :is(.wa-profile, .wa-doc)[open]
+    > :not(summary):nth-child(3) {
+    animation-delay: var(--ring-stagger);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    :is(.wa-profile, .wa-doc)[open]
+    > :not(summary):nth-child(n + 4) {
+    animation-delay: calc(var(--ring-stagger) * 2);
+  }
+
+  /* A press sinks a round control and lets it spring back. */
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    :is(.episode-controls button, .episode-pickup-plus, .wa-open, .wa-directory-controls button) {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    :is(
+      .episode-controls button,
+      .episode-pickup-plus,
+      .wa-open,
+      .wa-directory-controls button
+    ):active {
+    scale: 0.93;
+    transition: scale 90ms ease-out;
+  }
+}
+
+/* ---------- 9. Phones: smaller lenses on a wider ring, so every name
+   clears its neighbours and the centre (checked at 320, 360 and 390) ---------- */
+@media (max-width: 560px) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-contents {
+    --ws-ring-item: calc(var(--ws-ring-size) * 0.2);
+    --ws-ring-r: 40%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-contents
+    > .ws-map::before {
+    inset: 10%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li
+    .ws-map-label {
+    top: calc(100% + 19px);
+    max-width: calc(var(--ws-ring-item) * 1.55);
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li
+    .ws-map-label
+    > b {
+    top: -32px;
+    width: 26px;
+    height: 26px;
+    font-size: 8px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li[data-phase="annex"]
+    .ws-map-label {
+    top: calc(100% + 12px);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li[data-phase="annex"]
+    .ws-map-label
+    > b {
+    top: calc(-12px - var(--ws-ring-item) / 2);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array {
+    --rk-ring-item: 20%;
+    --rk-ring-r: 40%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array::before {
+    inset: 10%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > span {
+    bottom: -15px;
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > b {
+    top: calc(100% + 17px);
+    max-width: 180%;
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy {
+    gap: 5px;
+    width: calc(min(660px, 100%) * 0.5);
+    translate: 0 20px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > h3 {
+    font-size: 13px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > p {
+    line-height: 1.45;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a
+    > span {
+    top: calc(100% + 13px);
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a.is-far-from
+    > span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a.is-far-from {
+    --ws-door-size: 24%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:not(.is-far-from)
+    > span {
+    max-width: 128%;
+  }
+}
+
+@media (max-width: 360px) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > b {
+    max-width: 130%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > h3 {
+    font-size: 12px;
   }
 }

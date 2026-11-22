@@ -308,7 +308,9 @@ function DossierRoster({
   originSearch?: Record<string, string>;
 }) {
   return (
-    <ol className="dossier-roster" aria-label="この一覧の資料">
+    // ring-enter (2026-11-23): on six and eight files the roster is a ring
+    // (styles-ring-dossier.css) that turns into place when it is first seen.
+    <ol className="dossier-roster ring-enter" aria-label="この一覧の資料">
       {items.map((item, index) => {
         const numeral = fileNumeral(item, index);
         const body = (
