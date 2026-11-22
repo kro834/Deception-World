@@ -557,6 +557,140 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     > a:active {
     scale: 0.93;
   }
+
+  /* The ring turns into place; the files counter-turn and pop along it. */
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in] {
+    animation: ring-orbit-turn var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li
+    > :is(a, span) {
+    animation: ring-orbit-counter var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(var(--ring-slot, 0) * var(--ring-stagger));
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li.is-current
+    > span {
+    animation-name: ring-pop-in;
+    animation-delay: 240ms;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(2) {
+    --ring-slot: 1;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(3) {
+    --ring-slot: 2;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(4) {
+    --ring-slot: 3;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(5) {
+    --ring-slot: 4;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(6) {
+    --ring-slot: 5;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(7) {
+    --ring-slot: 6;
+  }
+
+  html[data-ring-ready][data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    ).ring-enter[data-ring-in]
+    > li:nth-child(8) {
+    --ring-slot: 7;
+  }
 }
 
 /* ---------- 2. The place in the list: a ring of nodes, not a bar ---------- */
