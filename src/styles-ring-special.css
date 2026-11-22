@@ -301,6 +301,69 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
 }
 
 /* ---------------------------------------------------------------
+   3b. Shape only, where a page's own editions paint the plate.
+   Rexonance and Extreme draw their panels from sheets that carry two and
+   three ids (layout, type, the fight card's chamfers), so the paint stays
+   theirs and only the cut changes: a circle's corner instead of a chamfer.
+   !important: those sheets' clip-path and radius are the layer below.
+   None of these holds a pinned stage or an engine's drawing surface.
+   --------------------------------------------------------------- */
+
+@media (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-comparison,
+      .rxs-p14-comparator,
+      .rxs-system-grid,
+      .rxs-specs,
+      .rxe-form-comparison,
+      .exs-core-flow,
+      .exs-catalog-details
+    ),
+  html[data-family="special"] body #top.exs-page[data-command-special]:not(#ring-b) .rxs-p14-overview,
+  html[data-family="special"] body #top.exs-page[data-command-special]:not(#ring-b) .rxs-stage-panel,
+  html[data-family="special"]
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxs-p14-overview
+    figure {
+    border-radius: var(--ring-radius-card) !important;
+    clip-path: none !important;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-system-grid > article,
+      .rxs-specs > div,
+      .rxs-comparison-metrics > article,
+      .rxs-comparison-result,
+      .rxs-comparison-note,
+      .rxs-p14-method-note,
+      .rxs-p14-copy dl > div,
+      .rxs-processing-comparison > :is(div, section),
+      .exs-p14-comparison > article,
+      .exs-form-facts > div,
+      .exs-unavailable > li,
+      .exo-read
+    ) {
+    border-radius: 22px !important;
+    clip-path: none !important;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.exs-opponent-options button, .rxs-scroll-cue, .exs-core-flow span, .rxs-p14-values span) {
+    border-radius: var(--ring-radius-pill) !important;
+    clip-path: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------
    4. Motion.
    --------------------------------------------------------------- */
 
