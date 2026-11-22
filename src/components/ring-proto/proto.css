@@ -1390,6 +1390,492 @@ li[data-open="true"] > .rp-m2-front::after {
   }
 }
 
+/* ── m3 潜行レンズ ──────────────────────────────────────────────────────── */
+.rp-m3 {
+  --lens: 214px;
+  --pitch: 250px;
+  --moon: 26px;
+}
+.rp-m3-sheet {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  background:
+    radial-gradient(circle at 50% 54%, rgb(36 140 255 / 0.2), transparent 52%), var(--rp-ink);
+}
+.rp-m3-sheet[hidden] {
+  display: none;
+}
+.rp-m3-field {
+  position: absolute;
+  inset: 0;
+  transform-origin: var(--ox) var(--oy);
+}
+.rp-m3-sheet[data-dive="true"] .rp-m3-field {
+  scale: 4.2;
+  opacity: 0;
+  pointer-events: none;
+}
+.rp-m3-head h2 {
+  position: absolute;
+  left: 56px;
+  top: 30px;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.rp-m3-head .rp-search {
+  position: absolute;
+  left: 300px;
+  top: 28px;
+  width: 260px;
+}
+.rp-m3-lenses {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 0;
+  height: 0;
+}
+.rp-m3-lens {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--lens);
+  height: var(--lens);
+  margin: calc(var(--lens) / -2);
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 36% 28%, #1c3554, #0a1424 72%) padding-box,
+    var(--rp-prism) border-box;
+  translate: calc(var(--dx) * var(--pitch)) calc(var(--dy) * var(--pitch));
+}
+.rp-m3-lens span {
+  max-width: 72%;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.25;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+/* A lens's pages ride its rim as moons. */
+.rp-m3-rim-moon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--moon);
+  height: var(--moon);
+  margin: calc(var(--moon) / -2);
+  overflow: hidden;
+  border: 2px solid #7ae8ff;
+  border-radius: 50%;
+  background: #0a1424;
+  transform: rotate(var(--a)) translate(calc(var(--lens) / 2)) rotate(calc(var(--a) * -1));
+}
+.rp-m3-rim-moon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 16%;
+}
+.rp-m3-depth {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 96px 48px 48px;
+  transform-origin: var(--ox) var(--oy);
+}
+.rp-m3-depth-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 96vmax;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: var(--rp-prism) border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.rp-m3-depth h3 {
+  position: relative;
+  margin: 0 0 30px;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.rp-m3-pages {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 290px));
+  grid-auto-rows: minmax(56px, auto);
+  gap: 12px 18px;
+  width: 100%;
+  justify-content: center;
+}
+.rp-m3-back {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background:
+    linear-gradient(#0d1a2c, #0a1322) padding-box,
+    var(--rp-prism) border-box;
+}
+.rp-m3-back i {
+  position: absolute;
+  left: 19px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  border-left: 2px solid #f3f8ff;
+  border-bottom: 2px solid #f3f8ff;
+  rotate: 45deg;
+}
+
+@media (max-width: 759px) {
+  .rp-m3 {
+    --lens: min(112px, calc((100vw - 60px) / 3));
+    --pitch: calc(var(--lens) + 14px);
+    --moon: 15px;
+  }
+  .rp-m3-head h2 {
+    left: 20px;
+    top: 20px;
+    font-size: 26px;
+  }
+  .rp-m3-head .rp-search {
+    left: 16px;
+    right: 16px;
+    top: 76px;
+    width: auto;
+    min-height: 44px;
+  }
+  .rp-m3-lenses {
+    top: 57%;
+  }
+  .rp-m3-lens {
+    translate: calc(var(--px) * var(--pitch)) calc(var(--py) * var(--pitch));
+  }
+  .rp-m3-lens span {
+    max-width: 82%;
+    font-size: clamp(11px, 3.5vw, 14px);
+  }
+  .rp-m3-rim-moon {
+    border-width: 1.5px;
+  }
+  .rp-m3-depth {
+    padding: 84px 16px 32px;
+  }
+  .rp-m3-depth h3 {
+    margin-bottom: 18px;
+    font-size: 28px;
+  }
+  .rp-m3-pages {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: minmax(44px, auto);
+    gap: 6px 8px;
+  }
+  .rp-m3-pages[data-cols="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rp-m3-pages[data-cols="3"] .rp-moon {
+    gap: 8px;
+    padding-right: 8px;
+  }
+  .rp-m3-pages[data-cols="3"] .rp-moon b {
+    font-size: 13px;
+  }
+  .rp-m3-pages[data-cols="3"] .rp-moon-art {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* ── d3 滑車リール ──────────────────────────────────────────────────────── */
+.rp-d3 {
+  --thread: rgb(var(--rp-amber-rgb) / 0.8);
+  display: grid;
+  grid-template-columns: 36% 96px minmax(0, 1fr);
+  background:
+    radial-gradient(
+      circle at 18% 46vh,
+      color-mix(in srgb, var(--tone) 30%, transparent),
+      transparent 40%
+    ),
+    var(--rp-ink);
+}
+.rp-d3-pulley {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--rp-amber);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--rp-amber) 0 3px, transparent 3.5px),
+    conic-gradient(
+      from 0deg,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 4%,
+      transparent 0 25%,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 29%,
+      transparent 0 50%,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 54%,
+      transparent 0 75%,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 79%,
+      transparent 0
+    ),
+    #0a1424;
+}
+.rp-d3-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;
+}
+.rp-d3-stage > .rp-d3-pulley {
+  left: 50%;
+  top: 46px;
+  z-index: 1;
+  margin-left: -20px;
+  rotate: calc(var(--p, 0) * 540deg);
+}
+.rp-d3-weight {
+  position: absolute;
+  left: 50%;
+  top: 66px;
+  translate: -50% calc(var(--p, 0) * 150px);
+}
+.rp-d3-rope {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 70px);
+  width: 2px;
+  height: 320px;
+  margin-left: -1px;
+  background: var(--thread);
+}
+.rp-d3-figure {
+  display: block;
+  width: min(300px, 21vw);
+  aspect-ratio: 1 / 1.46;
+  margin-top: 70px;
+  overflow: hidden;
+  border-radius: 28px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tone) 60%, #fff);
+}
+.rp-d3-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 10%;
+}
+.rp-d3-reel {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;
+  overflow: clip;
+}
+.rp-d3-reel-thread {
+  position: absolute;
+  left: 39px;
+  top: 66px;
+  bottom: 66px;
+  width: 18px;
+  border: solid var(--thread);
+  border-width: 0 2px;
+}
+.rp-d3-pulley-a {
+  left: 28px;
+  top: 44px;
+  rotate: calc(var(--q, 0) * 140deg);
+}
+.rp-d3-pulley-b {
+  left: 28px;
+  bottom: 44px;
+  rotate: calc(var(--q, 0) * -140deg);
+}
+.rp-d3-reel a {
+  position: absolute;
+  left: 25px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 46px;
+  min-height: 46px;
+  padding: 14px 0;
+  border: 1px solid rgb(var(--rp-amber-rgb) / 0.5);
+  border-radius: 999px;
+  background: #0a1424;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  writing-mode: vertical-rl;
+  translate: 0 calc((var(--i) - var(--q, 0)) * 178px - 50%);
+}
+.rp-d3-reel a i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rp-amber);
+}
+.rp-d3-reel a[aria-current="true"] {
+  border-color: var(--rp-amber);
+  background: #33280f;
+  color: #ffe9bd;
+}
+.rp-d3-file {
+  min-width: 0;
+  padding: 104px 64px 140px 28px;
+}
+.rp-d3-identity h1 {
+  margin: 0;
+  font-size: clamp(40px, 4.6vw, 68px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+}
+.rp-d3-identity p {
+  display: inline-block;
+  margin: 14px 0 0;
+  padding: 7px 18px;
+  border: 1px solid color-mix(in srgb, var(--tone) 70%, #fff);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.rp-d3-chapter {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  margin-top: 56px;
+  scroll-margin-top: 96px;
+}
+/* Each block is tied to the thread it was hoisted by. */
+.rp-d3-chapter > * {
+  position: relative;
+}
+.rp-d3-chapter > ::after {
+  content: "";
+  position: absolute;
+  left: 34px;
+  bottom: 100%;
+  width: 2px;
+  height: 16px;
+  background: var(--thread);
+}
+.rp-d3-chapter > :first-child::after {
+  height: 30px;
+}
+.rp-d3-chapter::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  top: -52px;
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--rp-amber);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--rp-amber) 0 2px, #0a1424 2.5px);
+}
+.rp-d3[data-armed="true"] .rp-d3-chapter > :not([data-in]) {
+  opacity: 0;
+  translate: 0 84px;
+}
+
+@media (max-width: 899px) {
+  .rp-d3 {
+    display: block;
+  }
+  .rp-d3-stage {
+    position: relative;
+    height: 372px;
+  }
+  .rp-d3-stage > .rp-d3-pulley {
+    top: 40px;
+  }
+  .rp-d3-weight {
+    top: 60px;
+    translate: -50% calc(min(var(--p, 0) * 10, 1) * 30px);
+  }
+  .rp-d3-rope {
+    bottom: calc(100% - 36px);
+    height: 80px;
+  }
+  .rp-d3-figure {
+    width: 176px;
+    margin-top: 36px;
+  }
+  /* The reel is a belt along the bottom edge, under the thumb. */
+  .rp-d3-reel {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 7;
+    height: 66px;
+    border-top: 1px solid rgb(var(--rp-amber-rgb) / 0.35);
+    background: #070b14;
+  }
+  .rp-d3-reel-thread {
+    left: 30px;
+    right: 30px;
+    top: 24px;
+    bottom: auto;
+    width: auto;
+    height: 18px;
+    border-width: 2px 0;
+  }
+  .rp-d3-pulley-a,
+  .rp-d3-pulley-b {
+    top: 13px;
+    bottom: auto;
+    left: -8px;
+  }
+  .rp-d3-pulley-b {
+    left: auto;
+    right: -8px;
+  }
+  .rp-d3-reel a {
+    left: 50%;
+    top: 10px;
+    min-height: 46px;
+    padding: 0 16px;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    translate: calc((var(--i) - var(--q, 0)) * 128px - 50%) 0;
+  }
+  .rp-d3-file {
+    padding: 0 16px 120px;
+  }
+  .rp-d3-identity h1 {
+    font-size: 38px;
+  }
+  .rp-d3-chapter {
+    margin-top: 48px;
+  }
+}
+
 /* ── motion (never under reduced motion, never in economy) ──────────────── */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .rp-m1-ring,
@@ -1495,6 +1981,40 @@ li[data-open="true"] > .rp-m2-front::after {
       translate var(--ring-dur-bounce) var(--ring-spring-bounce),
       opacity 200ms linear;
   }
+  html:not([data-world-effects="economy"]) .rp-m3-sheet {
+    animation: rp-fade var(--ring-dur-soft) var(--ring-spring-soft) backwards;
+  }
+  /* The view is a full-viewport move: it rides the soft spring, never past rest. */
+  html:not([data-world-effects="economy"]) .rp-m3-field {
+    transition:
+      scale var(--ring-dur-soft) var(--ring-spring-soft),
+      opacity 300ms linear;
+  }
+  html:not([data-world-effects="economy"]) .rp-m3-lens {
+    animation: rp-pop var(--ring-dur-bounce) var(--ring-spring-bounce) calc(var(--i) * 45ms + 60ms)
+      backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-m3-depth {
+    animation: rp-m3-dive var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-m3-pages .rp-moon {
+    animation: rp-m3-page-in var(--ring-dur-bounce) var(--ring-spring-bounce)
+      calc(var(--j) * 28ms + 140ms) backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-d3-chapter > * {
+    transition:
+      translate var(--ring-dur-bounce) var(--ring-spring-bounce),
+      opacity 240ms linear;
+  }
+  html:not([data-world-effects="economy"]) .rp-d3-chapter > :nth-child(2) {
+    transition-delay: 110ms;
+  }
+  html:not([data-world-effects="economy"]) .rp-d3-chapter > :nth-child(3) {
+    transition-delay: 220ms;
+  }
+  html:not([data-world-effects="economy"]) .rp-d3-chapter > :nth-child(n + 4) {
+    transition-delay: 330ms;
+  }
 }
 @keyframes rp-fade {
   from {
@@ -1570,5 +2090,18 @@ li[data-open="true"] > .rp-m2-front::after {
   from {
     opacity: 0;
     translate: 0 calc((var(--row) + 1) * -64px);
+  }
+}
+@keyframes rp-m3-dive {
+  from {
+    opacity: 0;
+    scale: 0.16;
+  }
+}
+@keyframes rp-m3-page-in {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+    scale: 0.84;
   }
 }

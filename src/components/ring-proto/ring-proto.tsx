@@ -2,7 +2,9 @@
 import { MenuOrbit } from "./menu-orbit";
 import { DossierExploded } from "./dossier-exploded";
 import { DossierWheel } from "./dossier-wheel";
+import { DossierReel } from "./dossier-reel";
 import { MenuCabinet } from "./menu-cabinet";
+import { MenuDive } from "./menu-dive";
 
 export function RingProto({
   concept,
@@ -16,6 +18,10 @@ export function RingProto({
   switch (concept) {
     case "m2":
       return <MenuCabinet initialRegion={part} />;
+    case "m3":
+      return <MenuDive initialRegion={part} />;
+    case "d3":
+      return <DossierReel riderId={riderId} />;
     case "d2":
       return <DossierWheel riderId={riderId} initialPart={part} />;
     case "d1":
