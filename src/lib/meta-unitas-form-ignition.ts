@@ -5,6 +5,7 @@
  * and burns; ウルトラ's cutout is revealed from the flame; the overlay then
  * fades onto the panel's own ウルトラ picture, decoded underneath. */
 
+import { usesTouchBudget } from "./rendering-profile.js";
 import { META_UNITAS_RX_FIGURE, META_UNITAS_RX_FORMS, META_UNITAS_RX_MARKS, META_UNITAS_RX_SIZE } from "./meta-unitas-rx-suit.ts";
 import { bakeWhiteFireFuel, createWhiteFire, type WhiteFireFuel } from "./meta-unitas-white-fire.ts";
 import { releasePendingImage } from "./release-pending-images.js";
@@ -40,7 +41,8 @@ export function mountMetaUnitasFormIgnition(
   let frame = 0;
   let deadline = 0;
   const context = canvas.getContext("2d");
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  // (Owner, 2026-11-23: touch screens in high quality draw the desktop fire.)
+  const coarse = usesTouchBudget(window.matchMedia("(pointer: coarse)").matches);
   const fire = context ? createWhiteFire(canvas.ownerDocument, coarse) : null;
   const from = new Image();
   const to = new Image();

@@ -43,7 +43,9 @@ test("every beat has the suit's real seams to trace", () => {
   assert.ok(groups[3].cy > groups[0].cy && groups[0].cy > groups[5].cy);
 });
 
-test("explicit lightweight choice scales budgets; pointer capability selects high or touch", () => {
+// (2026-11-23, owner: in high quality a phone draws the desktop budget, so
+// the pointer no longer selects "touch"; only the lightweight choice reduces.)
+test("explicit lightweight choice scales budgets; a touch screen in high quality is high", () => {
   const order = ["high", "touch", "lite"];
   for (const key of ["swarm", "shards", "sparks", "pixels"])
     for (let i = 1; i < order.length; i += 1)
@@ -58,8 +60,8 @@ test("explicit lightweight choice scales budgets; pointer capability selects hig
     deviceMemory: 4,
     hardwareConcurrency: 8,
   };
-  assert.equal(metaUnitasBoostTier(env(galaxy, true)), "touch");
-  assert.equal(metaUnitasBoostTier(env({ ...galaxy, hardwareConcurrency: 4, deviceMemory: 2 }, true)), "touch");
+  assert.equal(metaUnitasBoostTier(env(galaxy, true)), "high");
+  assert.equal(metaUnitasBoostTier(env({ ...galaxy, hardwareConcurrency: 4, deviceMemory: 2 }, true)), "high");
   assert.equal(
     metaUnitasBoostTier(
       env({ userAgent: "Mozilla/5.0 (Macintosh)", hardwareConcurrency: 10 }, false),
