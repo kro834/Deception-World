@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
 import { checkedUrl } from "./browser-guard.mjs";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8082");
 const engine = process.env.PW_ENGINE === "webkit" ? webkit : chromium;
@@ -48,6 +50,7 @@ async function prepare(page, record, direction) {
     await page.locator(record.link).first().click();
   } else {
     await page.locator(".side-panel-trigger").click();
+    await showMenuRow(page, `.side-panel-links a[href="${record.path}#${record.to}"]`);
     await page.locator(`.side-panel-links a[href="${record.path}#${record.to}"]`).click();
   }
   await page.waitForURL(`**${record.path}#${record.to}`);

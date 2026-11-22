@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
 import { checkedUrl } from "./browser-guard.mjs";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8082");
 const engine = process.env.PW_ENGINE || "chromium";
@@ -44,12 +46,14 @@ try {
     );
 
     await page.locator(".side-panel-trigger").click();
+    await showMenuRow(page, '.side-panel-links a[aria-current="page"]');
     await page.locator('.side-panel-links a[aria-current="page"]').click();
     await ready(page, "realm");
     assert.equal(new URL(page.url()).searchParams.get("archive"), "realm");
 
     // Leave through the real shared menu, then return through browser history.
     await page.locator(".side-panel-trigger").click();
+    await showMenuRow(page, '.side-panel-links a[href="/world#top"]');
     await page.locator('.side-panel-links a[href="/world#top"]').click();
     await page.waitForURL("**/world#top");
     await page.goBack();

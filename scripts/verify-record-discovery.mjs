@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 // Read-only against the server. Personal bookmark changes use an isolated
 // browser context only; this never posts an image or edits a public title.
@@ -397,6 +399,7 @@ try {
       const rect = panel.getBoundingClientRect();
       return rect.left >= -1 && rect.right <= innerWidth + 1;
     });
+    await showMenuRow(page, '.side-panel-links > [aria-current="location"]');
     const row = page.locator('.side-panel-links > [aria-current="location"]').first();
     await row.waitFor();
     assert.ok(

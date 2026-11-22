@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile } from "node:fs/promises";
 import { chromium, webkit, request } from "playwright";
 import { GALLERY_ARTWORKS } from "../src/components/gallery/gallery-data.ts";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const engine = process.env.PW_ENGINE || "chromium";
@@ -116,6 +118,7 @@ try {
     // Current-page menu entry is visible even though INFORMATION is low in
     // the long shared menu. Escape releases its inert tree and viewport lock.
     await page.locator(".side-panel-trigger").click();
+    await showMenuRow(page, '.side-panel-links a[href="/gallery"]');
     const menuEntry = page.locator('.side-panel-links a[href="/gallery"]');
     await menuEntry.waitFor({ state: "visible" });
     assert.equal(await menuEntry.getAttribute("aria-current"), "page");

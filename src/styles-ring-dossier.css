@@ -1291,12 +1291,6 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       background: linear-gradient(90deg, color-mix(in srgb, var(--ring-key) 80%, #fff), transparent);
     }
 
-    /* The reading bar is the orbit's double here: it steps aside while the
-       orbit is pinned in view, and returns for the full-width form records. */
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="form-records"])) > .dossier-reader {
-      display: none;
-    }
-
     /* 人物紹介 on a stage with room: the facts leave the reading column and
        stand round the figure as callouts, each on a leader line. The figure
        and its orbit are not pinned for this part, so the callouts (placed

@@ -28,7 +28,6 @@ import { Route as ManagersRouteImport } from './routes/managers'
 import { Route as MetaUnitasSagaRouteImport } from './routes/meta-unitas-saga'
 import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
-import { Route as RingProtoRouteImport } from './routes/ring-proto'
 import { Route as SagaCinemaRouteImport } from './routes/saga-cinema'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as TransformationLabRouteImport } from './routes/transformation-lab'
@@ -152,11 +151,6 @@ const RexonanceSagaRoute = RexonanceSagaRouteImport.update({
 const RidersRoute = RidersRouteImport.update({
   id: '/riders',
   path: '/riders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RingProtoRoute = RingProtoRouteImport.update({
-  id: '/ring-proto',
-  path: '/ring-proto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SagaCinemaRoute = SagaCinemaRouteImport.update({
@@ -326,7 +320,6 @@ export interface FileRoutesByFullPath {
   '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
-  '/ring-proto': typeof RingProtoRoute
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
   '/transformation-lab': typeof TransformationLabRoute
@@ -374,7 +367,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
-  '/ring-proto': typeof RingProtoRoute
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
   '/transformation-lab': typeof TransformationLabRoute
@@ -426,7 +418,6 @@ export interface FileRoutesById {
   '/meta-unitas-saga': typeof MetaUnitasSagaRoute
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/riders': typeof RidersRouteWithChildren
-  '/ring-proto': typeof RingProtoRoute
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
   '/transformation-lab': typeof TransformationLabRoute
@@ -479,7 +470,6 @@ export interface FileRouteTypes {
     | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/riders'
-    | '/ring-proto'
     | '/saga-cinema'
     | '/search'
     | '/transformation-lab'
@@ -527,7 +517,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/meta-unitas-saga'
     | '/rexonance-saga'
-    | '/ring-proto'
     | '/saga-cinema'
     | '/search'
     | '/transformation-lab'
@@ -578,7 +567,6 @@ export interface FileRouteTypes {
     | '/meta-unitas-saga'
     | '/rexonance-saga'
     | '/riders'
-    | '/ring-proto'
     | '/saga-cinema'
     | '/search'
     | '/transformation-lab'
@@ -630,7 +618,6 @@ export interface RootRouteChildren {
   MetaUnitasSagaRoute: typeof MetaUnitasSagaRoute
   RexonanceSagaRoute: typeof RexonanceSagaRoute
   RidersRoute: typeof RidersRouteWithChildren
-  RingProtoRoute: typeof RingProtoRoute
   SagaCinemaRoute: typeof SagaCinemaRoute
   SearchRoute: typeof SearchRoute
   TransformationLabRoute: typeof TransformationLabRoute
@@ -778,13 +765,6 @@ declare module '@tanstack/react-router' {
       path: '/riders'
       fullPath: '/riders'
       preLoaderRoute: typeof RidersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ring-proto': {
-      id: '/ring-proto'
-      path: '/ring-proto'
-      fullPath: '/ring-proto'
-      preLoaderRoute: typeof RingProtoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/saga-cinema': {
@@ -1095,7 +1075,6 @@ const rootRouteChildren: RootRouteChildren = {
   MetaUnitasSagaRoute: MetaUnitasSagaRoute,
   RexonanceSagaRoute: RexonanceSagaRoute,
   RidersRoute: RidersRouteWithChildren,
-  RingProtoRoute: RingProtoRoute,
   SagaCinemaRoute: SagaCinemaRoute,
   SearchRoute: SearchRoute,
   TransformationLabRoute: TransformationLabRoute,

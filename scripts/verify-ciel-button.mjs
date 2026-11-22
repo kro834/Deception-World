@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8197";
 const engine = process.env.PW_ENGINE === "webkit" ? "webkit" : "chromium";
@@ -85,6 +87,7 @@ try {
     assert.equal(await button.getAttribute("data-return-loading"), "false");
 
     await openMenu(page);
+    await showMenuRow(page, ".side-panel-zeus-toggle");
     const toggle = page.locator(".side-panel-zeus-toggle");
     assert.match(await toggle.innerText(), /シエルボタン/);
     assert.doesNotMatch(await toggle.innerText(), /ゼウスボタン/);

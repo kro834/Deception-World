@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+// 2026-11-23: the menu is an orbital dial; a row is shown once its region is chosen.
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
@@ -25,11 +27,13 @@ try {
       await page.goto(new URL("/world#story", base).href, { waitUntil: "domcontentloaded" });
       await pause(page);
       await openMenu(page);
+      await showMenuRow(page, '.side-panel-links a[href="/world#riders"]');
       await page.locator('.side-panel-links a[href="/world#riders"]').click();
       await page.waitForURL("**/world#riders");
       await pause(page);
       await openMenu(page);
       if (nested) {
+        await showMenuRow(page, ".side-panel-announcement-trigger");
         await page.locator(".side-panel-announcement-trigger").click();
         await page.waitForFunction(() => document.querySelector("#site-announcement-dialog")?.open);
       }
