@@ -184,12 +184,18 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
    3. Panels, plates and reading cards: ring cards.
    The corner ticks of the command deck give way to one continuous stroke.
    No overflow is set, so focus rings and long prose are never clipped.
+   The border widths are the command deck's own (1px; 2px on a reading
+   card's top): several of these hold a form slider or stand inside a
+   suit-up chapter, whose geometry and scroll length must not move by a
+   pixel. An inset line doubles the stroke without taking layout.
+   Rexonance and Extreme paint these plates from their own editions and
+   are left to them here: they take the ring's cut only (3b).
    --------------------------------------------------------------- */
 
 @media (forced-colors: none) {
   html[data-family="special"]
     body
-    #top.rxs-page[data-command-special]:not(#ring-b)
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
     :is(
       .rxs-comparison,
       .rxs-p14-comparator,
@@ -202,19 +208,20 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .mus-stage-switcher,
       .fst-story-layout
     ) {
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     border-radius: var(--ring-radius-card);
     background:
       var(--cs-face) padding-box,
       var(--ring-prism) border-box;
     box-shadow:
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.3),
       0 22px 44px -18px rgb(0 0 0 / 0.9),
       0 0 30px -12px rgb(var(--cs-key-rgb) / 0.3);
   }
 
   html[data-family="special"]
     body
-    #top.rxs-page[data-command-special]:not(#ring-b)
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
     :is(
       .rxs-specs > div,
       .ffs-specs > div,
@@ -226,17 +233,19 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .mus-weapons > li,
       .rxs-headline-metrics > article
     ) {
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     border-radius: 22px;
     background:
       var(--cs-face) padding-box,
       var(--ring-prism) border-box;
-    box-shadow: 0 14px 30px -16px rgb(0 0 0 / 0.9);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.24),
+      0 14px 30px -16px rgb(0 0 0 / 0.9);
   }
 
   html[data-family="special"]
     body
-    #top.rxs-page[data-command-special]:not(#ring-b)
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
     :is(
       .rxs-system-grid > article,
       .ffs-articles > article,
@@ -245,7 +254,8 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .ics-evaluations > article,
       .mus-article
     ) {
-    border: 2px solid transparent;
+    border: 1px solid transparent;
+    border-top-width: 2px;
     border-radius: var(--ring-radius-card);
     background:
       var(--cs-face) padding-box,
@@ -297,10 +307,10 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   /* The chapter doors under a hero: keys become ring nodes' pills. */
   html[data-family="special"]
     body
-    #top.rxs-page[data-command-special]:not(#ring-b)
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
     .rxs-chapter-index
     a {
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     border-radius: var(--ring-radius-pill);
     clip-path: none;
     background:
@@ -349,6 +359,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .rxs-system-grid > article,
       .rxs-specs > div,
       .rxs-comparison-metrics > article,
+      .rxs-headline-metrics > article,
       .rxs-comparison-result,
       .rxs-comparison-note,
       .rxs-p14-method-note,
@@ -366,7 +377,13 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   html[data-family="special"]
     body
     #top.rxs-page[data-command-special]:not(#ring-b)
-    :is(.exs-opponent-options button, .rxs-scroll-cue, .exs-core-flow span, .rxs-p14-values span) {
+    :is(
+      .exs-opponent-options button,
+      .rxs-scroll-cue,
+      .rxs-chapter-index a,
+      .exs-core-flow span,
+      .rxs-p14-values span
+    ) {
     border-radius: var(--ring-radius-pill) !important;
     clip-path: none !important;
   }
@@ -709,11 +726,10 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .poster-c
   border-radius: 50%;
 }
 
+/* An inset ring, not a border: the chosen number must not change size. */
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .chapter-switch button[aria-pressed="true"] {
-  background:
-    var(--rb-lens) padding-box,
-    var(--ring-prism) border-box;
-  border: 2px solid transparent;
+  background: var(--rb-lens);
+  box-shadow: inset 0 0 0 2px var(--saga-accent);
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.poster-controls, .auto-play, .desktop-nav) {
@@ -740,8 +756,13 @@ html[data-family="special"]
 html[data-family="special"]
   body
   .saga-cinema.saga-cinema:not(#ring-b)
-  :is(.project-data, .information-content, .hero-poster, .visual-feature, .intro-copy) {
+  :is(.project-data, .information-content, .intro-copy) {
   border-radius: var(--ring-radius-card);
+}
+
+/* Artwork stays rectangular: the smaller corner. */
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero-poster, .visual-feature) {
+  border-radius: 18px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
