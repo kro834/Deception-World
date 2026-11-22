@@ -276,7 +276,6 @@ html[data-family="utility"] body
     .wm-footer a,
     .lab-topbar a,
     .lab-field-label,
-    .lab-chips,
     .lab-chips > button,
     .lab-mobile-switch > button,
     .lab-transport > button,
@@ -313,8 +312,15 @@ html[data-family="utility"] body
 }
 
 html[data-family="utility"] body
-  :is(.wm-search-shell, .lab-form-name, .lab-zoom, .export-page > small):not(#ring-x#ring-x) {
-  border-radius: 22px !important;
+  :is(
+    .wm-search-shell,
+    .lab-form-name,
+    .lab-zoom,
+    .lab-chips,
+    .export-page > small
+  ):not(#ring-x#ring-x) {
+  /* 26px, not a pill: these tracks wrap to two rows on a phone. */
+  border-radius: 26px !important;
   clip-path: none !important;
 }
 
@@ -590,6 +596,8 @@ html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) > i {
   }
 
   html[data-family="archive"] body .dogs-ring-node > button > span {
+    max-width: none;
     font-size: 10.5px;
+    white-space: nowrap;
   }
 }

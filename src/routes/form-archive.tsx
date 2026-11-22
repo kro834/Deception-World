@@ -433,11 +433,7 @@ function FormArchive() {
       data-archive-kind={archive}
       data-archive-ready={loaded ? "true" : "false"}
     >
-      <header
-        ref={toolbarRef}
-        className="form-archive-toolbar"
-        aria-label="フォームアーカイブ操作"
-      >
+      <header className="form-archive-toolbar" aria-label="フォームアーカイブ操作" ref={toolbarRef}>
         <div
           ref={switcherRef}
           id="archive-switcher"

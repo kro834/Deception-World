@@ -532,7 +532,7 @@ export function LibraryPage({
             }}
           />
           <i className="ring-divider ring-enter" aria-hidden="true" />
-          {/* Ring system (2026-11-23): the five kinds have no first or last,
+          {/* Ring system (2026-11-23): the kinds have no first or last,
               so they sit on one orbit around their heading. Each node is a
               wrapper (the orbit places it with a transform); the button
               inside keeps its own press and focus. */}

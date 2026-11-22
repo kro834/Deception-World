@@ -4,7 +4,7 @@
    Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
    アニメーションにして」, and: be much bolder than phase 1.
 
-   /library  the hero picture sits in a round window inside a halo; the five
+   /library  the hero picture sits in a round window inside a halo; the
              kinds are one orbit around their heading; the eight riders are
              one orbit around theirs; every panel, card and control is cut
              from circles (28px cards, pills, round marks).
@@ -297,7 +297,7 @@ html[data-family="library"] body .library-hero > .library-screen > .ring-halo {
 }
 
 /* ---------------------------------------------------------------
-   3. /library kinds: five kinds on one orbit around their heading.
+   3. /library kinds: the kinds on one orbit around their heading.
    --------------------------------------------------------------- */
 
 html[data-family="library"] body .ring-kinds:not(#ring-x#ring-x),
@@ -789,6 +789,25 @@ html[data-family="library"] body .search-ring button[aria-pressed="true"] > span
   html[data-family="library"] body .library-topbar-actions > span:not(#ring-x#ring-x) {
     white-space: nowrap;
     writing-mode: horizontal-tb;
+  }
+}
+
+/* Phones: all eight names begin 仮面ライダー, and two lines under each
+   portrait would run into the next rider on the ring. The shared first word
+   is kept for assistive technology and hidden from view; the ring's heading
+   (八人のライダー) says it once. */
+@media (max-width: 480px) {
+  html[data-family="library"] body .ring-cast-name .name-word:first-child:not(:only-child) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  html[data-family="library"] body .ring-cast-name {
+    font-size: 11px;
   }
 }
 
