@@ -1071,6 +1071,19 @@ html[data-family="special"]
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  /* A touch gets the same answer a mouse does (owner, 2026-11-23: phones
+     keep the PC's quality): the face sinks under the finger and springs
+     back on release. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node:not(.is-on):active
+    > .ring-frame {
+    scale: 0.92;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
