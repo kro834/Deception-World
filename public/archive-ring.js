@@ -1,8 +1,8 @@
 /* Archive ring bridge (2026-11-23). The /form-archive page does not scroll:
    this sandboxed document does. The page's topbar ring shows how far down
    the archive the reader is, so this deferred script reports the document's
-   scroll progress (0..1) to the page, at most once a frame and only when the
-   value changes. It reads layout once per frame, writes nothing here and
+   scroll progress (0..1, in steps of 0.01) to the page, at most once a frame
+   and only when the step changes. It reads layout once per frame, writes nothing here and
    never blocks input (passive listeners). Only the page's own frame is
    answered by the page (it checks the sender). */
 (() => {
@@ -21,7 +21,7 @@
     const scroller = document.scrollingElement || html;
     const max = scroller.scrollHeight - scroller.clientHeight;
     const progress =
-      max > 0 ? Math.round(Math.min(1, Math.max(0, scroller.scrollTop / max)) * 1000) / 1000 : 0;
+      max > 0 ? Math.round(Math.min(1, Math.max(0, scroller.scrollTop / max)) * 100) / 100 : 0;
     if (progress === last) return;
     last = progress;
     window.parent.postMessage({ type: PROGRESS_MESSAGE, kind, progress }, "*");

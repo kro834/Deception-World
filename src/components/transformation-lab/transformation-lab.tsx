@@ -422,9 +422,10 @@ export function TransformationLab() {
           </div>
           {/* Ring system (2026-11-23): the stages of one suit-up are nodes on
               one ring (chrome only: the engine is not touched). The ring in
-              the centre is lit by the progress the slider already shows
-              (--lab-progress on the page root). Each node is a wrapper,
-              placed by the orbit; the button keeps its own press. */}
+              the centre is lit up to the stage in progress: it changes only
+              when the stage does, so nothing repaints per frame beside the
+              engine. Each node is a wrapper, placed by the orbit; the button
+              keeps its own press. */}
           <div
             className="lab-ring ring-orbit ring-orbit-keep ring-enter"
             role="group"
@@ -432,7 +433,15 @@ export function TransformationLab() {
             style={{ "--ring-n": LAB_BEATS.length } as CSSProperties}
           >
             <span className="ring-orbit-track" aria-hidden="true" />
-            <span className="lab-ring-core" aria-hidden="true" />
+            <span
+              className="lab-ring-core"
+              aria-hidden="true"
+              style={
+                {
+                  "--ring-p": (LAB_BEATS.indexOf(currentBeat) / (LAB_BEATS.length - 1)).toFixed(4),
+                } as CSSProperties
+              }
+            />
             {LAB_BEATS.map((beat, index) => (
               <span
                 key={beat.at}

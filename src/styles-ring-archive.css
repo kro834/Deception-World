@@ -16,7 +16,7 @@
                         panels, controls and index join the ring's material.
    /transformation-lab  chrome only (the suit-up engine is never selected):
                         the stages of the suit-up are one orbit around a ring
-                        lit by the progress the slider shows.
+                        lit up to the stage in progress.
    /download            the sigil is a ring inside a halo; the card and its
                         controls are cut from circles.
 
@@ -344,8 +344,9 @@ html[data-family="utility"] body .lab-ring > .ring-orbit-track {
   border-color: rgb(var(--ring-key-rgb) / 0.36);
 }
 
-/* The centre: a ring lit by the suit-up's progress (--lab-progress is set
-   on the page root by the lab itself). */
+/* The centre: a ring lit up to the stage in progress (--ring-p, written by
+   the lab only when the stage changes: no per-frame repaint beside the
+   engine). */
 html[data-family="utility"] body .lab-ring > .lab-ring-core {
   position: absolute;
   inset: calc(var(--ring-item) + 20px);
@@ -373,9 +374,9 @@ html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
   background: conic-gradient(
     from 0deg,
     var(--ring-key) 0turn,
-    var(--ring-pink) calc(var(--lab-progress, 0) * 0.6turn),
-    var(--ring-gold) calc(var(--lab-progress, 0) * 1turn),
-    transparent calc(var(--lab-progress, 0) * 1turn)
+    var(--ring-pink) calc(var(--ring-p, 0) * 0.6turn),
+    var(--ring-gold) calc(var(--ring-p, 0) * 1turn),
+    transparent calc(var(--ring-p, 0) * 1turn)
   );
 }
 

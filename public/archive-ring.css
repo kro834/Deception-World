@@ -6,9 +6,11 @@
    Realm share these classes), after every archive sheet and before
    archive-labels.css, which stays last.
 
-   Additive and paint-only. It changes corner radii, the stroke of a few
-   marks and how two surfaces open. It never changes a box's size, order,
-   overflow or scrolling, so the archive keeps its invariants: one scroller
+   Additive. It changes corner radii, the stroke of a few marks and how two
+   surfaces open. One mark changes its box: the selected form's index
+   (01/22) becomes a 46px ring in its own row, which stays 46px tall. No
+   other box changes size, and nothing changes order, overflow or
+   scrolling, so the archive keeps its invariants: one scroller
    (the document), the chip order, the comparison's row parity and the
    runtime art swap. Nothing is moved or re-parented and no text is touched.
 
@@ -239,13 +241,24 @@ html[data-embedded-archive] .telemetry-state:nth-child(22) { --ring-p: calc(22 /
     }
   }
 
-  /* The picture viewer: its inner sheet springs open from the centre. */
-  html[data-embedded-archive] dialog.image-lightbox[open] .lightbox-inner {
-    animation: archive-ring-unfold 700ms var(--ring-spring-bounce) backwards;
+  /* The picture viewer: the plate keeps its own fade (the archive's script
+     owns it); its bar and its picture spring in after it, 60 ms apart. */
+  html[data-embedded-archive]
+    dialog.image-lightbox[open]
+    :is(.lightbox-bar, .lightbox-image-wrap):not(#ring-x#ring-x#ring-x) {
+    animation: archive-ring-unfold 700ms var(--ring-spring-bounce) 60ms backwards;
+  }
+
+  html[data-embedded-archive]
+    dialog.image-lightbox[open]
+    .lightbox-image-wrap:not(#ring-x#ring-x#ring-x) {
+    animation-delay: 120ms;
   }
 
   /* The chosen form's ring settles when the selection changes. */
-  html[data-embedded-archive] .telemetry-state.is-current .telemetry-index {
+  html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+    .telemetry-state.is-current
+    .telemetry-index:not(#ring-x#ring-x) {
     animation: archive-ring-unfold 700ms var(--ring-spring-bounce) backwards;
   }
 }

@@ -374,7 +374,7 @@ function FormArchive() {
       if (!Number.isFinite(progress)) return;
       toolbar.style.setProperty(
         "--ring-archive-p",
-        Math.min(1, Math.max(0, progress)).toFixed(3),
+        Math.min(1, Math.max(0, progress)).toFixed(2),
       );
     };
     window.addEventListener("message", keepArchiveProgress);

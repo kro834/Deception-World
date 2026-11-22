@@ -491,7 +491,9 @@ export function WorldMap({
             data-kind={selected.kind}
             aria-label="選択中の資料"
           >
-            <div className="wm-detail-head">
+            {/* Keyed by the node (ring system, 2026-11-23): each newly chosen
+                record's heading mounts again, so it unfolds on the bounce. */}
+            <div className="wm-detail-head" key={selected.id}>
               <span className="wm-eyebrow" data-kind={selected.kind}>
                 {MAP_KINDS[selected.kind]}
               </span>
