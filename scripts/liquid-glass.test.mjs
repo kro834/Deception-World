@@ -158,11 +158,10 @@ test("motion, economy, forced colours and touch budgets", () => {
   const forced = css.match(/@media \(forced-colors: active\) \{[\s\S]*?\n\}\n/)[0];
   assert.match(forced, /backdrop-filter: none !important/);
   assert.match(forced, /box-shadow: none !important/);
-  // Touch: a smaller blur.
-  assert.match(
-    css,
-    /@media \(pointer: coarse\) \{\n {2}html\[data-button-style="liquid"\] \{\n {4}--lg-blur: 6px;/,
-  );
+  // Touch: the PC blur (2026-11-23, owner: phones equal PC in high quality
+  // mode). Only economy has a smaller one.
+  assert.doesNotMatch(css, /@media \(pointer: coarse\) \{\s*html\[data-button-style="liquid"\]/);
+  assert.match(css, /html\[data-button-style="liquid"\]\[data-world-effects="economy"\] \{\s*--lg-blur: 6px;/);
   // The iPad compact launcher and the phone-landscape trigger keep their own shells.
   const flat = css.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
   const all = flat.split(".side-panel-trigger").length - 1;

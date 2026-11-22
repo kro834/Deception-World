@@ -57,7 +57,9 @@ test("the React side menu owns its state without a second vanilla controller", (
   assert.match(panelStyles, /\.side-panel > \.liquid-pointer-glow/);
   assert.match(panelStyles, /\.side-panel\[data-liquid-pointer\]\s*\{\s*position:\s*fixed/);
   assert.match(panelStyles, /\.side-panel-trigger\[aria-expanded="true"\]/);
-  assert.match(panelStyles, /@media \(pointer: coarse\)[\s\S]*?\.side-panel > \.liquid-pointer-glow/);
+  // 2026-11-23 (owner: phones equal PC in high quality mode): touch screens
+  // keep the panel's pointer glow, so no coarse rule hides it.
+  assert.doesNotMatch(panelStyles, /@media \(pointer: coarse\) \{\s*\.side-panel > \.liquid-pointer-glow/);
 });
 
 test("the open side menu owns vertical panning without leaking to the page", () => {

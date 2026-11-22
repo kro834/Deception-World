@@ -250,16 +250,13 @@ html[data-mode="world"] .episode-card:focus-visible {
   }
 }
 
+/* 2026-11-23 (owner: phones equal PC in high quality mode): this block keeps
+   only layout fitting. The orbs' smaller blur and slower drift, the frozen
+   cards and the frozen sovereign aura are gone; phones run the PC effects
+   (the orbs are a pre-rendered gradient now, styles-world/01.css). */
 @media (max-width: 840px), (pointer: coarse) {
   .ambient-orb {
-    width: 30rem;
-    height: 30rem;
-    filter: blur(76px);
-    animation-duration: 26s;
-  }
-
-  .signal {
-    animation: none;
+    --orb-size: 30rem;
   }
 
   .manager-archive-tabs button,
@@ -275,15 +272,6 @@ html[data-mode="world"] .episode-card:focus-visible {
   .sovereign-status-copy small,
   .sovereign-status-copy p {
     font-size: 8px;
-  }
-
-  .is-sovereign .manager-portrait-column::before,
-  .sovereign-aura > i:nth-child(2),
-  .sovereign-aura > i:nth-child(3),
-  .sovereign-portrait-effects > i,
-  .sovereign-status::after,
-  .sovereign-emblem > i {
-    animation: none !important;
   }
 }
 

@@ -286,6 +286,9 @@ html[data-world-effects="economy"] .grain {
   display: none;
 }
 
+/* 2026-11-23 (owner: phones equal PC in high quality mode): the orbs, the
+   key-art backdrop, the sheen/corner/trigger-ring loops and the pointer glow
+   keep their PC look on phones; only layout fitting stays here. */
 @media (max-width: 840px), (pointer: coarse) {
   .section-index {
     margin-bottom: clamp(42px, 9vw, 62px);
@@ -293,28 +296,6 @@ html[data-world-effects="economy"] .grain {
 
   .section-index small::after {
     display: none;
-  }
-
-  .ambient-orb {
-    filter: blur(64px);
-    animation: none;
-  }
-
-  .hero-backdrop-layer img {
-    filter: blur(22px) saturate(112%);
-    animation: none;
-  }
-
-  .poster-sheen::after,
-  .corner::before,
-  .side-panel-trigger-ring::before {
-    animation: none;
-  }
-
-  .liquid-pointer-glow {
-    width: 112px;
-    height: 112px;
-    filter: none;
   }
 
   .poster-back-card-3,

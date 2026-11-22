@@ -49,7 +49,10 @@
     radial-gradient(ellipse at 57% 46%, transparent 18%, rgb(14 42 25 / 0.12) 48%, transparent 67%),
     radial-gradient(ellipse at 82% 73%, rgb(7 26 17 / 0.18), transparent 38%),
     radial-gradient(ellipse at 18% 24%, rgb(16 39 25 / 0.13), transparent 42%);
-  filter: blur(19px);
+  /* 2026-11-23: no blur(19px) on this drifting full-screen layer; its three
+     ellipses are already soft-edged gradients, so the blur barely showed and
+     cost a filter pass every frame. Touch screens and PC now draw the same
+     smoke. */
   opacity: 0.72;
   animation: ci-smoke-drift var(--ci-duration) ease-in-out both;
 }
@@ -268,15 +271,8 @@
     max-width: 110px;
   }
 }
-/* Retain the same composition without large filtered surfaces on touch GPUs. */
-@media (any-pointer: coarse) {
-  .ciel-inferno::after {
-    filter: none;
-  }
-  .ciel-inferno-dragon img {
-    filter: drop-shadow(0 0 18px rgb(90 237 82 / 0.18));
-  }
-}
+/* 2026-11-23 (owner: phones equal PC in high quality mode): touch GPUs keep
+   the PC filters here; the lightweight renderer has its own path. */
 .ciel-inferno[data-renderer="2d"]::after {
   filter: none;
 }

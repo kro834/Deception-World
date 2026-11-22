@@ -51,7 +51,12 @@ function harness({
   const doc = {
     ...listeners(),
     hidden: false,
-    documentElement: { hasAttribute: () => android },
+    // 2026-11-23 (owner: phones equal PC in high quality mode): press-only
+    // tracking is lightweight Android's, so the Android harness is economy.
+    documentElement: {
+      hasAttribute: () => android,
+      dataset: { worldEffects: android ? "economy" : undefined },
+    },
   };
   let serial = 0;
   let cleanup;
