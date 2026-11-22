@@ -1,6 +1,7 @@
 import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
+import ringSpecialCssUrl from "@/styles-ring-special.css?url";
 import { FarFromSaga } from "@/components/far-from-saga/far-from-saga";
 import {
   WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
@@ -68,6 +69,10 @@ export const Route = createFileRoute("/far-from-saga")({
       { rel: "stylesheet", href: formSliderCssUrl },
       { rel: "stylesheet", href: visualAstraCssUrl },
       { rel: "stylesheet", href: commandSpecialCssUrl },
+      // The ring system on the special sites (2026-11-23): pill bar, chapter
+      // rings, ring cards, springing disclosures. After every edition sheet;
+      // only the cinematic skin follows it.
+      { rel: "stylesheet", href: ringSpecialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       { rel: "stylesheet", href: farFromExhibitionCssUrl },
       {

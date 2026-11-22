@@ -140,6 +140,9 @@ export function IllusionculumComparison({
         <p className="ics-partners" lang="en">
           {partners}
         </p>
+        <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+          <b />
+        </i>
       </header>
       {/* The page's form, chosen here too: its rows light in its colour. */}
       <div className="ics-compare-pick rxs-reveal" role="group" aria-label="比較する形態">

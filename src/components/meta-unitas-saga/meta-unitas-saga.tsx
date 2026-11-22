@@ -395,6 +395,9 @@ export function MetaUnitasSaga() {
           >
             <header className="mus-head rxs-reveal">
               <h2 id="mus-overview-title">概要</h2>
+              <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+                <b />
+              </i>
             </header>
             <div className="mus-overview-body">
               <Lead body={META_UNITAS_SAGA.overview} className="mus-overview-copy rxs-reveal" />
@@ -419,6 +422,9 @@ export function MetaUnitasSaga() {
           >
             <header className="mus-head rxs-reveal">
               <h2 id="mus-performance-title">{jp(META_UNITAS_PERFORMANCE.title)}</h2>
+              <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+                <b />
+              </i>
             </header>
             <MetaUnitasPerformance stage={stage} onChoose={chooseQuietly} />
           </section>
@@ -432,6 +438,9 @@ export function MetaUnitasSaga() {
       <section id="stages" className="mus-chapter mus-stages" aria-labelledby="mus-stages-title">
         <header className="mus-head rxs-reveal">
           <h2 id="mus-stages-title">形態段階</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div
           className="mus-stage-switcher rxs-reveal"
@@ -514,6 +523,9 @@ export function MetaUnitasSaga() {
       <section id="armor" className="mus-chapter mus-armor" aria-labelledby="mus-armor-title">
         <header className="mus-head rxs-reveal">
           <h2 id="mus-armor-title">装甲・支援機構</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={META_UNITAS_SAGA.armor} label="装甲・支援機構" variant="armor" />
       </section>
@@ -522,6 +534,9 @@ export function MetaUnitasSaga() {
       <section id="arsenal" className="mus-chapter mus-arsenal" aria-labelledby="mus-arsenal-title">
         <header className="mus-head rxs-reveal">
           <h2 id="mus-arsenal-title">専用武装</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <ul className="mus-weapons rxs-reveal" aria-label="専用武装">
           {META_UNITAS_SAGA.arsenal.map((weapon) => (
@@ -542,6 +557,9 @@ export function MetaUnitasSaga() {
       >
         <header className="mus-head rxs-reveal">
           <h2 id="mus-abilities-title">固有能力</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={META_UNITAS_SAGA.abilities} label="固有能力" variant="ability" />
       </section>
@@ -552,6 +570,9 @@ export function MetaUnitasSaga() {
       >
         <header className="mus-head rxs-reveal">
           <h2 id="mus-system-title">基幹システム</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={META_UNITAS_SAGA.systems} label="基幹システム" variant="system" />
       </section>
@@ -562,6 +583,9 @@ export function MetaUnitasSaga() {
       >
         <header className="mus-head rxs-reveal">
           <h2 id="mus-finishers-title">必殺技</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="mus-finisher-list">
           {META_UNITAS_SAGA.finishers.map((finisher, index) => (
