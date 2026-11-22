@@ -1,8 +1,0 @@
-/* ================================================================
-   The ring system on the character files (2026-11-23): riders, 六詠 and
-   related characters (html[data-family="dossier"]).
-   Linked from src/lib/world-head.ts ahead of each list's pinned tail, so
-   every rule here carries its own weight (:not(#ring-x) adds an id's
-   weight and matches everything) instead of relying on sheet order.
-   Motion gates as in styles-ring.css.
-   ================================================================ */

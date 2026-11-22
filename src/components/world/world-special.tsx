@@ -65,7 +65,9 @@ export const WorldContents = memo(function WorldContents() {
   return (
     <nav className="ws-contents" aria-labelledby="ws-contents-title">
       <h2 id="ws-contents-title">目次</h2>
-      <ol className="ws-map">
+      {/* The ring system (2026-11-23): the six chapters sit on one ring around
+          the heading; ring-enter lets the ring turn into place when seen. */}
+      <ol className="ws-map ring-enter">
         {CHAPTERS.map(({ href, no, phase, title, image }) => (
           <li key={href} data-phase={phase}>
             <a href={href}>
@@ -195,7 +197,7 @@ const DOORS = [
 /** The end of the record: the doors to the three special sites. */
 export function WorldSpecialDoors() {
   return (
-    <nav className="ws-doors" aria-label="特設サイト">
+    <nav className="ws-doors ring-enter" aria-label="特設サイト">
       {DOORS.map(({ to, edition, name, art, size, assets }) => (
         <GuardedLink key={to} to={to} hash="top" assets={assets} className={`is-${edition}`}>
           <img
