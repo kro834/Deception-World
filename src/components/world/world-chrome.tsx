@@ -9,6 +9,7 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from "react";
+import { flushSync } from "react-dom";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { DisplayName } from "@/components/name-text";
@@ -202,6 +203,48 @@ const COMMAND_ATLAS_SCENES: Record<string, { title: string; image: string }> = {
   },
   "final-stage": { title: "FINAL STAGE", image: "/final-stage-logo-delivery-640.webp" },
 };
+
+// The orbital navigator (2026-11-23, owner: 「m1 d1で。」). The menu's seven
+// regions are planets on one dial; the region at the focus point shows its
+// groups. A region owns one or more of the atlas groups below; every group,
+// row and string of the menu is unchanged.
+const ORBIT_REGIONS = [
+  ["find", "資料"],
+  ["sections", "ページ内"],
+  ["special", "サーガ"],
+  ["stories", "物語"],
+  ["riders", "人物"],
+  ["information", "ギャラリー・お知らせ"],
+  ["system", "設定"],
+] as const;
+const ORBIT_REGION_OF_GROUP: Record<string, string> = {
+  rikuei: "riders",
+  related: "riders",
+  unmanaged: "riders",
+};
+const ORBIT_STEP_DEG = 360 / ORBIT_REGIONS.length;
+// A drag turns the dial once the pointer has swept this far round it.
+const ORBIT_DRAG_SLOP_DEG = 4;
+const ORBIT_WHEEL_LOCK_MS = 160;
+// The first open of a session nudges the dial a little and lets it spring
+// back: the rim's far planets peek in, so the dial reads as something that
+// turns without a caption.
+const ORBIT_NUDGE_KEY = "dw-orbit-nudge";
+const ORBIT_NUDGE_TURN = 0.3;
+const ORBIT_NUDGE_AFTER_MS = 620;
+const ORBIT_NUDGE_HOLD_MS = 300;
+// Side layout: rows hug the circle through their column's edge, never
+// closer to the planets than this, and never pulled in further than MAX.
+const ORBIT_HUG_MIN_GAP_PX = 96;
+const ORBIT_HUG_MAX_PX = 96;
+// The side layout's media query (styles-ring-chrome.css, section 3).
+const ORBIT_SIDE_LAYOUT =
+  "(min-width: 1020px), (min-width: 640px) and (max-height: 560px)";
+
+// Test doubles of `window` have no matchMedia; the menu then lays out as if
+// the query did not match.
+const orbitMedia = (query: string) =>
+  typeof window.matchMedia === "function" && window.matchMedia(query).matches;
 
 const SIDE_MENU_OPEN_INPUT_EVENT = "deception-world:side-menu-open-input";
 
@@ -567,6 +610,211 @@ export function SideMenuLayer({
     : pathname === "/characters/dante"
       ? { title: "ダンテ／ヴァルグ", image: "/character-dante-thumb.webp" }
       : (menuPage ?? COMMAND_ATLAS_SCENES[context]);
+  // `orbitTurn` is unbounded, so the dial always takes the short way round;
+  // `orbitDrag` is the fractional position while a finger holds the dial.
+  const [orbitTurn, setOrbitTurn] = useState(1);
+  const [orbitDrag, setOrbitDrag] = useState<number | null>(null);
+  const orbitDialRef = useRef<HTMLElement>(null);
+  const orbitPointerRef = useRef<{
+    id: number;
+    angle: number;
+    turn: number;
+    moved: boolean;
+  } | null>(null);
+  const orbitWheelLockRef = useRef(0);
+  const orbitShown = orbitDrag ?? orbitTurn;
+  const orbitIndex =
+    ((Math.round(orbitShown) % ORBIT_REGIONS.length) + ORBIT_REGIONS.length) %
+    ORBIT_REGIONS.length;
+  const orbitRegion = ORBIT_REGIONS[orbitIndex][0];
+  const turnOrbitTo = (index: number) =>
+    setOrbitTurn((value) => {
+      const count = ORBIT_REGIONS.length;
+      let delta = (((index - value) % count) + count) % count;
+      if (delta > count / 2) delta -= count;
+      return Math.round(value + delta);
+    });
+  const orbitPointerAngle = (event: { clientX: number; clientY: number }) => {
+    const box = orbitDialRef.current!.getBoundingClientRect();
+    return (
+      (Math.atan2(
+        event.clientY - (box.top + box.height / 2),
+        event.clientX - (box.left + box.width / 2),
+      ) *
+        180) /
+      Math.PI
+    );
+  };
+  // The dial owns its own drag: it never starts the panel's swipe-to-close.
+  const onOrbitPointerDown = (event: PointerEvent<HTMLElement>) => {
+    event.stopPropagation();
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    orbitPointerRef.current = {
+      id: event.pointerId,
+      angle: orbitPointerAngle(event),
+      turn: orbitTurn,
+      moved: false,
+    };
+  };
+  const onOrbitPointerMove = (event: PointerEvent<HTMLElement>) => {
+    const state = orbitPointerRef.current;
+    if (!state || state.id !== event.pointerId) return;
+    event.stopPropagation();
+    let delta = orbitPointerAngle(event) - state.angle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    if (!state.moved && Math.abs(delta) < ORBIT_DRAG_SLOP_DEG) return;
+    if (!state.moved) {
+      state.moved = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    setOrbitDrag(state.turn - delta / ORBIT_STEP_DEG);
+  };
+  const onOrbitPointerEnd = (event: PointerEvent<HTMLElement>) => {
+    const state = orbitPointerRef.current;
+    if (!state || state.id !== event.pointerId) return;
+    event.stopPropagation();
+    orbitPointerRef.current = null;
+    if (!state.moved) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    setOrbitDrag((value) => {
+      if (value !== null) setOrbitTurn(Math.round(value));
+      return null;
+    });
+  };
+  // A drag that ends on a planet must not also choose it.
+  const onOrbitClickCapture = (event: MouseEvent<HTMLElement>) => {
+    if (orbitDrag === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+  };
+  const onOrbitKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    const count = ORBIT_REGIONS.length;
+    const next =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? (orbitIndex + 1) % count
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? (orbitIndex + count - 1) % count
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? count - 1
+              : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    turnOrbitTo(next);
+    orbitDialRef.current
+      ?.querySelector<HTMLElement>(`#command-atlas-tab-${ORBIT_REGIONS[next][0]}`)
+      ?.focus({ preventScroll: true });
+  };
+  useEffect(() => {
+    const dial = orbitDialRef.current;
+    if (!dial || !isOpen) return;
+    // The wheel over the dial turns it one detent at a time.
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const now = performance.now();
+      if (now < orbitWheelLockRef.current || Math.abs(event.deltaY) < 8) return;
+      orbitWheelLockRef.current = now + ORBIT_WHEEL_LOCK_MS;
+      setOrbitTurn((value) => Math.round(value) + Math.sign(event.deltaY));
+    };
+    dial.addEventListener("wheel", onWheel, { passive: false });
+    return () => dial.removeEventListener("wheel", onWheel);
+  }, [isOpen]);
+  // The menu opens on the region the reader is in: the page's own row when a
+  // row is current, else this page's sections.
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    const panel = panelRef.current;
+    const group = panel
+      ?.querySelector<HTMLElement>(
+        '.side-panel-group a[aria-current="page"], .side-panel-group a[aria-current="location"]',
+      )
+      ?.closest<HTMLElement>(".side-panel-group")?.dataset?.atlasGroup;
+    const region = group ? (ORBIT_REGION_OF_GROUP[group] ?? group) : "sections";
+    const index = ORBIT_REGIONS.findIndex(([id]) => id === region);
+    setOrbitDrag(null);
+    setOrbitTurn(index < 0 ? 1 : index);
+  }, [isOpen, pathname]);
+  // First open of a session: one springy nudge (never under reduced motion
+  // or in economy, where the dial does not move at all).
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+    const calm =
+      orbitMedia("(prefers-reduced-motion: reduce)") ||
+      document.documentElement.dataset?.worldEffects === "economy";
+    if (calm) return;
+    try {
+      if (window.sessionStorage.getItem(ORBIT_NUDGE_KEY) === "1") return;
+      window.sessionStorage.setItem(ORBIT_NUDGE_KEY, "1");
+    } catch {
+      return;
+    }
+    let back = 0;
+    const out = window.setTimeout(() => {
+      if (orbitPointerRef.current) return;
+      setOrbitDrag(null);
+      setOrbitTurn((value) => value + ORBIT_NUDGE_TURN);
+      back = window.setTimeout(
+        () => setOrbitTurn((value) => Math.round(value - ORBIT_NUDGE_TURN)),
+        ORBIT_NUDGE_HOLD_MS,
+      );
+    }, ORBIT_NUDGE_AFTER_MS);
+    return () => {
+      window.clearTimeout(out);
+      window.clearTimeout(back);
+      setOrbitTurn((value) => Math.round(value));
+    };
+  }, [isOpen]);
+  // Desktop: each row of the region in view hugs the dial's curve. Measured
+  // once per region (and on resize), written as one custom property per row;
+  // the rows move by `translate` only.
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    const dial = orbitDialRef.current;
+    if (!panel || !dial || !isOpen) return;
+    const place = () => {
+      const rows = panel.querySelectorAll<HTMLElement>(
+        ".side-panel-group .side-panel-links > *, .side-panel-group .command-atlas-scene",
+      );
+      const wide = orbitMedia(ORBIT_SIDE_LAYOUT);
+      const box = dial.getBoundingClientRect();
+      const centre = box.top + box.height / 2;
+      // The rows hug the circle that passes through their column's edge.
+      const first = Array.from(rows).find((row) => row.getClientRects().length > 0);
+      const edge = first?.closest<HTMLElement>(".side-panel-group")?.getBoundingClientRect().left;
+      const radius = Math.max(
+        box.width / 2 + ORBIT_HUG_MIN_GAP_PX,
+        (edge ?? 0) - (box.left + box.width / 2),
+      );
+      for (const row of rows) {
+        if (!wide || row.getClientRects().length === 0) {
+          row.style.removeProperty("--orbit-hug");
+          continue;
+        }
+        const rect = row.getBoundingClientRect();
+        const y = Math.min(radius - 1, Math.abs(rect.top + rect.height / 2 - centre));
+        const hug = radius - Math.sqrt(radius ** 2 - y ** 2);
+        row.style.setProperty("--orbit-hug", `${(-Math.min(hug, ORBIT_HUG_MAX_PX)).toFixed(1)}px`);
+      }
+    };
+    place();
+    // Rows that arrive after this pass (the page's chapters, RE DIVE) and a
+    // scrolled list keep to the curve too.
+    let frame = window.requestAnimationFrame(place);
+    const onScroll = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(place);
+    };
+    window.addEventListener("resize", onScroll);
+    panel.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", onScroll);
+      panel.removeEventListener("scroll", onScroll);
+    };
+  }, [isOpen, orbitRegion, availableSectionIds]);
   // A jump scrolls this dialog only. Keyboard users land on the destination's
   // first control; pointer users keep their focus and can immediately pan.
   const jumpAtlasGroup = (group: string, keyboard: boolean) => {
@@ -1144,6 +1392,10 @@ export function SideMenuLayer({
         id="site-side-panel"
         className="side-panel"
         data-command-atlas="true"
+        data-orbit-menu="true"
+        data-orbit-region={orbitRegion}
+        data-orbit-dragging={orbitDrag !== null ? "true" : undefined}
+        style={{ ["--orbit-turn" as string]: orbitShown }}
         data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
         role="dialog"
@@ -1196,23 +1448,44 @@ export function SideMenuLayer({
           <div className="side-panel-search-dock">
             <MenuQuickSearch onOpen={openMenuSearch} compact />
           </div>
-          <nav className="command-atlas-index" aria-label="メニューの領域">
-            {[
-              ["find", "資料"],
-              ["sections", "ページ内"],
-              ["special", "サーガ"],
-              ["stories", "物語"],
-              ["riders", "人物"],
-              ["information", "ギャラリー・お知らせ"],
-              ["system", "設定"],
-            ].map(([group, label]) => (
+          {/* The dial: a tablist of seven planets. Drag, wheel, arrows and
+              Home/End turn it; each planet's angle is one transform read
+              from --orbit-turn, so the turn runs on the compositor. */}
+          <nav
+            ref={orbitDialRef}
+            className="command-atlas-index"
+            aria-label="メニューの領域"
+            role="tablist"
+            aria-orientation="horizontal"
+            onPointerDown={onOrbitPointerDown}
+            onPointerMove={onOrbitPointerMove}
+            onPointerUp={onOrbitPointerEnd}
+            onPointerCancel={onOrbitPointerEnd}
+            onClickCapture={onOrbitClickCapture}
+            onKeyDown={onOrbitKeyDown}
+          >
+            {ORBIT_REGIONS.map(([group, label], index) => (
               <button
                 key={group}
                 type="button"
+                role="tab"
+                id={`command-atlas-tab-${group}`}
+                aria-selected={index === orbitIndex}
                 aria-controls={`command-atlas-${group}`}
-                onClick={(event) => jumpAtlasGroup(group, event.detail === 0)}
+                tabIndex={index === orbitIndex ? 0 : -1}
+                style={{ ["--orbit-i" as string]: index }}
+                onClick={(event) => {
+                  // Enter or Space on a planet goes on into its rows: the
+                  // region is in the layout before focus moves there.
+                  if (event.detail === 0) {
+                    flushSync(() => turnOrbitTo(index));
+                    jumpAtlasGroup(group, true);
+                  } else {
+                    turnOrbitTo(index);
+                  }
+                }}
               >
-                {label}
+                <span>{label}</span>
               </button>
             ))}
           </nav>
