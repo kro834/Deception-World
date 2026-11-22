@@ -542,9 +542,15 @@
 
 /* Linked sections. The lift is from-only, so a part lands on its own place;
    the thread strips and the pulley read their start from the helper. */
-@keyframes ring-link-lift {
+@keyframes ring-link-lift-text {
   from {
-    translate: 0 var(--ring-link-hang, 30px);
+    translate: 0 30px;
+  }
+}
+
+@keyframes ring-link-lift-figure {
+  from {
+    translate: 0 52px;
   }
 }
 
@@ -555,13 +561,6 @@
 
   45% {
     opacity: 0.5;
-  }
-}
-
-/* The puller is tugged back as its thread takes the next part's weight. */
-@keyframes ring-link-recoil {
-  35% {
-    translate: 0 3px;
   }
 }
 
@@ -759,26 +758,27 @@
      「連鎖する感じ」「琥珀色の糸と滑車で」). The helper holds only the parts
      that are still below the fold ([data-ring-link="hold"]) and, at release,
      writes each part's delay: one hand-off after the part above it. Every
-     part hangs --ring-link-hang below its place, shows on its hook as its
-     thread goes taut, and is lifted on the bounce spring; the part above is
-     tugged back a little as it takes the weight. The thread strips stretch
+     part hangs below its place, shows on its hook as its
+     thread goes taut, and is lifted on the bounce spring (one plain
+     animation per property, so the compositor can run it). The thread strips stretch
      and the pulley turns on the same curve and the same delays, so the
      whole mechanism runs on the compositor with no frame loop. --- */
   html[data-ring-ready] [data-ring-link="hold"] {
     opacity: 0;
   }
 
-  html:not([data-world-effects="economy"]) [data-ring-link="text"] {
-    --ring-link-hang: 30px;
-  }
-
-  html:not([data-world-effects="economy"]) [data-ring-link="figure"] {
-    --ring-link-hang: 52px;
-  }
-
-  html[data-ring-ready]:not([data-world-effects="economy"]) :is([data-ring-link="text"], [data-ring-link="figure"]) {
+  /* Text hangs 30px, figures and cards 52px (RING_LINK_HANG). Literal
+     keyframes, one animation per property: nothing here needs the main
+     thread once it has started. */
+  html[data-ring-ready]:not([data-world-effects="economy"]) [data-ring-link="text"] {
     animation:
-      ring-link-lift var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
+      ring-link-lift-text var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
+      ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"]) [data-ring-link="figure"] {
+    animation:
+      ring-link-lift-figure var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
       ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards;
   }
 
@@ -881,18 +881,6 @@
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .ring-links {
     display: block;
-  }
-}
-
-@supports (animation-composition: add) {
-  @media (prefers-reduced-motion: no-preference) {
-    html[data-ring-ready]:not([data-world-effects="economy"]) :is([data-ring-link="text"], [data-ring-link="figure"]) {
-      animation:
-        ring-link-lift var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
-        ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards,
-        ring-link-recoil 300ms ease-out calc(var(--ring-link-d, 0ms) + 128ms);
-      animation-composition: add, replace, add;
-    }
   }
 }
 

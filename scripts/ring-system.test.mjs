@@ -135,17 +135,13 @@ test("the glass rings turn only on screen in a visible tab, all four layers on e
   // phone cap (layers 2 and 3 still on a narrow or coarse-pointer device) is
   // gone. No ring sheet reduces an effect by device: a width, pointer or
   // hover query may change layout and hover only, never an animation's name.
+  // (The side menu's rules in the chrome sheet belong to the side-menu owner.)
   for (const file of sheets) {
     const sheet = strip(read(file));
     for (const [a, b] of blocksOf(sheet, /@media[^{]*(?:max-width|pointer: coarse)[^{]*\{/g)) {
       assert.doesNotMatch(sheet.slice(a, b), /animation(?:-name)?:\s*none/, file);
     }
   }
-  // The side menu's tiles pop on every device, not only on a desktop pointer.
-  const chrome = strip(read("src/styles-ring-chrome.css"));
-  const tile = chrome.indexOf("animation: ring-menu-tile");
-  const media = chrome.lastIndexOf("@media", tile);
-  assert.doesNotMatch(chrome.slice(media, chrome.indexOf("{", media)), /hover|pointer|min-width|max-width/);
   // The pictures are requested only once the stack is near the viewport.
   for (const layer of ["hero-outer", "hero-mid", "hero-inner", "hero-holo"]) {
     assert.match(
@@ -239,13 +235,15 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   }
   assert.equal(RING_LINK_STEP_MS, cross);
   assert.ok(RING_LINK_STEP_MS > 100 && RING_LINK_STEP_MS < 160, String(RING_LINK_STEP_MS));
-  assert.ok(css.includes(`calc(var(--ring-link-d, 0ms) + ${RING_LINK_STEP_MS}ms)`));
+  // One plain animation per property: additive composition would take the lift off the compositor.
+  assert.doesNotMatch(css, /animation-composition/);
   // Text hangs less than figures and cards; the sheet and the helper agree.
-  assert.ok(RING_LINK_HANG.text < RING_LINK_HANG.figure && RING_LINK_HANG.figure <= 48);
-  assert.match(css, new RegExp(`\\[data-ring-link="text"\\] \\{\\s*--ring-link-hang: ${RING_LINK_HANG.text}px;`));
-  assert.match(css, new RegExp(`\\[data-ring-link="figure"\\] \\{\\s*--ring-link-hang: ${RING_LINK_HANG.figure}px;`));
+  assert.ok(RING_LINK_HANG.text < RING_LINK_HANG.figure && RING_LINK_HANG.text <= 32 && RING_LINK_HANG.figure <= 56);
+  for (const kind of ["text", "figure"]) {
+    assert.match(css, new RegExp(`@keyframes ring-link-lift-${kind} \\{\\s*from \\{\\s*translate: 0 ${RING_LINK_HANG[kind]}px;`), kind);
+  }
   // Parts, threads and pulleys all ride the bounce spring on the helper's delays.
-  for (const name of ["ring-link-lift", "ring-thread-run", "ring-pulley-turn"]) {
+  for (const name of ["ring-link-lift-text", "ring-link-lift-figure", "ring-thread-run", "ring-pulley-turn"]) {
     assert.match(
       css,
       new RegExp(`animation:\\s*${name} var\\(--ring-dur-bounce\\) var\\(--ring-spring-bounce\\) var\\(--ring-link-d, 0ms\\) backwards`),

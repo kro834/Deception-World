@@ -38,7 +38,7 @@
 //      [data-ring-section]), so a page needs no markup. The helper only
 //      decides WHEN: it holds the parts that are still below the fold,
 //      measures them once when their chain comes near, and at release writes
-//      each part's delay. The lift, the recoil, the thread's stretch and the
+//      each part's delay. The lift, the thread's stretch and the
 //      pulley's turn are CSS animations on those delays (the sheet), so no
 //      frame loop runs. Anything that already owns its arrival or its
 //      scroll choreography (the suit-up stages, scroll timelines, reveal
@@ -147,10 +147,11 @@ const LINK = "data-ring-link";
 const LINK_ROOT = "section, article, [data-ring-section]";
 const LINK_OFF = 'dialog, nav, aside, [hidden], [aria-hidden="true"], [data-ring-chain="off"]';
 // Never a part, and never searched for parts: the suit-up, entry and call
-// staging (the contract test's list), pinned scroll scenes, and everything
-// that already owns its own arrival.
+// staging (the contract test's list), every stage (the World annex's
+// `wa-…-stage` boxes are plain layout grids, so they stay), pinned scroll
+// scenes, and everything that already owns its own arrival.
 const LINK_FORBID =
-  /suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call|stage|sticky|pinned|scene|reveal|ring-(?:enter|stagger|expand|bounce|glass|orbit|arc|divider|halo)/;
+  /suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call|(?:^|\s)(?!wa-)\S*stage|sticky|pinned|scene|reveal|ring-(?:enter|stagger|expand|bounce|glass|orbit|arc|divider|halo)/;
 // Moved as one piece, never taken apart: measured rails, sliders, control
 // rows. Their inner geometry is read by their own engines.
 const LINK_WHOLE =
@@ -165,7 +166,7 @@ const LINK_CONTROLS = new Set(["a", "button", "input", "select", "label", "span"
 const LINK_HEADS = new Set(["h1", "h2", "h3", "h4"]);
 const LINK_MAX_PARTS = 12;
 const LINK_MAX_DEPTH = 6;
-/** How far a part hangs below its place, px. The sheet's --ring-link-hang values. */
+/** How far a part hangs below its place, px. The sheet's ring-link-lift-* keyframes. */
 export const RING_LINK_HANG = /** @type {const} */ ({ text: 30, figure: 52 });
 /**
  * The hand-off: a part starts when the one before first reaches its seat on
@@ -341,7 +342,7 @@ export function watchRingMotion(doc = document) {
    *   state: 0 | 1 | 2, start: number, top: number, bottom: number, left: number, right: number }} LinkPart
    * @typedef {{ parts: LinkPart[], links: (HTMLElement | null)[], near: boolean, armed: boolean,
    *   lastStart: number, top: number, body: boolean }} LinkChain
-   * @typedef {{ el: Element, chains: LinkChain[], done: boolean, dirty: boolean, at: number }} LinkRoot
+   * @typedef {{ el: Element, chains: LinkChain[], done: boolean, dirty: boolean, near: boolean, at: number }} LinkRoot
    */
   /** @type {WeakMap<Element, LinkPart>} */
   const partOf = new WeakMap();
@@ -583,7 +584,8 @@ export function watchRingMotion(doc = document) {
    * @param {LinkChain} chain
    */
   const arm = (chain) => {
-    const line = view.innerHeight * LINK_GATE;
+    // Held only when wholly below the fold: a part with a sliver on screen is never hidden.
+    const line = view.innerHeight;
     const sy = root.scrollTop;
     const parts = chain.parts;
     let any = false;
@@ -651,7 +653,7 @@ export function watchRingMotion(doc = document) {
     const part = partOf.get(/** @type {Element} */ (event.target));
     if (!part || part.state !== 2) return;
     const name = /** @type {AnimationEvent} */ (event).animationName;
-    if (event.type === "animationcancel" || name === "ring-link-lift" || (name === "ring-link-seen" && !bounces()))
+    if (event.type === "animationcancel" || name === "ring-link-lift-text" || name === "ring-link-lift-figure" || (name === "ring-link-seen" && !bounces()))
       clearPart(part);
   };
 
@@ -682,9 +684,10 @@ export function watchRingMotion(doc = document) {
     { rootMargin: `0px 0px -${Math.round((1 - LINK_GATE) * 100)}% 0px`, threshold: 0 },
   );
 
-  // A chain is armed when its heading comes within 30 % of a viewport below
-  // the fold, and put back when it leaves downwards: scrolling up never shows
-  // a held part, and scrolling down again replays the mechanism.
+  // A chain is armed when its heading comes within 30 % of a viewport of the
+  // fold (only its parts below the fold are held), and put back when it leaves
+  // downwards: scrolling up never shows a held part, and scrolling down again
+  // replays the mechanism.
   const nearIO = new view.IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -693,7 +696,7 @@ export function watchRingMotion(doc = document) {
         if (entry.isIntersecting) {
           if (chain.near) continue;
           chain.near = true;
-          if (!chain.armed && entry.boundingClientRect.top > view.innerHeight * LINK_GATE) arm(chain);
+          if (!chain.armed) arm(chain);
         } else if (chain.near) {
           chain.near = false;
           if (entry.boundingClientRect.top > 0) disarm(chain);
@@ -758,11 +761,13 @@ export function watchRingMotion(doc = document) {
 
   const rootIO = new view.IntersectionObserver(
     (entries) => {
+      // A section is read only while it is within a viewport of the screen:
+      // the first time, and again if its content changed while it was away.
       for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
         const rec = rootOf.get(entry.target);
-        rootIO.unobserve(entry.target);
-        if (rec && !rec.done) detectRoot(rec);
+        if (!rec) continue;
+        rec.near = entry.isIntersecting;
+        if (rec.near && (!rec.done || rec.dirty)) detectRoot(rec);
       }
     },
     { rootMargin: "100% 0px", threshold: 0 },
@@ -781,7 +786,7 @@ export function watchRingMotion(doc = document) {
         linkRoots.splice(i, 1);
         continue;
       }
-      if (!rec.done || !rec.dirty) continue;
+      if (!rec.done || !rec.dirty || !rec.near) continue;
       let busy = false;
       for (const chain of rec.chains) for (const part of chain.parts) if (part.state === 2) busy = true;
       // A chain in motion finishes first; a restless section is re-read at most every 1.5 s.
@@ -797,7 +802,7 @@ export function watchRingMotion(doc = document) {
       const cls = el.getAttribute("class");
       if (cls && LINK_FORBID.test(cls)) continue;
       /** @type {LinkRoot} */
-      const rec = { el, chains: [], done: false, dirty: false, at: 0 };
+      const rec = { el, chains: [], done: false, dirty: false, near: false, at: 0 };
       rootOf.set(el, rec);
       linkRoots.push(rec);
       rootIO.observe(el);
@@ -808,11 +813,17 @@ export function watchRingMotion(doc = document) {
     if (!linkScan) linkScan = view.setTimeout(scanLinks, 320);
   }
 
-  /** The layout moved under the threads: resting ones go, waiting ones are measured again. */
-  const onLinkLayout = () => {
-    const line = view.innerHeight * LINK_GATE;
+  /**
+   * The layout moved under the threads: resting ones go, waiting ones are
+   * measured again. The parts themselves are the same boxes, so a section is
+   * read again only when the window changed (a breakpoint may regroup it).
+   * @param {unknown} [event]
+   */
+  const onLinkLayout = (event) => {
+    const resized = event instanceof view.Event;
+    const fold = view.innerHeight;
     for (const rec of linkRoots) {
-      rec.dirty = rec.done;
+      if (resized) rec.dirty = rec.done;
       for (const chain of rec.chains) {
         let moving = false;
         for (const part of chain.parts) if (part.state === 2) moving = true;
@@ -822,10 +833,10 @@ export function watchRingMotion(doc = document) {
           continue;
         }
         disarm(chain);
-        if (chain.near && chain.parts[0].el.getBoundingClientRect().top > line) arm(chain);
+        if (chain.near && chain.parts[chain.parts.length - 1].el.getBoundingClientRect().bottom > fold) arm(chain);
       }
     }
-    queueLinkScan();
+    if (resized) queueLinkScan();
   };
 
   /** Print, reduced motion switched on: everything back at once. */
@@ -851,9 +862,10 @@ export function watchRingMotion(doc = document) {
         while (host && !rootOf.has(host)) host = host.parentElement?.closest(LINK_ROOT) ?? null;
         const rec = host && rootOf.get(host);
         if (rec) rec.dirty = rec.done;
-        queueLinkScan();
+        if (!rec || rec.near) queueLinkScan();
         if (!ring && (el.matches(SCROLL) || el.querySelector(SCROLL))) ring = true;
       }
+      if (record.removedNodes.length) queueLinkScan();
       for (const node of record.removedNodes) {
         if (ring || node.nodeType !== 1) continue;
         const el = /** @type {Element} */ (node);
