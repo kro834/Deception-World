@@ -480,6 +480,12 @@
     font-size: 19px;
   }
 
+  /* The orbit's own line is the ring here; the inner halo would cross the
+     heading at this size. */
+  .command-deck-riders .command-deck-rider-core > .ring-halo {
+    display: none;
+  }
+
   .command-deck-riders .command-deck-rider-core > a {
     min-height: 44px;
     font-size: 12px;
@@ -492,6 +498,31 @@
 
   .command-deck-riders {
     padding-block-end: 44px;
+  }
+}
+
+/* The narrowest phones: smaller portraits (still above the 44px target) so a
+   two-line name clears the next rider on the ring. */
+@media (max-width: 360px) {
+  .command-deck-rider-orbit {
+    --ring-item: 54px;
+    --ring-r: calc(50vw - var(--ring-item) / 2 - 26px);
+    /* Half a step round: no rider sits on the horizontal axis, so each
+       side has the full step of height for a two-line name. */
+    --ring-start: -112.5deg;
+  }
+
+  .command-deck-rider strong {
+    max-width: calc(100% + 14px);
+    line-height: 1.2;
+  }
+
+  .command-deck-riders .command-deck-rider-core {
+    width: 140px;
+  }
+
+  .command-deck-riders .command-deck-rider-core h2 {
+    font-size: 17px;
   }
 }
 

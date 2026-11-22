@@ -224,6 +224,16 @@ html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-si
   position: relative;
 }
 
+/* The dossier's way back to its list is a pill, like every text control. */
+html[data-family="dossier"]:not([data-button-style="liquid"])
+  body
+  .manager-page
+  > header.manager-topbar
+  .manager-back:not(#ring-x) {
+  border-radius: var(--ring-radius-pill) !important;
+  clip-path: none !important;
+}
+
 /* The chapter links: one pill track, round ends on every link. */
 @media (min-width: 761px) {
   html[data-family="world"] body main.site-shell.film-edition > header.topbar > nav {
@@ -325,24 +335,6 @@ html[data-family]:not([data-button-style="liquid"])
   border-radius: 22px !important;
 }
 
-/* Group headings open on a small ring instead of a bare rule. */
-html[data-family]:not([data-family="dream"])
-  body
-  #site-side-panel#site-side-panel
-  > .side-panel-group
-  > p::before {
-  content: "";
-  flex: none;
-  width: 9px;
-  height: 9px;
-  margin: 0 10px 0 2px;
-  border: 1.5px solid var(--ring-key);
-  border-radius: 50%;
-  background: none;
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.5);
-  outline-offset: 3px;
-}
-
 @keyframes ring-menu-group {
   from {
     opacity: 0;
@@ -410,16 +402,6 @@ html[data-family]:not([data-family="dream"])
     > button {
     animation: ring-menu-chip var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
     animation-delay: calc(80ms + var(--ring-i, 0) * 34ms);
-  }
-
-  /* The heading rings pop last, each with its group. */
-  html[data-family]:not([data-world-effects="economy"]):not([data-family="dream"])
-    body
-    #site-side-panel#site-side-panel.side-panel[data-open="true"]
-    > .side-panel-group
-    > p::before {
-    animation: ring-pop-in var(--ring-dur-elastic) var(--ring-spring-elastic) backwards;
-    animation-delay: calc(260ms + var(--ring-g, 0) * 60ms);
   }
 }
 
