@@ -356,3 +356,563 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     display: none;
   }
 }
+
+/* ================================================================
+   5. The saga cinema: the four films as an orbit.
+   The films section is one ring: the four posters stand at its four
+   points around the section's heading, whole (the owner's art is never
+   cropped), each a ring card. Under 1000px the ring keeps its four on the
+   diagonals (two by two) with the heading still at the centre.
+   Placement uses left/top and `translate`: the page's reveal rules pin
+   `transform` on the cards.
+   ================================================================ */
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) {
+  --ring-key: var(--saga-accent);
+  --ring-track: rgba(var(--saga-accent-rgb), 0.22);
+  --ring-prism: conic-gradient(
+    from var(--ring-from, 210deg),
+    var(--saga-accent) 0turn,
+    #f4fbff 0.16turn,
+    var(--ring-gold) 0.42turn,
+    rgba(var(--saga-accent-rgb), 0.3) 0.62turn,
+    var(--saga-accent) 1turn
+  );
+  --rb-lens:
+    radial-gradient(120% 120% at 22% 0%, rgba(var(--saga-accent-rgb), 0.26), transparent 62%),
+    linear-gradient(180deg, #111b29, #070c14);
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit {
+  --fo-w: clamp(132px, 38vw, 250px);
+  position: relative;
+  display: grid;
+  width: 100%;
+  margin-inline: auto;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit > * {
+  grid-area: 1 / 1;
+}
+
+/* The heading is the ring's centre. */
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .section-heading {
+  z-index: 2;
+  display: block;
+  place-self: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .section-heading h3 {
+  font-size: clamp(22px, 2.6vw, 40px);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* The ring itself: one stroke through the four films, an inner ring in
+   gold, four ticks between the films. */
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring {
+  position: relative;
+  z-index: 0;
+  display: block;
+  place-self: center;
+  width: min(100%, 560px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::before,
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::before {
+  inset: 0;
+  background: var(--ring-prism);
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::after {
+  inset: 14%;
+  background: rgba(var(--saga-accent-rgb), 0.26);
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b {
+  position: absolute;
+  inset: 0;
+  rotate: 0deg;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b:nth-child(2) {
+  rotate: 90deg;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b:nth-child(3) {
+  rotate: 180deg;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b:nth-child(4) {
+  rotate: 270deg;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--saga-accent);
+  box-shadow: 0 0 0 4px rgb(4 8 14 / 0.8);
+}
+
+/* Two by two: the four on the ring's diagonals. */
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-grid {
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, var(--fo-w));
+  gap: clamp(112px, 26vw, 150px) clamp(16px, 8vw, 120px);
+  justify-content: center;
+  align-content: center;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card {
+  margin: 0;
+}
+
+/* Each film is a ring card: the whole poster inside the ring's stroke. */
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster {
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background:
+    linear-gradient(#080a0d, #080a0d) padding-box,
+    var(--ring-prism) border-box;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster img {
+  border-radius: 14px;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster::before {
+  border-radius: 12px;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-open {
+  border-radius: 50%;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-name {
+  margin: 12px 0 0;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-name h4 {
+  font-size: clamp(22px, 2.4vw, 32px);
+}
+
+@media (min-width: 1000px) {
+  /* The full orbit: north, east, south, west. */
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit {
+    --fo-w: clamp(200px, 17vw, 244px);
+    --fo-r: clamp(290px, 25vw, 340px);
+    /* A card: its part line, the 853:1280 poster, its name. */
+    --fo-h: calc(var(--fo-w) * 1.5 + 104px);
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring {
+    width: calc(var(--fo-r) * 2);
+    /* The ticks sit between the films. */
+    rotate: 45deg;
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-grid {
+    position: relative;
+    display: block;
+    width: calc(var(--fo-r) * 2 + var(--fo-w));
+    height: calc(var(--fo-r) * 2 + var(--fo-h));
+    margin-inline: auto;
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--fo-w);
+    translate: calc(-50% + var(--fo-x, 0px)) calc(-50% + var(--fo-y, 0px));
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(1) {
+    --fo-y: calc(var(--fo-r) * -1);
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(2) {
+    --fo-x: var(--fo-r);
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(3) {
+    --fo-y: var(--fo-r);
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(4) {
+    --fo-x: calc(var(--fo-r) * -1);
+  }
+
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .section-heading {
+    max-width: calc(var(--fo-r) * 2 - var(--fo-w) - 40px);
+  }
+}
+
+/* The cinema's controls are cut from circles too. */
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .chapter-switch button,
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .poster-controls > button {
+  border-radius: 50%;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .chapter-switch button[aria-pressed="true"] {
+  background:
+    var(--rb-lens) padding-box,
+    var(--ring-prism) border-box;
+  border: 2px solid transparent;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.poster-controls, .auto-play, .desktop-nav) {
+  border-radius: var(--ring-radius-pill);
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .brand-mark {
+  border: 2px solid transparent;
+  border-radius: 50%;
+  clip-path: none;
+  background:
+    var(--rb-lens) padding-box,
+    var(--ring-prism) border-box;
+}
+
+html[data-family="special"]
+  body
+  .saga-cinema.saga-cinema:not(#ring-b)
+  :is(.world-return-link, .frame-button, .hero-actions > :is(a, button), .text-button) {
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+}
+
+html[data-family="special"]
+  body
+  .saga-cinema.saga-cinema:not(#ring-b)
+  :is(.project-data, .information-content, .hero-poster, .visual-feature, .intro-copy) {
+  border-radius: var(--ring-radius-card);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The films pop along the ring as the orbit arrives (the page pins the
+     cards' opacity, so only their scale springs; the grid carries the fade). */
+  html[data-family="special"][data-ring-ready]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-grid[data-ring-in]
+    > .film-card {
+    animation: ring-pop-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(120ms + var(--ring-i, 0) * 70ms);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:nth-child(2) {
+    --ring-i: 1;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:nth-child(3) {
+    --ring-i: 2;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:nth-child(4) {
+    --ring-i: 3;
+  }
+
+  /* A film answers the hand on the spring. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card {
+    transition: scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:active {
+    scale: 0.95;
+    transition: scale 90ms ease-out;
+  }
+
+  /* THE EXPANSION RULE: the film sheet and the gallery spring open from the
+     centre; the film sheet's rows follow, staggered. Closing is the
+     dialog's own. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .film-dialog[open]
+    > *,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .gallery-dialog[open]
+    .gallery-stage {
+    animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 50%;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .film-dialog[open]
+    .dialog-copy
+    > * {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(90ms + var(--ring-i, 0) * var(--ring-stagger));
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .film-dialog
+    .dialog-copy
+    > :nth-child(2) {
+    --ring-i: 1;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .film-dialog
+    .dialog-copy
+    > :nth-child(3) {
+    --ring-i: 2;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .film-dialog
+    .dialog-copy
+    > :nth-child(4) {
+    --ring-i: 3;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .film-dialog
+    .dialog-copy
+    > :nth-child(n + 5) {
+    --ring-i: 4;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:hover {
+    scale: 1.05;
+  }
+}
+
+/* ================================================================
+   6. Final Stage: the eight people on one orbit around the chapter's
+   heading. Choosing a person (here, or on the rail below, which stays the
+   tablist) turns the ring by the short way until that person rests at the
+   top; the faces counter-turn by the same spring, so they stay upright.
+   The radius follows the viewport, so the ring is a ring on phones too
+   (320px: r 108, eight 60px faces, chord 82px).
+   ================================================================ */
+
+html[data-family="special"] body #top.fst-page[data-command-special]:not(#ring-b) .fst-cast-ring {
+  --fst-item: clamp(60px, 6.2vw, 92px);
+  --fst-r: min(clamp(150px, 17vw, 250px), calc(50vw - var(--fst-item) / 2 - 22px));
+  --fst-inner: calc(var(--fst-r) * 2 - var(--fst-item) - 28px);
+  display: grid;
+  justify-items: center;
+  row-gap: var(--ring-space-4);
+  margin-bottom: var(--ring-space-5);
+}
+
+html[data-family="special"] body #top.fst-page[data-command-special]:not(#ring-b) .fst-cast-orbit {
+  --fst-turn: 0;
+  --ring-item: var(--fst-item);
+  --ring-r: var(--fst-r);
+  grid-area: 1 / 1;
+  rotate: calc(var(--fst-turn) * -45deg);
+}
+
+/* The heading's box dissolves: its title is the ring's centre and its
+   line reads under the ring. */
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-ring
+  > .rxs-section-heading {
+  display: contents;
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-ring
+  > .rxs-section-heading
+  > h2 {
+  grid-area: 1 / 1;
+  z-index: 1;
+  place-self: center;
+  max-width: calc(var(--fst-inner, 240px));
+  margin: 0;
+  font-size: clamp(16px, 2.3vw, 34px);
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-ring
+  > .rxs-section-heading
+  > span {
+  grid-area: 2 / 1;
+  max-width: 44ch;
+  margin: 0;
+  text-align: center;
+}
+
+html[data-family="special"] body #top.fst-page[data-command-special]:not(#ring-b) .fst-cast-node {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node
+  > .ring-frame {
+  --ring-gap: 3px;
+  width: 100%;
+  height: 100%;
+  rotate: calc(var(--fst-turn) * 45deg);
+  background: #070c14;
+}
+
+/* Unlit people are quiet rings; the chosen one wears its own light. */
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node
+  > .ring-frame::before {
+  background: rgb(255 255 255 / 0.3);
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node.is-on
+  > .ring-frame {
+  scale: 1.24;
+  box-shadow:
+    0 0 0 5px rgb(6 12 20 / 0.72),
+    0 10px 26px -8px var(--fst-accent, var(--cs-key));
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node.is-on
+  > .ring-frame::before {
+  background: conic-gradient(from 210deg, var(--fst-accent, var(--cs-key)), #fff 0.2turn, var(--cs-secondary) 0.5turn, var(--fst-accent, var(--cs-key)));
+}
+
+/* The face, as the rail's tabs cut it: the portrait enlarged about the
+   person's face inside the round window. */
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node
+  .ring-frame-media {
+  overflow: hidden;
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node
+  .ring-frame-media
+  > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scale: 2.1;
+}
+
+html[data-family="special"]
+  body
+  #top.fst-page[data-command-special]:not(#ring-b)
+  .fst-cast-node
+  b.ring-frame-media {
+  display: grid;
+  place-items: center;
+  color: var(--cs-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-orbit {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node
+    > .ring-frame {
+    transition:
+      rotate var(--ring-dur-bounce) var(--ring-spring-bounce),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node:not(.is-on):hover
+    > .ring-frame {
+    scale: 1.1;
+  }
+}
