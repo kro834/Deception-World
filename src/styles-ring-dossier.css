@@ -501,7 +501,10 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   aspect-ratio: 1;
 }
 
-@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
   html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
       #r
     ):not(#r)
@@ -520,8 +523,8 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     .manager-pagination
     .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
     > li
-    > a:hover {
-    scale: 1.12;
+    > a::before {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
   html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
@@ -531,8 +534,32 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     .manager-pagination
     .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
     > li
-    > a::before {
-    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+    > a:active {
+    scale: 0.93;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > a:active::before {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > a:hover {
+    scale: 1.12;
   }
 
   html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
@@ -1112,24 +1139,5 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     ) {
     scale: 0.93;
     transition: scale 90ms ease-out;
-  }
-}
-
-/* A viewer that fills a phone never overshoots its edges. */
-@media (prefers-reduced-motion: no-preference) and (max-width: 700px) {
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
-      #r
-    ):not(#r)
-    body
-    .form-pickup-dialog[open]
-    .form-pickup-panel,
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
-      #r
-    ):not(#r)
-    body
-    .rider-nightmare-dialog[open]
-    .rider-nightmare-dialog-panel {
-    animation-duration: var(--ring-dur-soft);
-    animation-timing-function: var(--ring-spring-soft);
   }
 }

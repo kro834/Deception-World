@@ -450,7 +450,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   }
 }
 
-@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
       #r
     )
@@ -467,9 +470,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     body
     .ws-map
     > li
-    > a:hover {
-    translate: none;
-    scale: 1.08;
+    > a::after {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -478,8 +480,31 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     body
     .ws-map
     > li
-    > a::after {
-    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+    > a:active {
+    scale: 0.93;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:active::after {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:hover {
+    translate: none;
+    scale: 1.08;
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -791,7 +816,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   line-height: 1.6;
 }
 
-@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
       #r
     )
@@ -803,6 +831,19 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:active::after {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
       #r
     )
@@ -1070,7 +1111,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   }
 }
 
-@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+/* Owner (2026-11-23: 高品質モードで、スマホでもPC版と同クオリティに): the
+   springs are not a mouse-only extra. Every pointer gets the transition, and
+   a touch press turns the ring and sinks the lens as a hover lifts it. */
+@media (prefers-reduced-motion: no-preference) {
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
       #r
     )
@@ -1089,9 +1133,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     main.site-shell
     > footer
     > .ws-doors
-    > a:hover {
-    translate: none;
-    scale: 1.08;
+    > a::after {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -1101,8 +1144,33 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     main.site-shell
     > footer
     > .ws-doors
-    > a::after {
-    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+    > a:active {
+    scale: 0.93;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:active::after {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:hover {
+    translate: none;
+    scale: 1.08;
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -1581,26 +1649,6 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     ):active {
     scale: 0.93;
     transition: scale 90ms ease-out;
-  }
-}
-
-/* A sheet that fills a phone never overshoots its edges: it rides the
-   critically damped spring, and only its rows bounce. */
-@media (prefers-reduced-motion: no-preference) and (max-width: 700px) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
-      #r
-    )
-    body
-    #episode-pickup-dialog[open]
-    .episode-pickup-panel,
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
-      #r
-    )
-    body
-    .world-column-dialog[open]
-    .world-column-dialog-card {
-    animation-duration: var(--ring-dur-soft);
-    animation-timing-function: var(--ring-spring-soft);
   }
 }
 
