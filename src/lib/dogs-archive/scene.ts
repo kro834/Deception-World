@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "../rendering-profile.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
@@ -133,7 +134,9 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     "aria-label",
     "第五の犬の立体模型。ドラッグで全方向へ回転、ピンチで拡大。矢印キーで回転、プラスとマイナスで拡大縮小、Homeで視点を戻す。",
   );
-  const mobile = matchMedia("(pointer: coarse)").matches;
+  // (Owner, 2026-11-23: a phone in high quality gets the "high" tier; the
+  // mobile and low tiers are the lightweight renderer's.)
+  const mobile = usesTouchBudget(matchMedia("(pointer: coarse)").matches);
   const tier = options.qualityTier ?? detectGuardianQualityTier(navigator, mobile);
   const fireTier = FIRE_TIERS[tier];
   canvas.dataset.qualityTier = tier;
