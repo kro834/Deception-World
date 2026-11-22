@@ -149,6 +149,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > .ws-contents {
   --ws-ring-size: min(740px, 100vw - 32px);
   --ws-ring-item: calc(var(--ws-ring-size) * 0.225);
+  --ws-ring-r: 38%;
   display: grid;
   justify-items: center;
   padding-inline: 16px;
@@ -249,8 +250,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li {
   position: absolute;
   z-index: 1;
-  top: calc(50% + var(--ring-y) * 38%);
-  left: calc(50% + var(--ring-x) * 38%);
+  top: calc(50% + var(--ring-y) * var(--ws-ring-r));
+  left: calc(50% + var(--ring-x) * var(--ws-ring-r));
   width: var(--ws-ring-item);
   height: var(--ws-ring-item);
   margin: calc(var(--ws-ring-item) / -2) 0 0 calc(var(--ws-ring-item) / -2);
@@ -578,10 +579,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .signal-array
   > .signal {
   position: absolute;
-  top: calc(50% + var(--ring-y) * 38% - 11.25%);
-  left: calc(50% + var(--ring-x) * 38% - 11.25%);
+  top: calc(50% + var(--ring-y) * var(--rk-ring-r, 38%) - var(--rk-ring-item, 22.5%) / 2);
+  left: calc(50% + var(--ring-x) * var(--rk-ring-r, 38%) - var(--rk-ring-item, 22.5%) / 2);
   display: block;
-  width: 22.5%;
+  width: var(--rk-ring-item, 22.5%);
   height: auto;
   min-height: 0;
   aspect-ratio: 1;
@@ -835,7 +836,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > .ws-doors::before {
   content: "";
   position: absolute;
-  inset: 11%;
+  inset: 9%;
   border: 1px solid rgb(var(--ring-gold-rgb) / 0.28);
   border-radius: 50%;
   pointer-events: none;
@@ -872,10 +873,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > footer
   > .ws-doors
   > a {
-  --ws-door-size: 22%;
+  --ws-door-size: 21%;
   position: absolute;
-  top: calc(50% + var(--ring-y) * 39% - var(--ws-door-size) / 2);
-  left: calc(50% + var(--ring-x) * 39% - var(--ws-door-size) / 2);
+  top: calc(50% + var(--ring-y) * 41% - var(--ws-door-size) / 2);
+  left: calc(50% + var(--ring-x) * 41% - var(--ws-door-size) / 2);
   display: block;
   width: var(--ws-door-size);
   height: auto;
@@ -976,7 +977,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > footer
   > .ws-doors
   > a.is-far-from {
-  --ws-door-size: 30%;
+  --ws-door-size: 27%;
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -1274,7 +1275,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.site-shell
-  .section-index
+  :is(.section-index, .wa-chapter)
   > span {
   position: relative;
 }
@@ -1282,7 +1283,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.site-shell
-  .section-index
+  :is(.section-index, .wa-chapter)
   > span::before {
   content: "";
   position: absolute;
@@ -1361,6 +1362,14 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   main.site-shell
   .artwork-stage--world
   .artwork-stage__halo {
+  /* Wider than the stage, so the rings sweep round the poster's frame
+     instead of hiding behind it. */
+  inset: 50% auto auto 50%;
+  width: 132%;
+  height: auto;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
   background:
     radial-gradient(
       closest-side,
@@ -1592,5 +1601,192 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     .world-column-dialog-card {
     animation-duration: var(--ring-dur-soft);
     animation-timing-function: var(--ring-spring-soft);
+  }
+}
+
+/* ---------- 9. Phones: smaller lenses on a wider ring, so every name
+   clears its neighbours and the centre (checked at 320, 360 and 390) ---------- */
+@media (max-width: 560px) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-contents {
+    --ws-ring-item: calc(var(--ws-ring-size) * 0.2);
+    --ws-ring-r: 40%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-contents
+    > .ws-map::before {
+    inset: 10%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li
+    .ws-map-label {
+    top: calc(100% + 19px);
+    max-width: calc(var(--ws-ring-item) * 1.55);
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li
+    .ws-map-label
+    > b {
+    top: -32px;
+    width: 26px;
+    height: 26px;
+    font-size: 8px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li[data-phase="annex"]
+    .ws-map-label {
+    top: calc(100% + 12px);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li[data-phase="annex"]
+    .ws-map-label
+    > b {
+    top: calc(-12px - var(--ws-ring-item) / 2);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array {
+    --rk-ring-item: 20%;
+    --rk-ring-r: 40%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array::before {
+    inset: 10%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > span {
+    bottom: -15px;
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > b {
+    top: calc(100% + 17px);
+    max-width: 180%;
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy {
+    gap: 5px;
+    width: calc(min(660px, 100%) * 0.5);
+    translate: 0 20px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > h3 {
+    font-size: 13px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > p {
+    line-height: 1.45;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a
+    > span {
+    top: calc(100% + 13px);
+    font-size: 11px;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a.is-far-from
+    > span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a.is-far-from {
+    --ws-door-size: 24%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:not(.is-far-from)
+    > span {
+    max-width: 128%;
+  }
+}
+
+@media (max-width: 360px) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > b {
+    max-width: 130%;
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > h3 {
+    font-size: 12px;
   }
 }

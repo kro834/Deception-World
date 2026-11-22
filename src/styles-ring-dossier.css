@@ -83,10 +83,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
   > li {
   --ring-item: 17%;
+  --ring-r: 39%;
   position: absolute;
   z-index: 1;
-  top: calc(50% + var(--ring-y, 0) * 39% - var(--ring-item) / 2);
-  left: calc(50% + var(--ring-x, 0) * 39% - var(--ring-item) / 2);
+  top: calc(50% + var(--ring-y, 0) * var(--ring-r) - var(--ring-item) / 2);
+  left: calc(50% + var(--ring-x, 0) * var(--ring-r) - var(--ring-item) / 2);
   width: var(--ring-item);
   height: auto;
   aspect-ratio: 1;
@@ -693,6 +694,86 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   }
 }
 
+/* Phones: smaller tiles on a wider ring, so the centre name clears the
+   tiles under it (checked at 320, 360 and 390). */
+@media (max-width: 560px) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li {
+    --ring-item: 16%;
+    --ring-r: 41%;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li.is-current {
+    --ring-item: 24%;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(
+      :has(> li:nth-child(6):last-child),
+      :has(> li:nth-child(8):last-child)
+    )::before {
+    inset: 9%;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > :is(a, span)
+    > i {
+    bottom: -12px;
+    width: 22px;
+    height: 22px;
+    font-size: 8px;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li
+    > :is(a, span)
+    > b {
+    top: calc(100% + 14px);
+    font-size: 11px;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li.is-current
+    > span
+    > i {
+    bottom: -13px;
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .manager-pagination
+    .dossier-roster:is(:has(> li:nth-child(6):last-child), :has(> li:nth-child(8):last-child))
+    > li.is-current
+    > span
+    > b {
+    top: calc(100% + 16px);
+    max-width: 170%;
+    font-size: 12px;
+  }
+}
+
 /* ---------- 2. The place in the list: a ring of nodes, not a bar ---------- */
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
@@ -867,6 +948,10 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.manager-page
   .manager-portrait-column::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  display: block;
   top: 60%;
   right: auto;
   bottom: auto;
