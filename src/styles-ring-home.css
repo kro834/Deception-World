@@ -1,0 +1,516 @@
+/* ================================================================
+   The ring system on the home dashboard (2026-11-22).
+   Linked by src/routes/index.tsx after styles-command-deck.css, on the
+   dashboard branch only (the title never loads it).
+   The dashboard is recomposed around circles:
+     - the eight riders stand on one orbit, the section heading at its centre
+     - round controls (a ring sigil, pill switches, ring buttons)
+     - the key visual sits in a halo of three rings
+     - sections are parted by ring dividers and arrive on springs
+   Copy, links, order and the WebGL engine are unchanged. Motion gates as
+   in styles-ring.css (reduced motion and economy get the resting layout).
+   ================================================================ */
+
+.command-deck {
+  --ring-key: var(--deck-accent, #74d9ec);
+  --ring-gold: var(--deck-gold, #ebcd97);
+}
+
+.command-deck-main {
+  gap: clamp(22px, 3.6vw, 52px);
+}
+
+.command-deck .command-deck-divider {
+  margin: 0;
+}
+
+/* ---- Header: a ring sigil and pill links ------------------------------ */
+
+.command-deck-header {
+  border-bottom: 0;
+  background: none;
+}
+
+.command-deck-brand-mark {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.26), transparent 62%), #07101c;
+  font-size: 17px;
+  letter-spacing: -0.08em;
+  text-indent: -0.08em;
+  white-space: nowrap;
+}
+
+/* The mark is one word: D and W side by side inside the ring. */
+.command-deck-brand-mark,
+.command-deck-brand-mark > span {
+  grid-auto-flow: column;
+}
+
+.command-deck-brand-mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--ring-prism);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+.command-deck-header-nav {
+  gap: 8px;
+}
+
+.command-deck-header-nav a {
+  padding-inline: 14px;
+  border-radius: var(--ring-radius-pill);
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.22);
+}
+
+/* ---- The work switch: one pill track, the current work a lit pill ----- */
+
+.command-deck-scene-buttons {
+  gap: 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 34px;
+  background: rgb(8 16 28 / 0.72);
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.22);
+}
+
+.command-deck-scene-buttons > a {
+  border: 0;
+  border-radius: 30px;
+}
+
+.command-deck-scene-buttons > a.is-selected {
+  border: 0;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.16), transparent 60%),
+    color-mix(in srgb, var(--deck-accent) 26%, #0a1626);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 70%, transparent),
+    0 10px 24px -14px var(--deck-accent);
+}
+
+/* ---- The door: a pill whose arrow rides in its own ring --------------- */
+
+.command-deck .command-deck-enter {
+  padding: 6px 6px 6px clamp(18px, 2.3vw, 28px);
+  border-radius: var(--ring-radius-pill);
+}
+
+.command-deck .command-deck-enter > svg {
+  box-sizing: content-box;
+  flex: none;
+  padding: 9px;
+  border-radius: 50%;
+  background: #081520;
+  color: var(--deck-accent-ink);
+}
+
+.command-deck-chapter-links a {
+  padding-inline: 14px;
+  border-radius: var(--ring-radius-pill);
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.2);
+}
+
+.command-deck-chapter-links {
+  gap: 8px;
+}
+
+/* ---- The key visual: three rings behind the poster --------------------- */
+
+.command-deck .artwork-stage.command-deck-artwork-stage {
+  border-bottom: 0;
+}
+
+.command-deck .command-deck-artwork-stage .artwork-stage__halo {
+  background:
+    radial-gradient(
+      circle closest-side at 50% 48%,
+      transparent calc(100% - 2px),
+      color-mix(in srgb, var(--deck-accent) 46%, transparent) calc(100% - 2px) calc(100% - 1px),
+      transparent 100%
+    ),
+    radial-gradient(
+      circle closest-side at 50% 48%,
+      transparent calc(82% - 1px),
+      color-mix(in srgb, var(--deck-gold) 34%, transparent) calc(82% - 1px) 82%,
+      transparent calc(82% + 1px)
+    ),
+    radial-gradient(
+      circle closest-side at 50% 48%,
+      transparent calc(64% - 1px),
+      rgb(var(--ring-pink-rgb) / 0.22) calc(64% - 1px) 64%,
+      transparent calc(64% + 1px)
+    ),
+    radial-gradient(
+      ellipse 72% 66% at 50% 48%,
+      color-mix(in srgb, var(--deck-accent) 42%, transparent) 0%,
+      color-mix(in srgb, var(--deck-gold) 18%, transparent) 42%,
+      transparent 74%
+    );
+}
+
+.command-deck .command-deck-artwork-stage .artwork-stage__image img {
+  border-radius: 18px;
+}
+
+/* The picture switch: ring buttons. */
+.command-deck-art-controls button {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.32);
+}
+
+/* ---- Exhibitions: cards in the ring's material ------------------------- */
+
+.command-deck-destinations a {
+  border-radius: var(--ring-radius-card);
+}
+
+.command-deck-destinations a > span > svg {
+  box-sizing: content-box;
+  padding: 7px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-gold-rgb) / 0.5);
+}
+
+/* ---- The rider orbit ---------------------------------------------------- */
+
+.command-deck-riders {
+  /* The heading and the orbit share one cell: the heading is the centre. */
+  display: grid;
+  grid-template: "orbit" auto / minmax(0, 1fr);
+  justify-items: center;
+  gap: 0;
+  /* Room for the bottom rider's name under the ring. */
+  padding-block: 8px clamp(40px, 5vw, 60px);
+}
+
+.command-deck-rider-orbit,
+.command-deck-riders .command-deck-rider-core {
+  grid-area: orbit;
+}
+
+.command-deck-rider-orbit {
+  --ring-item: clamp(92px, 9.4vw, 136px);
+  --ring-r: clamp(196px, 21vw, 292px);
+  --ring-track: color-mix(in srgb, var(--deck-accent, #74d9ec) 34%, transparent);
+}
+
+.command-deck-riders .command-deck-rider-core {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  place-self: center;
+  width: clamp(190px, 21vw, 300px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  text-align: center;
+  /* The core only labels the ring; the riders behind it stay clickable. */
+  pointer-events: none;
+}
+
+.command-deck-riders .command-deck-rider-core > a {
+  pointer-events: auto;
+}
+
+.command-deck-riders .command-deck-rider-core h2 {
+  position: relative;
+  font-size: clamp(22px, 2.6vw, 40px);
+}
+
+.command-deck-riders .command-deck-rider-core > a {
+  position: relative;
+  padding-inline: 14px;
+  border-radius: var(--ring-radius-pill);
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.26);
+}
+
+.command-deck-rider {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.command-deck-rider .command-deck-rider-portrait {
+  --ring-gap: 4px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  overflow: visible;
+  border: 0;
+  border-radius: 50%;
+  background: #0b1624;
+  box-shadow: 0 18px 34px -16px rgb(0 0 0 / 0.9);
+}
+
+.command-deck-rider .command-deck-rider-portrait img {
+  border-radius: 50%;
+  object-position: center 22%;
+}
+
+.command-deck-rider strong {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  display: block;
+  width: max-content;
+  max-width: calc(100% + 28px);
+  translate: -50% 0;
+  color: var(--deck-ink);
+  font-size: clamp(11px, 1.05vw, 15px);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.command-deck-rider strong > span {
+  display: inline-block;
+}
+
+@media (hover: hover) {
+  .command-deck-rider:hover .command-deck-rider-portrait {
+    box-shadow:
+      0 18px 34px -16px rgb(0 0 0 / 0.9),
+      0 0 26px -6px color-mix(in srgb, var(--deck-accent) 60%, transparent);
+  }
+}
+
+/* ---- Footer: pill links -------------------------------------------------- */
+
+.command-deck-footer {
+  gap: 8px;
+  justify-content: center;
+  padding-block-start: 0;
+  border-top: 0;
+}
+
+.command-deck-footer a {
+  padding-inline: 16px;
+  border-radius: var(--ring-radius-pill);
+  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.22);
+}
+
+/* ---- Motion --------------------------------------------------------------- */
+
+@keyframes ring-home-pop {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+
+@keyframes ring-home-rise {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+    scale: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The work switch, the title and the door arrive in reading order each
+     time a work is chosen (the title and links are re-keyed per work). */
+  html:not([data-world-effects="economy"]) .command-deck-scene-buttons > a {
+    animation: ring-home-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(var(--ring-i, 0) * 50ms);
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-title h1 > span {
+    animation: ring-home-rise var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-title h1 > span + span {
+    animation-delay: 70ms;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck .command-deck-enter {
+    animation: ring-home-pop var(--ring-dur-bounce) var(--ring-spring-bounce) 140ms backwards;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-chapter-links > a {
+    animation: ring-home-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(200ms + var(--ring-i, 0) * 50ms);
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-header-nav > a {
+    animation: ring-home-pop var(--ring-dur-elastic) var(--ring-spring-elastic) backwards;
+    animation-delay: calc(120ms + var(--ring-i, 0) * 60ms);
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-brand-mark::before {
+    animation: ring-spin-in var(--ring-dur-elastic) var(--ring-spring-elastic) backwards;
+  }
+
+  /* Controls answer a press with a sink and an elastic release. */
+  html:not([data-world-effects="economy"])
+    .command-deck
+    :is(
+      .command-deck-enter,
+      .command-deck-scene-buttons > a,
+      .command-deck-art-controls button,
+      .command-deck-rider,
+      .command-deck-destinations a,
+      .command-deck-footer a,
+      .command-deck-chapter-links a,
+      .command-deck-header-nav a
+    ) {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      translate var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html:not([data-world-effects="economy"])
+    .command-deck
+    :is(
+      .command-deck-enter,
+      .command-deck-scene-buttons > a,
+      .command-deck-art-controls button,
+      .command-deck-rider,
+      .command-deck-destinations a,
+      .command-deck-footer a,
+      .command-deck-chapter-links a,
+      .command-deck-header-nav a
+    ):active {
+    scale: 0.94;
+    transition-duration: 90ms;
+    transition-timing-function: ease-out;
+  }
+
+  /* The exhibition cards arrive one after another. */
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .command-deck-discover.ring-enter[data-ring-in] {
+    animation: none;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .command-deck-discover.ring-enter[data-ring-in]
+    > :is(h2, .command-deck-destinations)
+    > *,
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .command-deck-discover.ring-enter[data-ring-in]
+    > h2 {
+    animation: ring-home-rise var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(var(--ring-i, 0) * 70ms);
+  }
+
+  /* The orbit's centre pops once the ring has turned in. */
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .command-deck-riders:has(.ring-orbit[data-ring-in])
+    .command-deck-rider-core
+    > :is(h2, a) {
+    animation: ring-home-pop var(--ring-dur-bounce) var(--ring-spring-bounce) 260ms backwards;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .command-deck-riders:has(.ring-orbit:not([data-ring-in]))
+    .command-deck-rider-core {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"]) .command-deck-rider:hover {
+    scale: 1.1;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-destinations a:hover {
+    translate: 0 -6px;
+  }
+
+  html:not([data-world-effects="economy"])
+    .command-deck
+    :is(.command-deck-footer, .command-deck-chapter-links, .command-deck-header-nav)
+    a:hover {
+    translate: 0 -2px;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck .command-deck-enter:hover {
+    scale: 1.04;
+  }
+}
+
+.command-deck-scene-buttons > :nth-child(2),
+.command-deck-chapter-links > :nth-child(2),
+.command-deck-header-nav > :nth-child(2),
+.command-deck-destinations > :nth-child(2) {
+  --ring-i: 1;
+}
+
+.command-deck-scene-buttons > :nth-child(3),
+.command-deck-chapter-links > :nth-child(3),
+.command-deck-header-nav > :nth-child(3),
+.command-deck-destinations > :nth-child(3) {
+  --ring-i: 2;
+}
+
+/* ---- Phone: the orbit is sized to the viewport, so it stays a ring ------ */
+
+@media (max-width: 739px) {
+  .command-deck-rider-orbit {
+    --ring-item: clamp(60px, 18vw, 76px);
+    --ring-r: min(150px, calc(50vw - var(--ring-item) / 2 - 22px));
+  }
+
+  .command-deck-riders .command-deck-rider-core {
+    width: calc(var(--ring-core, 170px));
+    gap: 2px;
+  }
+
+  .command-deck-riders .command-deck-rider-core h2 {
+    font-size: 19px;
+  }
+
+  .command-deck-riders .command-deck-rider-core > a {
+    min-height: 44px;
+    font-size: 12px;
+  }
+
+  .command-deck-rider strong {
+    max-width: calc(100% + 22px);
+    font-size: 11px;
+  }
+
+  .command-deck-riders {
+    padding-block-end: 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  /* The sigil stays on a phone: it is the ring the page opens with. */
+  .command-deck-brand-mark {
+    display: inline-grid;
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+  }
+
+  .command-deck-header-nav a {
+    padding-inline: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .command-deck-rider .command-deck-rider-portrait {
+    border: 1px solid ButtonText;
+  }
+}

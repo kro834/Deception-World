@@ -668,7 +668,8 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
           </section>
         </ArtworkStage>
 
-        <section className="command-deck-discover" aria-labelledby="command-deck-discover-title">
+        <i className="ring-divider ring-enter command-deck-divider" aria-hidden="true" />
+        <section className="command-deck-discover ring-enter" aria-labelledby="command-deck-discover-title">
           <h2 id="command-deck-discover-title">展示・資料</h2>
           <div className="command-deck-destinations">
             {DECK_DESTINATIONS.map(({ to, label, art }) => (
@@ -690,50 +691,65 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
           </div>
         </section>
 
+        <i className="ring-divider ring-enter command-deck-divider" aria-hidden="true" />
         <section
           className="command-deck-riders"
           id="command-deck-riders"
           aria-labelledby="command-deck-riders-title"
         >
-          <header>
+          {/* The ring system: the eight riders stand on one orbit and the
+              section's own heading sits at its centre, so the ring itself
+              says "these eight belong together" without a caption. */}
+          <header className="command-deck-rider-core">
+            <span className="ring-halo ring-bounce" aria-hidden="true" />
             <h2 id="command-deck-riders-title">ライダー</h2>
             <DeckLink href="/riders">
               すべて見る
               <ArrowUpRight size={16} aria-hidden="true" />
             </DeckLink>
           </header>
-          <nav aria-label="ライダーショートカット" className="command-deck-rider-rail">
-            {RIDERS.map(([id, name]) => (
-              <DeckLink href={`/riders/${id}`} key={id} aria-label={name}>
-                <span className="command-deck-rider-portrait">
-                  <img
-                    src={launcherTile(`/riders/${id}`)}
-                    alt=""
-                    width="240"
-                    height="300"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-                <strong>
-                  {id === "over-zeztz" ? (
-                    <>
-                      <span>オーバー</span>
-                      <wbr />
-                      <span>ゼッツ</span>
-                    </>
-                  ) : id === "vandal" ? (
-                    <>
-                      <span>ヴァン</span>
-                      <wbr />
-                      <span>ダール</span>
-                    </>
-                  ) : (
-                    name
-                  )}
-                </strong>
-                <ArrowUpRight size={15} aria-hidden="true" />
-              </DeckLink>
+          <nav
+            aria-label="ライダーショートカット"
+            className="ring-orbit ring-enter ring-orbit-keep command-deck-rider-orbit"
+            style={{ "--ring-n": RIDERS.length } as CSSProperties}
+          >
+            <span className="ring-orbit-track" aria-hidden="true" />
+            {RIDERS.map(([id, name], index) => (
+              <div
+                className="ring-orbit-item"
+                style={{ "--ring-i": index } as CSSProperties}
+                key={id}
+              >
+                <DeckLink href={`/riders/${id}`} aria-label={name} className="command-deck-rider">
+                  <span className="command-deck-rider-portrait ring-frame">
+                    <img
+                      src={launcherTile(`/riders/${id}`)}
+                      alt=""
+                      width="240"
+                      height="300"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <strong>
+                    {id === "over-zeztz" ? (
+                      <>
+                        <span>オーバー</span>
+                        <wbr />
+                        <span>ゼッツ</span>
+                      </>
+                    ) : id === "vandal" ? (
+                      <>
+                        <span>ヴァン</span>
+                        <wbr />
+                        <span>ダール</span>
+                      </>
+                    ) : (
+                      name
+                    )}
+                  </strong>
+                </DeckLink>
+              </div>
             ))}
           </nav>
         </section>

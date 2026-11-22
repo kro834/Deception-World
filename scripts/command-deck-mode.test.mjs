@@ -59,7 +59,12 @@ test("dashboard head does not preload the opening; replay head retains its exact
   mode.endDocumentEntryOpening();
   assert.deepEqual(
     Array.from(head({}).links, (link) => link.href),
-    ["../styles-artwork-stage.css?url", "../styles-command-deck.css?url"],
+    // 2026-11-22: the dashboard's ring sheet (the rider orbit) follows the deck's own.
+    [
+      "../styles-artwork-stage.css?url",
+      "../styles-command-deck.css?url",
+      "../styles-ring-home.css?url",
+    ],
   );
   const opening = head({ opening: 1 }).links;
   assert.equal(opening.find((link) => link.rel === "preload").href, "/logo.webp");

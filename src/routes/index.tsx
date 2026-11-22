@@ -23,6 +23,7 @@ import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
 import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
 import artworkStageCssUrl from "../styles-artwork-stage.css?url";
 import commandDeckCssUrl from "../styles-command-deck.css?url";
+import ringHomeCssUrl from "../styles-ring-home.css?url";
 
 const opensWith = (search: Parameters<typeof showsOpening>[0]) =>
   isDocumentEntryOpening() || showsOpening(search);
@@ -66,7 +67,12 @@ export const Route = createFileRoute("/")({
                 "ディセプションワールド、夢の章、ファイナルステージ。物語、ライダー、作品を巡る。",
             },
           ],
-          links: [{ rel: "stylesheet", href: artworkStageCssUrl }, { rel: "stylesheet", href: commandDeckCssUrl }],
+          links: [
+            { rel: "stylesheet", href: artworkStageCssUrl },
+            { rel: "stylesheet", href: commandDeckCssUrl },
+            // The ring system on the dashboard (the rider orbit, round controls).
+            { rel: "stylesheet", href: ringHomeCssUrl },
+          ],
         },
 });
 
