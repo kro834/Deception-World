@@ -316,6 +316,9 @@ export function SideMenuTrigger({
       ref={triggerRef}
       className={`side-panel-trigger ios26-glass${className ? ` ${className}` : ""}`}
       data-liquid-pointer="true"
+      // The ring system: the trigger's ring is the page's scroll progress
+      // (src/lib/ring-motion.js writes --ring-p on it).
+      data-ring-scroll=""
       type="button"
       aria-expanded={open ?? false}
       aria-controls="site-side-panel"

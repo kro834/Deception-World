@@ -66,6 +66,10 @@ const original = [
   "../styles-dynamic-gui.css?url",
   // Owner (2026-10-30): the future-motion layer (springs, scan arrivals, cascades) after the kit.
   "../styles-fx-motion.css?url",
+  // Owner (2026-11-22): the ring system (円環 composition, bouncing springs)
+  // and the shared chrome that wears it, right after the motion layer.
+  "../styles-ring.css?url",
+  "../styles-ring-chrome.css?url",
   // Owner (2026-10-30): 未来的でダイナミックな色合い — the future spectrum's colour and surfaces, after the kit.
   "../styles-future-spectrum.css?url",
   // Owner (2026-11-20): the optional liquid glass's three sheets (about 160 KB,
@@ -142,7 +146,8 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     expected,
     "bundles expand to the complete unchanged title/dashboard cascade",
   );
-  assert.equal(actual.length, expected.length - 18);
+  // 2026-11-22: 18 before; the two ring sheets ride inside the interface bundle.
+  assert.equal(actual.length, expected.length - 20);
   // Owner (2026-11-20): 8 before; the three glass sheets load only with the option on.
   assert.equal(actual.filter((href) => href.startsWith("../")).length, 5);
   const tokenBlock = (file) => read(file).match(/html\[data-family\] \{[\s\S]*?\n\}/)[0];

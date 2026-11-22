@@ -80,6 +80,7 @@ import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
 import { watchDynamicGui } from "@/lib/dynamic-gui.js";
 import { watchFxMotion } from "@/lib/fx-motion.js";
+import { watchRingMotion } from "@/lib/ring-motion.js";
 import { startPerfHud } from "@/lib/perf-hud-gate.js";
 import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
@@ -120,6 +121,8 @@ import liquidGlassControlsCss from "../styles-liquid-glass-controls.css?url";
 import liquidGlassSurfacesCss from "../styles-liquid-glass-surfaces.css?url";
 import fxMotionCss from "../styles-fx-motion.css?url";
 import futureSpectrumCss from "../styles-future-spectrum.css?url";
+import ringCss from "../styles-ring.css?url";
+import ringChromeCss from "../styles-ring-chrome.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -164,6 +167,14 @@ function DynamicGui() {
    spring (src/lib/fx-motion.js, src/styles-fx-motion.css). */
 function FxMotion() {
   useEffect(() => watchFxMotion(), []);
+  return null;
+}
+
+/* html[data-ring-ready] + .ring-enter[data-ring-in] / --ring-p / --ring-kick:
+   the ring system's arrivals, scroll progress and scroll-linked bounce
+   (src/lib/ring-motion.js, src/styles-ring.css). */
+function RingMotion() {
+  useEffect(() => watchRingMotion(), []);
   return null;
 }
 
@@ -395,6 +406,12 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: dynamicGuiCss },
       // The future-motion layer (springs, scan arrivals, cascades), after the kit.
       { rel: "stylesheet", href: fxMotionCss },
+      // Owner (2026-11-22): the ring system (円環 composition, springs with
+      // overshoot, the bouncing expansion rule), then the shared chrome that
+      // wears it. Right after the motion layer on every route (the title's
+      // bundle included); the spectrum and the optional glass keep their places.
+      { rel: "stylesheet", href: ringCss },
+      { rel: "stylesheet", href: ringChromeCss },
       // The future spectrum: colour and surfaces over the shared chrome and
       // the base families (paint only; special, Dream, gallery and the title
       // excluded, so the title does not load it).
@@ -469,7 +486,7 @@ export const Route = createRootRoute({
         routeTransitionsCss, frostedControlsCss, futureInterfaceCss, pressFeedbackCss,
         chromeElevationCss, transitionCinemaCss, rexonanceCallsCss, farFromEntryCss,
         illusionculumEntryCss, viewportChromeCss, stageCss, openingShellCss,
-        siteAstraCss, commandChromeCss, dynamicGuiCss, fxMotionCss,
+        siteAstraCss, commandChromeCss, dynamicGuiCss, fxMotionCss, ringCss, ringChromeCss,
       ] },
     ] : []),
   }),
@@ -502,6 +519,7 @@ function RootDocument() {
               <InquiryNavigation />
               <DynamicGui />
               <FxMotion />
+              <RingMotion />
               <PerfHudGate />
               <QuickSearchHost />
               <GalleryStickerWarmup />

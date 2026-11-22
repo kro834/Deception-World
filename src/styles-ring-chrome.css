@@ -1,0 +1,615 @@
+/* ================================================================
+   The ring system on the shared chrome (2026-11-22).
+   Root sheet, linked right after styles-ring.css. It dresses what every
+   page shares in the ring language and gives every expansion its bounce:
+     1. the menu trigger: a ring whose stroke is the page's scroll progress
+     2. the topbar: a round sigil, a pill track for the chapter links
+     3. the side menu (the 2026-11-22 artbook menu, kept): round controls,
+        a halo behind the page, groups and tiles that spring in, staggered
+     4. the expansion rule on the shared surfaces: quick search, the
+        announcement dialog, native dialogs that opt in
+     5. the route cover: a ring locks onto the carried file and lets go
+   Paint and motion only. No geometry of a measured control changes (the
+   trigger stays 48px, the nav links keep their boxes, the rider rail is
+   untouched), no text is added, and the suit-up entries' covers
+   (.rider-route-dive) are never selected, so their clocks stay pinned.
+   The optional liquid glass (html[data-button-style="liquid"]) keeps its
+   own controls: the control paint here stands aside for it.
+   Gates as in styles-ring.css: every animation and transition sits behind
+   prefers-reduced-motion: no-preference and :not([data-world-effects=
+   "economy"]); nothing loops; keyframes move opacity, scale, translate and
+   rotate only.
+   ================================================================ */
+
+/* Dream Chapter is a Taisho playbill: its rings are gilt and vermilion. */
+html[data-family="dream"] {
+  --ring-key: #e6c88a;
+  --ring-key-rgb: 230 200 138;
+  --ring-pink: #d9553f;
+  --ring-pink-rgb: 217 85 63;
+  --ring-gold: #f3e6c4;
+  --ring-gold-rgb: 243 230 196;
+}
+
+/* ================================================================
+   1. The menu trigger. A dark lens inside a ring; the ring's lit arc is
+   how far down the page the reader is (data-ring-scroll, --ring-p).
+   :not(#ring-x#ring-x) matches every trigger and only adds specificity:
+   each family's shell sheet paints the trigger from a longer selector
+   (the World's reaches it through main > header), and this is one shape
+   on every page.
+   ================================================================ */
+
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x) {
+  --ring-p: 0;
+  --ring-w: 2.5px;
+  /* !important: the shell, streamline, command and spectrum sheets each
+     paint the trigger with !important; this is the layer above them. */
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.3), transparent 58%),
+    radial-gradient(circle at 72% 86%, rgb(var(--ring-pink-rgb) / 0.22), transparent 60%),
+    #07101c !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 8px 22px -12px rgb(var(--ring-key-rgb) / 0.7) !important;
+  color: #eafaff !important;
+  clip-path: none !important;
+}
+
+/* The track, then the lit arc over it. */
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)::before,
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  opacity: 1;
+  scale: 1;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-w) - 0.6px),
+    #000 calc(100% - var(--ring-w))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-w) - 0.6px),
+    #000 calc(100% - var(--ring-w))
+  );
+}
+
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)::before {
+  background: rgb(var(--ring-key-rgb) / 0.26);
+}
+
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-pink) calc(var(--ring-p) * 0.62turn),
+    var(--ring-gold) calc(var(--ring-p) * 1turn),
+    transparent calc(var(--ring-p) * 1turn)
+  );
+}
+
+/* The glyph: three satellites and their fourth, as dots on the lens. */
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)
+  > .side-panel-trigger-glyph
+  > i,
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)
+  > .side-panel-trigger-glyph::after {
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: none;
+}
+
+html[data-family]:not([data-button-style="liquid"])
+  body
+  .side-panel-trigger:not(#ring-x#ring-x)
+  > .side-panel-trigger-glyph::after {
+  border: 0;
+  background: var(--ring-gold);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"]):not([data-button-style="liquid"])
+    body
+    .side-panel-trigger:not(#ring-x#ring-x)
+    > .side-panel-trigger-glyph {
+    transition: rotate var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  /* Opening the menu turns the satellites a quarter, with a rebound. */
+  html[data-family]:not([data-world-effects="economy"]):not([data-button-style="liquid"])
+    body
+    .side-panel-trigger:not(#ring-x#ring-x)[aria-expanded="true"]
+    > .side-panel-trigger-glyph {
+    rotate: 90deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family]:not([data-world-effects="economy"]):not([data-button-style="liquid"])
+    body
+    .side-panel-trigger:not(#ring-x#ring-x):hover
+    > .side-panel-trigger-glyph {
+    rotate: 45deg;
+  }
+}
+
+/* ================================================================
+   2. The topbar. The DW sigil is a ring; the chapter links sit in a pill
+   track and the current one is a lit pill. Boxes are unchanged.
+   ================================================================ */
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil.brand-sigil,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil.brand-sigil {
+  border: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.28), transparent 60%), #07101c;
+  box-shadow: 0 0 18px -8px rgb(var(--ring-key-rgb) / 0.8);
+  clip-path: none;
+  isolation: isolate;
+}
+
+/* The sigil's ring: the prism, masked to a 2px stroke. */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  .brand-sigil.brand-sigil::before,
+html[data-family="dossier"]
+  body
+  .manager-page
+  > header.manager-topbar
+  .brand-sigil.brand-sigil::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  padding: 2px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ring-prism);
+  opacity: 1;
+  transform: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition
+  > header.topbar
+  .brand-sigil.brand-sigil::after,
+html[data-family="dossier"]
+  body
+  .manager-page
+  > header.manager-topbar
+  .brand-sigil.brand-sigil::after {
+  content: none;
+}
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil {
+  position: relative;
+}
+
+/* The chapter links: one pill track, round ends on every link. */
+@media (min-width: 761px) {
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar > nav {
+    border-radius: var(--ring-radius-pill);
+    box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.16);
+  }
+}
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar > nav > a {
+  border-radius: var(--ring-radius-pill);
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  /* The sigil's ring turns a half on hover and springs back on leave. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    :is(header.topbar, header.manager-topbar)
+    .brand-sigil.brand-sigil::before {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    :is(header.topbar, header.manager-topbar)
+    .brand:hover
+    .brand-sigil.brand-sigil::before {
+    rotate: 180deg;
+  }
+}
+
+/* ================================================================
+   3. The side menu. The artbook menu keeps its hierarchy, tiles and copy.
+   The ring system adds: a halo behind the page, round controls, and the
+   expansion rule (the panel arrives on the soft spring; its groups and
+   tiles spring in with overshoot, staggered; closing is the quick snap).
+   ================================================================ */
+
+/* The halo: three static rings off the top-right corner, painted on the
+   panel's own background (it does not scroll with the content). */
+html[data-family]:not([data-family="dream"])
+  body
+  #site-side-panel#site-side-panel#site-side-panel.side-panel:not(#ring-x) {
+  /* !important: the menu's own sheets set this background with it. */
+  background-image:
+    radial-gradient(
+      circle at calc(100% - 40px) -40px,
+      transparent 259px,
+      rgb(var(--ring-key-rgb) / 0.22) 260px 261px,
+      transparent 262px
+    ),
+    radial-gradient(
+      circle at calc(100% - 40px) -40px,
+      transparent 379px,
+      rgb(var(--ring-pink-rgb) / 0.14) 380px 381px,
+      transparent 382px
+    ),
+    radial-gradient(
+      circle at calc(100% - 40px) -40px,
+      transparent 519px,
+      rgb(var(--ring-gold-rgb) / 0.12) 520px 521px,
+      transparent 522px
+    ),
+    radial-gradient(64% 40% at 96% 0%, rgb(122 232 255 / 0.17), transparent 70%),
+    radial-gradient(50% 34% at 48% 24%, rgb(157 134 255 / 0.11), transparent 72%),
+    radial-gradient(54% 38% at 4% 100%, rgb(240 210 150 / 0.13), transparent 70%) !important;
+}
+
+/* Round controls: the close button is a ring, the index a pill track. */
+html[data-family]:not([data-button-style="liquid"])
+  body
+  #site-side-panel#site-side-panel
+  .side-panel-close.side-panel-close {
+  border-radius: 50%;
+  border-color: rgb(var(--ring-key-rgb) / 0.5);
+}
+
+html[data-family]:not([data-button-style="liquid"])
+  body
+  #site-side-panel#site-side-panel
+  .command-atlas-index.command-atlas-index {
+  border-radius: 30px;
+}
+
+html[data-family]:not([data-button-style="liquid"])
+  body
+  #site-side-panel#site-side-panel
+  .command-atlas-index.command-atlas-index
+  > button {
+  border-radius: var(--ring-radius-pill);
+}
+
+/* The artbook tiles keep their pictures, copy and grid; their corners take
+   the ring's card radius so every surface in the menu is cut from a circle. */
+html[data-family]:not([data-button-style="liquid"])
+  body
+  #site-side-panel#site-side-panel:not(#ring-x)
+  .side-panel-links
+  > :is(a, button) {
+  border-radius: 22px !important;
+}
+
+/* Group headings open on a small ring instead of a bare rule. */
+html[data-family]:not([data-family="dream"])
+  body
+  #site-side-panel#site-side-panel
+  > .side-panel-group
+  > p::before {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin: 0 10px 0 2px;
+  border: 1.5px solid var(--ring-key);
+  border-radius: 50%;
+  background: none;
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.5);
+  outline-offset: 3px;
+}
+
+@keyframes ring-menu-group {
+  from {
+    opacity: 0;
+    translate: 0 28px;
+    scale: 0.96;
+  }
+}
+
+@keyframes ring-menu-tile {
+  from {
+    opacity: 0;
+    scale: 0.82;
+  }
+}
+
+@keyframes ring-menu-control {
+  from {
+    opacity: 0;
+    scale: 0.4;
+    rotate: -90deg;
+  }
+}
+
+@keyframes ring-menu-chip {
+  from {
+    opacity: 0;
+    translate: 0 -12px;
+    scale: 0.7;
+  }
+}
+
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+  /* The panel is a full-viewport layer: it rides the soft spring (no
+     overshoot, so no gap ever opens at its edge) and leaves on the snap.
+     A drag in progress keeps the swipe's own, transition-free tracking. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel.side-panel[data-open="true"]:not([data-dragging]) {
+    transition-timing-function: var(--ring-spring-soft);
+  }
+
+  /* Groups spring up one after another (60 ms apart). Backwards fill only:
+     a group is never left transformed, and every row is tappable from the
+     first frame (the entries into the suit-up scenes start at once). */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group {
+    animation: ring-menu-group var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(90ms + var(--ring-g, 0) * 60ms);
+  }
+
+  /* The head's controls: the close ring spins in, the index chips drop in. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel.side-panel[data-open="true"]
+    .side-panel-close {
+    animation: ring-menu-control var(--ring-dur-elastic) var(--ring-spring-elastic) 120ms backwards;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel.side-panel[data-open="true"]
+    .command-atlas-index
+    > button {
+    animation: ring-menu-chip var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(80ms + var(--ring-i, 0) * 34ms);
+  }
+
+  /* The heading rings pop last, each with its group. */
+  html[data-family]:not([data-world-effects="economy"]):not([data-family="dream"])
+    body
+    #site-side-panel#site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group
+    > p::before {
+    animation: ring-pop-in var(--ring-dur-elastic) var(--ring-spring-elastic) backwards;
+    animation-delay: calc(260ms + var(--ring-g, 0) * 60ms);
+  }
+}
+
+/* Tiles pop inside their group on a desktop pointer only: a phone's menu
+   holds dozens of pictures, and one layer per group is its budget. */
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) and (min-width: 900px) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group
+    .side-panel-links
+    > :is(a, button) {
+    animation: ring-menu-tile var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(140ms + var(--ring-g, 0) * 60ms + var(--fx-row, 0) * 36ms);
+  }
+
+  /* A tile leans up on hover and lands back on the spring. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel
+    .command-atlas-index
+    > button {
+    transition:
+      background-color 180ms ease,
+      box-shadow 220ms ease,
+      translate var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel
+    .command-atlas-index
+    > button:hover {
+    translate: 0 -2px;
+  }
+}
+
+/* The cascade's indices: groups in document order, index chips in a row. */
+#site-side-panel > .side-panel-group:nth-of-type(2) { --ring-g: 1; }
+#site-side-panel > .side-panel-group:nth-of-type(3) { --ring-g: 2; }
+#site-side-panel > .side-panel-group:nth-of-type(4) { --ring-g: 3; }
+#site-side-panel > .side-panel-group:nth-of-type(5) { --ring-g: 4; }
+#site-side-panel > .side-panel-group:nth-of-type(n + 6) { --ring-g: 5; }
+#site-side-panel .command-atlas-index > :nth-child(2) { --ring-i: 1; }
+#site-side-panel .command-atlas-index > :nth-child(3) { --ring-i: 2; }
+#site-side-panel .command-atlas-index > :nth-child(4) { --ring-i: 3; }
+#site-side-panel .command-atlas-index > :nth-child(5) { --ring-i: 4; }
+#site-side-panel .command-atlas-index > :nth-child(6) { --ring-i: 5; }
+#site-side-panel .command-atlas-index > :nth-child(n + 7) { --ring-i: 6; }
+
+/* ================================================================
+   4. The expansion rule on the shared surfaces. Each of these opens on
+   the bounce spring; its rows follow, staggered. They close as before
+   (their own quick fades).
+   ================================================================ */
+
+@keyframes ring-sheet-in {
+  from {
+    opacity: 0;
+    translate: 0 -18px;
+    scale: 0.9;
+  }
+}
+
+@keyframes ring-row-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.94;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Quick search: the sheet drops in and rebounds; the options follow. */
+  html:not([data-world-effects="economy"]) body dialog.quick-search[open] .quick-search-panel {
+    animation: ring-sheet-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    dialog.quick-search[open]
+    .quick-search-group
+    :is(.quick-search-option) {
+    animation: ring-row-in var(--ring-dur-spring) var(--ring-spring) backwards;
+    animation-delay: calc(90ms + var(--fx-row, 0) * 30ms);
+  }
+
+  /* The announcement dialog: the hub springs open from the centre. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-announcement-dialog[open]
+    .site-announcement-hub {
+    animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-announcement-dialog[open]
+    .site-announcement-list
+    > li {
+    animation: ring-row-in var(--ring-dur-spring) var(--ring-spring) backwards;
+    animation-delay: calc(120ms + var(--ring-i, 0) * var(--ring-stagger));
+  }
+}
+
+#site-announcement-dialog .site-announcement-list > :nth-child(2) { --ring-i: 1; }
+#site-announcement-dialog .site-announcement-list > :nth-child(3) { --ring-i: 2; }
+#site-announcement-dialog .site-announcement-list > :nth-child(4) { --ring-i: 3; }
+#site-announcement-dialog .site-announcement-list > :nth-child(n + 5) { --ring-i: 4; }
+
+/* ================================================================
+   5. The route cover. The file shutter keeps its clocks, panels and
+   brackets; a ring now locks around the held file as the ink closes and
+   opens away as the page takes over. A 2px line on ink: no flash, no red.
+   Only the file, world and cut-in covers; the rider dives and the
+   suit-up entries (.rider-route-dive) are not selected.
+   ================================================================ */
+
+html body .load-gate.has-cine:not(.rider-route-dive) > .dwc-lock::after {
+  --ring-d: calc(max(var(--fw, 240), var(--fh, 320)) * 1px + 72px);
+  content: "";
+  position: absolute;
+  top: calc(var(--fy, 0) * 1px + var(--fh, 0) * 0.5px - var(--ring-d) / 2);
+  left: calc(var(--fx, 0) * 1px + var(--fw, 0) * 0.5px - var(--ring-d) / 2);
+  width: var(--ring-d);
+  height: var(--ring-d);
+  padding: 2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    var(--dwc-accent, #7ae8ff),
+    #d4f6ff 0.2turn,
+    var(--dwc-gold, #f0cf86) 0.55turn,
+    transparent 0.56turn 0.66turn,
+    var(--dwc-accent, #7ae8ff) 0.67turn
+  );
+  opacity: 0;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+@keyframes ring-cover-lock {
+  from {
+    opacity: 0;
+    scale: 1.5;
+    rotate: -120deg;
+  }
+  to {
+    opacity: 0.9;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes ring-cover-release {
+  from {
+    opacity: 0.9;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1.7;
+    rotate: 60deg;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-dive).is-covering
+    > .dwc-lock::after {
+    animation: ring-cover-lock var(--ring-dur-bounce) var(--ring-spring-bounce) 120ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.rider-route-dive).is-revealing
+    > .dwc-lock::after {
+    animation: ring-cover-release 420ms cubic-bezier(0.3, 0, 0.2, 1) both;
+  }
+
+  /* Uncovered routes: the prism signal lands on the snap, not a plain ease. */
+  html:not([data-world-effects="economy"]) .route-signal.is-done {
+    animation-timing-function: var(--ring-spring-snap);
+  }
+}

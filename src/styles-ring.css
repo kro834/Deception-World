@@ -1,0 +1,647 @@
+/* ================================================================
+   The ring system — foundation (2026-11-22).
+   Owner: 「サイト全体に、円環型の構成と動的で弾んだアニメーションを」
+          「展開時は弾む様なアニメーションにして。」
+   Root sheet, linked after styles-fx-motion.css / the spectrum in
+   src/routes/__root.tsx. Driven by src/lib/ring-motion.js, which sets
+   html[data-ring-ready] and keeps data-ring-in / --ring-p / --ring-kick.
+   The shared chrome that uses it lives in styles-ring-chrome.css; each page
+   family applies it from its own styles-ring-<group>.css.
+
+   Everything here is opt-in (a .ring-* class or a --ring-* token). Nothing
+   touches an element that does not ask for it.
+
+   TOKENS
+     --ring-spring-soft     ζ .84   640 ms   large surfaces
+     --ring-spring          ζ .62   620 ms   controls, cards (8 % overshoot)
+     --ring-spring-bounce   ζ .45   700 ms   anything that expands (21 %)
+     --ring-spring-elastic  ζ .32   880 ms   small ornaments (35 %)
+     --ring-spring-snap     ζ .90   240 ms   closing, leaving
+     --ring-dur-*           the matching durations
+     --ring-stagger         40 ms between siblings (first twelve)
+     --ring-key / --ring-gold / --ring-pink / --ring-ink   the palette
+     --ring-prism           the conic ring gradient (ice → pink → gold → ice)
+     --ring-w               ring stroke (2px)   --ring-gap  ring to content
+     --ring-size-xs…xl      44 / 64 / 96 / 160 / 280 px diameters
+     --ring-space-1…6       4 / 8 / 16 / 24 / 40 / 64 px
+     --ring-radius-card     28px   --ring-radius-pill  999px
+
+   PRIMITIVES
+     .ring-frame            circular portrait frame (.ring-frame-card: the
+                            same stroke on a 28px-radius card)
+     .ring-orbit            children placed on a circle (--ring-n, --ring-r,
+                            --ring-i per child). .ring-arc: part of a circle
+                            (--ring-sweep, --ring-start).
+     .ring-progress         circular progress, reads --ring-p (0..1).
+                            data-ring-scroll makes the helper feed it the
+                            document scroll.
+     .ring-divider          a section divider: a hairline that opens around a
+                            small double ring.
+     .ring-halo             decorative concentric rings behind a subject.
+   MOTION
+     .ring-enter            arrives on a spring the first time it is seen
+                            (.ring-enter-pop / -rise / -spin pick the move).
+     .ring-stagger          on a parent: its children arrive 40 ms apart.
+     .ring-expand           THE EXPANSION RULE: a surface that opens springs in
+                            with overshoot and settles; .ring-expand-stagger
+                            staggers its children. Closing is quick (snap).
+     .ring-lift             hover lift on a spring (mouse only).
+     .ring-press            press sink, elastic release.
+     .ring-bounce           scroll-linked bounce (reads --ring-kick).
+
+   GATES. Every animation and transition sits behind
+     @media (prefers-reduced-motion: no-preference)
+     html:not([data-world-effects="economy"])
+   Reduced motion and economy get the resting state at once: no spring, no
+   stagger, no bounce. Nothing loops. Keyframes move only opacity, scale,
+   translate and rotate (compositor properties), with backwards fill, so no
+   transform is left on an element at rest. No backdrop-filter, no blur.
+   The special sites' suit-up engines are never selected here.
+   ================================================================ */
+
+:root {
+  /* Fallbacks for engines without linear(): close cubic approximations. */
+  --ring-spring-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ring-spring: cubic-bezier(0.25, 1.25, 0.4, 1);
+  --ring-spring-bounce: cubic-bezier(0.3, 1.6, 0.42, 1);
+  --ring-spring-elastic: cubic-bezier(0.32, 1.9, 0.4, 0.96);
+  --ring-spring-snap: cubic-bezier(0.3, 0.9, 0.3, 1);
+  --ring-dur-soft: 640ms;
+  --ring-dur-spring: 620ms;
+  --ring-dur-bounce: 700ms;
+  --ring-dur-elastic: 880ms;
+  --ring-dur-snap: 240ms;
+  --ring-stagger: 40ms;
+
+  --ring-key: #7ae8ff;
+  --ring-key-rgb: 122 232 255;
+  --ring-gold: #f0cf86;
+  --ring-gold-rgb: 240 207 134;
+  --ring-pink: #ff5fc8;
+  --ring-pink-rgb: 255 95 200;
+  --ring-ink: #05080f;
+  --ring-ink-rgb: 5 8 15;
+  --ring-paper: #f3f8ff;
+  --ring-prism: conic-gradient(
+    from var(--ring-from, 210deg),
+    var(--ring-key) 0turn,
+    #d4f6ff 0.14turn,
+    var(--ring-pink) 0.36turn,
+    var(--ring-gold) 0.62turn,
+    #fae6b6 0.8turn,
+    var(--ring-key) 1turn
+  );
+  --ring-track: rgb(var(--ring-key-rgb) / 0.18);
+
+  --ring-w: 2px;
+  --ring-gap: 5px;
+  --ring-size-xs: 44px;
+  --ring-size-sm: 64px;
+  --ring-size-md: 96px;
+  --ring-size-lg: 160px;
+  --ring-size-xl: 280px;
+  --ring-space-1: 4px;
+  --ring-space-2: 8px;
+  --ring-space-3: 16px;
+  --ring-space-4: 24px;
+  --ring-space-5: 40px;
+  --ring-space-6: 64px;
+  --ring-radius-card: 28px;
+  --ring-radius-pill: 999px;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    /* Sampled from src/lib/ring-motion.js (RING_SPRINGS); the test pins them. */
+    --ring-spring-soft: linear(0, 0.024, 0.083, 0.163, 0.255, 0.35, 0.443, 0.53, 0.61, 0.682, 0.744, 0.798, 0.843, 0.88, 0.911, 0.936, 0.955, 0.97, 0.982, 0.991, 0.997, 1.001, 1.004, 1.006, 1.007, 1.007, 1.007, 1.007, 1.006, 1.006, 1.005, 1.004, 1.004, 1.003, 1.002, 1.002, 1);
+    --ring-spring: linear(0, 0.034, 0.121, 0.24, 0.373, 0.508, 0.636, 0.75, 0.847, 0.925, 0.986, 1.03, 1.059, 1.076, 1.083, 1.082, 1.077, 1.068, 1.057, 1.046, 1.035, 1.025, 1.016, 1.009, 1.003, 0.999, 0.996, 0.994, 0.993, 0.993, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998, 1);
+    --ring-spring-bounce: linear(0, 0.054, 0.191, 0.375, 0.574, 0.763, 0.927, 1.054, 1.141, 1.191, 1.208, 1.199, 1.171, 1.134, 1.093, 1.053, 1.018, 0.991, 0.972, 0.961, 0.957, 0.958, 0.964, 0.971, 0.98, 0.988, 0.996, 1.001, 1.006, 1.008, 1.009, 1.009, 1.008, 1.006, 1.004, 1.003, 1);
+    --ring-spring-elastic: linear(0, 0.111, 0.379, 0.705, 1.004, 1.221, 1.332, 1.343, 1.279, 1.174, 1.06, 0.965, 0.903, 0.878, 0.886, 0.916, 0.955, 0.993, 1.022, 1.039, 1.043, 1.037, 1.024, 1.01, 0.998, 0.989, 0.985, 0.986, 0.989, 0.993, 0.998, 1.002, 1.004, 1.005, 1.005, 1.003, 1);
+    --ring-spring-snap: linear(0, 0.012, 0.044, 0.09, 0.145, 0.206, 0.269, 0.334, 0.397, 0.458, 0.516, 0.571, 0.621, 0.668, 0.71, 0.748, 0.782, 0.813, 0.84, 0.864, 0.885, 0.903, 0.919, 0.933, 0.945, 0.955, 0.963, 0.971, 0.977, 0.982, 0.986, 0.989, 0.992, 0.994, 0.996, 0.998, 1);
+  }
+}
+
+/* ================================================================
+   1. Ring frame: the circular frame for a portrait, a sigil or a control.
+   The stroke is a masked conic gradient on ::before, so the picture is
+   never filtered and the frame costs one small layer.
+   ================================================================ */
+
+.ring-frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  aspect-ratio: 1;
+  padding: calc(var(--ring-w) + var(--ring-gap));
+  border-radius: 50%;
+  isolation: isolate;
+}
+
+.ring-frame::before,
+.ring-frame-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: var(--ring-w);
+  border-radius: inherit;
+  background: var(--ring-prism);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+.ring-frame > img,
+.ring-frame > picture > img,
+.ring-frame > .ring-frame-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* The same stroke on a card: a 28px radius, the ring's material. */
+.ring-frame-card {
+  position: relative;
+  border-radius: var(--ring-radius-card);
+  isolation: isolate;
+}
+
+/* ================================================================
+   2. Orbit and arc: children on a circle.
+   Each child is placed by rotate → translate → counter-rotate, so it stays
+   upright and no trigonometry is needed. The container is a square of
+   2 × (--ring-r + half an item). Set --ring-n on the parent and --ring-i on
+   each child (0-based); the first twelve children get --ring-i from
+   :nth-child when it is not set inline.
+   ================================================================ */
+
+.ring-orbit,
+.ring-arc {
+  --ring-n: 8;
+  --ring-r: 180px;
+  --ring-item: var(--ring-size-sm);
+  --ring-start: -90deg;
+  --ring-sweep: 360deg;
+  position: relative;
+  box-sizing: border-box;
+  width: calc(var(--ring-r) * 2 + var(--ring-item));
+  max-width: 100%;
+  aspect-ratio: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* An arc spreads its children over --ring-sweep inclusive of both ends. */
+.ring-arc {
+  --ring-sweep: 120deg;
+  --ring-start: -150deg;
+  --ring-steps: calc(var(--ring-n) - 1);
+}
+
+.ring-orbit {
+  --ring-steps: var(--ring-n);
+}
+
+.ring-orbit > .ring-orbit-item,
+.ring-arc > .ring-orbit-item {
+  --ring-a: calc(var(--ring-start) + var(--ring-sweep) * var(--ring-i, 0) / var(--ring-steps));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ring-item);
+  height: var(--ring-item);
+  margin: calc(var(--ring-item) / -2) 0 0 calc(var(--ring-item) / -2);
+  transform: rotate(var(--ring-a)) translateX(var(--ring-r)) rotate(calc(var(--ring-a) * -1));
+}
+
+/* The centre of an orbit: whatever the ring is about. */
+.ring-orbit > .ring-orbit-core {
+  position: absolute;
+  inset: calc(var(--ring-item) + var(--ring-space-3));
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+/* The orbit's own line, drawn behind the items. */
+.ring-orbit > .ring-orbit-track {
+  position: absolute;
+  inset: calc(var(--ring-item) / 2);
+  border: 1px solid var(--ring-track);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ring-orbit-item:nth-child(1) { --ring-i: 0; }
+.ring-orbit-item:nth-child(2) { --ring-i: 1; }
+.ring-orbit-item:nth-child(3) { --ring-i: 2; }
+.ring-orbit-item:nth-child(4) { --ring-i: 3; }
+.ring-orbit-item:nth-child(5) { --ring-i: 4; }
+.ring-orbit-item:nth-child(6) { --ring-i: 5; }
+.ring-orbit-item:nth-child(7) { --ring-i: 6; }
+.ring-orbit-item:nth-child(8) { --ring-i: 7; }
+.ring-orbit-item:nth-child(9) { --ring-i: 8; }
+.ring-orbit-item:nth-child(10) { --ring-i: 9; }
+.ring-orbit-item:nth-child(11) { --ring-i: 10; }
+.ring-orbit-item:nth-child(12) { --ring-i: 11; }
+
+/* ================================================================
+   3. Circular progress. --ring-p is 0..1. The fill is a conic gradient
+   under a ring mask: one paint of a small box, nothing animated per frame
+   but that box. With data-ring-scroll the helper writes the document's
+   scroll position into --ring-p on the element itself.
+   ================================================================ */
+
+.ring-progress {
+  --ring-p: 0;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--ring-size-xs);
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.ring-progress::before,
+.ring-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-w) - 0.6px),
+    #000 calc(100% - var(--ring-w))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-w) - 0.6px),
+    #000 calc(100% - var(--ring-w))
+  );
+}
+
+.ring-progress::before {
+  background: var(--ring-track);
+}
+
+.ring-progress::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-pink) calc(var(--ring-p) * 0.6turn),
+    var(--ring-gold) calc(var(--ring-p) * 1turn),
+    transparent calc(var(--ring-p) * 1turn)
+  );
+}
+
+/* ================================================================
+   4. Ring divider: a hairline that opens around a small double ring.
+   Use as <hr class="ring-divider"> or an empty aria-hidden element.
+   ================================================================ */
+
+.ring-divider {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  margin: var(--ring-space-5) 0;
+  border: 0;
+  background: none;
+  color: var(--ring-key);
+  overflow: visible;
+}
+
+.ring-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--ring-key-rgb) / 0.5) 18%,
+    rgb(var(--ring-pink-rgb) / 0.5) 50%,
+    rgb(var(--ring-gold-rgb) / 0.5) 82%,
+    transparent
+  );
+  /* The line stops short of the ring on both sides. */
+  -webkit-mask: linear-gradient(
+    90deg,
+    #000 calc(50% - 30px),
+    transparent calc(50% - 30px) calc(50% + 30px),
+    #000 calc(50% + 30px)
+  );
+  mask: linear-gradient(
+    90deg,
+    #000 calc(50% - 30px),
+    transparent calc(50% - 30px) calc(50% + 30px),
+    #000 calc(50% + 30px)
+  );
+}
+
+.ring-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 1.5px solid var(--ring-key);
+  border-radius: 50%;
+  /* The outer ring: an outline, so it never takes layout. */
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.55);
+  outline-offset: 9px;
+}
+
+/* ================================================================
+   5. Halo: decorative concentric rings behind a subject. Static paint
+   (two radial gradients), aria-hidden, never catches input.
+   ================================================================ */
+
+.ring-halo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(100% - 1px),
+      rgb(var(--ring-key-rgb) / 0.34) calc(100% - 1px) 100%,
+      transparent 100%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(78% - 1px),
+      rgb(var(--ring-gold-rgb) / 0.26) calc(78% - 1px) 78%,
+      transparent 78%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(56% - 1px),
+      rgb(var(--ring-pink-rgb) / 0.2) calc(56% - 1px) 56%,
+      transparent 56%
+    );
+  pointer-events: none;
+}
+
+/* ================================================================
+   6. Motion.
+   ================================================================ */
+
+@keyframes ring-pop-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@keyframes ring-rise-in {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+    scale: 0.94;
+  }
+}
+
+@keyframes ring-spin-in {
+  from {
+    opacity: 0;
+    rotate: -70deg;
+    scale: 0.7;
+  }
+}
+
+/* The orbit turns into place; its items counter-turn by the same curve, so
+   they stay upright while they travel along the ring. */
+@keyframes ring-orbit-turn {
+  from {
+    rotate: -48deg;
+  }
+}
+
+@keyframes ring-orbit-counter {
+  from {
+    opacity: 0;
+    rotate: 48deg;
+    scale: 0.4;
+  }
+}
+
+@keyframes ring-expand-in {
+  from {
+    opacity: 0;
+    scale: 0.84;
+  }
+}
+
+@keyframes ring-expand-child {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+    scale: 0.9;
+  }
+}
+
+@keyframes ring-line-draw {
+  from {
+    scale: 0 1;
+  }
+}
+
+/* The keyframes are from-only, so each arrival ends on the element's own
+   resting values, whatever they are. Opacity rides the same spring: it is
+   clamped at 1 while the move overshoots, so the fade is done by the time
+   the curve first crosses its target. */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* --- Arrivals: held back only once the helper can release them. --- */
+  html[data-ring-ready]:not([data-world-effects="economy"]) .ring-enter:not([data-ring-in]) {
+    opacity: 0;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"]) .ring-enter[data-ring-in] {
+    animation: ring-rise-in var(--ring-dur-spring) var(--ring-spring) backwards;
+    animation-delay: calc(var(--ring-i, 0) * var(--ring-stagger));
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"]) .ring-enter-pop[data-ring-in] {
+    animation-name: ring-pop-in;
+    animation-duration: var(--ring-dur-bounce);
+    animation-timing-function: var(--ring-spring-bounce);
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"]) .ring-enter-spin[data-ring-in] {
+    animation-name: ring-spin-in;
+    animation-duration: var(--ring-dur-bounce);
+    animation-timing-function: var(--ring-spring-bounce);
+  }
+
+  /* An orbit that arrives: the ring turns in, the items pop along it. */
+  html[data-ring-ready]:not([data-world-effects="economy"]) .ring-orbit.ring-enter[data-ring-in] {
+    animation: ring-orbit-turn var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .ring-orbit.ring-enter[data-ring-in]
+    > .ring-orbit-item
+    > * {
+    animation: ring-orbit-counter var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(var(--ring-i, 0) * var(--ring-stagger));
+  }
+
+  /* A divider: the line draws from the centre, the ring pops last. */
+  html[data-ring-ready]:not([data-world-effects="economy"]) .ring-divider.ring-enter[data-ring-in] {
+    animation: none;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .ring-divider.ring-enter[data-ring-in]::before {
+    animation: ring-line-draw var(--ring-dur-soft) var(--ring-spring-soft) backwards;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    .ring-divider.ring-enter[data-ring-in]::after {
+    animation: ring-pop-in var(--ring-dur-elastic) var(--ring-spring-elastic) 160ms backwards;
+  }
+
+  /* --- Stagger: a parent hands its children their place in the cascade. --- */
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(1) { --ring-i: 0; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(2) { --ring-i: 1; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(3) { --ring-i: 2; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(4) { --ring-i: 3; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(5) { --ring-i: 4; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(6) { --ring-i: 5; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(7) { --ring-i: 6; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(8) { --ring-i: 7; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(9) { --ring-i: 8; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(10) { --ring-i: 9; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(11) { --ring-i: 10; }
+  html:not([data-world-effects="economy"]) .ring-stagger > :nth-child(n + 12) { --ring-i: 11; }
+
+  /* --- THE EXPANSION RULE (owner, 2026-11-22). ---
+     A surface that opens springs in with overshoot and an elastic settle.
+     It plays when the open state first matches (or on mount, with
+     .ring-expand-mount) and leaves nothing behind (backwards fill), so a
+     panel's fixed and sticky children are not re-parented at rest.
+     Full-viewport sheets should put .ring-expand on their inner groups,
+     not on themselves: a large layer must not overshoot past the screen. */
+  html:not([data-world-effects="economy"])
+    .ring-expand:is(
+      [open],
+      [data-open="true"],
+      [data-state="open"],
+      [aria-hidden="false"],
+      .is-open,
+      .ring-expand-mount
+    ) {
+    animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: var(--ring-origin, 50% 0%);
+  }
+
+  html:not([data-world-effects="economy"])
+    .ring-expand-stagger:is(
+      [open],
+      [data-open="true"],
+      [data-state="open"],
+      [aria-hidden="false"],
+      .is-open,
+      .ring-expand-mount
+    )
+    > * {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(60ms + var(--ring-i, 0) * var(--ring-stagger));
+  }
+
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(1) { --ring-i: 0; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(2) { --ring-i: 1; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(3) { --ring-i: 2; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(4) { --ring-i: 3; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(5) { --ring-i: 4; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(6) { --ring-i: 5; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(7) { --ring-i: 6; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(8) { --ring-i: 7; }
+  html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(n + 9) { --ring-i: 8; }
+
+  /* --- Press: a quick sink, an elastic release. --- */
+  html:not([data-world-effects="economy"]) .ring-press {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  html:not([data-world-effects="economy"]) .ring-press:active {
+    scale: 0.93;
+    transition: scale 90ms ease-out;
+  }
+
+  /* --- Scroll-linked bounce: one spring value, written by the helper. --- */
+  html:not([data-world-effects="economy"]) .ring-bounce {
+    translate: 0 var(--ring-kick, 0px);
+  }
+}
+
+/* --- Hover lift: a mouse only, as everywhere on the site. --- */
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"]) .ring-lift {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html:not([data-world-effects="economy"]) .ring-lift:hover {
+    translate: 0 -5px;
+    scale: 1.04;
+  }
+
+  /* A framed portrait turns its ring a quarter on hover. */
+  html:not([data-world-effects="economy"]) .ring-frame::before {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html:not([data-world-effects="economy"]) :is(a, button):hover > .ring-frame::before,
+  html:not([data-world-effects="economy"]) :is(a, button).ring-frame:hover::before {
+    rotate: 90deg;
+  }
+}
+
+/* ================================================================
+   7. Phone: an orbit that cannot fit becomes a wrapped row of the same
+   ring-framed items (the ring stays in each item; the page never scrolls
+   sideways). Opt out with .ring-orbit-keep where the radius is already
+   sized to the viewport.
+   ================================================================ */
+
+@media (max-width: 560px) {
+  .ring-orbit:not(.ring-orbit-keep),
+  .ring-arc:not(.ring-orbit-keep) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ring-space-3);
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: auto;
+  }
+
+  .ring-orbit:not(.ring-orbit-keep) > .ring-orbit-item,
+  .ring-arc:not(.ring-orbit-keep) > .ring-orbit-item {
+    position: static;
+    margin: 0;
+    transform: none;
+  }
+
+  .ring-orbit:not(.ring-orbit-keep) > :is(.ring-orbit-track, .ring-orbit-core) {
+    display: none;
+  }
+}
