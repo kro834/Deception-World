@@ -16,7 +16,15 @@ runInNewContext(
   ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   }).outputText,
-  { exports, require: createRequire(import.meta.url) },
+  {
+    exports,
+    // 2026-11-23: the reader mounts the dossier orbit (the exploded-view
+    // file); this fixture renders the reading bar alone.
+    require: (name) =>
+      name === "./dossier-orbit"
+        ? { DossierOrbit: () => null }
+        : createRequire(import.meta.url)(name),
+  },
 );
 
 test("contents render Japanese titles and original metadata with native chapter anchors", () => {
@@ -112,7 +120,10 @@ function mountReaderPosition() {
                 cleanup = effect();
               },
             }
-          : createRequire(import.meta.url)(name),
+          : // 2026-11-23: the dossier orbit is stubbed, as in the fixture above.
+            name === "./dossier-orbit"
+            ? { DossierOrbit: () => null }
+            : createRequire(import.meta.url)(name),
       document: {
         documentElement: root,
         getElementById: (id) => sections.find((section) => section.id === id) ?? null,

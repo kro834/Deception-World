@@ -238,8 +238,7 @@ const ORBIT_NUDGE_HOLD_MS = 300;
 const ORBIT_HUG_MIN_GAP_PX = 96;
 const ORBIT_HUG_MAX_PX = 96;
 // The side layout's media query (styles-ring-chrome.css, section 3).
-const ORBIT_SIDE_LAYOUT =
-  "(min-width: 1020px), (min-width: 640px) and (max-height: 560px)";
+const ORBIT_SIDE_LAYOUT = "(min-width: 1020px), (min-width: 640px) and (max-height: 560px)";
 
 // Test doubles of `window` have no matchMedia; the menu then lays out as if
 // the query did not match.
@@ -624,8 +623,7 @@ export function SideMenuLayer({
   const orbitWheelLockRef = useRef(0);
   const orbitShown = orbitDrag ?? orbitTurn;
   const orbitIndex =
-    ((Math.round(orbitShown) % ORBIT_REGIONS.length) + ORBIT_REGIONS.length) %
-    ORBIT_REGIONS.length;
+    ((Math.round(orbitShown) % ORBIT_REGIONS.length) + ORBIT_REGIONS.length) % ORBIT_REGIONS.length;
   const orbitRegion = ORBIT_REGIONS[orbitIndex][0];
   const turnOrbitTo = (index: number) =>
     setOrbitTurn((value) => {

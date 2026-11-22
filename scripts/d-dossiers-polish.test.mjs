@@ -175,6 +175,8 @@ function mountReaderAtEnd({ scrollend = true } = {}) {
           jsx: (type, props) => ({ type, props }),
           jsxs: (type, props) => ({ type, props }),
         };
+      // 2026-11-23: the reader mounts the dossier orbit beside its bar.
+      if (name === "./dossier-orbit") return { DossierOrbit: () => null };
       throw new Error(`Unexpected dependency ${name}`);
     },
     document: {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DossierOrbit } from "./dossier-orbit";
 
 type Chapter = { no: string; title: string; kicker: string };
 type ReaderDestination = { id: string; label: string };
@@ -55,6 +56,11 @@ export function DossierReader({
   forms?: boolean;
 }) {
   const [active, setActive] = useState("dossier-profile");
+  // The exploded-view file (2026-11-23): one part is in the layout at a
+  // time, chosen on the orbit round the figure or here. The part chosen is
+  // the bar's current destination; the scroll position no longer decides it
+  // (the other parts are out of the layout).
+  const [part, setPart] = useState("dossier-profile");
   const destinations: ReaderDestination[] = [
     { id: "dossier-profile", label: "人物紹介" },
     ...(identity ? [{ id: "identity-records", label: "関連記録" }] : []),
@@ -156,20 +162,26 @@ export function DossierReader({
     };
   }, [ids]);
 
+  // `active` (the scroll position's section) still follows the page for
+  // anything that reads it later; the bar marks the part.
+  void active;
   return (
-    <nav className="dossier-reader" aria-label={`${name}の資料内を移動`}>
-      <span className="dossier-reader-name">{name}</span>
-      <div className="dossier-reader-links">
-        {destinations.map((item) => (
-          <a
-            key={item.id}
-            href={`#${item.id}`}
-            aria-current={active === item.id ? "location" : undefined}
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
-    </nav>
+    <>
+      <DossierOrbit name={name} parts={destinations} part={part} onPart={setPart} />
+      <nav className="dossier-reader" aria-label={`${name}の資料内を移動`}>
+        <span className="dossier-reader-name">{name}</span>
+        <div className="dossier-reader-links">
+          {destinations.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              aria-current={part === item.id ? "location" : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </nav>
+    </>
   );
 }

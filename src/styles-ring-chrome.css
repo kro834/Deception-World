@@ -599,11 +599,13 @@ html[data-family]:not([data-family="dream"]) body #site-side-panel#site-side-pan
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  width: auto;
+  /* !important: the page-section rows are sized to their text by the
+     artbook sheets with it. */
+  width: auto !important;
   height: auto;
   min-height: 50px;
   margin: 0;
-  padding: 5px 18px 5px 6px;
+  padding: 5px 18px 5px 22px;
   overflow: hidden;
   border: 1px solid var(--orbit-line);
   border-radius: var(--ring-radius-pill) !important;
@@ -625,38 +627,17 @@ html[data-family]:not([data-family="dream"]) body #site-side-panel#site-side-pan
   display: none;
 }
 
-#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button)::before {
-  content: "";
-  position: static;
-  flex: none;
-  width: 10px;
-  height: 10px;
-  margin: 0 6px 0 14px;
-  inset: auto;
-  min-width: 10px;
-  max-width: 10px;
-  border: 2px solid var(--ring-key);
-  border-radius: 50%;
-  background: none;
-  box-shadow: none;
-  opacity: 1;
-  transform: none;
-  translate: none;
-  scale: none;
-  rotate: none;
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button)::before,
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button)::after {
+  content: none;
 }
 
-#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button):has(> img)::before,
-#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > .side-panel-zeus-toggle::before {
-  display: none;
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button):has(> img) {
+  padding-left: 6px;
 }
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button) > * {
   align-self: center;
-}
-
-#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button)::after {
-  content: none;
 }
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button) > img {
@@ -930,16 +911,12 @@ html[data-family]:not([data-family="dream"]) body #site-side-panel#site-side-pan
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button) {
     min-height: 46px;
-    padding-left: 16px;
+    padding-left: 18px;
     translate: none;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button):has(> img) {
     padding-left: 6px;
-  }
-
-  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button)::before {
-    display: none;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(.library-current-control, fieldset) {
