@@ -1,0 +1,860 @@
+/* ================================================================
+   The ring system on the library and the record search (2026-11-23).
+   Linked last by src/routes/library.tsx and src/routes/search.tsx.
+   Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
+   アニメーションにして」, and: be much bolder than phase 1.
+
+   /library  the hero picture sits in a round window inside a halo; the
+             kinds are one orbit around their heading; the eight riders are
+             one orbit around theirs; every panel, card and control is cut
+             from circles (28px cards, pills, round marks).
+   /search   the kinds are an orbit around a lens whose ring is lit by the
+             chosen kind's share; the field is one pill; results are ring
+             cards.
+
+   The older library sheets (stage, zenith, atelier, command-records) paint
+   these controls in several layers, some with !important. Where the ring
+   paint must win it says !important and raises specificity with
+   :not(#ring-x#ring-x) (matches everything, adds two ids), as the chrome
+   sheet does. Restructured blocks use their own .ring-* / .search-ring
+   classes, so no older rule reaches them.
+   Motion gates as in styles-ring.css.
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   1. Shared material: round corners, pills, ring cards.
+   --------------------------------------------------------------- */
+
+/* Panels and cards: the 28px ring card. The older cut corners go. */
+html[data-family="library"] body
+  :is(
+    .library-hero,
+    .library-continue,
+    .library-shelf,
+    .library-history,
+    .library-searches,
+    .library-browse-controls,
+    .library-card,
+    .inquiry-choice,
+    .inquiry-route,
+    .inquiry-stop-body,
+    .search-workbench,
+    .search-result-card,
+    .search-empty,
+    .search-library-door
+  ):not(#ring-x#ring-x) {
+  /* The older sheets cut these corners with clip-path and 0–4px radii. */
+  border-radius: var(--ring-radius-card) !important;
+  clip-path: none !important;
+}
+
+html[data-family="library"] body
+  :is(.library-card, .search-result-card, .inquiry-stop-body):not(#ring-x#ring-x) {
+  border-radius: 22px !important;
+}
+
+/* The ring's material: a dark lens under a prism stroke. The stroke is the
+   border box's own gradient, so it follows the round corner and needs no
+   pseudo-element; the older corner brackets (background layers) go with the
+   older fill. */
+html[data-family="library"] body
+  :is(
+    .library-hero,
+    .library-continue,
+    .library-shelf,
+    .library-history,
+    .library-searches,
+    .library-browse-controls,
+    .search-workbench
+  ):not(#ring-x#ring-x) {
+  border: var(--ring-w) solid transparent !important;
+  background:
+    radial-gradient(120% 130% at 0% 0%, rgb(164 221 207 / 0.17), transparent 56%) padding-box,
+    radial-gradient(90% 110% at 100% 100%, rgb(var(--ring-gold-rgb) / 0.08), transparent 60%)
+      padding-box,
+    linear-gradient(160deg, #101c22, #070c15) padding-box,
+    var(--ring-prism) border-box !important;
+  box-shadow: 0 22px 48px rgb(0 0 0 / 0.36) !important;
+}
+
+html[data-family="library"] body
+  :is(.library-shelf, .library-history, .library-searches):not(#ring-x#ring-x) {
+  border-width: 1px !important;
+}
+
+html[data-family="library"] body .search-workbench:not(#ring-x#ring-x) {
+  background:
+    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.16), transparent 56%)
+      padding-box,
+    radial-gradient(90% 110% at 100% 100%, rgb(var(--ring-pink-rgb) / 0.09), transparent 60%)
+      padding-box,
+    linear-gradient(160deg, #0d1a2a, #060b15) padding-box,
+    var(--ring-prism) border-box !important;
+}
+
+/* Cards: the same lens, a quieter stroke (there are dozens on a page). */
+html[data-family="library"] body
+  :is(.library-card, .search-result-card, .inquiry-choice):not(#ring-x#ring-x) {
+  border: 1.5px solid transparent !important;
+  background:
+    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.1), transparent 52%)
+      padding-box,
+    linear-gradient(160deg, #0e1922, #070c15) padding-box,
+    linear-gradient(
+        140deg,
+        rgb(var(--ring-key-rgb) / 0.6),
+        rgb(var(--ring-pink-rgb) / 0.22) 46%,
+        rgb(var(--ring-gold-rgb) / 0.55)
+      )
+      border-box !important;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 0.3) !important;
+}
+
+/* A saved or chosen card wears the full prism. */
+html[data-family="library"] body
+  :is(
+    .library-card[data-record-saved="true"],
+    .inquiry-choice[aria-pressed="true"],
+    .search-result-card[aria-selected="true"]
+  ):not(#ring-x#ring-x) {
+  background:
+    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 56%)
+      padding-box,
+    linear-gradient(160deg, #101d28, #070c15) padding-box,
+    var(--ring-prism) border-box !important;
+}
+
+html[data-family="library"] body
+  :is(.library-browse-controls, .library-hero, .search-workbench):not(#ring-x#ring-x)::before,
+html[data-family="library"] body
+  :is(.library-browse-controls, .library-hero, .search-workbench):not(#ring-x#ring-x)::after {
+  content: none !important;
+}
+
+/* The art windows inside cards: rectangles keep their aspect, corners round. */
+html[data-family="library"] body
+  :is(.library-card, .search-result-card, .library-continue, .inquiry-stop-body, .library-rows)
+  .dxl-art:not(#ring-x#ring-x) {
+  border-radius: 16px !important;
+  clip-path: none !important;
+  overflow: hidden;
+}
+
+html[data-family="library"] body .inquiry-choice-art:not(#ring-x#ring-x) {
+  border-radius: 18px !important;
+  overflow: hidden;
+}
+
+/* Text controls: pills. */
+html[data-family="library"] body
+  :is(
+    .library-jump-links > a,
+    .library-start-reading > a,
+    .library-data-controls > button,
+    .library-shelf-tools > :is(a, button),
+    .library-browse-submit,
+    .library-scope-row > button,
+    .library-filter-row > button,
+    .library-active-filters,
+    .library-card-actions > :is(a, button),
+    .library-footer > a,
+    .library-topbar-actions > span,
+    .inquiry-choice-action,
+    .inquiry-guide-jump,
+    .inquiry-stop-body a,
+    .search-submit,
+    .search-clear,
+    .search-suggestions > button,
+    .search-suggestions > span,
+    .search-recent-term,
+    .search-recent-clear,
+    .search-active-filter > button,
+    .search-section-nav > a,
+    .search-group-head,
+    .search-more-option,
+    .search-more,
+    .search-results-heading > p,
+    .library-results-heading > p,
+    .library-card-kind,
+    .search-empty-kinds > button,
+    .search-close-matches > button
+  ):not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-pill) !important;
+  clip-path: none !important;
+}
+
+/* The fields: one pill each. */
+html[data-family="library"] body
+  :is(.library-search, .search-input-row):not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-pill) !important;
+  clip-path: none !important;
+  overflow: hidden;
+}
+
+html[data-family="library"] body .search-input-row:not(#ring-x#ring-x) {
+  padding-inline: 20px 8px;
+}
+
+html[data-family="library"] body .library-search:not(#ring-x#ring-x) {
+  padding-inline-start: 14px;
+}
+
+/* Small counts become round marks. */
+html[data-family="library"] body
+  :is(
+    .library-shelf-title > span,
+    .library-hub-subhead > b,
+    .search-result-meta > span:first-child
+  ):not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-pill) !important;
+}
+
+html[data-family="library"] body .search-group-head:not(#ring-x#ring-x)::before {
+  border-radius: var(--ring-radius-pill) !important;
+}
+
+/* The section rule under a heading becomes the ring's hairline. */
+html[data-family="library"] body .search-main > .ring-divider:not(#ring-x) {
+  margin-block: var(--ring-space-3);
+}
+
+/* While a search is typed the results follow the field directly. */
+html[data-family="library"] body .search-main:has(.search-ring.is-compact) > .ring-divider {
+  display: none;
+}
+
+html[data-family="library"] body .ring-divider {
+  margin: var(--ring-space-5) auto;
+  max-width: min(1320px, calc(100% - 32px));
+}
+
+/* ---------------------------------------------------------------
+   2. /library hero: the picture in a round window, inside a halo.
+   --------------------------------------------------------------- */
+
+html[data-family="library"] body .library-hero > .library-screen:not(#ring-x#ring-x) {
+  position: relative;
+  justify-self: center;
+  align-self: center;
+  width: min(100%, 400px) !important;
+  height: auto !important;
+  aspect-ratio: 1 !important;
+  padding: 7px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: none !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
+/* The window's prism stroke (the older frame marks are replaced). */
+html[data-family="library"] body .library-hero > .library-screen:not(#ring-x#ring-x)::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2;
+  width: auto !important;
+  height: auto !important;
+  padding: var(--ring-w);
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: var(--ring-prism) !important;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: none;
+}
+
+html[data-family="library"] body .library-hero > .library-screen:not(#ring-x#ring-x)::after {
+  content: none !important;
+}
+
+html[data-family="library"] body .library-hero > .library-screen > .dxl-art:not(#ring-x#ring-x) {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+html[data-family="library"] body
+  .library-hero
+  > .library-screen
+  > .dxl-art:not(#ring-x#ring-x)::before,
+html[data-family="library"] body
+  .library-hero
+  > .library-screen
+  > .dxl-art:not(#ring-x#ring-x)::after {
+  content: none !important;
+}
+
+html[data-family="library"] body .library-hero > .library-screen > .ring-halo {
+  inset: -17%;
+  z-index: -1;
+}
+
+/* ---------------------------------------------------------------
+   3. /library kinds: the kinds on one orbit around their heading.
+   --------------------------------------------------------------- */
+
+html[data-family="library"] body .ring-kinds:not(#ring-x#ring-x),
+html[data-family="library"] body .ring-cast:not(#ring-x#ring-x) {
+  display: grid !important;
+  justify-items: center;
+  margin-block: var(--ring-space-5) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* The heading rests in the ring's centre and never takes a tap. */
+html[data-family="library"] body .ring-kinds:not(#ring-x#ring-x) > h2,
+html[data-family="library"] body .ring-cast:not(#ring-x#ring-x) > h2 {
+  grid-area: 1 / 1;
+  align-self: center;
+  z-index: 1;
+  max-width: calc(var(--ring-core-w, 240px));
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  font-size: clamp(20px, 2.4vw, 36px) !important;
+  line-height: 1.25 !important;
+  text-align: center !important;
+  pointer-events: none;
+}
+
+html[data-family="library"] body .ring-kinds:not(#ring-x#ring-x) > h2::before,
+html[data-family="library"] body .ring-kinds:not(#ring-x#ring-x) > h2::after,
+html[data-family="library"] body .ring-cast:not(#ring-x#ring-x) > h2::before,
+html[data-family="library"] body .ring-cast:not(#ring-x#ring-x) > h2::after {
+  content: none !important;
+}
+
+html[data-family="library"] body .ring-kinds-orbit,
+html[data-family="library"] body .ring-cast-orbit {
+  grid-area: 1 / 1;
+  /* Room for the names under the lowest nodes. */
+  margin-block: var(--ring-space-3) 76px;
+}
+
+html[data-family="library"] body .ring-kinds {
+  --ring-core-w: clamp(132px, 22vw, 300px);
+}
+
+html[data-family="library"] body .ring-kinds-orbit {
+  --ring-item: clamp(76px, 9.2vw, 124px);
+  /* 2r + item + the names' overhang stays inside the 16px gutters. */
+  --ring-r: min(clamp(150px, 18vw, 250px), calc(50vw - var(--ring-item) / 2 - 34px));
+}
+
+html[data-family="library"] body .ring-cast {
+  --ring-core-w: clamp(120px, 24vw, 340px);
+}
+
+html[data-family="library"] body .ring-cast-orbit {
+  --ring-item: clamp(64px, 8.4vw, 118px);
+  --ring-r: min(clamp(150px, 22vw, 290px), calc(50vw - var(--ring-item) / 2 - 32px));
+}
+
+/* The orbit line: a gold inner companion makes it read as a ring, not a rule. */
+html[data-family="library"] body :is(.ring-kinds-orbit, .ring-cast-orbit) > .ring-orbit-track {
+  border-color: rgb(var(--ring-key-rgb) / 0.34);
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.2);
+  outline-offset: calc(var(--ring-item) * -0.5 - 14px);
+}
+
+/* A node: the round picture is the control; its words hang under it. */
+html[data-family="library"] body :is(.ring-kind, .ring-cast-node) {
+  all: unset;
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  color: #eef7ff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="library"] body :is(.ring-kind, .ring-cast-node):focus-visible {
+  outline: 2px solid var(--ring-key);
+  outline-offset: 5px;
+}
+
+html[data-family="library"] body :is(.ring-kind-art, .ring-cast-art) {
+  --ring-gap: 4px;
+  position: absolute;
+  inset: 0;
+  background: #07101c;
+}
+
+html[data-family="library"] body .ring-kind-art > .dxl-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+html[data-family="library"] body .ring-kind-art > .dxl-art::before,
+html[data-family="library"] body .ring-kind-art > .dxl-art::after,
+html[data-family="library"] body .ring-kind-art > .dxl-art > i {
+  display: none;
+}
+
+html[data-family="library"] body .ring-kind-art > .dxl-art > img,
+html[data-family="library"] body .ring-cast-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+html[data-family="library"] body .ring-cast-art > img {
+  position: static;
+}
+
+/* A plate without a picture: its name words, centred in the lens. */
+html[data-family="library"] body .ring-kind-art > .dxl-art > b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* Each rider's ring wears the rider's own tone. */
+html[data-family="library"] body .ring-cast-art::before {
+  background: conic-gradient(
+    from 210deg,
+    var(--cast-tone, var(--ring-key)) 0turn,
+    #ffffff 0.16turn,
+    var(--cast-tone, var(--ring-key)) 0.42turn,
+    rgb(255 255 255 / 0.18) 0.7turn,
+    var(--cast-tone, var(--ring-key)) 1turn
+  );
+}
+
+html[data-family="library"] body :is(.ring-kind-label, .ring-cast-name) {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: calc(var(--ring-item) + 28px);
+  translate: -50% 0;
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+html[data-family="library"] body .ring-cast-name {
+  display: block;
+}
+
+html[data-family="library"] body .ring-kind-count {
+  color: rgb(var(--ring-gold-rgb) / 0.92);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+html[data-family="library"] body .ring-kind-count > b {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* The chosen kind: a second ring and a larger lens. */
+html[data-family="library"] body .ring-kind[aria-pressed="true"] > .ring-kind-art {
+  scale: 1.1;
+  box-shadow:
+    0 0 0 5px rgb(var(--ring-ink-rgb)),
+    0 0 0 6px rgb(var(--ring-gold-rgb) / 0.8);
+}
+
+html[data-family="library"] body .ring-kind[aria-pressed="true"] .ring-kind-name {
+  color: var(--ring-gold);
+}
+
+/* ---------------------------------------------------------------
+   4. /search: the kinds on an orbit around a lens.
+   --------------------------------------------------------------- */
+
+html[data-family="library"] body .search-ring {
+  --ring-item: clamp(64px, 5.6vw, 80px);
+  --ring-r: min(clamp(112px, 10.5vw, 138px), calc(50vw - var(--ring-item) / 2 - 44px));
+  justify-self: center;
+  margin: var(--ring-space-4) auto var(--ring-space-2);
+}
+
+html[data-family="library"] body .search-ring > .ring-orbit-track {
+  border-color: rgb(var(--ring-key-rgb) / 0.36);
+}
+
+/* The lens: a progress ring whose lit arc is the chosen kind's share. */
+html[data-family="library"] body .search-ring-lens {
+  --ring-p: 1;
+  position: absolute;
+  inset: calc(var(--ring-item) + 22px);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.24), transparent 62%), #07101c;
+  pointer-events: none;
+}
+
+html[data-family="library"] body .search-ring-lens::before,
+html[data-family="library"] body .search-ring-lens::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.6px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3.6px), #000 calc(100% - 3px));
+}
+
+html[data-family="library"] body .search-ring-lens::before {
+  background: var(--ring-track);
+}
+
+html[data-family="library"] body .search-ring-lens::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-pink) calc(var(--ring-p) * 0.6turn),
+    var(--ring-gold) calc(var(--ring-p) * 1turn),
+    transparent calc(var(--ring-p) * 1turn)
+  );
+}
+
+/* The glass and its handle, drawn from two strokes. */
+html[data-family="library"] body .search-ring-lens > i {
+  position: relative;
+  width: 34%;
+  aspect-ratio: 1;
+  translate: -8% -8%;
+  border: 2px solid rgb(var(--ring-key-rgb) / 0.9);
+  border-radius: 50%;
+}
+
+html[data-family="library"] body .search-ring-lens > i::after {
+  content: "";
+  position: absolute;
+  top: 92%;
+  left: 92%;
+  width: 46%;
+  height: 2px;
+  border-radius: 2px;
+  background: rgb(var(--ring-gold-rgb) / 0.9);
+  rotate: 45deg;
+  transform-origin: 0 50%;
+}
+
+/* While a search is typed only the kinds with a match remain (two to
+   eight): the ring tightens to the smallest radius whose neighbours still
+   clear each other, so the results stay close to the field. */
+html[data-family="library"] body .search-ring.is-compact {
+  --ring-item: 52px;
+  --ring-r: max(58px, calc((var(--ring-item) + 8px) / (2 * sin(180deg / var(--ring-n)))));
+  margin-block: var(--ring-space-2);
+}
+
+html[data-family="library"] body .search-ring.is-compact > .search-ring-lens {
+  inset: calc(var(--ring-item) + 12px);
+}
+
+html[data-family="library"] body .search-ring.is-compact button {
+  padding: 3px;
+  font-size: 10.5px;
+}
+
+html[data-family="library"] body .search-ring.is-compact button > span {
+  top: -6px;
+  right: -8px;
+  min-width: 22px;
+  height: 19px;
+  padding: 0 5px;
+  font-size: 10px;
+}
+
+/* A kind: a dark lens with its name; the count is a round mark on its rim. */
+html[data-family="library"] body .search-ring button {
+  all: unset;
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.2), transparent 64%), #07101c;
+  color: #dff4ff;
+  font-size: clamp(11px, 0.95vw, 13px);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="library"] body .search-ring button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--ring-w);
+  border-radius: 50%;
+  background: rgb(var(--ring-key-rgb) / 0.34);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="library"] body .search-ring button:focus-visible {
+  outline: 2px solid var(--ring-key);
+  outline-offset: 4px;
+}
+
+html[data-family="library"] body .search-ring button > span {
+  position: absolute;
+  top: -7px;
+  right: -9px;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.6);
+  border-radius: var(--ring-radius-pill);
+  background: #0a1422;
+  color: var(--ring-gold);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+html[data-family="library"] body .search-ring button[aria-pressed="true"] {
+  scale: 1.12;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.5), transparent 70%), #0b1c2e;
+  color: #ffffff;
+}
+
+html[data-family="library"] body .search-ring button[aria-pressed="true"]::before {
+  background: var(--ring-prism);
+}
+
+html[data-family="library"] body .search-ring button[aria-pressed="true"] > span {
+  border-color: var(--ring-gold);
+  background: var(--ring-gold);
+  color: #0a1422;
+}
+
+/* Wide screens: the orbit stands beside the field, not under it. */
+@media (min-width: 1180px) {
+  html[data-family="library"] body .search-workbench:not(#ring-x#ring-x) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--ring-space-5);
+    align-content: center;
+  }
+
+  html[data-family="library"] body .search-workbench:not(#ring-x#ring-x) > * {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  html[data-family="library"] body .search-workbench:not(#ring-x#ring-x) > .search-ring {
+    grid-row: 1 / span 8;
+    grid-column: 2;
+    align-self: center;
+    margin: var(--ring-space-2) var(--ring-space-2) var(--ring-space-2) 0;
+  }
+}
+
+/* ---------------------------------------------------------------
+   5. Motion (reduced motion and economy get the resting state).
+   --------------------------------------------------------------- */
+
+@keyframes ring-library-unfold {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The chosen node settles on the elastic spring (a small ornament). */
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(.ring-kind-art, .search-ring button) {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  /* EXPANSION RULE: the inquiry's guide unfolds when a question opens it;
+     its stops cascade after the sheet. Backwards fill: nothing stays moved. */
+  html[data-family="library"]:not([data-world-effects="economy"]) body .inquiry-guide > .inquiry-route {
+    animation: ring-library-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    .inquiry-guide
+    > .inquiry-route
+    .inquiry-stop {
+    animation: ring-library-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(90ms + var(--ring-i, 0) * var(--ring-stagger));
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"]) body .inquiry-stop:nth-child(2) {
+    --ring-i: 1;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"]) body .inquiry-stop:nth-child(3) {
+    --ring-i: 2;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"]) body .inquiry-stop:nth-child(n + 4) {
+    --ring-i: 3;
+  }
+
+  /* The active-filter chip and the empty state appear by unfolding too. */
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(.search-active-filter > button, .search-empty) {
+    animation: ring-library-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(.ring-kind, .ring-cast-node, .library-card, .search-result-card) {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(.ring-kind, .ring-cast-node):hover {
+    scale: 1.08;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(.library-card, .search-result-card):hover {
+    translate: 0 -4px;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"]) body .search-ring button:hover {
+    scale: 1.1;
+  }
+}
+
+/* ---------------------------------------------------------------
+   6. Phone.
+   --------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  html[data-family="library"] body .library-hero > .library-screen:not(#ring-x#ring-x) {
+    width: min(64vw, 260px) !important;
+  }
+
+  html[data-family="library"] body .ring-kinds-orbit,
+  html[data-family="library"] body .ring-cast-orbit {
+    margin-bottom: 64px;
+  }
+
+  /* Eight two-line names: half a step round, so no rider sits on the
+     horizontal axis and each side has a full step of height for its name. */
+  html[data-family="library"] body .ring-cast-orbit {
+    --ring-item: clamp(58px, 17vw, 70px);
+    --ring-r: min(150px, calc(50vw - var(--ring-item) / 2 - 30px));
+    --ring-start: -112.5deg;
+  }
+
+  html[data-family="library"] body .ring-cast-name {
+    max-width: calc(var(--ring-item) + 22px);
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+
+  html[data-family="library"] body .ring-cast:not(#ring-x#ring-x) > h2,
+  html[data-family="library"] body .ring-kinds:not(#ring-x#ring-x) > h2 {
+    max-width: 150px;
+    font-size: 18px !important;
+    word-break: keep-all;
+  }
+
+  /* The topbar's page name stays on one line as a pill. */
+  html[data-family="library"] body .library-topbar-actions > span:not(#ring-x#ring-x) {
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+  }
+}
+
+/* Phones: all eight names begin 仮面ライダー, and two lines under each
+   portrait would run into the next rider on the ring. The shared first word
+   is kept for assistive technology and hidden from view; the ring's heading
+   (八人のライダー) says it once. */
+@media (max-width: 480px) {
+  html[data-family="library"] body .ring-cast-name .name-word:first-child:not(:only-child) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  html[data-family="library"] body .ring-cast-name {
+    font-size: 11px;
+  }
+}
+
+/* Very narrow phones: smaller keys, so neighbours on the ring never touch. */
+@media (max-width: 359px) {
+  html[data-family="library"] body .search-ring {
+    --ring-item: 58px;
+    --ring-r: calc(50vw - var(--ring-item) / 2 - 36px);
+  }
+
+  html[data-family="library"] body .ring-cast-orbit {
+    --ring-item: 56px;
+  }
+}

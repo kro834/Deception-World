@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TransformationLab } from "@/components/transformation-lab/transformation-lab";
 import cssUrl from "@/styles-transformation-lab.css?url";
+import ringArchiveCssUrl from "@/styles-ring-archive.css?url";
 import { WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 export const Route = createFileRoute("/transformation-lab")({
   component: TransformationLab,
@@ -13,6 +14,11 @@ export const Route = createFileRoute("/transformation-lab")({
           "レクソナンス、ファーフロム、イリュージョンクルム、メタ・ウニタスの変身を再生・逆再生・比較。",
       },
     ],
-    links: [...WORLD_CORE_STYLESHEET_LINKS, { rel: "stylesheet", href: cssUrl }],
+    links: [
+      ...WORLD_CORE_STYLESHEET_LINKS,
+      { rel: "stylesheet", href: cssUrl },
+      // The ring system on this page (2026-11-23), after every older skin.
+      { rel: "stylesheet", href: ringArchiveCssUrl },
+    ],
   }),
 });

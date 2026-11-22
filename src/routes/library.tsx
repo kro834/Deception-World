@@ -7,6 +7,7 @@ import stageLibraryCssUrl from "@/styles-stage-library.css?url";
 import zenithLibraryCssUrl from "@/styles-library-zenith.css?url";
 import atelierLibraryCssUrl from "@/styles-library-atelier.css?url";
 import commandRecordsCssUrl from "@/styles-command-records.css?url";
+import ringLibraryCssUrl from "@/styles-ring-library.css?url";
 import { getInquiryGuide } from "@/lib/inquiry-guides";
 import { validateLibraryBrowseSearch } from "@/lib/library-browse-state";
 
@@ -29,6 +30,8 @@ export const Route = createFileRoute("/library")({
         // Route-local editorial layout, after every shared index skin.
         { rel: "stylesheet", href: atelierLibraryCssUrl },
         { rel: "stylesheet", href: commandRecordsCssUrl },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringLibraryCssUrl },
       ],
     }),
 });

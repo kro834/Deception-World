@@ -42,7 +42,8 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     await ready(page, "/search");
     await page.locator(".search-observatory").waitFor();
-    const categories = page.locator(".search-categories button");
+    // 2026-11-23 (ring system): the kinds are an orbit (.search-ring), no longer .search-categories.
+    const categories = page.locator(".search-ring button");
     assert.equal(await categories.count(), 8);
     assert.equal(
       await categories.evaluateAll((buttons) =>
@@ -147,7 +148,7 @@ try {
     await page.locator(".search-section-nav").waitFor();
 
     await ready(page, "/search?q=ゼウス&category=riders");
-    const selectedEmptyCategory = page.locator('.search-categories button[aria-pressed="true"]');
+    const selectedEmptyCategory = page.locator('.search-ring button[aria-pressed="true"]');
     assert.match(await selectedEmptyCategory.textContent(), /ライダー/);
     assert.equal(
       Number(await selectedEmptyCategory.locator("span").textContent()),

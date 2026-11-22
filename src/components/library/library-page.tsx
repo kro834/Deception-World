@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { defaultParseSearch, Link } from "@tanstack/react-router";
 import { LibraryInquiry } from "./library-inquiry";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -502,6 +510,7 @@ export function LibraryPage({
               </nav>
             </div>
             <div className="library-screen" aria-hidden="true">
+              <i className="ring-halo ring-bounce" />
               <RecordArtFrame
                 art={pathArt("/world")}
                 title="DECEPTION WORLD"
@@ -522,30 +531,51 @@ export function LibraryPage({
               });
             }}
           />
-          <section className="library-discovery" aria-labelledby="library-discovery-title">
+          <i className="ring-divider ring-enter" aria-hidden="true" />
+          {/* Ring system (2026-11-23): the kinds have no first or last,
+              so they sit on one orbit around their heading. Each node is a
+              wrapper (the orbit places it with a transform); the button
+              inside keeps its own press and focus. */}
+          <section
+            className="library-discovery ring-kinds"
+            aria-labelledby="library-discovery-title"
+          >
             <h2 id="library-discovery-title">種類から探す</h2>
-            <div className="library-index-meter" role="group" aria-label="種類から探す">
-              {KIND_COUNTS.map(([id, count]) => (
-                <button
+            <div
+              className="ring-kinds-orbit ring-orbit ring-orbit-keep ring-enter"
+              role="group"
+              aria-label="種類から探す"
+              style={{ "--ring-n": KIND_COUNTS.length } as CSSProperties}
+            >
+              <span className="ring-orbit-track" aria-hidden="true" />
+              {KIND_COUNTS.map(([id, count], index) => (
+                <span
                   key={id}
-                  type="button"
-                  data-kind={id}
-                  aria-pressed={kind === id}
-                  onClick={() => openKind(id)}
+                  className="ring-orbit-item"
+                  style={{ "--ring-i": index } as CSSProperties}
                 >
-                  <RecordArtFrame
-                    art={pathArt(KIND_ART[id])}
-                    title={LIBRARY_KINDS[id]}
-                    slot="continue"
-                  />
-                  <span className="library-kind-name">{LIBRARY_KINDS[id]}</span>
-                  <span className="library-kind-count">
-                    <b>{count}</b> 件の資料
-                  </span>
-                  <span className="library-kind-arrow" aria-hidden="true">
-                    ↘
-                  </span>
-                </button>
+                  <button
+                    type="button"
+                    className="ring-kind"
+                    data-kind={id}
+                    aria-pressed={kind === id}
+                    onClick={() => openKind(id)}
+                  >
+                    <span className="ring-kind-art ring-frame">
+                      <RecordArtFrame
+                        art={pathArt(KIND_ART[id])}
+                        title={LIBRARY_KINDS[id]}
+                        slot="continue"
+                      />
+                    </span>
+                    <span className="ring-kind-label">
+                      <span className="ring-kind-name">{LIBRARY_KINDS[id]}</span>
+                      <span className="ring-kind-count">
+                        <b>{count}</b> 件の資料
+                      </span>
+                    </span>
+                  </button>
+                </span>
               ))}
             </div>
           </section>
@@ -838,32 +868,38 @@ export function LibraryPage({
                 .catch(() => undefined);
             }}
           />
-          <section className="library-cast-directory" aria-label="ライダーの人物資料">
-            <div className="library-cast-board">
-              <div className="library-cast-heading">
-                <h2>八人のライダー</h2>
-              </div>
-              <nav
-                className="library-cast"
-                aria-label="ライダーの人物資料"
-                onFocus={(event) => {
-                  // Keep a keyboard-selected file fully visible on short screens.
-                  const tile = event.target;
-                  if (tile instanceof HTMLElement && tile.matches(":focus-visible"))
-                    tile.scrollIntoView({ block: "nearest", inline: "nearest" });
-                }}
-              >
-                {CAST.map(({ entry, tone, src, pos }) => (
+          <i className="ring-divider ring-enter" aria-hidden="true" />
+          {/* Ring system (2026-11-23): the eight riders on one orbit around
+              their heading, as on the home dashboard. */}
+          <section className="library-cast-directory ring-cast" aria-label="ライダーの人物資料">
+            <h2>八人のライダー</h2>
+            <nav
+              className="ring-cast-orbit ring-orbit ring-orbit-keep ring-enter"
+              aria-label="ライダーの人物資料"
+              style={{ "--ring-n": CAST.length } as CSSProperties}
+              onFocus={(event) => {
+                // Keep a keyboard-selected file fully visible on short screens.
+                const tile = event.target;
+                if (tile instanceof HTMLElement && tile.matches(":focus-visible"))
+                  tile.scrollIntoView({ block: "nearest", inline: "nearest" });
+              }}
+            >
+              <span className="ring-orbit-track" aria-hidden="true" />
+              {CAST.map(({ entry, tone, src, pos }, index) => (
+                <span
+                  key={entry.id}
+                  className="ring-orbit-item"
+                  style={{ "--ring-i": index } as CSSProperties}
+                >
                   <GuardedLink
-                    key={entry.id}
                     to={entry.path}
                     assets={[]}
-                    className="library-cast-tile"
+                    className="ring-cast-node"
                     data-cast-card="true"
                     style={{ "--cast-tone": tone } as ReturnType<typeof titleRunStyle>}
                     beforeNavigate={quietFlush}
                   >
-                    <span className="library-cast-art" aria-hidden="true">
+                    <span className="ring-cast-art ring-frame" aria-hidden="true">
                       {/* Reuse published delivery variants; later rows load lazily. */}
                       <img
                         {...recordImage(src, "cast")}
@@ -874,13 +910,13 @@ export function LibraryPage({
                         style={{ objectPosition: pos }}
                       />
                     </span>
-                    <span className="library-cast-name">
+                    <span className="ring-cast-name">
                       <DisplayName value={entry.title} />
                     </span>
                   </GuardedLink>
-                ))}
-              </nav>
-            </div>
+                </span>
+              ))}
+            </nav>
           </section>
         </main>
         <footer className="library-footer">

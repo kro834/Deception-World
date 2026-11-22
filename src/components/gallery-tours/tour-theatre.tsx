@@ -370,7 +370,12 @@ export function GalleryTourTheatre({
             >
               ← 前の作品
             </button>
-            <div className="gallery-tour-progress">
+            {/* Ring system (2026-11-23): the stops are marks on one ring around
+                the position (--ring-n marks, --ring-i each). */}
+            <div
+              className="gallery-tour-progress gallery-tour-ring-stops"
+              style={{ "--ring-n": tour.stops.length } as CSSProperties}
+            >
               <p className="gallery-tour-position" aria-live="polite" aria-atomic="true">
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <span className="gallery-tour-position-total">
@@ -384,6 +389,7 @@ export function GalleryTourTheatre({
                     key={`${item.artworkId}:${itemIndex}`}
                     data-visited={itemIndex <= index || undefined}
                     data-current={itemIndex === index || undefined}
+                    style={{ "--ring-i": itemIndex } as CSSProperties}
                   />
                 ))}
               </div>

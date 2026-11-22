@@ -21,6 +21,12 @@ const nameWordAssets = '<link rel="stylesheet" href="/name-words.css?v=20261006-
 // 2026-10-23 no-secondary-labels plan). Linked last, after every archive
 // sheet, so it takes the captions out over all of them.
 const labelsStylesheet = '<link rel="stylesheet" href="/archive-labels.css?v=20261120-labels1">';
+// Owner (2026-11-23): the ring system inside the archives (round material,
+// the selected form's ring, bouncing expansion) and the scroll report that
+// feeds the page's topbar ring. Linked after every archive sheet and before
+// the labels sheet, which stays last.
+const ringAssets =
+  '<link rel="stylesheet" href="/archive-ring.css?v=20261123-ring1">\n<script src="/archive-ring.js?v=20261123-ring1" defer></script>';
 // The frame intentionally has an opaque sandbox origin. Classic scripts
 // preserve that boundary; ES module fetches would require CORS permission.
 const nameRules = readFileSync(resolve(root, "src/lib/name-break-rules.js"), "utf8").replace(/^export /gm, "");
@@ -118,9 +124,15 @@ for (const archive of archives) {
   const withNameWords = withStateBridge.includes(nameWordAssets)
     ? withStateBridge
     : withStateBridge.replace("</head>", `${nameWordAssets}\n</head>`);
-  const withLabels = withNameWords.includes(labelsStylesheet)
+  // The ring layer goes right before the labels sheet, wherever that is.
+  const withRing = withNameWords.includes(ringAssets)
     ? withNameWords
-    : withNameWords.replace("</head>", `${labelsStylesheet}\n</head>`);
+    : withNameWords.includes(labelsStylesheet)
+      ? withNameWords.replace(labelsStylesheet, `${ringAssets}\n${labelsStylesheet}`)
+      : withNameWords.replace("</head>", `${ringAssets}\n</head>`);
+  const withLabels = withRing.includes(labelsStylesheet)
+    ? withRing
+    : withRing.replace("</head>", `${labelsStylesheet}\n</head>`);
   const withReadySignal = withLabels.includes("data-archive-ready-signal")
     ? withLabels
     : withLabels.replace("</body>", `${readySignal}\n</body>`);

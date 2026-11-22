@@ -1,0 +1,604 @@
+/* ================================================================
+   The ring system on the archives and the utility pages (2026-11-23).
+   Linked last by src/routes/dogs-archive.tsx, form-archive.tsx,
+   world-map.tsx, transformation-lab.tsx and download.tsx.
+   Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
+   アニメーションにして」, and: be much bolder than phase 1.
+
+   /dogs-archive        the five dogs are nodes on one arc; the page does not
+                        scroll, so the topbar's ring shows the chosen dog's
+                        place among the five.
+   /form-archive        the page chrome around the archive frame; the
+                        topbar's ring follows the frame's own scroll
+                        (--ring-archive-p). The archive document inside the
+                        frame has its own ring layer (public/archive-ring.css).
+   /world-map           the map is already a ring of connections: its
+                        panels, controls and index join the ring's material.
+   /transformation-lab  chrome only (the suit-up engine is never selected):
+                        the stages of the suit-up are one orbit around a ring
+                        lit up to the stage in progress.
+   /download            the sigil is a ring inside a halo; the card and its
+                        controls are cut from circles.
+
+   Where an older sheet's !important or id-weight paint must lose, the ring
+   says !important and raises specificity with :not(#ring-x#ring-x).
+   Motion gates as in styles-ring.css.
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   0. The topbar's progress ring on pages whose document does not scroll.
+   The helper keeps writing the document's scroll (always 0 here) inline on
+   the trigger; an author !important value outranks that, so the page hands
+   its own progress down as --ring-archive-p.
+   --------------------------------------------------------------- */
+
+html[data-family="archive"] body .side-panel-trigger:not(#ring-x#ring-x#ring-x) {
+  --ring-p: var(--ring-archive-p, 0) !important;
+}
+
+/* ---------------------------------------------------------------
+   1. /dogs-archive: five dogs on one arc.
+   --------------------------------------------------------------- */
+
+html[data-family="archive"] body .dogs-ring {
+  --dog-item: clamp(52px, 4.8vw, 66px);
+  /* The distance between neighbours along the arc. */
+  --dog-gap: clamp(66px, 15.4vw, 210px);
+  --dog-step: 13deg;
+  /* gap = r × step (rad): r = gap / 0.2269. */
+  --dog-r: calc(var(--dog-gap) * 4.407);
+  /* The end nodes sit 26° round: they drop r × (1 − cos 26°). */
+  --dog-sag: calc(var(--dog-r) * 0.1012);
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  height: calc(var(--dog-item) + var(--dog-sag) + 46px);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* The arc itself: one large circle, shown only between the end nodes. */
+html[data-family="archive"] body .dogs-ring::before {
+  content: "";
+  position: absolute;
+  top: calc(12px + var(--dog-item) / 2);
+  left: calc(50% - var(--dog-r));
+  width: calc(var(--dog-r) * 2);
+  height: calc(var(--dog-r) * 2);
+  border: 1px solid rgb(126 240 178 / 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(
+    90deg,
+    transparent calc(50% - var(--dog-gap) * 2.9),
+    #000 calc(50% - var(--dog-gap) * 2.1),
+    #000 calc(50% + var(--dog-gap) * 2.1),
+    transparent calc(50% + var(--dog-gap) * 2.9)
+  );
+  mask: linear-gradient(
+    90deg,
+    transparent calc(50% - var(--dog-gap) * 2.9),
+    #000 calc(50% - var(--dog-gap) * 2.1),
+    #000 calc(50% + var(--dog-gap) * 2.1),
+    transparent calc(50% + var(--dog-gap) * 2.9)
+  );
+}
+
+/* A node: moved to the arc's centre, turned, moved back out, turned upright. */
+html[data-family="archive"] body .dogs-ring > .dogs-ring-node {
+  --ring-a: calc((var(--ring-i, 0) - 2) * var(--dog-step));
+  position: absolute;
+  top: 12px;
+  left: calc(50% - var(--dog-item) / 2);
+  width: var(--dog-item);
+  height: var(--dog-item);
+  transform: translateY(var(--dog-r)) rotate(var(--ring-a)) translateY(calc(var(--dog-r) * -1))
+    rotate(calc(var(--ring-a) * -1));
+}
+
+html[data-family="archive"] body .dogs-ring-node > button {
+  all: unset;
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(126 240 178 / 0.26), transparent 64%), #04130d;
+  color: #d9ffe9;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="archive"] body .dogs-ring-node > button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--ring-w);
+  border-radius: 50%;
+  background: rgb(126 240 178 / 0.36);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="archive"] body .dogs-ring-node > button:focus-visible {
+  outline: 2px solid #9dffc8;
+  outline-offset: 4px;
+}
+
+html[data-family="archive"] body .dogs-ring-node > button > b {
+  font-family: inherit;
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 600;
+  line-height: 1;
+}
+
+html[data-family="archive"] body .dogs-ring-node > button > span {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  width: max-content;
+  max-width: calc(var(--dog-gap) - 6px);
+  translate: -50% 0;
+  color: rgb(217 255 233 / 0.82);
+  font-size: clamp(10.5px, 0.95vw, 13px);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* The chosen dog: the lit ring, a larger lens. */
+html[data-family="archive"] body .dogs-ring-node > button[aria-selected="true"] {
+  scale: 1.16;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(126 240 178 / 0.6), transparent 70%), #0a2a1b;
+  color: #ffffff;
+}
+
+html[data-family="archive"] body .dogs-ring-node > button[aria-selected="true"]::before {
+  background: conic-gradient(from 210deg, #9dffc8, #ffffff 0.2turn, #49c98a 0.5turn, #e9d79a 0.78turn, #9dffc8);
+}
+
+html[data-family="archive"] body .dogs-ring-node > button[aria-selected="true"] > span {
+  color: #ffffff;
+}
+
+/* The record bar's controls: a pill track and round corners. */
+html[data-family="archive"] body
+  :is(
+    .dogs-archive-forms,
+    .dogs-archive-forms > button,
+    .dogs-archive-reference,
+    .dogs-archive-portrait > a
+  ):not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-pill) !important;
+}
+
+html[data-family="archive"] body .dogs-archive-portrait {
+  position: relative;
+}
+
+html[data-family="archive"] body .dogs-archive-portrait__frame:not(#ring-x#ring-x) {
+  position: relative;
+  z-index: 1;
+  border-radius: var(--ring-radius-card) !important;
+  overflow: hidden;
+}
+
+/* A halo behind the portrait, in the archive's own green. */
+html[data-family="archive"] body .dogs-archive-portrait > .dogs-ring-halo {
+  inset: 50% auto auto 50%;
+  width: min(118vmin, 980px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(100% - 1.5px),
+      rgb(126 240 178 / 0.4) calc(100% - 1.5px) 100%,
+      transparent 100%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(80% - 1.5px),
+      rgb(233 215 154 / 0.3) calc(80% - 1.5px) 80%,
+      transparent 80%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(62% - 1px),
+      rgb(126 240 178 / 0.24) calc(62% - 1px) 62%,
+      transparent 62%
+    );
+}
+
+html[data-family="archive"] body .dogs-archive-reference-dialog:not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-card) !important;
+}
+
+html[data-family="archive"] body .dogs-archive-reference-dialog:not(#ring-x#ring-x) header > button {
+  border-radius: 50% !important;
+}
+
+html[data-family="archive"] body .dogs-reference-pair img {
+  border-radius: 18px;
+}
+
+/* ---------------------------------------------------------------
+   2. /form-archive: the chrome around the archive frame.
+   --------------------------------------------------------------- */
+
+/* The loading plate: the crest waits inside a ring. */
+html[data-family="archive"] body .form-archive-frame-status:not(#ring-x#ring-x) > i {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border: 0 !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.26), transparent 62%) padding-box,
+    linear-gradient(#07101c, #07101c) padding-box,
+    var(--ring-prism) border-box !important;
+  border: var(--ring-w) solid transparent !important;
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.4);
+  outline-offset: 12px;
+}
+
+/* ---------------------------------------------------------------
+   3. /world-map
+   --------------------------------------------------------------- */
+
+html[data-family="utility"] body
+  :is(
+    .wm-back,
+    .wm-lab-link,
+    .wm-search,
+    .wm-search-clear,
+    .wm-filters > button,
+    .wm-view-controls,
+    .wm-view-controls > button,
+    .wm-source,
+    .wm-detail-actions > :is(a, button),
+    .wm-detail li > :is(a, button),
+    .wm-detail li a,
+    .wm-index-grid a,
+    .wm-footer a,
+    .lab-topbar a,
+    .lab-field-label,
+    .lab-chips > button,
+    .lab-mobile-switch > button,
+    .lab-transport > button,
+    .lab-seek output,
+    .lab-zoom > button,
+    .lab-stage-status,
+    .export-page > b,
+    .export-page-btn,
+    .export-page-alt,
+    .export-page-navigation > a
+  ):not(#ring-x#ring-x) {
+  /* The older sheets square these and cut their corners. */
+  border-radius: var(--ring-radius-pill) !important;
+  clip-path: none !important;
+}
+
+html[data-family="utility"] body
+  :is(
+    .wm-tools,
+    .wm-workspace,
+    .wm-index,
+    .lab-selectors,
+    .lab-stage,
+    .lab-controls,
+    .tl-part-record
+  ):not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-card) !important;
+  clip-path: none !important;
+}
+
+html[data-family="utility"] body
+  :is(.wm-workspace, .lab-stage):not(#ring-x#ring-x) {
+  overflow: hidden;
+}
+
+html[data-family="utility"] body
+  :is(
+    .wm-search-shell,
+    .lab-form-name,
+    .lab-zoom,
+    .lab-chips,
+    .export-page > small
+  ):not(#ring-x#ring-x) {
+  /* 26px, not a pill: these tracks wrap to two rows on a phone. */
+  border-radius: 26px !important;
+  clip-path: none !important;
+}
+
+/* The map's round controls. */
+html[data-family="utility"] body .wm-view-controls > button:not(#ring-x#ring-x) {
+  min-width: 44px;
+}
+
+/* ---------------------------------------------------------------
+   4. /transformation-lab: the stages on one orbit (chrome only).
+   --------------------------------------------------------------- */
+
+html[data-family="utility"] body .lab-ring {
+  --ring-item: clamp(54px, 4.6vw, 64px);
+  --ring-r: min(clamp(100px, 9vw, 120px), calc(50vw - var(--ring-item) / 2 - 34px));
+  justify-self: center;
+  margin: var(--ring-space-3) auto;
+}
+
+html[data-family="utility"] body .lab-ring > .ring-orbit-track {
+  border-color: rgb(var(--ring-key-rgb) / 0.36);
+}
+
+/* The centre: a ring lit up to the stage in progress (--ring-p, written by
+   the lab only when the stage changes: no per-frame repaint beside the
+   engine). */
+html[data-family="utility"] body .lab-ring > .lab-ring-core {
+  position: absolute;
+  inset: calc(var(--ring-item) + 20px);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.22), transparent 62%), #06101a;
+  pointer-events: none;
+}
+
+html[data-family="utility"] body .lab-ring > .lab-ring-core::before,
+html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4.6px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4.6px), #000 calc(100% - 4px));
+}
+
+html[data-family="utility"] body .lab-ring > .lab-ring-core::before {
+  background: var(--ring-track);
+}
+
+html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-pink) calc(var(--ring-p, 0) * 0.6turn),
+    var(--ring-gold) calc(var(--ring-p, 0) * 1turn),
+    transparent calc(var(--ring-p, 0) * 1turn)
+  );
+}
+
+html[data-family="utility"] body .lab-ring button {
+  all: unset;
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.16), transparent 64%), #07101c;
+  color: rgb(223 244 255 / 0.74);
+  font-size: clamp(10.5px, 0.9vw, 12.5px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="utility"] body .lab-ring button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--ring-w);
+  border-radius: 50%;
+  background: rgb(var(--ring-key-rgb) / 0.3);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="utility"] body .lab-ring button:focus-visible {
+  outline: 2px solid var(--ring-key);
+  outline-offset: 4px;
+}
+
+/* Stages already passed are lit; the stage in progress wears the prism. */
+html[data-family="utility"] body .lab-ring button[data-state="passed"] {
+  color: #eaf8ff;
+}
+
+html[data-family="utility"] body .lab-ring button[data-state="passed"]::before {
+  background: rgb(var(--ring-key-rgb) / 0.85);
+}
+
+html[data-family="utility"] body .lab-ring button[data-state="active"] {
+  scale: 1.14;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.5), transparent 70%), #0b1c2e;
+  color: #ffffff;
+}
+
+html[data-family="utility"] body .lab-ring button[data-state="active"]::before {
+  background: var(--ring-prism);
+}
+
+@media (min-width: 1100px) {
+  /* Wide screens: the stage ring stands beside the transport and slider. */
+  html[data-family="utility"] body .lab-controls:not(#ring-x#ring-x) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--ring-space-5);
+    align-items: center;
+  }
+
+  html[data-family="utility"] body .lab-controls:not(#ring-x#ring-x) > * {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  html[data-family="utility"] body .lab-controls:not(#ring-x#ring-x) > .lab-ring {
+    grid-row: 1 / span 6;
+    grid-column: 2;
+    margin: 0 var(--ring-space-3);
+  }
+}
+
+/* ---------------------------------------------------------------
+   5. /download: the sigil is a ring inside a halo.
+   --------------------------------------------------------------- */
+
+html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) {
+  display: grid !important;
+  place-items: center;
+  width: 104px !important;
+  height: 104px !important;
+  border: var(--ring-w) solid transparent !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.3), transparent 62%) padding-box,
+    linear-gradient(#07101c, #07101c) padding-box,
+    var(--ring-prism) border-box !important;
+  box-shadow: none !important;
+  /* The halo: two outer rings that take no layout. */
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.45);
+  outline-offset: 12px;
+  transform: none !important;
+}
+
+html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x)::before,
+html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x)::after {
+  content: none !important;
+}
+
+html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) > i {
+  transform: none !important;
+}
+
+/* ---------------------------------------------------------------
+   6. Motion (reduced motion and economy get the resting state).
+   --------------------------------------------------------------- */
+
+@keyframes ring-archive-unfold {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.88;
+  }
+}
+
+@keyframes ring-archive-pop {
+  from {
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The five dogs pop along the arc when the page arrives, 40 ms apart. */
+  html[data-family="archive"]:not([data-world-effects="economy"]) body .dogs-ring-node > button {
+    animation: ring-archive-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(120ms + var(--ring-i, 0) * var(--ring-stagger));
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  /* EXPANSION RULE: the reference dialog springs open from its centre and
+     its two pictures follow; closing is the dialog's own (instant). */
+  html[data-family="archive"]:not([data-world-effects="economy"])
+    body
+    .dogs-archive-reference-dialog[open] {
+    animation: ring-archive-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 50%;
+  }
+
+  html[data-family="archive"]:not([data-world-effects="economy"])
+    body
+    .dogs-archive-reference-dialog[open]
+    figure {
+    animation: ring-archive-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) 100ms backwards;
+  }
+
+  html[data-family="archive"]:not([data-world-effects="economy"])
+    body
+    .dogs-archive-reference-dialog[open]
+    figure
+    + figure {
+    animation-delay: 140ms;
+  }
+
+  /* A newly chosen dog's portrait arrives on the spring. */
+  html[data-family="archive"]:not([data-world-effects="economy"])
+    body
+    .dogs-archive-portrait__frame
+    > img {
+    animation: ring-archive-unfold var(--ring-dur-spring) var(--ring-spring) backwards;
+  }
+
+  /* The lab's stage in progress settles on the elastic spring. */
+  html[data-family="utility"]:not([data-world-effects="economy"]) body .lab-ring button {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  /* The map's detail panel unfolds for each newly chosen node. */
+  html[data-family="utility"]:not([data-world-effects="economy"]) body .wm-detail-head {
+    animation: ring-archive-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  /* The download card's parts arrive in a cascade around the sigil. */
+  html[data-family="utility"]:not([data-world-effects="economy"]) body .export-page-sigil {
+    animation: ring-archive-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="archive"]:not([data-world-effects="economy"])
+    body
+    .dogs-ring-node
+    > button:not([aria-selected="true"]):hover,
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    .lab-ring
+    button:not([data-state="active"]):hover {
+    scale: 1.08;
+  }
+}
+
+/* ---------------------------------------------------------------
+   7. Phone.
+   --------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  html[data-family="archive"] body .dogs-ring {
+    --dog-item: 50px;
+    --dog-gap: min(17.4vw, 76px);
+  }
+
+  html[data-family="archive"] body .dogs-ring-node > button > span {
+    max-width: none;
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+}

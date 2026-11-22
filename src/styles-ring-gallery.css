@@ -1,0 +1,808 @@
+/* ================================================================
+   The ring system on the gallery, the tours and the exhibition room
+   (2026-11-23). Linked last by src/routes/gallery.tsx, gallery-tours.tsx
+   and exhibition.tsx.
+   Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
+   アニメーションにして」, and: be much bolder than phase 1.
+
+   Artwork keeps its aspect everywhere (ring cards, never circles): the
+   ring appears as structure around it.
+   /gallery        a halo behind the title; the shown work's number sits in
+                   a ring lit by its place in the collection; filters are a
+                   pill track; the viewer's place is a ring; the viewer's
+                   footer, the settings and the search tips unfold on the
+                   bounce.
+   /gallery-tours  the courses are one orbit around the catalogue heading;
+                   a saved place is a ring; in the theatre the stops are
+                   marks on a ring around the position.
+   /exhibition     the work number and the shelf page sit in rings; view
+                   controls are a pill track; previous / next are round.
+
+   The older gallery sheets paint these controls in several layers, some
+   with !important: where the ring must win it says !important and raises
+   specificity with :not(#ring-x#ring-x), as the chrome sheet does.
+   The exhibition's 3D surface and the shared artwork stage's own parts are
+   not selected.
+   Motion gates as in styles-ring.css.
+   ================================================================ */
+
+html[data-family="gallery"] {
+  /* The gallery's own gilt joins the ring's prism. */
+  --ring-g-gold: 240 207 134;
+}
+
+/* ---------------------------------------------------------------
+   1. Shared material: pills, round corners.
+   --------------------------------------------------------------- */
+
+html[data-family="gallery"] body
+  :is(
+    .gallery-refresh,
+    .gallery-topbar-actions > a,
+    .gallery-screening-nav > a,
+    .gallery-feature-save,
+    .gallery-feature-settings > a,
+    .gallery-collection-meta > :is(p, a),
+    .gallery-search-input-row input,
+    .gallery-favorites-filter,
+    .gallery-order select,
+    .gallery-filters > button,
+    .gallery-selection-marker,
+    .gallery-shuffle-start,
+    .gallery-work-hint,
+    .gallery-favorite-toggle,
+    .gallery-display-reset,
+    .gallery-display-current,
+    .gallery-viewer-close,
+    .gallery-viewer-footer > button,
+    .gallery-shuffle-end button,
+    .gallery-tour-action,
+    .gallery-tour-course-actions > :is(a, button),
+    .gallery-tour-theatre-button,
+    .gallery-tour-next-tour,
+    .gallery-tour-reading-column :is(select, button, a),
+    .gallery-viewer-number,
+    .gallery-tours-colophon > a,
+    .quote-source,
+    .quote-ambience,
+    .quote-leaf-actions > :is(a, button),
+    .exhibition-room-entrances > a,
+    .exhibition-studio-tools button,
+    .exhibition-studio-tools > div,
+    .exhibition-room-choose select,
+    .exhibition-room-choose > a,
+    .exhibition-room-adjacent > button,
+    .exhibition-shelf-return,
+    .exhibition-shelf-search-field input,
+    .exhibition-shelf-filters select,
+    .exhibition-shelf-current,
+    .exhibition-shelf-selected,
+    .exhibition-shelf-pagination > button
+  ):not(#ring-x#ring-x) {
+  /* The older sheets square these with 2–3px radii and cut corners. */
+  border-radius: var(--ring-radius-pill) !important;
+  clip-path: none !important;
+}
+
+/* Panels: the 28px ring card. */
+html[data-family="gallery"] body
+  :is(
+    .gallery-browse-panel,
+    .gallery-tour-introduction,
+    .gallery-tour-course,
+    .gallery-viewer-shell,
+    .exhibition-room-view,
+    .exhibition-room-work-heading,
+    .exhibition-shelf-filters
+  ):not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-card) !important;
+  clip-path: none !important;
+}
+
+html[data-family="gallery"] body
+  :is(
+    .gallery-filter-summary,
+    .gallery-display-settings,
+    .gallery-display-field,
+    .gallery-search-examples,
+    .gallery-tour-course-previews,
+    .gallery-tour-opening-frame,
+    .gallery-tour-course-visual,
+    .gallery-tour-stage,
+    .gallery-tour-filmstrip,
+    .gallery-tour-reading-column > div,
+    .gallery-viewer-stage,
+    .quote-plaque,
+    .exhibition-shelf-work,
+    .exhibition-studio-tools
+  ):not(#ring-x#ring-x) {
+  border-radius: 22px !important;
+  clip-path: none !important;
+}
+
+/* Artwork windows: rectangles with round corners, the picture whole. */
+html[data-family="gallery"] body
+  :is(
+    .gallery-work-frame,
+    .gallery-stage-candidates > button,
+    .gallery-tour-opening-mat,
+    .gallery-tour-course-mat,
+    .gallery-tour-course-preview,
+    .gallery-tour-thumbnail,
+    .exhibition-shelf-image,
+    .exhibition-studio-stage,
+    .quote-leaf-frame
+  ):not(#ring-x#ring-x) {
+  border-radius: 18px !important;
+  clip-path: none !important;
+  overflow: hidden;
+}
+
+html[data-family="gallery"] body
+  :is(.gallery-work-frame, .gallery-tour-opening-mat, .gallery-tour-course-mat, .quote-leaf-mat)
+  > img:not(#ring-x#ring-x) {
+  border-radius: 12px !important;
+}
+
+html[data-family="gallery"] body .gallery-stage-candidates > button:not(#ring-x#ring-x) {
+  border-radius: 14px !important;
+}
+
+/* The shared artwork stage, on this page only: its outer plate takes the
+   ring card's corner (its parts and its picture are not touched). */
+html[data-family="gallery"] body .artwork-stage--gallery:not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-card) !important;
+  overflow: clip;
+}
+
+/* The pill track of filters keeps its measured marker; both are pills. */
+html[data-family="gallery"] body .gallery-filters:not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-pill);
+}
+
+html[data-family="gallery"] body .ring-divider {
+  margin: var(--ring-space-4) auto var(--ring-space-3);
+  color: rgb(var(--ring-g-gold));
+}
+
+/* ---------------------------------------------------------------
+   2. Ring numbers: a place in a set, drawn as a lit arc around the
+   number that already says it.
+   --------------------------------------------------------------- */
+
+html[data-family="gallery"] body
+  :is(
+    .gallery-ring-number,
+    .gallery-ring-position,
+    .exhibition-ring-page,
+    .exhibition-ring-number
+  ):not(#ring-x#ring-x) {
+  --ring-p: 0;
+  position: relative !important;
+  display: inline-grid !important;
+  box-sizing: border-box;
+  place-items: center;
+  place-content: center;
+  width: var(--ring-size, 64px) !important;
+  min-width: var(--ring-size, 64px);
+  height: var(--ring-size, 64px) !important;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-gold) / 0.2), transparent 62%), #0a0d14 !important;
+  box-shadow: none !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+html[data-family="gallery"] body
+  :is(
+    .gallery-ring-number,
+    .gallery-ring-position,
+    .exhibition-ring-page,
+    .exhibition-ring-number
+  ):not(#ring-x#ring-x)::before,
+html[data-family="gallery"] body
+  :is(
+    .gallery-ring-number,
+    .gallery-ring-position,
+    .exhibition-ring-page,
+    .exhibition-ring-number
+  ):not(#ring-x#ring-x)::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3.6px),
+    #000 calc(100% - 3px)
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3.6px), #000 calc(100% - 3px));
+}
+
+html[data-family="gallery"] body
+  :is(
+    .gallery-ring-number,
+    .gallery-ring-position,
+    .exhibition-ring-page,
+    .exhibition-ring-number
+  ):not(#ring-x#ring-x)::before {
+  background: rgb(var(--ring-g-gold) / 0.22) !important;
+}
+
+html[data-family="gallery"] body
+  :is(
+    .gallery-ring-number,
+    .gallery-ring-position,
+    .exhibition-ring-page,
+    .exhibition-ring-number
+  ):not(#ring-x#ring-x)::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-pink) calc(var(--ring-p) * 0.6turn),
+    var(--ring-gold) calc(var(--ring-p) * 1turn),
+    transparent calc(var(--ring-p) * 1turn)
+  ) !important;
+}
+
+/* The caption is an 84px box that scrolls a long title by itself: the ring
+   must fit inside it (a taller ring made the caption a scroller that took
+   the page's touch scroll), so the title sits beside the ring. */
+html[data-family="gallery"] body .gallery-feature > figcaption:not(#ring-x#ring-x) {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
+html[data-family="gallery"] body .gallery-ring-number:not(#ring-x#ring-x) {
+  --ring-size: 68px;
+  flex: none;
+  margin: 0 !important;
+  font-size: 18px;
+}
+
+html[data-family="gallery"] body .gallery-ring-position:not(#ring-x#ring-x) {
+  --ring-size: 68px;
+  font-size: 12px;
+}
+
+html[data-family="gallery"] body .exhibition-ring-page:not(#ring-x#ring-x) {
+  --ring-size: 60px;
+  font-size: 13px;
+}
+
+/* The exhibition's number is the panel's heading mark: a large ring. */
+html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) {
+  --ring-size: clamp(120px, 11vw, 156px);
+  grid-template-columns: auto;
+  gap: 0;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) > span {
+  display: block;
+  font-size: clamp(34px, 3.2vw, 46px);
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------
+   3. /gallery
+   --------------------------------------------------------------- */
+
+/* The halo behind the title: three quiet rings, cropped by the page edge. */
+html[data-family="gallery"] body .gallery-screening-heading > .gallery-ring-halo {
+  inset: auto;
+  top: 50%;
+  left: clamp(-140px, -6vw, -40px);
+  width: clamp(280px, 36vw, 520px);
+  aspect-ratio: 1;
+  margin-top: clamp(-260px, -18vw, -140px);
+  z-index: 0;
+}
+
+html[data-family="gallery"] body .gallery-screening-heading > :not(.gallery-ring-halo) {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-family="gallery"] body .exhibition-room-heading > .exhibition-ring-halo {
+  inset: auto;
+  top: 50%;
+  right: clamp(-120px, -5vw, -30px);
+  left: auto;
+  width: clamp(260px, 32vw, 460px);
+  aspect-ratio: 1;
+  margin-top: clamp(-230px, -16vw, -130px);
+  z-index: 0;
+  opacity: 0.75;
+}
+
+html[data-family="gallery"] body .exhibition-room-heading > :not(.exhibition-ring-halo) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------------------------------------------------------------
+   4. /gallery-tours: the courses on one orbit around the heading.
+   --------------------------------------------------------------- */
+
+html[data-family="gallery"] body .gallery-tour-opening-artwork > .gallery-tour-ring-halo {
+  inset: -9% -4%;
+  z-index: 0;
+}
+
+html[data-family="gallery"] body .gallery-tour-opening-artwork > :not(.gallery-tour-ring-halo) {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring {
+  /* Sized here so the heading in the centre can measure the ring too; the
+     orbit takes them below (.ring-orbit declares its own defaults). */
+  --tour-item: clamp(64px, 7.4vw, 100px);
+  --tour-r: min(clamp(150px, 19vw, 250px), calc(50vw - var(--tour-item) / 2 - 36px));
+  display: grid;
+  /* One track that may shrink: the lede must wrap inside the gutters. */
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  margin-block: var(--ring-space-4) var(--ring-space-5);
+}
+
+/* The heading rests in the ring's centre; its lede follows under the ring. */
+html[data-family="gallery"] body .gallery-tour-ring > .gallery-tour-catalogue-heading:not(#ring-x#ring-x) {
+  display: contents !important;
+}
+
+html[data-family="gallery"] body
+  .gallery-tour-ring
+  > .gallery-tour-catalogue-heading:not(#ring-x#ring-x)
+  > div {
+  grid-area: 1 / 1;
+  align-self: center;
+  z-index: 1;
+  max-width: calc(var(--tour-r) * 2 - var(--tour-item) - 56px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring h2:not(#ring-x#ring-x) {
+  margin: 0 !important;
+  font-size: clamp(18px, 2.3vw, 34px) !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+  text-wrap: balance;
+  word-break: auto-phrase;
+}
+
+html[data-family="gallery"] body
+  .gallery-tour-ring
+  > .gallery-tour-catalogue-heading:not(#ring-x#ring-x)
+  > p {
+  grid-area: 2 / 1;
+  width: 100%;
+  max-width: 34em;
+  margin: 0 auto;
+  text-align: center;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-orbit {
+  --ring-item: var(--tour-item);
+  --ring-r: var(--tour-r);
+  grid-area: 1 / 1;
+  /* Room for the titles under the lowest nodes. */
+  margin-block: var(--ring-space-2) 72px;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-orbit > .ring-orbit-track {
+  border-color: rgb(var(--ring-g-gold) / 0.4);
+  outline: 1px solid rgb(var(--ring-key-rgb) / 0.18);
+  outline-offset: calc(var(--ring-item) * -0.5 - 12px);
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-node {
+  all: unset;
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 30% 24%,
+      color-mix(in srgb, var(--gallery-tour-course-accent, var(--ring-gold)) 34%, transparent),
+      transparent 64%
+    ),
+    #0b0d13;
+  color: #fff8e8;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-node:focus-visible {
+  outline: 2px solid var(--ring-key);
+  outline-offset: 5px;
+}
+
+/* Each course's ring wears the course's own accent. */
+html[data-family="gallery"] body .gallery-tour-ring-node::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--ring-w);
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    var(--gallery-tour-course-accent, var(--ring-gold)) 0turn,
+    #fff6dc 0.18turn,
+    var(--gallery-tour-course-accent, var(--ring-gold)) 0.44turn,
+    rgb(255 255 255 / 0.16) 0.72turn,
+    var(--gallery-tour-course-accent, var(--ring-gold)) 1turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-node > span {
+  font-size: clamp(18px, 2vw, 28px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-node > b {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  width: max-content;
+  max-width: calc(var(--ring-item) + 28px);
+  translate: -50% 0;
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* A saved place in a course. */
+html[data-family="gallery"] body .gallery-tour-course-position > .gallery-tour-ring-progress {
+  --ring-w: 3px;
+  width: 30px;
+  flex: none;
+  vertical-align: middle;
+}
+
+/* The numbers on courses and plaques become round marks. */
+html[data-family="gallery"] body
+  :is(.gallery-tour-course-number, .quote-plaque-index):not(#ring-x#ring-x) {
+  display: grid !important;
+  place-items: center;
+  width: 44px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+}
+
+/* The theatre: the stops are marks on one ring around the position. */
+html[data-family="gallery"] body .gallery-tour-ring-stops:not(#ring-x#ring-x) {
+  --ring-stop-r: 44px;
+  position: relative;
+  display: grid !important;
+  flex: none;
+  place-items: center;
+  width: calc(var(--ring-stop-r) * 2 + 12px) !important;
+  min-width: calc(var(--ring-stop-r) * 2 + 12px);
+  height: calc(var(--ring-stop-r) * 2 + 12px) !important;
+  margin-inline: auto;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-gold) / 0.18), transparent 62%), #0a0d14 !important;
+}
+
+html[data-family="gallery"] body .gallery-tour-ring-stops:not(#ring-x#ring-x) > .gallery-tour-position {
+  margin: 0 !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+html[data-family="gallery"] body
+  .gallery-tour-ring-stops:not(#ring-x#ring-x)
+  > .gallery-tour-progress-marks {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  border: 1px solid rgb(var(--ring-g-gold) / 0.24);
+  border-radius: 50%;
+  background: none !important;
+}
+
+html[data-family="gallery"] body
+  .gallery-tour-ring-stops:not(#ring-x#ring-x)
+  > .gallery-tour-progress-marks
+  > span {
+  --ring-a: calc(360deg * var(--ring-i, 0) / var(--ring-n, 8) - 90deg);
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 9px !important;
+  height: 9px !important;
+  margin: -4.5px 0 0 -4.5px !important;
+  flex: none !important;
+  border: 1px solid rgb(var(--ring-g-gold) / 0.5) !important;
+  border-radius: 50% !important;
+  background: #0a0d14 !important;
+  transform: rotate(var(--ring-a)) translateX(calc(var(--ring-stop-r) + 5px)) !important;
+}
+
+html[data-family="gallery"] body
+  .gallery-tour-ring-stops:not(#ring-x#ring-x)
+  > .gallery-tour-progress-marks
+  > span[data-visited] {
+  border-color: var(--ring-gold) !important;
+  background: var(--ring-gold) !important;
+}
+
+html[data-family="gallery"] body
+  .gallery-tour-ring-stops:not(#ring-x#ring-x)
+  > .gallery-tour-progress-marks
+  > span[data-current] {
+  border-color: #ffffff !important;
+  background: var(--ring-key) !important;
+  scale: 1.5;
+}
+
+/* ---------------------------------------------------------------
+   5. /exhibition
+   --------------------------------------------------------------- */
+
+html[data-family="gallery"] body .exhibition-room-adjacent-number:not(#ring-x#ring-x) {
+  display: grid !important;
+  place-items: center;
+  width: 60px !important;
+  min-width: 60px;
+  height: 60px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+}
+
+html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x) {
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------
+   6. Motion (reduced motion and economy get the resting state).
+   --------------------------------------------------------------- */
+
+@keyframes ring-gallery-unfold {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+    scale: 0.9;
+  }
+}
+
+@keyframes ring-gallery-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ring-gallery-pop {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* EXPANSION RULE. The viewer is a full-viewport sheet with its own
+     measured picture flight, so the sheet and the picture are left alone.
+     Its header is a scroller whose controls are scrolled into view from
+     measured boxes the moment a key is pressed: it must not be scaled or
+     moved while it opens, so it only fades. The footer under the picture
+     springs up on the bounce and the position ring pops after it. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-viewer[open]
+    .gallery-viewer-header {
+    animation: ring-gallery-fade var(--ring-dur-snap) ease-out 60ms backwards;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-viewer[open]
+    .gallery-viewer-footer {
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) 120ms backwards;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-viewer[open]
+    .gallery-ring-position {
+    animation: ring-gallery-pop var(--ring-dur-elastic) var(--ring-spring-elastic) 220ms backwards;
+  }
+
+  /* Disclosures: the display settings, search tips, the
+     course note, the quote's leaf. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(.gallery-display-settings, .gallery-search-tips, .gallery-tour-course-observation)[open]
+    > :not(summary) {
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  /* The viewer's tools open inside that scrolling header: they fade in
+     without travel for the same reason. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-viewer-tools[open]
+    > :not(summary) {
+    animation: ring-gallery-fade var(--ring-dur-snap) ease-out backwards;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"]) body .quote-leaf:not([hidden]) {
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .quote-leaf:not([hidden])
+    :is(.quote-leaf-frame, .quote-leaf-copy) {
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) 90ms backwards;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .quote-leaf:not([hidden])
+    .quote-leaf-copy {
+    animation-delay: 130ms;
+  }
+
+  /* The theatre's current stop pops on the elastic spring (a 9px mark). */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-stops
+    > .gallery-tour-progress-marks
+    > span {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  /* The messages that appear in place arrive by unfolding. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(.gallery-shuffle-end, .gallery-tour-ending) {
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(.gallery-tour-ring-node, .exhibition-shelf-work, .gallery-tour-course-preview) {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-node:hover {
+    scale: 1.1;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(.exhibition-shelf-work, .gallery-tour-course-preview):hover {
+    translate: 0 -4px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   7. Phone.
+   --------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  html[data-family="gallery"] body .gallery-tour-ring {
+    --tour-item: clamp(60px, 17vw, 72px);
+    --tour-r: min(150px, calc(50vw - var(--tour-item) / 2 - 34px));
+  }
+
+  html[data-family="gallery"] body .gallery-tour-ring h2:not(#ring-x#ring-x) {
+    font-size: 17px !important;
+  }
+
+  html[data-family="gallery"] body .gallery-tour-ring-orbit {
+    margin-bottom: 60px;
+  }
+
+  html[data-family="gallery"] body .gallery-screening-heading > .gallery-ring-halo {
+    top: 0;
+    right: -70px;
+    left: auto;
+    width: 240px;
+    margin-top: -60px;
+  }
+
+  html[data-family="gallery"] body .exhibition-room-heading > .exhibition-ring-halo {
+    top: 0;
+    right: -70px;
+    width: 220px;
+    margin-top: -50px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   8. The halos on these pages: the foundation's three rings, drawn a
+   little stronger (they are the page's opening ring, not a backdrop).
+   --------------------------------------------------------------- */
+
+html[data-family="gallery"] body
+  :is(.gallery-ring-halo, .exhibition-ring-halo, .gallery-tour-ring-halo) {
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(100% - 1.5px),
+      rgb(var(--ring-g-gold) / 0.62) calc(100% - 1.5px) 100%,
+      transparent 100%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(80% - 1.5px),
+      rgb(var(--ring-key-rgb) / 0.46) calc(80% - 1.5px) 80%,
+      transparent 80%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(60% - 1px),
+      rgb(var(--ring-pink-rgb) / 0.34) calc(60% - 1px) 60%,
+      transparent 60%
+    );
+}
+
+/* The topbar's links stay on one line as pills. */
+html[data-family="gallery"] body .gallery-topbar-actions > :is(a, button):not(#ring-x#ring-x) {
+  white-space: nowrap;
+}
+
+/* The narrowest phones: the catalogue heading still fits the ring's centre. */
+@media (max-width: 359px) {
+  html[data-family="gallery"] body
+    .gallery-tour-ring
+    > .gallery-tour-catalogue-heading:not(#ring-x#ring-x)
+    > div {
+    max-width: calc(var(--tour-r) * 2 - var(--tour-item) - 22px);
+  }
+
+  html[data-family="gallery"] body .gallery-tour-ring h2:not(#ring-x#ring-x) {
+    font-size: 13.5px !important;
+  }
+}

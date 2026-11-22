@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
 } from "react";
 import { GuardedLink } from "@/components/load-gate";
@@ -110,6 +111,12 @@ export function SearchPage({
     return map;
   }, [all]);
   const filtered = category === "all" ? all : all.filter((r) => r.document.category === category);
+  // The kinds on the orbit: every kind while browsing, the kinds with a
+  // match (and the chosen one) while searching.
+  const shownCategories = SEARCH_CATEGORIES.filter(
+    (item) => !trimmed || item.id === "all" || item.id === category || counts.has(item.id),
+  );
+  const categoryShare = all.length ? Number((filtered.length / all.length).toFixed(4)) : 0;
   const suggestions = useMemo(
     () => (trimmed && !all.length ? suggestSearchQueries(SEARCH_DOCUMENTS, trimmed) : []),
     [all.length, trimmed],
@@ -408,21 +415,41 @@ export function SearchPage({
                 {recentNotice}
               </p>
             ) : null}
-            <div className="search-categories" role="group" aria-label="資料の分類">
-              {SEARCH_CATEGORIES.filter(
-                (item) =>
-                  !trimmed || item.id === "all" || item.id === category || counts.has(item.id),
-              ).map((item) => (
-                <button
-                  type="button"
+            {/* Ring system (2026-11-23): the kinds are peers, so they sit on
+                one orbit around a lens. The lens's ring is lit by the chosen
+                kind's share of the records (decorative: each key keeps its
+                own count). Each node is a wrapper, placed by the orbit. While
+                a search is typed the ring is compact, so results stay near. */}
+            <div
+              className={`search-ring ring-orbit ring-orbit-keep ring-enter${trimmed ? " is-compact" : ""}`}
+              role="group"
+              aria-label="資料の分類"
+              style={{ "--ring-n": shownCategories.length } as CSSProperties}
+            >
+              <span className="ring-orbit-track" aria-hidden="true" />
+              <span
+                className="search-ring-lens"
+                aria-hidden="true"
+                style={{ "--ring-p": categoryShare } as CSSProperties}
+              >
+                <i />
+              </span>
+              {shownCategories.map((item, index) => (
+                <span
                   key={item.id}
-                  data-category-id={item.id}
-                  aria-pressed={category === item.id}
-                  onClick={() => onCategoryChange(item.id)}
+                  className="ring-orbit-item"
+                  style={{ "--ring-i": index } as CSSProperties}
                 >
-                  {item.label}
-                  <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
-                </button>
+                  <button
+                    type="button"
+                    data-category-id={item.id}
+                    aria-pressed={category === item.id}
+                    onClick={() => onCategoryChange(item.id)}
+                  >
+                    {item.label}
+                    <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
+                  </button>
+                </span>
               ))}
             </div>
             {category !== "all" ? (
@@ -440,6 +467,7 @@ export function SearchPage({
           </section>
         </div>
 
+        <i className="ring-divider ring-enter" aria-hidden="true" />
         <section className="search-results" aria-labelledby="record-results-heading">
           <div className="search-results-heading">
             <h2 id="record-results-heading" ref={resultsRef} tabIndex={-1}>
