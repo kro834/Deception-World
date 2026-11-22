@@ -214,6 +214,15 @@ html[data-family="library"] body .search-group-head:not(#ring-x#ring-x)::before 
 }
 
 /* The section rule under a heading becomes the ring's hairline. */
+html[data-family="library"] body .search-main > .ring-divider:not(#ring-x) {
+  margin-block: var(--ring-space-3);
+}
+
+/* While a search is typed the results follow the field directly. */
+html[data-family="library"] body .search-main:has(.search-ring.is-compact) > .ring-divider {
+  display: none;
+}
+
 html[data-family="library"] body .ring-divider {
   margin: var(--ring-space-5) auto;
   max-width: min(1320px, calc(100% - 32px));
@@ -562,6 +571,33 @@ html[data-family="library"] body .search-ring-lens > i::after {
   background: rgb(var(--ring-gold-rgb) / 0.9);
   rotate: 45deg;
   transform-origin: 0 50%;
+}
+
+/* While a search is typed only the kinds with a match remain (two to
+   eight): the ring tightens to the smallest radius whose neighbours still
+   clear each other, so the results stay close to the field. */
+html[data-family="library"] body .search-ring.is-compact {
+  --ring-item: 52px;
+  --ring-r: max(58px, calc((var(--ring-item) + 8px) / (2 * sin(180deg / var(--ring-n)))));
+  margin-block: var(--ring-space-2);
+}
+
+html[data-family="library"] body .search-ring.is-compact > .search-ring-lens {
+  inset: calc(var(--ring-item) + 12px);
+}
+
+html[data-family="library"] body .search-ring.is-compact button {
+  padding: 3px;
+  font-size: 10.5px;
+}
+
+html[data-family="library"] body .search-ring.is-compact button > span {
+  top: -6px;
+  right: -8px;
+  min-width: 22px;
+  height: 19px;
+  padding: 0 5px;
+  font-size: 10px;
 }
 
 /* A kind: a dark lens with its name; the count is a round mark on its rim. */

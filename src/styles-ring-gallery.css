@@ -9,8 +9,9 @@
    ring appears as structure around it.
    /gallery        a halo behind the title; the shown work's number sits in
                    a ring lit by its place in the collection; filters are a
-                   pill track; the viewer's place is a ring; panels, the
-                   viewer's tools and the settings unfold on the bounce.
+                   pill track; the viewer's place is a ring; the viewer's
+                   footer, the settings and the search tips unfold on the
+                   bounce.
    /gallery-tours  the courses are one orbit around the catalogue heading;
                    a saved place is a ring; in the theatre the stops are
                    marks on a ring around the position.
@@ -254,9 +255,20 @@ html[data-family="gallery"] body
   ) !important;
 }
 
+/* The caption is an 84px box that scrolls a long title by itself: the ring
+   must fit inside it (a taller ring made the caption a scroller that took
+   the page's touch scroll), so the title sits beside the ring. */
+html[data-family="gallery"] body .gallery-feature > figcaption:not(#ring-x#ring-x) {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+}
+
 html[data-family="gallery"] body .gallery-ring-number:not(#ring-x#ring-x) {
-  --ring-size: clamp(84px, 7.4vw, 108px);
-  font-size: clamp(20px, 1.9vw, 27px);
+  --ring-size: 68px;
+  flex: none;
+  margin: 0 !important;
+  font-size: 18px;
 }
 
 html[data-family="gallery"] body .gallery-ring-position:not(#ring-x#ring-x) {
@@ -596,6 +608,12 @@ html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x
   }
 }
 
+@keyframes ring-gallery-fade {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes ring-gallery-pop {
   from {
     opacity: 0;
@@ -605,36 +623,49 @@ html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x
 
 @media (prefers-reduced-motion: no-preference) {
   /* EXPANSION RULE. The viewer is a full-viewport sheet with its own
-     measured picture flight, so the sheet and the picture are left alone:
-     its header, tools and footer unfold on the bounce, staggered. */
+     measured picture flight, so the sheet and the picture are left alone.
+     Its header is a scroller whose controls are scrolled into view from
+     measured boxes the moment a key is pressed: it must not be scaled or
+     moved while it opens, so it only fades. The footer under the picture
+     springs up on the bounce and the position ring pops after it. */
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
     .gallery-viewer[open]
-    :is(.gallery-viewer-header, .gallery-viewer-footer) {
-    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: 80ms;
+    .gallery-viewer-header {
+    animation: ring-gallery-fade var(--ring-dur-snap) ease-out 60ms backwards;
   }
 
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
     .gallery-viewer[open]
     .gallery-viewer-footer {
-    animation-delay: 140ms;
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) 120ms backwards;
   }
 
-  /* Disclosures: the tools menu, the display settings, search tips, the
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-viewer[open]
+    .gallery-ring-position {
+    animation: ring-gallery-pop var(--ring-dur-elastic) var(--ring-spring-elastic) 220ms backwards;
+  }
+
+  /* Disclosures: the display settings, search tips, the
      course note, the quote's leaf. */
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
-    :is(
-      .gallery-viewer-tools,
-      .gallery-display-settings,
-      .gallery-search-tips,
-      .gallery-tour-course-observation
-    )[open]
+    :is(.gallery-display-settings, .gallery-search-tips, .gallery-tour-course-observation)[open]
     > :not(summary) {
     animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
     transform-origin: 50% 0%;
+  }
+
+  /* The viewer's tools open inside that scrolling header: they fade in
+     without travel for the same reason. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-viewer-tools[open]
+    > :not(summary) {
+    animation: ring-gallery-fade var(--ring-dur-snap) ease-out backwards;
   }
 
   html[data-family="gallery"]:not([data-world-effects="economy"]) body .quote-leaf:not([hidden]) {

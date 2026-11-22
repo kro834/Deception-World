@@ -418,9 +418,10 @@ export function SearchPage({
             {/* Ring system (2026-11-23): the kinds are peers, so they sit on
                 one orbit around a lens. The lens's ring is lit by the chosen
                 kind's share of the records (decorative: each key keeps its
-                own count). Each node is a wrapper, placed by the orbit. */}
+                own count). Each node is a wrapper, placed by the orbit. While
+                a search is typed the ring is compact, so results stay near. */}
             <div
-              className="search-ring ring-orbit ring-orbit-keep ring-enter"
+              className={`search-ring ring-orbit ring-orbit-keep ring-enter${trimmed ? " is-compact" : ""}`}
               role="group"
               aria-label="資料の分類"
               style={{ "--ring-n": shownCategories.length } as CSSProperties}

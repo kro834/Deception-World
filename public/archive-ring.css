@@ -228,6 +228,20 @@ html[data-embedded-archive] .telemetry-state:nth-child(22) { --ring-p: calc(22 /
   }
 }
 
+@keyframes archive-ring-drop {
+  from {
+    opacity: 0;
+    translate: 0 -14px;
+  }
+}
+
+@keyframes archive-ring-grow {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html[data-embedded-archive] {
     /* The site's expansion spring (stiffness 320, damping 16), as a fallback
@@ -242,17 +256,17 @@ html[data-embedded-archive] .telemetry-state:nth-child(22) { --ring-p: calc(22 /
   }
 
   /* The picture viewer: the plate keeps its own fade (the archive's script
-     owns it); its bar and its picture spring in after it, 60 ms apart. */
-  html[data-embedded-archive]
-    dialog.image-lightbox[open]
-    :is(.lightbox-bar, .lightbox-image-wrap):not(#ring-x#ring-x#ring-x) {
-    animation: archive-ring-unfold 700ms var(--ring-spring-bounce) 60ms backwards;
+     owns it). Its bar drops in from above on the bounce; the picture grows
+     to its size without passing it, so nothing ever reaches past the
+     dialog's edge and the dialog never scrolls. */
+  html[data-embedded-archive] dialog.image-lightbox[open] .lightbox-bar:not(#ring-x#ring-x#ring-x) {
+    animation: archive-ring-drop 700ms var(--ring-spring-bounce) 60ms backwards;
   }
 
   html[data-embedded-archive]
     dialog.image-lightbox[open]
     .lightbox-image-wrap:not(#ring-x#ring-x#ring-x) {
-    animation-delay: 120ms;
+    animation: archive-ring-grow 660ms cubic-bezier(0.22, 1, 0.36, 1) 60ms backwards;
   }
 
   /* The chosen form's ring settles when the selection changes. */
