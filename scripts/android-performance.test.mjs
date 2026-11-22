@@ -166,10 +166,17 @@ test("capable Android keeps the key art and the Mirage boot; only economy freeze
     assert.match(selector, /data-world-effects="economy"/, selector);
   }
   // 2026-11-23: no rule of this file applies to Android in high quality mode
-  // (the native scroll-progress line is not a reduction).
+  // except the Zeus button's tile-budget pair (its halo and its permanent
+  // layer); the native scroll-progress line is not a reduction.
   const highAndroid = [...rules.matchAll(/([^{}]+)\{/g)]
     .map(([, selector]) => selector.trim())
-    .filter((selector) => /data-android-renderer/.test(selector));
+    .filter((selector) => /data-android-renderer/.test(selector))
+    .filter(
+      (selector) =>
+        !/^html(?::not\(\[data-world-effects="economy"\]\))?\[data-android-renderer\]\s+\.zeus-button(?::not\([^)]*\))*$/.test(
+          selector.replace(/\s+/g, " "),
+        ),
+    );
   for (const selector of highAndroid) {
     for (const part of selector.split(/,(?![^(]*\))/)) {
       assert.match(part, /data-world-effects="economy"/, part);
@@ -193,6 +200,7 @@ test("the Android lite tier touches only the floor, halo, curtains, bracket over
   });
   assert.deepEqual(changes, [
     ".mr-hero-floor {display}",
+    ".mr-hero-beam {mix-blend-mode}",
     ".poster-frame {box-shadow}",
     ":is(.story-section, .riders-section, .records-section)::after {display}",
     ":is(.story-layout, .threat-panel, .world-column, .episode-archive, .rider-console)::after {content}",
@@ -205,8 +213,8 @@ test("the Android lite tier touches only the floor, halo, curtains, bracket over
     ":is(.story-layout, .threat-panel, .world-column) {background,background-repeat,background-blend-mode}",
     ".rider-console {background,background-repeat,background-blend-mode}",
     ".episode-archive {background,background-repeat,background-blend-mode}",
-    // 2026-11-23 (owner: phones equal PC in high quality mode): the beam
-    // blend and the clip-path stand-ins are gone (the PC reveals are
+    // 2026-11-23 (owner: phones equal PC in high quality mode): the
+    // clip-path stand-ins are gone (the PC reveals are
     // compositor-only now; android-gpu-budget.test.mjs guards that). The
     // iris stays at rest, as part of the tile-memory budget.
     ".finale-sticky::before {animation}",
@@ -220,10 +228,16 @@ test("the Android lite tier touches only the floor, halo, curtains, bracket over
     tier,
     /hero-backdrop|poster-media|poster-image|mr-word|mr-redact|tr-c|data-text-reveal/,
   );
-  // Motion is the same on every renderer (2026-11-23: the panels keep their
-  // fade and the finale art its settle on Android).
+  // Kept as tile budget in high quality mode (2026-11-23).
+  // Motion keeps every timeline; the panels only lose their fade and the finale art its settle.
   const motion = strip(readSource("src/styles-motion-edition.css"));
-  assert.doesNotMatch(motion, /\[data-android-renderer\]/);
+  const android = [...motion.matchAll(/\[data-android-renderer\]([^{]*)\{([^}]*)\}/g)].map(
+    (match) => `${match[1].trim().replace(/\s+/g, " ")} {${match[2].trim()}}`,
+  );
+  assert.deepEqual(android, [
+    ".site-shell.film-edition.motion-on :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive) {animation-name: mx-lift-flat;}",
+    ".site-shell.film-edition.motion-on .finale-backdrop img {animation: none;}",
+  ]);
 });
 
 test("Android keeps the edge stretch and uses small-viewport min-heights", () => {

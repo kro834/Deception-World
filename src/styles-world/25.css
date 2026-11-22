@@ -273,8 +273,9 @@ html[data-world-effects="economy"] .side-panel-trigger-ring::before {
   animation: none !important;
 }
 
+/* The orb's softness is pre-rendered in its gradient (01.css) since
+   2026-11-23, so economy needs no blur filter on it. */
 html[data-world-effects="economy"] .ambient-orb {
-  filter: blur(62px);
   opacity: 0.065;
 }
 

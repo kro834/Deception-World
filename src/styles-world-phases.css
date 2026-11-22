@@ -609,10 +609,11 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
   }
 
   /* 2026-11-23 (owner: phones equal PC in high quality mode): Android's
-     plates get the same phase grounds, rims and glows as above. The kept
+     plates get the same phase grounds and rims as above. The kept
      tile-memory workaround (styles-world-mirage.css) still paints their
      brackets into the background instead of an ::after layer, so the
-     brackets lead the same layer list here. */
+     brackets lead the same layer list here, and the outer glows (which
+     enlarge each plate's raster) stay off. */
   html:not([data-world-effects="economy"])[data-android-renderer]
     main.site-shell.film-edition.mirage-edition
     #manager-archive {
@@ -625,9 +626,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background-repeat: no-repeat;
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
-      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent),
-      0 0 46px -12px var(--phase-glow),
-      var(--phase-shadow);
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent);
   }
 
   html:not([data-world-effects="economy"])[data-android-renderer]
@@ -643,9 +642,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background-repeat: no-repeat;
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
-      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent),
-      0 0 44px -12px var(--phase-glow),
-      var(--phase-shadow);
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent);
   }
 
   html:not([data-world-effects="economy"])[data-android-renderer]
@@ -663,9 +660,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background-origin: border-box;
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
-      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent),
-      0 0 44px -12px var(--phase-glow),
-      var(--phase-shadow);
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent);
   }
 
   html:not([data-world-effects="economy"])[data-android-renderer]
@@ -681,9 +676,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background-repeat: no-repeat;
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
-      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent),
-      0 0 46px -12px var(--phase-glow),
-      var(--phase-shadow);
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent);
   }
 
   /* The story record is paper on every tier. The Android lite tier had
@@ -772,6 +765,25 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     #records
     .episode-archive {
     background: var(--mr-deck);
+    box-shadow: none;
+  }
+  /* Android's plates above (2026-11-23) restate the calm grounds, with
+     their painted brackets. */
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    main.site-shell.film-edition.mirage-edition
+    :is(#manager-archive, #story .world-column, #records .episode-archive) {
+    background: var(--mr-brackets), var(--mr-deck);
+    background-repeat: no-repeat;
+    box-shadow: none;
+  }
+
+  html:not([data-world-effects="economy"])[data-android-renderer]
+    main.site-shell.film-edition.mirage-edition
+    #riders
+    .rider-console {
+    background: var(--mr-brackets), #12161c;
+    background-repeat: no-repeat;
+    background-origin: border-box;
     box-shadow: none;
   }
 }

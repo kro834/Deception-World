@@ -168,6 +168,18 @@
   }
 }
 
+/* Android in any pointer mode (DeX, desktop-site mode): Samsung Internet
+   28-30 runs clip-path animations on the main thread, so it keeps the same
+   compositor rise and fade (a kept engine workaround). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-dg-ready][data-android-renderer]:not([data-world-effects="economy"]):not(
+      [data-family="special"]
+    )
+    .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
+    animation-name: fx-rise-arrive;
+  }
+}
+
 @keyframes fx-rise-arrive {
   0% {
     opacity: 0;

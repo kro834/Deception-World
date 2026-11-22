@@ -153,17 +153,18 @@ test("no blurred shadow over 48px on Android's poster frame, topbar or Zeus butt
   for (const blur of blurRadii(declaration(topbar, "box-shadow"))) assert.equal(blur, 0);
   assert.equal(declaration(topbar, "transition"), "none");
 
-  // 2026-11-23 (owner: phones equal PC in high quality mode): the Zeus
-  // button keeps its PC halo on capable Android; every Android Zeus rule is
-  // now scoped to the lightweight renderer.
+  // Kept in high quality mode as part of the tile budget (2026-11-23).
   const android = styleRules(stripComments(await read("src/styles-android-performance.css")));
-  const zeus = android.filter(({ selector }) => /\.zeus-button/.test(selector));
-  assert.ok(zeus.length > 0);
-  for (const { selector } of zeus) {
-    for (const part of splitTopLevel(selector)) {
-      assert.match(part, /^html\[data-world-effects="economy"\]\[data-android-renderer\] /, part);
-    }
-  }
+  const zeus = android.find(({ selector }) =>
+    /^html[^ ]*\[data-android-renderer\] \.zeus-button/.test(selector),
+  );
+  assert.ok(zeus?.selector.startsWith(ANDROID_FULL), zeus?.selector);
+  // Dragging and the return spinner keep their own glow.
+  assert.match(
+    zeus.selector,
+    /:not\(\[data-dragging="true"\]\):not\(\[data-return-loading="true"\]\)$/,
+  );
+  for (const blur of blurRadii(declaration(zeus.body, "box-shadow"))) assert.equal(blur, 0);
 
   // Every other renderer keeps the full halo.
   const base = styleRules(stripComments(await read("src/styles-world-mirage.css"))).find(
@@ -174,7 +175,7 @@ test("no blurred shadow over 48px on Android's poster frame, topbar or Zeus butt
 
 // 2026-11-23 (owner: phones equal PC in high quality mode): the scroll
 // reveals' PC keyframes are compositor-only now, so Android runs them as PC
-// does and the clip-path stand-ins (mr-rise-in, mr-fade-in, mx-lift-flat) are
+// does and the clip-path stand-ins (mr-rise-in, mr-fade-in) are
 // gone. The Samsung Internet 28-30 limit (no composited clip-path) is now
 // guarded on the keyframes themselves. The iris stays at rest on Android:
 // it is part of the tile-memory budget.
@@ -225,15 +226,46 @@ test("Android animates no clip-path reveal and no iris", async () => {
     }
   }
 
+  // The Motion lift and still finale art stay: tile budget (2026-11-23).
   const motion = stripComments(await read("src/styles-motion-edition.css"));
-  assert.doesNotMatch(motion, /\[data-android-renderer\]/);
+  const motionRules = styleRules(motion);
+  const lift = motionRules.find(
+    ({ selector }) =>
+      selector ===
+      `${ANDROID_FULL} .site-shell.film-edition.motion-on :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive)`,
+  );
+  assert.equal(declaration(lift.body, "animation-name"), "mx-lift-flat");
+  const flat = motion.match(/@keyframes mx-lift-flat \{([\s\S]*?\})\s*\}/)?.[1] ?? "";
+  assert.match(flat, /translate:/);
+  assert.doesNotMatch(flat, /opacity/);
+  const settle = motionRules.find(
+    ({ selector }) =>
+      selector === `${ANDROID_FULL} .site-shell.film-edition.motion-on .finale-backdrop img`,
+  );
+  assert.equal(declaration(settle.body, "animation"), "none");
 });
 
-// 2026-11-23: the beam's screen blend was a perf trim outside the tile
-// budget; Android now blends it as PC does.
-test("Android blends the hero beam as PC does", async () => {
-  const rules = styleRules(await mirageTier());
-  assert.equal(androidRule(rules, ".mr-hero-beam"), undefined);
+// Kept in high quality mode as part of the tile budget (2026-11-23).
+test("no blend mode on a layer that animates on Android", async () => {
+  const css = stripComments(await read("src/styles-world-mirage.css"));
+  const rules = styleRules(css);
+  const key = (selector) => selector.split(" ").at(-1);
+  const animated = new Set(
+    rules
+      .filter(({ body }) => /(?:^|;)\s*animation(?:-name)?:(?!\s*none)/.test(body))
+      .flatMap(({ selector }) => splitTopLevel(selector).map(key)),
+  );
+  const blended = rules.filter(
+    ({ selector, body }) =>
+      !selector.startsWith(ANDROID_FULL) &&
+      /mix-blend-mode:\s*(?!normal)/.test(body) &&
+      animated.has(key(selector)),
+  );
+  assert.ok(blended.length > 0);
+  for (const { selector } of blended) {
+    const android = androidRule(rules, ` ${key(selector)}`);
+    assert.equal(declaration(android?.body ?? "", "mix-blend-mode"), "normal", selector);
+  }
 });
 
 test("the hero HUD clips without becoming a composited scroller", async () => {

@@ -2979,12 +2979,16 @@ html:not([data-world-effects="economy"])[data-android-renderer]
   display: none;
 }
 
-/* 2026-11-23 (owner: phones equal PC in high quality mode): the beam keeps
-   its PC screen blend on Android (it was a perf trim, not part of the tile
-   budget). Everything left in this tier is one of the two kept workarounds:
-   the tile-memory budget (floor, frame shadows, curtains, bracket overlays,
-   iris, topbar shadow) and the Samsung clip-path stand-ins (the scroll
-   rules below). */
+/* Screen-blending the beam while its boot sweep runs cost a render pass over
+   the hero; at 5-12% alpha on the dark bay, normal blending reads the same.
+   2026-11-23: everything left in this tier belongs to the kept tile-memory
+   budget (floor, beam pass, frame shadows, curtains, bracket overlays, iris,
+   topbar shadow); the clip-path stand-ins are gone (see below). */
+html:not([data-world-effects="economy"])[data-android-renderer]
+  .site-shell.film-edition.mirage-edition
+  .mr-hero-beam {
+  mix-blend-mode: normal;
+}
 
 html:not([data-world-effects="economy"])[data-android-renderer]
   .site-shell.film-edition.mirage-edition

@@ -42,7 +42,8 @@ test("Realm archive loads its normalized motion controller in both deliverables"
   for (const html of [realmStandalone, realmEmbedded]) {
     // r51: the controller now opens on a requested form (rx6).
     // Owner (2026-10-21): r52 releases the lightbox's closing fill, so a second opening shows its art.
-    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20261022-r52" defer><\/script>/);
+    // 2026-11-23: bumped with the archive motion profile change (phones equal PC).
+    assert.match(html, /<script src="\/realm-archive-motion\.js\?v=20261123-phone1" defer><\/script>/);
   }
 });
 
