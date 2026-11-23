@@ -207,7 +207,7 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
   ]) {
     assert.ok(record.includes(`{ dt: "${dt}", dd: "${dd}" }`), `${dt}: ${dd}`);
   }
-  assert.match(record, /『Paranormal Realizer Ultra』『Neural Resonancer Ultra』『P16』/);
+  assert.ok(record.includes('{ dt: "認識・制御", dd: "『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P16』" }') || /dt: "認識・制御",\s*dd: "『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P16』"/.test(record));
   for (const stale of [
     "369.5t",
     "50000YOPS",
@@ -221,23 +221,28 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
   ]) {
     assert.doesNotMatch(record, new RegExp(stale), stale);
   }
-  // Four theories, two authorities, ten weapons, two finishers, as the owner wrote them.
+  // Four theories, one authority (Exception World), ten weapons, two
+  // finishers, as the owner's canon of 2026-11-23 writes them.
   for (const title of [
-    "FARFROM DRIVE／多重供給接続",
+    "FARFROM DRIVE ／ 多重供給接続",
     "分散共鳴収束",
     "接続境界整合",
     "並列進化・継続実装",
   ]) {
     assert.ok(record.includes(`title: "${title}"`), title);
   }
-  assert.match(record, /title: "FAR FROM DEUS"/);
+  assert.doesNotMatch(record, /title: "FAR FROM DEUS"/);
   assert.match(record, /title: "Exception World"/);
   assert.doesNotMatch(record, /title: "OVERGODS DEUS"/);
-  assert.match(record, /"ユナイトエッジマークII &Ⅲ・ソード／ランサーモード"/);
+  assert.match(record, /"ユナイトエッジ・マークⅡ＆Ⅲ（ソード／ランサーモード）"/);
+  assert.doesNotMatch(record, /ユナイトエッジマークII/);
   assert.match(record, /name: "デウスシフト・ファー・グランドフィナーレ"/);
-  assert.match(record, /"FAR！GRAND FINALE！！"/);
-  assert.match(record, /title: "SA-GA OS 6.1"/);
-  assert.match(record, /表記の60000〜YOPSは標準稼働時の基準値にあたる/);
+  assert.match(record, /calls: \["MIDDLE！HIGH！XHIGH！MAX！ULTRA！", "DEUS SHIFT！FAR！！", "GRAND FINALE！！"\]/);
+  assert.match(record, /calls: \["MIDDLE！HIGH！XHIGH！MAX！ULTRA！", "DEUS SHIFT！！", "GOD TORNADO！！"\]/);
+  assert.doesNotMatch(record, /"FAR！GRAND FINALE！！"/);
+  assert.match(record, /title: "『 SA-GA OS 6\.1 』＆『 FARFROM SCALER 』"/);
+  assert.match(record, /『KHAOS DeuX（60000〜YOPS）』の演算をさらに加速させ/);
+  assert.doesNotMatch(record, /OVERGODS DEUS|表記の60000〜YOPSは標準稼働時/);
   // The Final Stage's own chapter no longer prints a provisional note.
   assert.doesNotMatch(read("src/components/final-stage/final-stage.tsx"), /specNote/);
   assert.match(read("src/components/search/search-data.ts"), /description: "SA-GA OS 6\.1"/);
@@ -777,7 +782,7 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
   const record = read("src/components/final-stage/final-stage-data.ts");
   assert.ok(
     record.includes(
-      "水色の結晶装甲が全身に大きく展開し、鋭く拡張された頭部、肩部の追加機構、幾重もの光輪と電子表示が出現する。",
+      "水色の結晶装甲が全身に大きく展開し、鋭く拡張された頭部、肩部の追加機構、背後に重なる幾重もの光輪と電子表示が出現する。",
     ),
   );
   for (const source of [suitupSource, ultraArt])

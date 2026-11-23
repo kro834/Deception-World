@@ -789,7 +789,7 @@ export function FarFromSaga() {
             <b />
           </i>
         </header>
-        <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
+        <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核攻撃機構" />
       </section>
 
       {/* 05, continued — the floating unit and the OS. */}
