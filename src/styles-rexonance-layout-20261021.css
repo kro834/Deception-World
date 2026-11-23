@@ -196,7 +196,11 @@ html[data-family="special"]
   /* Round 2 (2026-10-22): the P14 column holds the widest figure, 約11.4%
      (4.55em of a figure set at 2.6vw, 26–36px): at 132px it ran 32px into
      the base column on the desktop (100% / 約11.4% touched at 1440). */
-  grid-template-columns: 96px clamp(132px, 12vw, 168px);
+  /* Overlap pass (2026-11-23): the pill is that figure plus its 10px padding
+     either side, so it is sized from the figure (4.55em at the figure's
+     clamp) instead of 12vw, which left 約11.4% 7-9px out of the pill's left
+     edge on every desktop width. */
+  grid-template-columns: 96px calc(clamp(26px, 2.6vw, 36px) * 4.55 + 24px);
   align-items: start;
   justify-items: end;
   column-gap: clamp(14px, 2vw, 28px);
@@ -1360,6 +1364,39 @@ html[data-family="special"]:has(.rxs-rexonance-page) {
    observer still measures unusual text zoom/safe-area configurations. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
   --rxs-local-nav-reserve: calc(77px + env(safe-area-inset-top, 0px));
+}
+
+/* Overlap pass (2026-11-23): the P14 reading's pill is 120px wide, but 約11.4%
+   at the phone's 26px figure is 118px against its 100px inner width, so the
+   figure ran 9px out of the pill's left edge on every phone and small tablet
+   (375px to 700px). The P14 column is widened to hold it. A 375px to 429px
+   phone has no room for the delta beside the two readings (the delta kept
+   60px and 応答時間短縮 / 約-94.0% overlapped the base figure), so the delta takes
+   its own line over the readings as it does under 375px. */
+@media (min-width: 375px) and (max-width: 700px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    .rxs-p14-values {
+    grid-template-columns: 72px 142px;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 429.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    article {
+    grid-template-areas:
+      "label label"
+      "delta delta"
+      ". values";
+    row-gap: 8px;
+  }
 }
 
 @media (max-width: 700px) {

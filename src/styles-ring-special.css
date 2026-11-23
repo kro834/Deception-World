@@ -387,6 +387,19 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     border-radius: var(--ring-radius-pill) !important;
     clip-path: none !important;
   }
+
+  /* Overlap pass (2026-11-23): Rexonance's square corner brackets (20px
+     L-strokes drawn at `inset: 0` by styles-rexonance-apex.css) stuck out of
+     the corners of the plates the ring system cut round (28px), so a square
+     stroke stood outside every rounded corner. The overlay now takes the
+     plate's own radius, which paints the brackets only where they lie inside
+     the curve; the mid-edge marks are untouched. */
+  html[data-family="special"]
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    :is(.rxs-comparison, .rxs-p14-comparator, .rxe-form-comparison, .rxe-form-status)::before {
+    border-radius: inherit;
+  }
 }
 
 /* ---------------------------------------------------------------
