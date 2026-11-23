@@ -329,6 +329,14 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   assert.match(css, /\.ring-link\[data-ring-idle\],\s*\.ring-link\[data-ring-nopull\] > \.ring-thread-pull \{\s*display: none;/);
   // A dossier part taken out of the layout lets go of everything it held.
   assert.match(code, /forgetRoot\(rec\);\s*rec\.done = false;/);
+  // 2026-11-23 (chain-all): a section is read once its finite entrances have
+  // landed (a dossier part springs in while the page scrolls back to its top),
+  // and a held part with a sliver on screen is let go when the scroll stops.
+  assert.match(code, /const settle = rootSettling\(rec\.el, true\);/);
+  assert.match(code, /view\.addEventListener\("scrollend", sweepHeld, \{ passive: true \}\);/);
+  assert.match(code, /if \(part\.el\.getBoundingClientRect\(\)\.top < bottom\) release\(part, now\);/);
+  // A box with its own entrance is never moved; once it has played it is only opened.
+  assert.match(code, /child\.getAnimations\(\)\.length === 0\s*\) \{\s*collectParts\(child, depth \+ 1, out, vh, vw, sy\);\s*continue;/);
   // The film reveal stands aside for a part the chain holds or lifts.
   assert.match(read("src/lib/film-motion.js"), /if \(node\.hasAttribute\?\.\("data-ring-link"\)\) continue;/);
   assert.match(code, /cs\.animationName !== "none"/);
