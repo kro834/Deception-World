@@ -931,3 +931,11 @@ html[data-family="library"] .library-page .library-saved-state button {
     background: Highlight;
   }
 }
+
+/* iPhone SE width: the long unbreakable name (ディセプションワールド) was cut at the card edge. */
+@media (max-width: 340px) {
+  .library-page .library-card h3 .name-word {
+    font-size: 0.86em;
+    letter-spacing: 0;
+  }
+}
