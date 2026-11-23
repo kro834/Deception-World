@@ -402,8 +402,10 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewpor
 /* 2026-11-23 iOS fix (A4): a sideways iPhone. viewport-fit=cover lets the
    page run under the Dynamic Island or notch, so the page columns step in by
    the side insets (Rexonance and Far From already did; Exhibition, the lab,
-   Dogs, the archive and Download carry their own). Full-bleed grounds stay
-   full-bleed: the fixed headers, rails and stages pad themselves. Roots with
+   Dogs, the archive and Download carry their own). The fixed headers,
+   rails and stages pad themselves, and the suit-up stages keep their full
+   width; the saga, dossier, Dream and gallery roots inset their grounds
+   with their columns, as Rexonance's already did. Roots with
    no gutter of their own take the inset; roots with one keep the larger. */
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
   html[data-family] body main.manager-page.manager-page.manager-page.manager-page,
@@ -414,6 +416,25 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewpor
   html body .gallery-page > .gallery-tours-colophon {
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* The suit-up stages keep their full width (their art-exact frames):
+     the stage's chapter steps back out over the root's inset. */
+  html[data-family]
+    body
+    main.rxs-page.rxs-page.rxs-page:is(.ics-page, .mus-page)
+    > section#suitup {
+    margin-left: calc(env(safe-area-inset-left, 0px) * -1);
+    margin-right: calc(env(safe-area-inset-right, 0px) * -1);
+  }
+
+  html[data-family]
+    body
+    main.rxs-page.rxs-page.rxs-page.ics-page
+    > section#suitup
+    > .rxs-stage-switcher {
+    margin-left: max(0px, env(safe-area-inset-left, 0px) - 20px);
+    margin-right: max(0px, env(safe-area-inset-right, 0px) - 20px);
   }
 
   /* World's sections share one gutter: it grows to the inset, so the
