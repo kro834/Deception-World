@@ -3118,15 +3118,17 @@ html body .load-gate .rider-ring {
     pointer-events: none;
   }
 
-  /* A cut-in's ring stands round its stage's centre, wide enough to clear
-     the rider's name. */
+  /* A cut-in's ring stands round its stage's centre, wide enough that its
+     band clears the rider's name (the widest, ARGENOME and OVER-ZEZTZ, at
+     72px on a desktop and 30px on a phone); on a phone the band passes the
+     screen's edges and its lit stroke stays on screen. */
   html:not([data-world-effects="economy"])
     body
     .load-gate.has-cine.is-cine-full.rider-route-cutin:not(.is-cine-flip)
     > .rider-ring {
     --rr-cx: 50%;
     --rr-cy: 50%;
-    --rr-d: min(84vmin, 580px);
+    --rr-d: min(118vmin, 800px);
     z-index: 3;
     /* The stage takes 260 ms to come in over the page: the ring shows on it,
        never over the page it covers. */
@@ -3484,7 +3486,7 @@ html body .load-gate .rider-ring {
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip)
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
     > .rider-ring
     > .rider-ring-pieces
     > i {
@@ -3493,7 +3495,7 @@ html body .load-gate .rider-ring {
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip)
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
     > .rider-ring
     > .rider-ring-pieces
     > i:nth-child(2) {
@@ -3503,7 +3505,7 @@ html body .load-gate .rider-ring {
   /* The doors part the pieces themselves: the group stays. */
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip)
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
     > .rider-ring
     > .rider-ring-pieces {
     animation: none;
@@ -3559,7 +3561,7 @@ html body .load-gate .rider-ring {
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip)
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
     > .rider-ring
     > .rider-ring-pieces {
     animation: none;
@@ -3567,7 +3569,7 @@ html body .load-gate .rider-ring {
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip)
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
     > .rider-ring
     > .rider-ring-pieces
     > i {
@@ -3576,7 +3578,7 @@ html body .load-gate .rider-ring {
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip)
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
     > .rider-ring
     > .rider-ring-line {
     animation: none;
@@ -3959,10 +3961,11 @@ html body .load-gate .rider-ring {
   }
 }
 
+/* From the ring outwards: the pressure rings never cross the name. */
 @keyframes rr-zeztz-burst {
   from {
     opacity: 0.9;
-    scale: 0.28;
+    scale: 0.92;
   }
   to {
     opacity: 0;

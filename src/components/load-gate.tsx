@@ -1160,10 +1160,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
 
   pathnameRef.current = pathname;
 
-  // サーガ's fire sheet is decoded before its first dive: on idle when a link
-  // to サーガ is on the page, or as soon as one is pointed at or focused.
+  // サーガ's fire sheet is decoded before its first dive: on idle when an
+  // entry to サーガ is on the page (a link, or the World console's サーガ tab,
+  // whose open control is a button), or as soon as one is pointed at or
+  // focused.
   useEffect(() => {
-    const SAGA_LINK = 'a[href="/riders/saga"], a[href^="/riders/saga#"]';
+    const SAGA_LINK = 'a[href="/riders/saga"], a[href^="/riders/saga#"], #rider-tab-saga';
     const onIntent = (event: Event) => {
       const target = event.target;
       if (target instanceof Element && target.closest(SAGA_LINK)) warmSagaDiveFire();
