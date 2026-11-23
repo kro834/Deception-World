@@ -335,6 +335,12 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   assert.match(code, /const settle = rootSettling\(rec\.el, true\);/);
   assert.match(code, /view\.addEventListener\("scrollend", sweepHeld, \{ passive: true \}\);/);
   assert.match(code, /if \(part\.el\.getBoundingClientRect\(\)\.top < bottom\) release\(part, now\);/);
+  // Main-thread cost (2026-11-23, chain-all): every running animation, even a
+  // compositor one, is restyled on each frame the page draws while it
+  // scrolls. A later part waits on a timer (still held), not in an animation
+  // delay, and the thread is animated only while it pulls.
+  assert.match(code, /part\.timer = view\.setTimeout\(/);
+  assert.match(css, /animation: ring-thread-show 830ms linear var\(--ring-link-f, 0ms\) backwards;/);
   // A box with its own entrance is never moved; once it has played it is only opened.
   assert.match(code, /child\.getAnimations\(\)\.length === 0\s*\) \{\s*collectParts\(child, depth \+ 1, out, vh, vw, sy\);\s*continue;/);
   // The film reveal stands aside for a part the chain holds or lifts.

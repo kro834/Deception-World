@@ -442,7 +442,7 @@ export function watchRingMotion(doc = document) {
   /**
    * @typedef {{ test: (el: Element) => boolean, seen: (el: Element) => boolean, show: (el: Element) => void }} LinkFamily
    * @typedef {{ el: HTMLElement, chain: LinkChain, i: number, figure: boolean, head: boolean, own: boolean, once: boolean,
-   *   fam: LinkFamily | null, state: 0 | 1 | 2, start: number, top: number, bottom: number, left: number, right: number }} LinkPart
+   *   fam: LinkFamily | null, state: 0 | 1 | 2, start: number, timer: number, top: number, bottom: number, left: number, right: number }} LinkPart
    * @typedef {{ parts: LinkPart[], links: (HTMLElement | null)[], near: boolean, armed: boolean,
    *   lastStart: number, top: number, body: boolean, root: Element, wait: number }} LinkChain
    * @typedef {{ el: Element, chains: LinkChain[], done: boolean, dirty: boolean, near: boolean, at: number, wait: number }} LinkRoot
@@ -640,6 +640,7 @@ export function watchRingMotion(doc = document) {
         once: enter && !own,
         fam,
         state: 0,
+        timer: 0,
         start: 0,
         top: rect.top + sy,
         bottom: rect.bottom + sy,
@@ -651,6 +652,10 @@ export function watchRingMotion(doc = document) {
 
   /** @param {LinkPart} part */
   const clearPart = (part) => {
+    if (part.timer) {
+      view.clearTimeout(part.timer);
+      part.timer = 0;
+    }
     if (part.state === 1) {
       held.delete(part);
       gateIO.unobserve(part.el);
@@ -940,7 +945,29 @@ export function watchRingMotion(doc = document) {
     part.state = 2;
     held.delete(part);
     gateIO.unobserve(part.el);
-    const delay = Math.round(start - now);
+    // A later part waits on a timer (still held), not in an animation's delay:
+    // an animation, even one still in its delay, is restyled on every frame
+    // the page draws (2026-11-23). It is set going as its thread goes taut,
+    // one step before its lift.
+    const wait = Math.round(start - now) - (part.own ? 0 : RING_LINK_STEP_MS);
+    if (wait > 24)
+      part.timer = view.setTimeout(() => {
+        part.timer = 0;
+        go(part, view.performance.now());
+      }, wait);
+    else go(part, now);
+  };
+
+  /**
+   * Set a released part (and its thread) going: the sheet does the rest from
+   * the delays written here.
+   * @param {LinkPart} part
+   * @param {number} now
+   */
+  const go = (part, now) => {
+    if (part.state !== 2) return;
+    const chain = part.chain;
+    const delay = Math.max(0, Math.round(part.start - now));
     const style = part.el.style;
     // An absorbed reveal arrives as the page would show it, on the chain's lift.
     if (part.fam && !part.fam.seen(part.el)) part.fam.show(part.el);

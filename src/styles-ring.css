@@ -582,16 +582,17 @@
   }
 }
 
-/* Taut and bright while it pulls, then back to a faint rest. (1100 ms
-   since 2026-11-23, was 1500: the same bright span, a shorter fade, so the
-   thread is animated for less of the scroll.) */
+/* Taut and bright while it pulls, then back to a faint rest by the time
+   the part it lifts has landed. (830 ms since 2026-11-23, was 1500: every
+   running animation, even a compositor one, is restyled on each frame the
+   page draws while scrolling, so the thread is animated only while it pulls.) */
 @keyframes ring-thread-show {
   from {
     opacity: 0;
   }
 
-  9%,
-  79% {
+  12%,
+  80% {
     opacity: 1;
   }
 }
@@ -831,7 +832,7 @@
   }
 
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] {
-    animation: ring-thread-show 1100ms linear var(--ring-link-f, 0ms) backwards;
+    animation: ring-thread-show 830ms linear var(--ring-link-f, 0ms) backwards;
   }
 
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-thread {
