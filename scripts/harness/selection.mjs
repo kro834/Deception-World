@@ -34,7 +34,6 @@ const areaStems = {
   zeus: /^(?:zeus|manager-zeus)(?:[./-]|$)/,
   forms:
     /^(?:form-signature|form-pickup|form-slider|over-zeztz|kemonohen|explom|transformation-lab)(?:[./-]|$)/,
-  dogs: /^(?:dogs-archive|dogs-viewer|dog-dossier)(?:[./-]|$)/,
   shared:
     /^(?:chunk-retry|asset-loader|auto-sized-image|viewport|rendering-profile|device-profile|liquid|glass|frosted-controls|future-interface|button-style|content-protection|press-feedback|visual-paint|scroll-playhead|startup|site-fonts|site-page-registry|font-subsets|preview-host-bridge|route-css-delivery)(?:[./-]|$)/,
   delivery:
@@ -86,7 +85,7 @@ const browserSuites = [
   },
   {
     id: "dante-dossier",
-    areas: ["dossiers", "dogs"],
+    areas: ["dossiers"],
     env: { PW_ENGINE: "chromium" },
   },
   {

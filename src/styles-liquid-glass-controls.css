@@ -42,10 +42,6 @@ html[data-button-style="liquid"] body .dream-page [data-lg-seg]:not(#lg-glass):n
   --lg-seg-tint: 236 199 136;
 }
 
-html[data-button-style="liquid"] body .dogs-archive-selector[data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  --lg-seg-tint: 126 214 150;
-}
-
 html[data-button-style="liquid"] body .exs-opponent-options[data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   --lg-seg-tint: 244 204 123;
 }

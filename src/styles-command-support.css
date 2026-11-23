@@ -380,3 +380,33 @@
     border: 1px solid CanvasText;
   }
 }
+
+/* Tours top bar on narrow phones: keep the brand phrases on one line and the bar at one row. */
+@media (max-width: 380px) {
+  .command-support-tours .gallery-topbar {
+    gap: 6px;
+    padding-inline: max(12px, env(safe-area-inset-left)) max(10px, env(safe-area-inset-right));
+  }
+  .command-support-tours .gallery-brand {
+    flex: 0 0 auto;
+    gap: 3px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .command-support-tours .gallery-brand span {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .command-support-tours .gallery-topbar-actions {
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+  .command-support-tours .gallery-topbar-actions > a {
+    padding-inline: 8px;
+    font-size: 11px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+}

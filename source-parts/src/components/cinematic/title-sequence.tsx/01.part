@@ -961,11 +961,17 @@ export function TitleSequence() {
       } else if (phase === "complete" && letter === "r") {
         keyboardFocusRef.current = true;
         replay();
+      } else if (phase === "complete" && e.key === "Enter" && !isInteractive) {
+        // A tap leaves focus on <body>, so a hardware Enter (iPad keyboard)
+        // enters the world as the tap does. A focused button or link keeps
+        // its own native Enter and Space.
+        e.preventDefault();
+        void enterWorld();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase, replay, skip]);
+  }, [enterWorld, phase, replay, skip]);
 
   const stageStateClass =
     phase === "playing"

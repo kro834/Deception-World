@@ -7,7 +7,7 @@ import { writeFileSync } from "node:fs";
 const require = createRequire(new URL("../../package.json", import.meta.url));
 const { chromium } = require("playwright");
 const BASE = process.env.BASE || "http://127.0.0.1:4971";
-const seeds = ["/", "/world", "/rexonance-saga", "/far-from-saga", "/extreme-saga", "/final-stage", "/riders/saga", "/characters/ciel", "/riders", "/characters", "/gallery", "/library", "/search", "/dream-chapter", "/meta-unitas-saga", "/illusionculum-saga", "/saga-cinema", "/managers", "/dogs-archive", "/download", "/form-archive", "/gallery-tours", "/world-map", "/transformation-lab", "/exhibition", "/login"];
+const seeds = ["/", "/world", "/rexonance-saga", "/far-from-saga", "/extreme-saga", "/final-stage", "/riders/saga", "/characters/ciel", "/riders", "/characters", "/gallery", "/library", "/search", "/dream-chapter", "/meta-unitas-saga", "/illusionculum-saga", "/saga-cinema", "/managers", "/download", "/form-archive", "/gallery-tours", "/world-map", "/transformation-lab", "/exhibition", "/login"];
 const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
 const out = {};
 const queue = [...seeds]; const seen = new Set(seeds);
