@@ -15,6 +15,9 @@ import { chromium } from "playwright";
 import { isFlatCoverFrame } from "./route-transition-frame.mjs";
 import { showMenuRow } from "./verify-menu-region.mjs";
 
+// 2026-11-24: see the Rexonance gone-budget note in audit().
+const REXONANCE_GONE_MS = 4800;
+const REXONANCE_RELEASE_MS = 5000;
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:8082";
 const FPS = 60;
 const STEP = 1000 / FPS;
@@ -343,9 +346,14 @@ async function audit(browser, analyser, profileName, name) {
   // frozen entries are sampled for.
   const extremeEntry = scenario.dest === "/extreme-saga";
   const illusionculumEntry = scenario.dest === "/illusionculum-saga";
+  // 2026-11-24: the owner's Rexonance call now opens on Ultra DEUS！ and then
+  // REXONANCE！ in a blackout before the stage (commits 716b24fe, 5c793322);
+  // the cover leaves at about 5.2–5.5 s (measured on the 806b48b7 build), so
+  // its entry is sampled for 7 s like Illusionculum's.
+  const rexonanceEntry = scenario.dest === "/rexonance-saga";
   for (
     let frame = 0;
-    frame < (metaUnitasEntry ? 1440 : illusionculumEntry ? 420 : extremeEntry ? 300 : 240);
+    frame < (metaUnitasEntry ? 1440 : illusionculumEntry || rexonanceEntry ? 420 : extremeEntry ? 300 : 240);
     frame += 1
   ) {
     if (metaUnitasEntry) await page.waitForTimeout(STEP);
@@ -458,19 +466,25 @@ async function audit(browser, analyser, profileName, name) {
     0,
     `${profileName} ${name}: red flashes ${JSON.stringify(flashes.red)}`,
   );
-  assert.equal(blank.length, 0, `${profileName} ${name}: flat empty cover frames`);
+  // 2026-11-24: the owner's Rexonance call opens with REXONANCE！ in a
+  // deliberate blackout before the hand-over; dark frames before the
+  // hand-over are that blackout, not an empty cover. After it, none may be flat.
+  const blankRule = rexonanceEntry && handedOver ? blank.filter((frame) => frame.t >= handedOver.t) : blank;
+  assert.equal(blankRule.length, 0, `${profileName} ${name}: flat empty cover frames`);
   if (metaUnitasEntry) assert.ok(playbackAt !== null && playbackAt < 20_000, "Meta Unitas must actually prepare and play");
   // rx12: the Rexonance call holds 580 ms longer (the face's pixel hold).
+  // 2026-11-24: the owner's Ultra DEUS！ → REXONANCE！ blackout opening moves
+  // the shutter's exit to about 4.68 s (806b48b7); REXONANCE_GONE_MS pins it.
   assert.ok(
     doneAt &&
       doneAt <=
-        (scenario.dest === "/rexonance-saga" ? 3580 : illusionculumEntry ? ILLUSIONCULUM_GONE_MS : extremeEntry ? EXTREME_GONE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_GONE_MS : GONE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? REXONANCE_GONE_MS : illusionculumEntry ? ILLUSIONCULUM_GONE_MS : extremeEntry ? EXTREME_GONE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_GONE_MS : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
     releasedAt &&
       releasedAt <=
-        (scenario.dest === "/rexonance-saga" ? 3780 : illusionculumEntry ? ILLUSIONCULUM_RELEASE_MS : extremeEntry ? EXTREME_RELEASE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_RELEASE_MS : RELEASE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? REXONANCE_RELEASE_MS : illusionculumEntry ? ILLUSIONCULUM_RELEASE_MS : extremeEntry ? EXTREME_RELEASE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_RELEASE_MS : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);
