@@ -21,6 +21,7 @@ import openingFontsCssUrl from "../styles-opening-fonts.css?url";
 import openingElevationCssUrl from "../styles-opening-elevation.css?url";
 import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
 import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
+import openingRingCssUrl from "../styles-opening-ring.css?url";
 import artworkStageCssUrl from "../styles-artwork-stage.css?url";
 import commandDeckCssUrl from "../styles-command-deck.css?url";
 import ringHomeCssUrl from "../styles-ring-home.css?url";
@@ -50,6 +51,9 @@ export const Route = createFileRoute("/")({
             },
             { rel: "preload", as: "image", href: "/atmosphere-poster.jpg" },
             { rel: "stylesheet", href: openingRefinementCssUrl },
+            // 2026-11-23: the title in the ring language (the glass rings,
+            // the prism pills, the dive's rings), before the pinned tail.
+            { rel: "stylesheet", href: openingRingCssUrl },
             // The World's HUD face (the same Michroma subset /world and the
             // dossiers load), the title's elevation sheet, then its cinema light
             // (the arrival, the rays, the streaks), last on this route.

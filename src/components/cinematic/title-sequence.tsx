@@ -30,7 +30,7 @@ import {
 import { useLoadGate } from "@/components/load-gate";
 import { prefersLightweightRendering } from "@/lib/rendering-profile";
 import { Particles } from "./particles";
-import { OPENING_BURN } from "./opening-timing";
+import { OPENING_BURN, OPENING_RINGS } from "./opening-timing";
 import type { BurnRun, BurnStats } from "./opening-burn";
 
 // OPENING_SEQUENCE_SECONDS in opening-timing.ts: the ice logo arrives, burns
@@ -299,6 +299,28 @@ const CinematicEditorialFrame = memo(function CinematicEditorialFrame() {
   );
 });
 
+// The glass rings (2026-11-23, the ring redesign): the four approved Blender
+// hero layers stand concentric with the logo's dial, behind the wordmark
+// (styles-opening-ring.css). Each layer assembles from its own depth on the
+// bounce spring and locks with the logo; its picture (<b>) drifts to rest
+// over the sequence. Textless; the pictures are fetched once the ice logo
+// has decoded, and the stack fades in at rest if they arrive late.
+const GLASS_RING_SOURCES = OPENING_RINGS.layers.map(
+  (layer) => `/ring-glass-20261123/hero-${layer}.webp`,
+);
+
+const GlassRings = memo(function GlassRings({ rootRef }: { rootRef: Ref<HTMLDivElement> }) {
+  return (
+    <div ref={rootRef} className="cine-glass-rings" aria-hidden="true">
+      {OPENING_RINGS.layers.map((layer) => (
+        <i key={layer} className={`cine-glass-ring cine-glass-ring-${layer}`}>
+          <b />
+        </i>
+      ))}
+    </div>
+  );
+});
+
 function LogoLayer({
   logo,
   className,
@@ -347,6 +369,7 @@ export function TitleSequence() {
   const logoBoxRef = useRef<HTMLDivElement>(null);
   const burnHostRef = useRef<HTMLDivElement>(null);
   const hudRef = useRef<SVGSVGElement>(null);
+  const ringsRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const enterRef = useRef<HTMLButtonElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
@@ -419,6 +442,37 @@ export function TitleSequence() {
       if (idleId != null) window.cancelIdleCallback(idleId);
     };
   }, [router]);
+
+  // The glass rings' pictures, once the ice logo has decoded (the title's
+  // first frame never waits on them). The stack shows when all four are
+  // decoded; a late arrival fades in at rest (styles-opening-ring.css).
+  useEffect(() => {
+    let cancelled = false;
+    const first = firstLogoRef.current;
+    const titleReady = first
+      ? first.decode().catch(() => undefined)
+      : Promise.resolve(undefined);
+    void titleReady
+      .then(() =>
+        Promise.all(
+          GLASS_RING_SOURCES.map((source) => {
+            const image = new Image();
+            image.decoding = "async";
+            image.src = source;
+            return image.decode();
+          }),
+        ),
+      )
+      .then(
+        () => {
+          if (!cancelled && ringsRef.current) ringsRef.current.dataset.glass = "ready";
+        },
+        () => undefined,
+      );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // The shine is masked by the prism logo's alpha, from the file its layer
   // chose. A server-rendered image can finish loading before hydration, so
@@ -746,6 +800,11 @@ export function TitleSequence() {
       logoRect: logo.getBoundingClientRect(),
       videoRect: video?.getBoundingClientRect(),
       hudRect: hud?.getBoundingClientRect(),
+      // Shown only once its pictures are in: the dive's copy flies only then.
+      ringRect:
+        ringsRef.current?.dataset.glass === "ready"
+          ? ringsRef.current.getBoundingClientRect()
+          : undefined,
       lineRect: line?.getBoundingClientRect(),
       logoSrc: logo.currentSrc || logo.src || undefined,
       videoSrc: video?.currentSrc || video?.src || undefined,
@@ -963,6 +1022,7 @@ export function TitleSequence() {
 
       <div className="cine-stack">
         <div ref={lockupRef} className="cine-title-lockup">
+          <GlassRings rootRef={ringsRef} />
           <div ref={logoBoxRef} className="cine-logo-wrap">
             <LogoLayer logo={OPENING_LOGO_FIRST} className="cine-logo-glow" />
             <LogoLayer logo={OPENING_LOGO_FIRST} className="cine-logo-echo cine-logo-echo-ice" />

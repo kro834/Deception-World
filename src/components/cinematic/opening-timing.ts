@@ -159,3 +159,60 @@ export function openingFramesPerDraw(cadenceMs: number) {
   if (!(cadenceMs > 0)) return 1;
   return Math.max(1, Math.floor(1000 / 60 / cadenceMs + 0.25));
 }
+
+/**
+ * The glass rings (2026-11-23, the ring redesign): the four approved Blender
+ * hero layers (public/ring-glass-20261123/hero-*.webp, outer band, arcs,
+ * inner ring, hologram) stand concentric with the logo's own dial, behind
+ * the wordmark. The box is a square of `size` × the logo box's width (a
+ * phone, where the logo is narrow, takes `sizeNarrow`) centred at x / y of
+ * the logo box, so the band clears the caption under the logo and the inner
+ * ring sits just outside the dial. The title sheet (styles-opening-ring.css)
+ * and the dive's copy (opening-handoff.tsx) read the same numbers.
+ */
+export const OPENING_RINGS = {
+  x: 0.566,
+  y: 0.43,
+  size: 0.735,
+  sizeNarrow: 0.8,
+  /** Logo boxes narrower than this (CSS px) take sizeNarrow. */
+  narrowBelow: 560,
+  layers: ["outer", "mid", "inner", "holo"] as const,
+} as const;
+
+/**
+ * The rings in the dive. They stand behind the logo, so they are not drawn
+ * while the wordmark fills the frame (the GL canvas covers the title's own
+ * rings as it fades in); once the glyphs have blown past and dimmed, each
+ * layer rushes past the camera at its own depth (nearer layers grow
+ * faster: parallax), turning in alternate directions, and is gone before
+ * the camera breaks through the dial into the world (`cut`). The scale
+ * follows the shader's own zoom (1 / uZoom) about the dive's focus, so the
+ * rings stay on the camera's axis.
+ */
+export const OPENING_DIVE_RINGS = {
+  /** Per layer (outer, mid, inner, holo): depth exponent and total turn (deg). */
+  depth: [1.22, 1.08, 0.96, 1.4],
+  turn: [28, -46, 64, -90],
+  /** Peak opacity: lines, never a filled field. */
+  peak: 0.82,
+  /** They appear as the glyphs dim (T, seconds). */
+  show: [0.4, 0.6],
+  /** And are gone by the time a layer is this many times its size. */
+  gone: [2.6, 4.6],
+} as const;
+
+export type DiveRingFrame = { scale: number; rotate: number; opacity: number };
+
+/** One ring layer of the dive at T seconds after the dive started drawing. */
+export function diveRingAt(T: number, layer: number): DiveRingFrame {
+  const { cut } = OPENING_DIVE;
+  const { depth, turn, peak, show, gone } = OPENING_DIVE_RINGS;
+  const t = Math.min(T, cut);
+  const zoom = diveUniformsAt(t).uZoom;
+  const scale = (1 / Math.max(zoom, 0.1)) ** depth[layer];
+  const diveT = clamp01((t - 0.08) / (cut - 0.08));
+  const opacity =
+    T >= cut ? 0 : peak * smooth(show[0], show[1], T) * (1 - smooth(gone[0], gone[1], scale));
+  return { scale, rotate: turn[layer] * diveT * diveT, opacity };
+}

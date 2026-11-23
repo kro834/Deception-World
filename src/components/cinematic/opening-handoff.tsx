@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { OPENING_DIVE } from "./opening-timing";
+import { OPENING_DIVE, diveRingAt } from "./opening-timing";
 import type { DiveRun, DiveStats } from "./opening-dive";
 import { posterImage } from "@/lib/thumbnail-images";
 
@@ -17,6 +17,8 @@ export type OpeningHandoffSource = {
   logoRect: OpeningHandoffRect;
   videoRect?: OpeningHandoffRect;
   hudRect?: OpeningHandoffRect;
+  /** The title's glass ring stack, when its pictures were in (the dive flies through it). */
+  ringRect?: OpeningHandoffRect;
   lineRect?: OpeningHandoffRect;
   logoSrc?: string;
   videoSrc?: string;
@@ -154,6 +156,29 @@ function setRect(element: HTMLElement, rect: OpeningHandoffRect) {
   element.style.transform = "none";
 }
 
+// The glass rings' flight (2026-11-23): one keyframe per sample of the
+// shader's own zoom (diveRingAt), so the compositor follows the camera with
+// linear segments. Each layer scales about the dive's focus and turns about
+// its own centre; offsets are fractions of glEnd, which is the GL and the
+// full CSS dive alike (the economy CSS dive scales the whole clock).
+const RING_FLIGHT_SAMPLES = 28;
+
+function ringFlightKeyframes(layer: number, dx: number, dy: number): Keyframe[] {
+  const { cut, glEnd } = OPENING_DIVE;
+  const frames: Keyframe[] = [];
+  for (let step = 0; step <= RING_FLIGHT_SAMPLES; step += 1) {
+    const T = (cut * step) / RING_FLIGHT_SAMPLES;
+    const { scale, rotate, opacity } = diveRingAt(T, layer);
+    frames.push({
+      offset: T / glEnd,
+      opacity: Number(opacity.toFixed(3)),
+      transform: `translate(${dx}px, ${dy}px) scale(${scale.toFixed(4)}) translate(${-dx}px, ${-dy}px) rotate(${rotate.toFixed(2)}deg)`,
+    });
+  }
+  frames.push({ offset: 1, opacity: 0, transform: String(frames.at(-1)?.transform) });
+  return frames;
+}
+
 function animateNode(
   node: HTMLElement | null,
   keyframes: Keyframe[],
@@ -212,6 +237,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
   const trailsRef = useRef<HTMLDivElement>(null);
   const warpRef = useRef<HTMLDivElement>(null);
   const lockRef = useRef<HTMLDivElement>(null);
+  const ringsRef = useRef<HTMLDivElement>(null);
   const activeTokenRef = useRef<number | null>(null);
   // The landing's compositor motion also outlives the covering effect: it
   // carries on under the arrival, which waits for it to come to rest.
@@ -287,6 +313,26 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     });
     const focusX = sourceLogoRect.left + sourceLogoRect.width * RING.x;
     const focusY = sourceLogoRect.top + sourceLogoRect.height * RING.y;
+    // The glass rings fly only from a title that showed them, at its rect.
+    const ringsLayer = ringsRef.current;
+    const sourceRingRect =
+      source.ringRect && !source.economy && !source.reducedMotion
+        ? visualViewportLocalRect(source.ringRect, sourceLogoRect)
+        : null;
+    const ringLayers = ringsLayer && sourceRingRect ? [...ringsLayer.children] : [];
+    const ringAnimations: Animation[] = [];
+    const flyRings = (start: (node: HTMLElement, keyframes: Keyframe[]) => Animation | null) => {
+      if (!sourceRingRect) return;
+      for (const animation of ringAnimations) animation.cancel();
+      ringAnimations.length = 0;
+      const dx = focusX - (sourceRingRect.left + sourceRingRect.width / 2);
+      const dy = focusY - (sourceRingRect.top + sourceRingRect.height / 2);
+      ringLayers.forEach((node, index) => {
+        if (!(node instanceof HTMLElement)) return;
+        const animation = start(node, ringFlightKeyframes(index, dx, dy));
+        if (animation) ringAnimations.push(animation);
+      });
+    };
 
     if (snapshot.phase === "covering") {
       const landing = landingRef.current;
@@ -306,6 +352,14 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       setRect(logo, sourceLogoRect);
       setRect(video, sourceVideoRect);
       setRect(hud, sourceHudRect);
+      if (ringsLayer) {
+        if (sourceRingRect) {
+          setRect(ringsLayer, sourceRingRect);
+          ringsLayer.dataset.openingHandoffRingsOn = "";
+        } else {
+          delete ringsLayer.dataset.openingHandoffRingsOn;
+        }
+      }
       root.style.setProperty("--opening-dive-x", `${focusX}px`);
       root.style.setProperty("--opening-dive-y", `${focusY}px`);
       logo.style.transformOrigin = `${sourceLogoRect.width * RING.x}px ${sourceLogoRect.height * RING.y}px`;
@@ -681,6 +735,11 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         },
         { opacity: 1, transform: `scale(${OPENING_DIVE.landScale})` },
       ]);
+      // The glass rings rush past on the same clock (cancelling a GL run's).
+      flyRings((node, keyframes) => {
+        add(node, keyframes);
+        return cssAnimations.at(-1) ?? null;
+      });
       for (const bar of stableRoot.querySelectorAll<HTMLElement>(
         "[data-opening-handoff-letterbox]",
       )) {
@@ -753,8 +812,10 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         return tierLabel;
       },
       seek: (T: number) => {
-        if (tierLabel === "webgl") diveRef.current?.run.seek(T);
-        else for (const animation of cssAnimations) animation.currentTime = Math.max(0, T) * 1000;
+        if (tierLabel === "webgl") {
+          diveRef.current?.run.seek(T);
+          for (const animation of ringAnimations) animation.currentTime = Math.max(0, T) * 1000;
+        } else for (const animation of cssAnimations) animation.currentTime = Math.max(0, T) * 1000;
       },
       land: () => {
         if (tierLabel === "webgl") diveRef.current?.run.land();
@@ -820,6 +881,17 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
           if (tier === "webgl") {
             tierLabel = "webgl";
             stableRoot.dataset.openingHandoffTier = "webgl";
+            // The canvas draws from now (startedAt): the rings share its clock.
+            flyRings((node, keyframes) => {
+              const animation = animateNode(
+                node,
+                keyframes,
+                commonOptions(OPENING_DIVE.glEnd * 1000, "linear"),
+                running,
+              );
+              if (audit) animation?.pause();
+              return animation;
+            });
           } else {
             beginCssDive();
           }
@@ -896,6 +968,13 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       <div data-opening-handoff-letterbox="top" />
       <div data-opening-handoff-letterbox="bottom" />
       <div ref={glRef} data-opening-handoff-gl />
+      {/* The glass rings the camera flies through (styles-opening-ring.css). */}
+      <div ref={ringsRef} data-opening-handoff-rings>
+        <i />
+        <i />
+        <i />
+        <i />
+      </div>
       <div ref={lockRef} data-opening-handoff-lock>
         <i />
         <i />

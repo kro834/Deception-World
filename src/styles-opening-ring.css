@@ -1,0 +1,306 @@
+/* The opening in the ring language (2026-11-23, the ring redesign; owner:
+   「オープニング画面も大幅にブラッシュアップして」).
+
+   1. The glass rings: the four approved Blender hero layers
+      (public/ring-glass-20261123/hero-*.webp) stand concentric with the
+      logo's own dial, behind the wordmark. Each assembles from its own depth
+      on the bounce spring and locks with the logo (~1.5 s); its picture
+      drifts to rest by the end of the sequence. Nothing loops.
+   2. The old thin-line SVG HUD steps aside for them (its box is still
+      measured by the hand-off).
+   3. ENTER THE WORLD and もう一度 become pills with a prism ring stroke that
+      locks on (the existing plate-lock), pop in on the bounce spring and
+      answer a press with a sink and an elastic release.
+   4. The dive's copy of the rings (opening-handoff.tsx) rushes past the
+      camera on the shader's clock.
+
+   Every animation and transition is behind prefers-reduced-motion and the
+   economy renderer; both show the rings at rest. Compositor-only motion
+   (opacity, scale, rotate, translate). Linked before the pinned tail of the
+   opening head (fonts, elevation, cinema), so ids in :not() lift the few
+   declarations that must win over those later sheets. */
+
+/* ---- 1. The glass ring stack -------------------------------------------- */
+
+/* OPENING_RINGS in opening-timing.ts: centre 0.566 / 0.43 of the logo box,
+   0.735 of its width (0.8 where the logo box is under 560px: a portrait
+   phone, or a very short landscape). */
+.cine-glass-rings {
+  position: absolute;
+  left: 56.6%;
+  top: 43%;
+  width: 73.5%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@media (max-width: 608px), (max-height: 478px) {
+  .cine-glass-rings {
+    width: 80%;
+  }
+}
+
+.cine-glass-rings[data-glass] {
+  opacity: 0.92;
+}
+
+.cine-glass-ring,
+.cine-glass-ring > b {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.cine-glass-ring > b {
+  background: center / contain no-repeat;
+}
+
+.cine-glass-rings[data-glass] .cine-glass-ring-outer > b {
+  background-image: url("/ring-glass-20261123/hero-outer.webp");
+}
+
+.cine-glass-rings[data-glass] .cine-glass-ring-mid > b {
+  background-image: url("/ring-glass-20261123/hero-mid.webp");
+}
+
+.cine-glass-rings[data-glass] .cine-glass-ring-inner > b {
+  background-image: url("/ring-glass-20261123/hero-inner.webp");
+}
+
+.cine-glass-rings[data-glass] .cine-glass-ring-holo > b {
+  background-image: url("/ring-glass-20261123/hero-holo.webp");
+}
+
+/* Per layer: when it starts (s into the sequence), the depth it flies in
+   from (scale), the angle it turns in from, and the drift its picture comes
+   to rest from. The hologram comes first, from inside (light growing
+   outward); the band last, from in front of the lens, locking at 1.56 s,
+   with the logo's own lock (1.53 s) and the dust's burst (1.5 s). */
+.cine-glass-ring-holo {
+  --opr-at: 0.5s;
+  --opr-from: 0.4;
+  --opr-turn: 120deg;
+  --opr-drift: -34deg;
+}
+
+.cine-glass-ring-inner {
+  --opr-at: 0.62s;
+  --opr-from: 1.45;
+  --opr-turn: -70deg;
+  --opr-drift: 22deg;
+}
+
+.cine-glass-ring-mid {
+  --opr-at: 0.74s;
+  --opr-from: 0.55;
+  --opr-turn: 90deg;
+  --opr-drift: -16deg;
+}
+
+.cine-glass-ring-outer {
+  --opr-at: 0.86s;
+  --opr-from: 1.28;
+  --opr-turn: -40deg;
+  --opr-drift: 9deg;
+}
+
+/* ---- 2. The old HUD steps aside ------------------------------------------ */
+
+/* Hidden, not removed: the hand-off still measures its box. Its endless
+   turns stop with it (nothing paints them). */
+.cine-stage .cine-hud:not(#opr) {
+  visibility: hidden;
+}
+
+.cine-stage .cine-hud:not(#opr) :is(.cine-hud-spin, .cine-hud-spin-rev, .cine-hud-orbits) {
+  animation: none;
+}
+
+/* ---- 3. The ENTER row: prism pills --------------------------------------- */
+
+.cine-stage .cine-replay-slot > .cine-btn:not(#opr) {
+  border-radius: 999px;
+}
+
+/* The bracket plate becomes the ring stroke: a 1.5px prism line cut from
+   the pill (the plate-lock still locks it on). */
+.cine-stage .cine-replay-slot > .cine-btn:not(#opr)::before {
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 210deg,
+    rgb(var(--ring-key-rgb, 122 232 255) / 0.95),
+    rgb(var(--ring-pink-rgb, 255 95 200) / 0.85) 32%,
+    rgb(var(--ring-gold-rgb, 240 207 134) / 0.95) 62%,
+    rgb(var(--ring-key-rgb, 122 232 255) / 0.95)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+.cine-stage .cine-replay-slot > .cine-btn-secondary:not(#opr)::before {
+  opacity: 0.55;
+}
+
+/* The prism underline sits inside the pill's straight run. */
+.cine-stage .cine-replay-slot > .cine-btn-primary:not(#opr)::after {
+  right: 22px;
+  left: 22px;
+}
+
+.cine-stage .cine-replay-slot > .cine-btn:not(#opr):active {
+  transform: none;
+  scale: 0.93;
+}
+
+/* ---- Motion (gated) ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .cine-stage .cine-glass-rings {
+    transition: opacity 0.6s ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .cine-stage.is-playing:not(.is-economy-opening)
+    .cine-glass-ring {
+    animation:
+      opr-ring-in var(--ring-dur-bounce, 0.7s) var(--ring-spring-bounce, ease-out) var(--opr-at)
+        backwards,
+      opr-ring-show 0.32s ease-out var(--opr-at) backwards;
+  }
+
+  /* The drift runs on the sequence clock and ends at rest as the title
+     settles (OPENING_SEQUENCE_SECONDS), so the complete state shows the
+     same frame. */
+  html:not([data-world-effects="economy"])
+    .cine-stage.is-playing:not(.is-economy-opening)
+    .cine-glass-ring
+    > b {
+    animation: opr-ring-drift 7.2s cubic-bezier(0.2, 0.55, 0.25, 1) backwards;
+  }
+
+  /* The row pops in on the bounce spring, もう一度 a beat after. Individual
+     properties and a backwards fill, so the press below is never held. */
+  html:not([data-world-effects="economy"])
+    .cine-stage.is-complete
+    .cine-replay-slot
+    > .cine-btn:not(#opr) {
+    animation:
+      opr-deck-pop var(--ring-dur-bounce, 0.7s) var(--ring-spring-bounce, ease-out) 0.06s backwards,
+      opr-deck-show 0.28s ease-out 0.06s backwards;
+    transition:
+      border-color 180ms ease,
+      color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      translate 180ms ease,
+      scale var(--ring-dur-elastic, 0.88s) var(--ring-spring-elastic, ease-out);
+  }
+
+  html:not([data-world-effects="economy"])
+    .cine-stage.is-complete
+    .cine-replay-slot
+    > .cine-btn-secondary:not(#opr) {
+    animation-delay: 0.14s;
+  }
+
+  /* The press sinks quickly; the release springs back past rest. */
+  html:not([data-world-effects="economy"])
+    .cine-stage.is-complete
+    .cine-replay-slot
+    > .cine-btn:not(#opr):active {
+    transition-duration: 180ms, 180ms, 180ms, 180ms, 180ms, 90ms;
+    transition-timing-function: ease, ease, ease, ease, ease, ease-out;
+  }
+}
+
+@keyframes opr-ring-in {
+  from {
+    scale: var(--opr-from);
+    rotate: var(--opr-turn);
+  }
+}
+
+@keyframes opr-ring-show {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes opr-ring-drift {
+  from {
+    rotate: var(--opr-drift);
+  }
+}
+
+@keyframes opr-deck-pop {
+  from {
+    translate: 0 18px;
+    scale: 0.82;
+  }
+}
+
+@keyframes opr-deck-show {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---- 4. The dive's rings (opening-handoff.tsx) ---------------------------- */
+
+/* Placed at the title's ring rect and moved only by the flight's animations;
+   at rest (and after the flight) they are transparent. Over the canvas, and
+   shown in the GL tier, where the root hides every other DOM layer. */
+[data-opening-handoff-root] > [data-opening-handoff-rings]:not(#opr) {
+  position: absolute;
+  z-index: 10;
+  display: none;
+  pointer-events: none;
+}
+
+[data-opening-handoff-root] > [data-opening-handoff-rings][data-opening-handoff-rings-on]:not(#opr) {
+  display: block;
+  visibility: visible;
+}
+
+[data-opening-handoff-rings] > i {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: center / contain no-repeat;
+}
+
+[data-opening-handoff-rings] > i:nth-child(1) {
+  background-image: url("/ring-glass-20261123/hero-outer.webp");
+}
+
+[data-opening-handoff-rings] > i:nth-child(2) {
+  background-image: url("/ring-glass-20261123/hero-mid.webp");
+}
+
+[data-opening-handoff-rings] > i:nth-child(3) {
+  background-image: url("/ring-glass-20261123/hero-inner.webp");
+}
+
+[data-opening-handoff-rings] > i:nth-child(4) {
+  background-image: url("/ring-glass-20261123/hero-holo.webp");
+}
+
+[data-opening-handoff-root][data-opening-handoff-tier="reduced"] > [data-opening-handoff-rings]:not(#opr) {
+  display: none;
+}
+
+@media (forced-colors: active) {
+  .cine-glass-rings,
+  [data-opening-handoff-rings] {
+    display: none;
+  }
+}
