@@ -2670,11 +2670,11 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
 }
 
 /* ---- The eight riders, strengthened (owner, 2026-10-21) ----------------
-   Dives (サーガ, レルム, ローア, ヴァンダル): a one-shot burst of the rider's
-   light radiating from the held file, and the numeral punching in. サーガ's
-   burst is a forest-green fire instead, its tongues rising round the file
-   and dying away. Cut-ins (レディック, アルジェノム, オーバーゼッツ,
-   サイファー): one slash of the rider's light across the stage.
+   Dives: a one-shot burst of the rider's light radiating from the held
+   file (the four riders' own dives replace it: "The eight riders' rings",
+   2026-11-24, at the end of this sheet), and the numeral punching in.
+   Cut-ins (レディック, アルジェノム, オーバーゼッツ, サイファー): one slash
+   of the rider's light across the stage.
    Every layer is ink-dark or tinted (never white), runs once and moves
    only opacity/transform; economy and reduced motion keep the plain
    shutter (these rules exist only in full motion). */
@@ -2706,134 +2706,6 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     .rider-dive-mark
     > i {
     animation: dwc-rider-punch 520ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
-  }
-
-  /* サーガ: the green fire — tall tongues rising from the file's foot and
-     sides, a low glow at its base, a second rank of tongues behind. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
-      .is-extreme-dive
-    ):not(.is-final-stage-dive)
-    > .rider-dive-vector-field {
-    background:
-      radial-gradient(
-        4% 30% at calc((var(--fx) + var(--fw) * -0.04) * 1px) calc((var(--fy) + var(--fh) * 0.78) * 1px),
-        rgb(150 240 130 / 80%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        4.5% 34% at calc((var(--fx) + var(--fw) * 0.12) * 1px) calc((var(--fy) + var(--fh) * 0.98) * 1px),
-        rgb(120 236 110 / 78%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        3.5% 28% at calc((var(--fx) + var(--fw) * 0.3) * 1px) calc((var(--fy) + var(--fh) * 1.02) * 1px),
-        rgb(170 246 150 / 76%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        5% 38% at calc((var(--fx) + var(--fw) * 0.5) * 1px) calc((var(--fy) + var(--fh) * 1.04) * 1px),
-        rgb(150 240 130 / 82%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        3.5% 30% at calc((var(--fx) + var(--fw) * 0.7) * 1px) calc((var(--fy) + var(--fh) * 1.02) * 1px),
-        rgb(170 246 150 / 76%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        4.5% 34% at calc((var(--fx) + var(--fw) * 0.88) * 1px) calc((var(--fy) + var(--fh) * 0.98) * 1px),
-        rgb(120 236 110 / 78%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        4% 28% at calc((var(--fx) + var(--fw) * 1.04) * 1px) calc((var(--fy) + var(--fh) * 0.74) * 1px),
-        rgb(150 240 130 / 80%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        34% 16% at calc((var(--fx) + var(--fw) / 2) * 1px) calc((var(--fy) + var(--fh) * 1.04) * 1px),
-        rgb(96 214 92 / 55%),
-        rgb(34 139 34 / 30%) 50%,
-        transparent 78%
-      );
-    transform-origin: 50% calc((var(--fy) + var(--fh)) * 1px);
-    animation: dwc-saga-fire 1000ms cubic-bezier(0.22, 0.7, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
-      .is-extreme-dive
-    ):not(.is-final-stage-dive)
-    > .rider-dive-vector-field::before,
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
-      .is-extreme-dive
-    ):not(.is-final-stage-dive)
-    > .rider-dive-vector-field::after {
-    position: absolute;
-    inset: 0;
-    content: "";
-    background:
-      radial-gradient(
-        3% 22% at calc((var(--fx) + var(--fw) * 0.02) * 1px) calc((var(--fy) + var(--fh) * 0.5) * 1px),
-        rgb(96 214 92 / 72%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        3% 24% at calc((var(--fx) + var(--fw) * 0.98) * 1px) calc((var(--fy) + var(--fh) * 0.46) * 1px),
-        rgb(96 214 92 / 72%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        3% 22% at calc((var(--fx) + var(--fw) * 0.22) * 1px) calc((var(--fy) + var(--fh) * 1.0) * 1px),
-        rgb(120 236 110 / 70%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        3% 24% at calc((var(--fx) + var(--fw) * 0.62) * 1px) calc((var(--fy) + var(--fh) * 1.0) * 1px),
-        rgb(120 236 110 / 70%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        2.6% 20% at calc((var(--fx) + var(--fw) * 0.4) * 1px) calc((var(--fy) + var(--fh) * 0.98) * 1px),
-        rgb(170 246 150 / 70%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      ),
-      radial-gradient(
-        2.6% 20% at calc((var(--fx) + var(--fw) * 0.8) * 1px) calc((var(--fy) + var(--fh) * 0.94) * 1px),
-        rgb(170 246 150 / 70%),
-        rgb(34 139 34 / 38%) 46%,
-        transparent 72%
-      );
-    transform-origin: 50% calc((var(--fy) + var(--fh)) * 1px);
-    animation: dwc-saga-tongues 880ms cubic-bezier(0.3, 0.6, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(.is-rexonance-dive):not(
-      .is-extreme-dive
-    ):not(.is-final-stage-dive)
-    > .rider-dive-vector-field::after {
-    transform: scaleX(-1);
-    animation-name: dwc-saga-tongues-b;
-    animation-delay: 160ms;
   }
 
   /* The cut-ins: one slash of the rider's light. */
@@ -2888,51 +2760,6 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
   }
 }
 
-@keyframes dwc-saga-fire {
-  0% {
-    opacity: 0;
-    transform: translateY(18%) scaleY(0.55);
-  }
-  34% {
-    opacity: 0.62;
-    transform: translateY(0) scaleY(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-10%) scaleY(1.25);
-  }
-}
-
-@keyframes dwc-saga-tongues {
-  0% {
-    opacity: 0;
-    transform: translateY(14%) scaleY(0.6);
-  }
-  40% {
-    opacity: 0.66;
-    transform: translateY(-4%) scaleY(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-22%) scaleY(1.4);
-  }
-}
-
-@keyframes dwc-saga-tongues-b {
-  0% {
-    opacity: 0;
-    transform: scaleX(-1) translateY(14%) scaleY(0.6);
-  }
-  40% {
-    opacity: 0.66;
-    transform: scaleX(-1) translateY(-6%) scaleY(1.15);
-  }
-  100% {
-    opacity: 0;
-    transform: scaleX(-1) translateY(-26%) scaleY(1.45);
-  }
-}
-
 @keyframes dwc-rider-slash {
   0% {
     opacity: 0;
@@ -2951,18 +2778,8 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
    The block above gives every dive one burst and every cut-in one slash;
    here each rider gets a gesture of their own, under the same rules (ink or
    tinted light, never white; once; opacity, transform and clip-path only;
-   full motion only). サーガ keeps the owner's green fire and the classic
-   tunnel; the other three dives replace the tunnel's radial streaks.
-   レルム, the blade: the tunnel becomes a wind of dashes along the texture's
-     own -16deg, a crimson cut is drawn across the stage and the held file
-     from the lower left and an amber counter-cut answers from the right.
-   ローア, the frost record: the tunnel becomes a six-fold lattice of rings
-     and spokes that turns into place with frost glints, a hexagonal ring
-     leaves the file and the record grid rises.
-   ヴァンダル, the shatter: the tunnel becomes a ring of hard-edged shards
-     that slams out with one tremor, the seam is drawn through the file and
-     its two edges part, magenta and violet.
-   Cut-ins: レディック a warm paper light down the doors; アルゲノム two
+   full motion only). The four dives' gestures moved to "The eight
+   riders' rings" (2026-11-24, at the end of this sheet). Cut-ins: レディック a warm paper light down the doors; アルゲノム two
    scarlet cuts cross; オーバーゼッツ a vertical impact band and a pressure
    ring; サイファー a stepped scan and a cyan return line. */
 @media (prefers-reduced-motion: no-preference) {
@@ -2989,674 +2806,6 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
     .load-gate.has-cine.is-cine-full.is-dream-dive.is-revealing
     .cine-dive-tunnel {
     transform: translate(-50%, -54%) scale(1.08, 0.88);
-  }
-
-  /* The three fields cover the stage itself (the old sheet's field is a
-     1540 px disc masked round its own centre, off the file). */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
-      .is-realm-dive,
-      .is-lore-dive,
-      .is-vandal-dive
-    )
-    > .rider-dive-vector-field {
-    inset: 0;
-    width: auto;
-    height: auto;
-    overflow: hidden;
-    border-radius: 0;
-    -webkit-mask-image: none;
-    mask-image: none;
-    transform: none;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
-      .is-realm-dive,
-      .is-lore-dive,
-      .is-vandal-dive
-    )
-    > .rider-dive-vector-field::before,
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
-      .is-realm-dive,
-      .is-lore-dive,
-      .is-vandal-dive
-    )
-    > .rider-dive-vector-field::after {
-    position: absolute;
-    content: "";
-    pointer-events: none;
-    opacity: 0;
-  }
-
-  /* The three tunnels drop the sheet's disc: each draws its own field. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
-      .is-realm-dive,
-      .is-lore-dive,
-      .is-vandal-dive
-    )
-    .cine-dive-tunnel
-    > i {
-    inset: 0;
-    border-radius: 0;
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-
-  /* サーガ ---------------------------------------------------------- */
-  /* The owner's fire keeps its geometry and its motion; only the old
-     sheet's disc mask goes, which hollowed out the glow at the file's foot
-     on wide screens (a 131px hole round the disc's own centre). */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive:not(
-      .is-rexonance-dive
-    ):not(.is-extreme-dive):not(.is-final-stage-dive)
-    > .rider-dive-vector-field {
-    border-radius: 0;
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-
-  /* Embers rise off the fire through the tunnel's second rank: green,
-     pale green and gold, small, once. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-saga-dive
-    .cine-dive-tunnel
-    > i:nth-child(2) {
-    inset: 0;
-    border-radius: 0;
-    background:
-      radial-gradient(
-          circle at 50% 50%,
-          rgb(170 246 150 / 0.95) 0 1.4px,
-          transparent 2.6px
-        )
-        0 0 / 97px 131px,
-      radial-gradient(
-          circle at 50% 50%,
-          rgb(240 207 134 / 0.9) 0 1.2px,
-          transparent 2.4px
-        )
-        41px 67px / 163px 89px,
-      radial-gradient(
-          circle at 50% 50%,
-          rgb(120 236 110 / 0.85) 0 1.6px,
-          transparent 3px
-        )
-        113px 23px / 211px 173px;
-    -webkit-mask-image: radial-gradient(
-      ellipse 34% 40% at 50% 58%,
-      #000 30%,
-      transparent 100%
-    );
-    mask-image: radial-gradient(
-      ellipse 34% 40% at 50% 58%,
-      #000 30%,
-      transparent 100%
-    );
-    animation: dwc-saga-embers 900ms cubic-bezier(0.2, 0.6, 0.3, 1) 80ms both;
-  }
-
-  /* レルム ---------------------------------------------------------- */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
-    .cine-dive-tunnel {
-    --dwc-o: 0.5;
-    width: min(116vmax, 1800px);
-    height: min(116vmax, 1800px);
-    border-radius: 0;
-    background:
-      radial-gradient(
-          64px 1.4px at 50% 50%,
-          rgb(255 194 120 / 0.85),
-          rgb(241 74 96 / 0.4) 50%,
-          transparent
-        )
-        0 0 / 233px 29px,
-      radial-gradient(
-          96px 1.2px at 50% 50%,
-          rgb(255 120 138 / 0.7),
-          rgb(241 74 96 / 0.3) 50%,
-          transparent
-        )
-        91px 13px / 317px 43px,
-      radial-gradient(40px 1px at 50% 50%, rgb(255 184 196 / 0.6), transparent)
-        37px 21px / 173px 61px;
-    -webkit-mask-image: radial-gradient(
-      ellipse 54% 26% at 50% 50%,
-      #000 0 30%,
-      transparent 100%
-    );
-    mask-image: radial-gradient(
-      ellipse 54% 26% at 50% 50%,
-      #000 0 30%,
-      transparent 100%
-    );
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive.is-covering:not(
-      .is-cine-flip
-    ):not(.is-cine-calm):not(.is-cine-reduced)
-    .cine-dive-tunnel {
-    animation: dwc-realm-wind 340ms cubic-bezier(0.1, 0.8, 0.1, 1) 20ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive.is-revealing:not(
-      .is-cine-flip
-    )
-    .cine-dive-tunnel {
-    transform: translate(-50%, -50%) rotate(-16deg);
-  }
-
-  /* The grain along the blade, and a nearer, faster rank of dashes. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
-    .cine-dive-tunnel
-    > i {
-    background: repeating-linear-gradient(
-      180deg,
-      transparent 0 37px,
-      rgb(241 74 96 / 0.22) 37px 38px,
-      transparent 38px 59px,
-      rgb(255 194 120 / 0.14) 59px 60px,
-      transparent 60px 101px
-    );
-    animation: dwc-realm-grain 340ms cubic-bezier(0.1, 0.8, 0.1, 1) 20ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
-    .cine-dive-tunnel
-    > i:nth-child(2) {
-    background:
-      radial-gradient(
-          130px 1.6px at 50% 50%,
-          rgb(255 206 160 / 0.9),
-          rgb(241 74 96 / 0.42) 50%,
-          transparent
-        )
-        0 0 / 521px 83px,
-      radial-gradient(
-          84px 1.3px at 50% 50%,
-          rgb(255 138 152 / 0.8),
-          transparent
-        )
-        203px 37px / 389px 107px;
-    animation-name: dwc-realm-dash;
-  }
-
-  /* The cut and the counter-cut: over the held file, under the numeral. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive:not(
-      .is-rexonance-dive
-    ):not(.is-extreme-dive):not(.is-final-stage-dive)
-    > .rider-dive-vector-field {
-    z-index: 26;
-    background: linear-gradient(
-      -16deg,
-      transparent 45%,
-      rgb(241 74 96 / 0.08) 48.6%,
-      rgb(255 194 120 / 0.13) 50%,
-      rgb(241 74 96 / 0.08) 51.4%,
-      transparent 55%
-    );
-    animation: dwc-realm-wake 640ms cubic-bezier(0.2, 0.7, 0.3, 1) 60ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
-    > .rider-dive-vector-field::before,
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
-    > .rider-dive-vector-field::after {
-    top: 50%;
-    left: 50%;
-    width: 150vmax;
-    height: 2px;
-    margin: -1px 0 0 -75vmax;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgb(241 74 96 / 0.5) 16%,
-      rgb(255 120 138 / 0.92) 58%,
-      rgb(255 206 160) 84%,
-      rgb(255 228 200 / 0.5) 96%,
-      transparent
-    );
-    box-shadow:
-      0 0 10px rgb(241 74 96 / 0.72),
-      0 0 28px rgb(241 74 96 / 0.32);
-    transform: rotate(-16deg);
-    clip-path: inset(-40px 100% -40px 0);
-    animation: dwc-realm-cut 540ms cubic-bezier(0.16, 0.9, 0.3, 1) 30ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-realm-dive
-    > .rider-dive-vector-field::after {
-    height: 1px;
-    margin-top: 14px;
-    background: linear-gradient(
-      270deg,
-      transparent,
-      rgb(255 194 120 / 0.42) 16%,
-      rgb(255 210 150 / 0.86) 58%,
-      rgb(255 184 196) 84%,
-      transparent
-    );
-    box-shadow: 0 0 10px rgb(255 194 120 / 0.42);
-    clip-path: inset(-40px 0 -40px 100%);
-    animation-name: dwc-realm-counter;
-    animation-duration: 480ms;
-    animation-delay: 150ms;
-  }
-
-  /* ローア ---------------------------------------------------------- */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
-    .cine-dive-tunnel {
-    --dwc-o: 0.46;
-    background:
-      repeating-conic-gradient(
-        from 0deg,
-        rgb(200 245 255 / 0.4) 0deg 0.4deg,
-        transparent 0.45deg 60deg
-      ),
-      repeating-conic-gradient(
-        from 30deg,
-        rgb(160 230 255 / 0.2) 0deg 0.3deg,
-        transparent 0.3deg 60deg
-      ),
-      repeating-radial-gradient(
-        circle,
-        transparent 0 52px,
-        rgb(200 245 255 / 0.24) 52px 53.5px,
-        transparent 53.5px 104px
-      );
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive.is-covering:not(
-      .is-cine-flip
-    ):not(.is-cine-calm):not(.is-cine-reduced)
-    .cine-dive-tunnel {
-    animation: dwc-lore-lattice 400ms cubic-bezier(0.16, 0.84, 0.3, 1) 20ms both;
-  }
-
-  /* Finer rings opening like a sounding, and the frost glints. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
-    .cine-dive-tunnel
-    > i {
-    background: repeating-radial-gradient(
-      circle,
-      transparent 0 19px,
-      rgb(142 232 255 / 0.2) 19px 20px,
-      transparent 20px 34px
-    );
-    animation: dwc-lore-sound 420ms cubic-bezier(0.2, 0.8, 0.3, 1) 40ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
-    .cine-dive-tunnel
-    > i:nth-child(2) {
-    background:
-      radial-gradient(
-        0.22% 1.9% at 31% 34%,
-        rgb(216 244 255 / 0.95),
-        transparent
-      ),
-      radial-gradient(
-        1.9% 0.22% at 31% 34%,
-        rgb(216 244 255 / 0.95),
-        transparent
-      ),
-      radial-gradient(
-        0.18% 1.4% at 70% 29%,
-        rgb(200 245 255 / 0.9),
-        transparent
-      ),
-      radial-gradient(
-        1.4% 0.18% at 70% 29%,
-        rgb(200 245 255 / 0.9),
-        transparent
-      ),
-      radial-gradient(
-        0.2% 1.6% at 76% 64%,
-        rgb(216 244 255 / 0.9),
-        transparent
-      ),
-      radial-gradient(
-        1.6% 0.2% at 76% 64%,
-        rgb(216 244 255 / 0.9),
-        transparent
-      ),
-      radial-gradient(
-        0.16% 1.2% at 25% 69%,
-        rgb(200 245 255 / 0.85),
-        transparent
-      ),
-      radial-gradient(
-        1.2% 0.16% at 25% 69%,
-        rgb(200 245 255 / 0.85),
-        transparent
-      ),
-      radial-gradient(0.14% 1% at 58% 80%, rgb(216 244 255 / 0.8), transparent),
-      radial-gradient(1% 0.14% at 58% 80%, rgb(216 244 255 / 0.8), transparent),
-      radial-gradient(0.14% 1% at 46% 19%, rgb(216 244 255 / 0.8), transparent),
-      radial-gradient(1% 0.14% at 46% 19%, rgb(216 244 255 / 0.8), transparent);
-    animation: dwc-lore-glint 520ms cubic-bezier(0.2, 0.8, 0.3, 1) 110ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive:not(
-      .is-rexonance-dive
-    ):not(.is-extreme-dive):not(.is-final-stage-dive)
-    > .rider-dive-vector-field {
-    background: radial-gradient(
-      44% 44% at calc((var(--fx) + var(--fw) / 2) * 1px)
-        calc((var(--fy) + var(--fh) / 2) * 1px),
-      rgb(160 230 255 / 22%),
-      rgb(142 232 255 / 7%) 48%,
-      transparent 72%
-    );
-    animation: dwc-lore-frost 700ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  }
-
-  /* The hexagonal frost ring, flat-topped, off the held file. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
-    > .rider-dive-vector-field::before {
-    top: calc((var(--fy) + var(--fh) / 2) * 1px);
-    left: calc((var(--fx) + var(--fw) / 2) * 1px);
-    width: calc(var(--fw) * 1.36px);
-    height: calc(var(--fw) * 1.178px);
-    margin: calc(var(--fw) * -0.589px) 0 0 calc(var(--fw) * -0.68px);
-    background: linear-gradient(
-      135deg,
-      rgb(216 244 255 / 0.95),
-      rgb(142 232 255 / 0.72) 50%,
-      rgb(200 245 255 / 0.95)
-    );
-    clip-path: polygon(
-      evenodd,
-      25% 0,
-      75% 0,
-      100% 50%,
-      75% 100%,
-      25% 100%,
-      0 50%,
-      25% 0,
-      25.45% 0.9%,
-      0.9% 50%,
-      25.45% 99.1%,
-      74.55% 99.1%,
-      99.1% 50%,
-      74.55% 0.9%,
-      25.45% 0.9%
-    );
-    transform: scale(0.72);
-    animation: dwc-lore-hex 640ms cubic-bezier(0.16, 0.84, 0.3, 1) 70ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-lore-dive
-    > .rider-dive-vector-field::after {
-    inset: 0;
-    background:
-      repeating-linear-gradient(
-        0deg,
-        rgb(200 245 255 / 0.14) 0 1px,
-        transparent 1px 40px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        rgb(200 245 255 / 0.08) 0 1px,
-        transparent 1px 64px
-      );
-    -webkit-mask-image: radial-gradient(
-      60% 60% at calc((var(--fx) + var(--fw) / 2) * 1px)
-        calc((var(--fy) + var(--fh) / 2) * 1px),
-      #000,
-      transparent 70%
-    );
-    mask-image: radial-gradient(
-      60% 60% at calc((var(--fx) + var(--fw) / 2) * 1px)
-        calc((var(--fy) + var(--fh) / 2) * 1px),
-      #000,
-      transparent 70%
-    );
-    transform: translateY(5%);
-    animation: dwc-lore-grid 680ms cubic-bezier(0.2, 0.7, 0.2, 1) 40ms both;
-  }
-
-  /* ヴァンダル ------------------------------------------------------- */
-  /* Two fans of facets from two centres: where they overlap, the wedges
-     cut each other into shards. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
-    .cine-dive-tunnel {
-    --dwc-o: 0.52;
-    border-radius: 0;
-    background:
-      conic-gradient(
-        from 8deg at 44% 53%,
-        rgb(231 26 156 / 0.112) 0deg 21deg,
-        rgb(255 190 236 / 0.5) 21deg 21.35deg,
-        transparent 21.35deg 47deg,
-        rgb(151 79 255 / 0.098) 47deg 83deg,
-        rgb(255 190 236 / 0.38) 83deg 83.3deg,
-        rgb(231 26 156 / 0.045) 83.3deg 104deg,
-        transparent 104deg 129deg,
-        rgb(244 100 200 / 0.105) 129deg 158deg,
-        rgb(255 190 236 / 0.46) 158deg 158.35deg,
-        transparent 158.35deg 187deg,
-        rgb(151 79 255 / 0.112) 187deg 226deg,
-        rgb(231 26 156 / 0.053) 226deg 241deg,
-        rgb(255 190 236 / 0.42) 241deg 241.3deg,
-        transparent 241.3deg 268deg,
-        rgb(231 26 156 / 0.098) 268deg 302deg,
-        rgb(255 190 236 / 0.46) 302deg 302.35deg,
-        rgb(151 79 255 / 0.068) 302.35deg 331deg,
-        transparent 331deg
-      ),
-      conic-gradient(
-        from -14deg at 57% 45%,
-        transparent 0deg 33deg,
-        rgb(151 79 255 / 0.075) 33deg 61deg,
-        rgb(255 190 236 / 0.36) 61deg 61.3deg,
-        transparent 61.3deg 112deg,
-        rgb(231 26 156 / 0.075) 112deg 139deg,
-        transparent 139deg 196deg,
-        rgb(244 100 200 / 0.068) 196deg 233deg,
-        rgb(255 190 236 / 0.34) 233deg 233.3deg,
-        transparent 233.3deg 284deg,
-        rgb(151 79 255 / 0.083) 284deg 318deg,
-        transparent 318deg
-      );
-    -webkit-mask-image: radial-gradient(
-      circle,
-      transparent 0 9%,
-      #000 20% 62%,
-      transparent 82%
-    );
-    mask-image: radial-gradient(
-      circle,
-      transparent 0 9%,
-      #000 20% 62%,
-      transparent 82%
-    );
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive.is-covering:not(
-      .is-cine-flip
-    ):not(.is-cine-calm):not(.is-cine-reduced)
-    .cine-dive-tunnel {
-    animation: dwc-vandal-shatter 380ms cubic-bezier(0.2, 0.8, 0.25, 1) 20ms
-      both;
-  }
-
-  /* The cracks: thin lines from two more points, at no regular angle. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
-    .cine-dive-tunnel
-    > i {
-    background: conic-gradient(
-      from 0deg at 48% 50%,
-      transparent 0deg 17deg,
-      rgb(255 190 236 / 0.62) 17deg 17.25deg,
-      transparent 17.25deg 64deg,
-      rgb(255 190 236 / 0.5) 64deg 64.2deg,
-      transparent 64.2deg 101deg,
-      rgb(255 190 236 / 0.58) 101deg 101.22deg,
-      transparent 101.22deg 172deg,
-      rgb(255 190 236 / 0.5) 172deg 172.2deg,
-      transparent 172.2deg 215deg,
-      rgb(255 190 236 / 0.6) 215deg 215.24deg,
-      transparent 215.24deg 279deg,
-      rgb(255 190 236 / 0.46) 279deg 279.2deg,
-      transparent 279.2deg 333deg,
-      rgb(255 190 236 / 0.56) 333deg 333.22deg,
-      transparent 333.22deg
-    );
-    animation: dwc-vandal-crack 420ms cubic-bezier(0.3, 0.7, 0.2, 1) 40ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
-    .cine-dive-tunnel
-    > i:nth-child(2) {
-    background: conic-gradient(
-      from 0deg at 53% 48%,
-      transparent 0deg 39deg,
-      rgb(201 158 255 / 0.5) 39deg 39.22deg,
-      transparent 39.22deg 128deg,
-      rgb(201 158 255 / 0.46) 128deg 128.2deg,
-      transparent 128.2deg 197deg,
-      rgb(201 158 255 / 0.52) 197deg 197.22deg,
-      transparent 197.22deg 256deg,
-      rgb(201 158 255 / 0.44) 256deg 256.2deg,
-      transparent 256.2deg 308deg,
-      rgb(201 158 255 / 0.5) 308deg 308.22deg,
-      transparent 308.22deg
-    );
-    animation-delay: 70ms;
-  }
-
-  /* The seam, drawn through the held file at 28deg, over it. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive:not(
-      .is-rexonance-dive
-    ):not(.is-extreme-dive):not(.is-final-stage-dive)
-    > .rider-dive-vector-field {
-    z-index: 26;
-    inset: auto;
-    top: calc((var(--fy) + var(--fh) / 2) * 1px);
-    left: calc((var(--fx) + var(--fw) / 2) * 1px);
-    width: 2px;
-    height: 220vmax;
-    margin: -110vmax 0 0 -1px;
-    overflow: visible;
-    background: linear-gradient(
-      180deg,
-      transparent,
-      rgb(255 190 236 / 0.8) 34%,
-      rgb(255 214 244 / 0.95) 50%,
-      rgb(255 190 236 / 0.8) 66%,
-      transparent
-    );
-    box-shadow:
-      0 0 10px rgb(231 26 156 / 0.72),
-      0 0 30px rgb(151 79 255 / 0.42);
-    transform: rotate(28deg) scaleY(0.2);
-    transform-origin: 50% 50%;
-    animation: dwc-vandal-seam 560ms cubic-bezier(0.3, 0.7, 0.2, 1) 20ms both;
-  }
-
-  /* Its two edges part: magenta to the left, violet to the right, each
-     with its light falling away from the seam. */
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
-    > .rider-dive-vector-field::before,
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
-    > .rider-dive-vector-field::after {
-    top: 0;
-    bottom: 0;
-    left: -63px;
-    width: 64px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgb(231 26 156 / 0.1) 40%,
-      rgb(231 26 156 / 0.3) 86%,
-      rgb(255 170 228 / 0.9) 97%,
-      transparent
-    );
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      transparent 18%,
-      #000 42% 58%,
-      transparent 82%
-    );
-    mask-image: linear-gradient(
-      180deg,
-      transparent 18%,
-      #000 42% 58%,
-      transparent 82%
-    );
-    animation: dwc-vandal-part-l 560ms cubic-bezier(0.3, 0.7, 0.2, 1) 90ms both;
-  }
-
-  html:not([data-world-effects="economy"])
-    body
-    .load-gate.has-cine.is-cine-full.rider-route-dive.is-vandal-dive
-    > .rider-dive-vector-field::after {
-    left: 1px;
-    background: linear-gradient(
-      270deg,
-      transparent,
-      rgb(151 79 255 / 0.1) 40%,
-      rgb(151 79 255 / 0.3) 86%,
-      rgb(214 180 255 / 0.9) 97%,
-      transparent
-    );
-    animation-name: dwc-vandal-part-r;
   }
 
   /* The cut-ins: the stage's two pseudo layers carry each rider's light. */
@@ -3791,270 +2940,6 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
   }
 }
 
-@keyframes dwc-saga-embers {
-  0% {
-    opacity: 0;
-    transform: translateY(5%) scale(0.96);
-  }
-  30% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-9%) scale(1.04);
-  }
-}
-
-@keyframes dwc-realm-wind {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) rotate(-16deg) translateX(-16%)
-      scaleX(0.42);
-  }
-  /* Rises to its resting light, never above it: an overshoot read as a
-     flash on phones (verify-route-transitions, page-saga-realm). */
-  to {
-    opacity: 0.5;
-    transform: translate(-50%, -50%) rotate(-16deg) translateX(0) scaleX(1);
-  }
-}
-
-@keyframes dwc-realm-grain {
-  from {
-    opacity: 0;
-    transform: scaleX(0.3);
-  }
-  to {
-    opacity: 0.7;
-    transform: scaleX(1);
-  }
-}
-
-@keyframes dwc-realm-dash {
-  from {
-    opacity: 0;
-    transform: translateX(-26%) scaleX(0.5);
-  }
-  to {
-    opacity: 0.55;
-    transform: translateX(3%) scaleX(1.1);
-  }
-}
-
-@keyframes dwc-realm-wake {
-  0% {
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Drawn from the lower left in a stroke, held a beat, let go. */
-@keyframes dwc-realm-cut {
-  0% {
-    opacity: 1;
-    clip-path: inset(-40px 100% -40px 0);
-  }
-  32% {
-    opacity: 1;
-    clip-path: inset(-40px 0 -40px 0);
-  }
-  52% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    clip-path: inset(-40px 0 -40px 0);
-  }
-}
-
-@keyframes dwc-realm-counter {
-  0% {
-    opacity: 1;
-    clip-path: inset(-40px 0 -40px 100%);
-  }
-  34% {
-    opacity: 1;
-    clip-path: inset(-40px 0 -40px 0);
-  }
-  100% {
-    opacity: 0;
-    clip-path: inset(-40px 0 -40px 0);
-  }
-}
-
-/* The lattice turns half a period into place. */
-@keyframes dwc-lore-lattice {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5) rotate(-30deg);
-  }
-  42% {
-    opacity: 0.85;
-  }
-  to {
-    opacity: 0.46;
-    transform: translate(-50%, -50%) scale(1.06) rotate(0deg);
-  }
-}
-
-@keyframes dwc-lore-sound {
-  from {
-    opacity: 0;
-    transform: scale(0.45);
-  }
-  36% {
-    opacity: 0.9;
-  }
-  to {
-    opacity: 0.45;
-    transform: scale(1.12);
-  }
-}
-
-@keyframes dwc-lore-glint {
-  0% {
-    opacity: 0;
-    transform: scale(0.82) rotate(-8deg);
-  }
-  36% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.5;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes dwc-lore-frost {
-  0% {
-    opacity: 0;
-    transform: scale(0.7);
-  }
-  34% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.3);
-  }
-}
-
-@keyframes dwc-lore-hex {
-  0% {
-    opacity: 0.95;
-    transform: scale(0.72);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2.1);
-  }
-}
-
-@keyframes dwc-lore-grid {
-  0% {
-    opacity: 0;
-    transform: translateY(5%);
-  }
-  40% {
-    opacity: 0.9;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-3%);
-  }
-}
-
-/* The shards slam out past their rest and settle on it. */
-@keyframes dwc-vandal-shatter {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.62) rotate(7deg);
-  }
-  26% {
-    opacity: 0.95;
-    transform: translate(-50%, -50%) scale(1.1) rotate(-1.6deg);
-  }
-  46% {
-    transform: translate(-50%, -50%) scale(1.04) rotate(0.6deg);
-  }
-  100% {
-    opacity: 0.52;
-    transform: translate(-50%, -50%) scale(1.06) rotate(0deg);
-  }
-}
-
-/* One tremor through the cracks, then still. */
-@keyframes dwc-vandal-crack {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  20% {
-    opacity: 1;
-    transform: scale(1) translate(5px, -3px);
-  }
-  32% {
-    transform: scale(1) translate(-3px, 2px);
-  }
-  44% {
-    transform: scale(1) translate(1px, -1px);
-  }
-  56%,
-  100% {
-    opacity: 0.7;
-    transform: scale(1);
-  }
-}
-
-@keyframes dwc-vandal-seam {
-  0% {
-    opacity: 0;
-    transform: rotate(28deg) scaleY(0.2);
-  }
-  22% {
-    opacity: 1;
-    transform: rotate(28deg) scaleY(1);
-  }
-  100% {
-    opacity: 0;
-    transform: rotate(28deg) scaleY(1);
-  }
-}
-
-@keyframes dwc-vandal-part-l {
-  0% {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  26% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-34px);
-  }
-}
-
-@keyframes dwc-vandal-part-r {
-  0% {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  26% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(34px);
-  }
-}
-
 @keyframes dwc-leddic-light {
   0% {
     opacity: 0;
@@ -4166,5 +3051,1018 @@ html[data-route-cover="covering"] .zeus-button:not([data-navigating="true"]) {
   100% {
     opacity: 0;
     transform: translateY(-70%);
+  }
+}
+
+/* ---- The eight riders' rings (2026-11-24) --------------------------------
+   Owner: 「仮面ライダー八人の遷移アニメーションを大幅にブラッシュアップして。
+   サーガの緑の炎はチープなので修正して。」
+   The eight riders' covers now share the site's ring language: as the ink
+   closes, a ring of the rider's own two lights and the site's glass band
+   spring shut around the held file (a dive) or the stage (a cut-in), and
+   open away as the page is revealed, as the file shutter's glass band does
+   (styles-ring-chrome.css §5). Each rider draws the ring in its own way:
+     サーガ        a ring of the owner's forest-green fire (pre-rendered by
+                  scripts/render-saga-dive-fire.mjs from the opening trace's
+                  flame and fireRamp): it catches at its foot, runs up both
+                  sides to the crown, roars and dies to embers and smoke;
+     レルム        one sword stroke draws the ring; two cuts answer outside it;
+     ローア        six frost arcs snap into a six-fold order;
+     ヴァンダル    eight hard shards slam in from outside and lock;
+     レディック    a round window (丸窓) of kumiko light closes with the doors;
+     アルゲノム    the ring is severed along the cut and parts on the reveal;
+     オーバーゼッツ pressure rings burst from the impact;
+     サイファー    pink and cyan ghost rings converge on a stepped reticle.
+   The four dives drop the radial tunnel streaks and the old burst (and
+   サーガ's old radial-gradient fire). Markup: RiderRing in load-gate.tsx.
+   Rules: full motion only (economy and reduced motion keep their plain
+   shutter); thin strokes and pictures moved by transform and opacity, run
+   once; crimson only ever as a 2px stroke (no red field, no red flash);
+   nothing over a face (the cuts are masked off inside the ring); no width
+   or pointer tier: phones get the same as a desktop. Dream, Final Stage, the
+   special sites and シエル are not selected. */
+
+html body .load-gate .rider-ring {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring {
+    /* The ring's centre and diameter: round the held file, clear of its
+       corners (as the glass band). On a narrow screen, where the held file
+       fills the width, the band may pass the screen's edges (its lit stroke
+       stays about on screen) so the ring and the fire still show round the
+       file instead of hiding behind it. */
+    --rr-cx: calc((var(--fx) + var(--fw) / 2) * 1px);
+    --rr-cy: calc((var(--fy) + var(--fh) / 2) * 1px);
+    --rr-d: min(calc(hypot(var(--fw) * 1px, var(--fh) * 1px) * 1.22 + 24px), 112vmin);
+    --rr-a: var(--dwc-accent);
+    --rr-b: var(--dwc-gold);
+    --rr-well: color-mix(in srgb, var(--dwc-accent) 16%, transparent);
+    /* A 2px stroke with a short soft skirt inside it. */
+    --rr-stroke: radial-gradient(
+      closest-side,
+      transparent calc(100% - 10px),
+      rgb(0 0 0 / 0.22) calc(100% - 5px),
+      #000 calc(100% - 2.5px) calc(100% - 0.5px),
+      transparent 100%
+    );
+    --rr-in: var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+    position: absolute;
+    z-index: 21;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* A cut-in's ring stands round its stage's centre, wide enough that its
+     band clears the rider's name (the widest, ARGENOME and OVER-ZEZTZ, at
+     72px on a desktop and 30px on a phone); on a phone the band passes the
+     screen's edges and its lit stroke stays on screen. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-cutin:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-cx: 50%;
+    --rr-cy: 50%;
+    --rr-d: min(118vmin, 800px);
+    z-index: 3;
+    /* The stage takes 260 ms to come in over the page: the ring shows on it,
+       never over the page it covers. */
+    animation: rr-well-in 160ms ease-out 150ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring
+    > * {
+    position: absolute;
+    top: var(--rr-cy);
+    left: var(--rr-cx);
+    width: var(--rr-d);
+    height: var(--rr-d);
+    margin: calc(var(--rr-d) / -2) 0 0 calc(var(--rr-d) / -2);
+    border-radius: 50%;
+  }
+
+  /* The four dives' own ring replaces the radial tunnel and the burst
+     (:not(#rider-ring) outranks the burst's own three-:not() rule). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive:is(
+      .is-saga-dive,
+      .is-realm-dive,
+      .is-lore-dive,
+      .is-vandal-dive
+    ):not(#rider-ring)
+    :is(.cine-dive-tunnel, .rider-dive-vector-field) {
+    display: none;
+  }
+
+  /* ---- Shared: the light well, the glass band, the lit stroke ---------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-well {
+    width: calc(var(--rr-d) * 1.5);
+    height: calc(var(--rr-d) * 1.5);
+    margin: calc(var(--rr-d) * -0.75) 0 0 calc(var(--rr-d) * -0.75);
+    background: radial-gradient(closest-side, var(--rr-well), transparent 72%);
+    animation: rr-well-in 420ms ease-out 60ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-glass {
+    /* The site's pre-rendered glass band (fetched on idle by ring-motion.js). */
+    background: url("/ring-glass-20261123/cover.webp") center / contain no-repeat;
+    animation: rr-glass-lock 620ms var(--rr-in) 120ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    width: calc(var(--rr-d) * 0.84);
+    height: calc(var(--rr-d) * 0.84);
+    margin: calc(var(--rr-d) * -0.42) 0 0 calc(var(--rr-d) * -0.42);
+    background: conic-gradient(from 210deg, var(--rr-a), var(--rr-b), var(--rr-a), var(--rr-b), var(--rr-a));
+    -webkit-mask-image: var(--rr-stroke);
+    mask-image: var(--rr-stroke);
+    animation: rr-line-lock 640ms var(--rr-in) 160ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces {
+    border-radius: 0;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    -webkit-mask-image: var(--rr-stroke);
+    mask-image: var(--rr-stroke);
+    opacity: 0;
+  }
+
+  /* ---- サーガ: a ring of green fire ----------------------------------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-saga-dive:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #3fbf4c;
+    --rr-b: #8fe08a;
+    --rr-well: rgb(34 139 34 / 0.22);
+  }
+
+  /* The sheet is 5 x 4 frames of 400 x 500; its ring (radius 0.68 of the
+     frame's half-width, centred 0.58 down) is laid on the lit stroke. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-saga-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-fire {
+    --rr-fw: calc(var(--rr-d) * 0.84 / 0.68);
+    width: var(--rr-fw);
+    height: calc(var(--rr-fw) * 1.25);
+    margin: calc(var(--rr-fw) * 1.25 * -0.58) 0 0 calc(var(--rr-fw) / -2);
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  /* One shot of 20 frames over 1 s, stepped on the compositor. Phase-free:
+     the change to the reveal must not restart it. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-saga-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-fire
+    > i {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 500%;
+    height: 400%;
+    background: url("/saga-dive-fire-20261124.webp") 0 0 / 100% 100% no-repeat;
+    animation: rr-saga-fire 1000ms step-end both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-saga-dive.is-revealing:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-fire {
+    animation: dwc-fade-out calc(var(--dwc-reveal, 460ms) * 0.7) ease-in
+      calc(var(--dwc-reveal, 460ms) * 0.12) both;
+  }
+
+  /* The fire is the ring: the glass stays faint behind it. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-saga-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-glass {
+    animation-name: rr-glass-lock-faint;
+  }
+
+  /* ---- レルム: one sword stroke draws the ring ------------------------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-realm-dive:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #f14a60;
+    --rr-b: #ffc278;
+    /* Amber, not crimson: the well is a field. */
+    --rr-well: rgb(255 170 96 / 0.1);
+  }
+
+  /* The ring appears behind the blade, as if cut. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-realm-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    animation: rr-realm-drawn 520ms cubic-bezier(0.2, 0.8, 0.2, 1) 180ms both;
+  }
+
+  /* The blade's head: a bright arc with a fading tail, swept once round. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-realm-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:first-child {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg 250deg,
+      rgb(241 74 96 / 0.5) 320deg,
+      #ffd9a8 357deg,
+      transparent 360deg
+    );
+    animation: rr-realm-blade 520ms cubic-bezier(0.25, 0.7, 0.2, 1) 150ms both;
+  }
+
+  /* Two cuts answer outside the ring (masked off inside it). */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-realm-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:not(:first-child) {
+    inset: calc(50% - 1px) -38%;
+    height: 2px;
+    border-radius: 0;
+    background: linear-gradient(90deg, transparent, #f14a60 18%, #ffc278 50%, #f14a60 82%, transparent);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      #000 0 30%,
+      transparent 31% 69%,
+      #000 70% 100%
+    );
+    mask-image: linear-gradient(90deg, #000 0 30%, transparent 31% 69%, #000 70% 100%);
+    rotate: -16deg;
+    animation: rr-realm-cut 460ms cubic-bezier(0.16, 0.9, 0.3, 1) 420ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-realm-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:nth-child(3) {
+    rotate: 24deg;
+    animation-delay: 500ms;
+    animation-name: rr-realm-cut-back;
+  }
+
+  /* ---- ローア: six frost arcs snap into order ------------------------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-lore-dive:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #67d8ff;
+    --rr-b: #e4fbff;
+    --rr-well: rgb(103 216 255 / 0.16);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-lore-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    animation: rr-line-settle 300ms ease-out 560ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-lore-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    --rr-at: calc(var(--piece) * 60deg + 3deg);
+    background: conic-gradient(from 0deg, #e4fbff 0deg, #67d8ff 27deg, #e4fbff 54deg, transparent 54deg);
+    rotate: var(--rr-at);
+    animation: rr-lore-arc var(--ring-dur-elastic, 880ms)
+      var(--ring-spring-elastic, cubic-bezier(0.3, 1.8, 0.4, 1)) calc(140ms + var(--piece) * 40ms)
+      both;
+  }
+
+  /* ---- ヴァンダル: eight shards slam in -------------------------------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-vandal-dive:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #e71a9c;
+    --rr-b: #974fff;
+    --rr-well: rgb(151 79 255 / 0.14);
+    /* A wider, hard-edged band: the shards are plates, not a hairline. */
+    --rr-shard: radial-gradient(
+      closest-side,
+      transparent calc(100% - 7px),
+      #000 calc(100% - 6px) calc(100% - 0.5px),
+      transparent 100%
+    );
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-vandal-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    animation: rr-line-settle 260ms ease-out 520ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-vandal-dive:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    --rr-at: calc(var(--piece) * 45deg + 2deg);
+    --rr-mid: calc(var(--piece) * 45deg + 22.5deg);
+    background: conic-gradient(from 0deg, #e71a9c 0deg, #ff9be4 20deg, #974fff 41deg, transparent 41deg);
+    -webkit-mask-image: var(--rr-shard);
+    mask-image: var(--rr-shard);
+    rotate: var(--rr-at);
+    animation: rr-vandal-shard var(--ring-dur-bounce, 700ms) var(--rr-in)
+      calc(110ms + var(--piece) * 22ms) both;
+  }
+
+  /* ---- レディック: the round window closes with the doors ------------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #f44f58;
+    --rr-b: #8fe8a4;
+    --rr-well: rgb(255 220 160 / 0.08);
+    /* Below the name, which sits low between the doors. */
+    --rr-cy: calc(50% + clamp(40px, 5.5vmin, 64px));
+  }
+
+  /* Each half carries kumiko spokes in a paper band, crimson on the left
+     door and green on the right, and slides shut with its door. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    inset: 6%;
+    background:
+      repeating-conic-gradient(from 0deg, rgb(255 246 226 / 0.9) 0deg 1.2deg, transparent 1.2deg 15deg),
+      conic-gradient(from 180deg, rgb(244 79 88 / 0.55) 0deg 180deg, transparent 180deg);
+    -webkit-mask-image: radial-gradient(
+      closest-side,
+      transparent calc(100% - 14px),
+      #000 calc(100% - 13px) calc(100% - 0.5px),
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      closest-side,
+      transparent calc(100% - 14px),
+      #000 calc(100% - 13px) calc(100% - 0.5px),
+      transparent 100%
+    );
+    clip-path: inset(0 50% 0 0);
+    animation: rr-leddic-left 260ms cubic-bezier(0.6, 0, 0.2, 1) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:nth-child(2) {
+    background:
+      repeating-conic-gradient(from 0deg, rgb(238 255 242 / 0.9) 0deg 1.2deg, transparent 1.2deg 15deg),
+      conic-gradient(from 0deg, rgb(127 227 154 / 0.5) 0deg 180deg, transparent 180deg);
+    clip-path: inset(0 0 0 50%);
+    animation-name: rr-leddic-right;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    animation: rr-leddic-open-left calc(var(--dwc-reveal, 520ms) * 0.7) cubic-bezier(0.5, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:nth-child(2) {
+    animation-name: rr-leddic-open-right;
+  }
+
+  /* The doors part the pieces themselves: the group stays. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-leddic-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
+    > .rider-ring
+    > .rider-ring-pieces {
+    animation: none;
+  }
+
+  /* ---- アルゲノム: the ring is severed along the cut ------------------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #ff2b45;
+    --rr-b: #ffb3bd;
+    --rr-well: rgb(0 0 0 / 0);
+  }
+
+  /* The whole ring holds until the cut, then is two halves a hair apart. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    animation:
+      rr-line-lock 520ms var(--rr-in) 60ms both,
+      rr-line-cut 1ms linear 300ms forwards;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    inset: 8%;
+    background: conic-gradient(from 210deg, #ff2b45, #ffb3bd, #ff2b45, #ffb3bd, #ff2b45);
+    /* Halves along the cut's own 28deg. */
+    clip-path: polygon(0 0, 100% 0, 100% 23.4%, 0 76.6%);
+    --rr-nx: -0.47;
+    --rr-ny: -0.88;
+    animation: rr-argenome-sever 260ms cubic-bezier(0.2, 0.8, 0.2, 1) 300ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:nth-child(2) {
+    clip-path: polygon(0 76.6%, 100% 23.4%, 100% 100%, 0 100%);
+    --rr-nx: 0.47;
+    --rr-ny: 0.88;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
+    > .rider-ring
+    > .rider-ring-pieces {
+    animation: none;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    animation: rr-argenome-part calc(var(--dwc-reveal, 540ms) * 0.7) cubic-bezier(0.3, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-argenome-cutin.is-revealing:not(.is-cine-flip):not(#rider-ring)
+    > .rider-ring
+    > .rider-ring-line {
+    animation: none;
+    opacity: 0;
+  }
+
+  /* ---- オーバーゼッツ: pressure rings burst from the impact ------------ */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-over-zeztz-cutin:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #8cecff;
+    --rr-b: #ecfbff;
+    --rr-well: rgb(80 200 255 / 0.12);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-over-zeztz-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    animation: rr-zeztz-lock var(--ring-dur-elastic, 880ms)
+      var(--ring-spring-elastic, cubic-bezier(0.3, 1.8, 0.4, 1)) 200ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-over-zeztz-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    background: rgb(196 244 255 / 0.85);
+    animation: rr-zeztz-burst 720ms cubic-bezier(0.1, 0.7, 0.2, 1) calc(60ms + var(--piece) * 90ms)
+      both;
+  }
+
+  /* ---- サイファー: ghost rings converge on a stepped reticle ----------- */
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin:not(.is-cine-flip)
+    > .rider-ring {
+    --rr-a: #ff7bdc;
+    --rr-b: #7ce4ff;
+    --rr-well: rgb(160 90 255 / 0.1);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-line {
+    animation: rr-line-settle 200ms ease-out 400ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i {
+    background: #ff7bdc;
+    --rr-off: -7%;
+    animation: rr-cipher-ghost 420ms steps(6, jump-end) 40ms both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:nth-child(2) {
+    background: #7ce4ff;
+    --rr-off: 7%;
+  }
+
+  /* The reticle: twelve dashes, turned into lock in four steps. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-cipher-cutin:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-pieces
+    > i:nth-child(3) {
+    inset: 1%;
+    background: repeating-conic-gradient(from 0deg, #ecd8ff 0deg 14deg, transparent 14deg 30deg);
+    -webkit-mask-image: radial-gradient(
+      closest-side,
+      transparent calc(100% - 5px),
+      #000 calc(100% - 4px) calc(100% - 0.5px),
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      closest-side,
+      transparent calc(100% - 5px),
+      #000 calc(100% - 4px) calc(100% - 0.5px),
+      transparent 100%
+    );
+    animation: rr-cipher-reticle 360ms steps(4, jump-end) 220ms both;
+  }
+
+  /* The reveal: the ring opens away from where it held; the light goes. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing:is(
+      .rider-route-cutin,
+      .rider-route-dive:not(.has-landing)
+    ):not(.is-cine-flip)
+    > .rider-ring
+    > :is(.rider-ring-glass, .rider-ring-line, .rider-ring-pieces) {
+    animation: rr-release calc(var(--dwc-reveal, 460ms) * 0.62) cubic-bezier(0.3, 0, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.is-revealing:not(.is-cine-flip)
+    > .rider-ring
+    > .rider-ring-well {
+    animation: dwc-fade-out calc(var(--dwc-reveal, 460ms) * 0.5) ease-in both;
+  }
+
+  /* A dive's ring escorts the file to the dossier's portrait: it travels
+     and scales with the docking file onto the page's own portrait ring, and
+     hands over to it as it fades. Its pieces hold their locked state. */
+  html:not([data-world-effects="economy"])
+    body
+    .load-gate.has-cine.is-cine-full.rider-route-dive.has-landing.is-revealing:not(.is-cine-flip)
+    > .rider-ring {
+    transform-origin: var(--rr-cx) var(--rr-cy);
+    animation: rr-escort calc(var(--dwc-reveal, 460ms) * 0.8) cubic-bezier(0.26, 0.68, 0.18, 1) both;
+  }
+}
+
+@keyframes rr-escort {
+  70% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+    translate: calc((var(--lx) + var(--lw) / 2 - var(--fx) - var(--fw) / 2) * 1px)
+      calc((var(--ly) + var(--lh) / 2 - var(--fy) - var(--fh) / 2) * 1px);
+    scale: calc(hypot(var(--lw), var(--lh)) / hypot(var(--fw), var(--fh)));
+  }
+}
+
+@keyframes rr-well-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rr-glass-lock {
+  from {
+    opacity: 0;
+    scale: 1.45;
+    rotate: -110deg;
+  }
+  to {
+    opacity: 0.78;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes rr-glass-lock-faint {
+  from {
+    opacity: 0;
+    scale: 1.45;
+    rotate: -110deg;
+  }
+  to {
+    opacity: 0.32;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes rr-line-lock {
+  from {
+    opacity: 0;
+    scale: 0.8;
+    rotate: -90deg;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes rr-line-settle {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rr-line-cut {
+  to {
+    opacity: 0;
+  }
+}
+
+/* From the resting state, outwards and away. */
+@keyframes rr-release {
+  to {
+    opacity: 0;
+    scale: 1.42;
+    rotate: 36deg;
+  }
+}
+
+@keyframes rr-realm-drawn {
+  0% {
+    opacity: 0;
+    rotate: -160deg;
+  }
+  100% {
+    opacity: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes rr-realm-blade {
+  0% {
+    opacity: 0;
+    rotate: -200deg;
+  }
+  20% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    rotate: 160deg;
+  }
+}
+
+@keyframes rr-realm-cut {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.7;
+    scale: 1 1;
+  }
+}
+
+@keyframes rr-realm-cut-back {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+    scale: 1 1;
+  }
+}
+
+@keyframes rr-lore-arc {
+  from {
+    opacity: 0;
+    scale: 1.3;
+    rotate: calc(var(--rr-at) + 48deg);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: var(--rr-at);
+  }
+}
+
+@keyframes rr-vandal-shard {
+  from {
+    opacity: 0;
+    translate: calc(sin(var(--rr-mid)) * 36%) calc(cos(var(--rr-mid)) * -36%);
+    rotate: calc(var(--rr-at) + 28deg);
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    rotate: var(--rr-at);
+  }
+}
+
+@keyframes rr-leddic-left {
+  from {
+    opacity: 0;
+    translate: -60% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rr-leddic-right {
+  from {
+    opacity: 0;
+    translate: 60% 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes rr-leddic-open-left {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: -46% 0;
+  }
+}
+
+@keyframes rr-leddic-open-right {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 46% 0;
+  }
+}
+
+@keyframes rr-argenome-sever {
+  from {
+    opacity: 0;
+    translate: 0 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    translate: calc(var(--rr-nx) * 6px) calc(var(--rr-ny) * 6px);
+  }
+}
+
+@keyframes rr-argenome-part {
+  from {
+    opacity: 1;
+    translate: calc(var(--rr-nx) * 6px) calc(var(--rr-ny) * 6px);
+  }
+  to {
+    opacity: 0;
+    translate: calc(var(--rr-nx) * 64px) calc(var(--rr-ny) * 64px);
+  }
+}
+
+@keyframes rr-zeztz-lock {
+  from {
+    opacity: 0;
+    scale: 1.24;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* From the ring outwards: the pressure rings never cross the name. */
+@keyframes rr-zeztz-burst {
+  from {
+    opacity: 0.9;
+    scale: 0.92;
+  }
+  to {
+    opacity: 0;
+    scale: 1.9;
+  }
+}
+
+@keyframes rr-cipher-ghost {
+  from {
+    opacity: 0.9;
+    translate: var(--rr-off) 0;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+
+@keyframes rr-cipher-reticle {
+  from {
+    opacity: 0;
+    rotate: -96deg;
+  }
+  25% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes rr-saga-fire {
+  0% {
+    translate: 0% 0%;
+  }
+  5% {
+    translate: -20% 0%;
+  }
+  10% {
+    translate: -40% 0%;
+  }
+  15% {
+    translate: -60% 0%;
+  }
+  20% {
+    translate: -80% 0%;
+  }
+  25% {
+    translate: 0% -25%;
+  }
+  30% {
+    translate: -20% -25%;
+  }
+  35% {
+    translate: -40% -25%;
+  }
+  40% {
+    translate: -60% -25%;
+  }
+  45% {
+    translate: -80% -25%;
+  }
+  50% {
+    translate: 0% -50%;
+  }
+  55% {
+    translate: -20% -50%;
+  }
+  60% {
+    translate: -40% -50%;
+  }
+  65% {
+    translate: -60% -50%;
+  }
+  70% {
+    translate: -80% -50%;
+  }
+  75% {
+    translate: 0% -75%;
+  }
+  80% {
+    translate: -20% -75%;
+  }
+  85% {
+    translate: -40% -75%;
+  }
+  90% {
+    translate: -60% -75%;
+  }
+  95% {
+    translate: -80% -75%;
+  }
+  100% {
+    translate: -80% -75%;
   }
 }

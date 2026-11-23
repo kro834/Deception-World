@@ -1160,6 +1160,40 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
 
   pathnameRef.current = pathname;
 
+  // サーガ's fire sheet is decoded before its first dive: on idle when an
+  // entry to サーガ is on the page (a link, or the World console's サーガ tab,
+  // whose open control is a button), or as soon as one is pointed at or
+  // focused.
+  useEffect(() => {
+    const SAGA_LINK = 'a[href="/riders/saga"], a[href^="/riders/saga#"], #rider-tab-saga';
+    const onIntent = (event: Event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest(SAGA_LINK)) warmSagaDiveFire();
+    };
+    const idle = () => {
+      if (!document.querySelector(SAGA_LINK)) return;
+      warmSagaDiveFire();
+      window.removeEventListener("scroll", idle);
+    };
+    // No timer fallback (it would hold the route clocks' tests): scrolling
+    // also checks (a section with サーガ's link may render after the idle
+    // check, and older Safari has no requestIdleCallback), and the intent
+    // and the press itself still warm it.
+    const handle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(idle, { timeout: 4000 })
+        : 0;
+    window.addEventListener("scroll", idle, { passive: true });
+    document.addEventListener("pointerover", onIntent, { passive: true });
+    document.addEventListener("focusin", onIntent);
+    return () => {
+      if (handle) window.cancelIdleCallback(handle);
+      window.removeEventListener("scroll", idle);
+      document.removeEventListener("pointerover", onIntent);
+      document.removeEventListener("focusin", onIntent);
+    };
+  }, [pathname]);
+
   useEffect(() => {
     document.addEventListener("pointerdown", notePress, true);
     document.addEventListener("keydown", notePress, true);
@@ -1595,6 +1629,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         const cutInVariant = changesDocument
           ? RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES]
           : undefined;
+        if (diveVariant === "saga") warmSagaDiveFire();
         // The other dossiers and the World take the plain file shutter. The
         // opening's own handoff (transitionCovered, above) and Zeus's seal
         // keep theirs; a section jump within the page stays uncovered.
@@ -2546,6 +2581,7 @@ function LoadOverlay({
       >
         <CineLayers scene={scene} />
         <RiderRouteCutIn variant={variant} />
+        {isRingRider(variant) ? <RiderRing variant={variant} /> : null}
       </div>
     );
   }
@@ -2781,6 +2817,7 @@ function RiderRouteDive({
           <CineLayers scene={scene} />
           <span className="archive-dive-space" aria-hidden="true" />
           <span className="rider-dive-vector-field" aria-hidden="true" />
+          {isRingRider(variant) ? <RiderRing variant={variant} /> : null}
           <span className="cine-dive-tunnel" aria-hidden="true">
             <i />
             <i />
@@ -2845,6 +2882,80 @@ function RiderRouteDive({
         </span>
       </span>
     </div>
+  );
+}
+
+// The eight riders' rings (2026-11-24, owner: 「仮面ライダー八人の遷移アニメーションを
+// 大幅にブラッシュアップして」). Every rider's cover now closes a ring of the
+// rider's own light around the held file (a dive) or the stage (a cut-in),
+// with the site's glass band, and each rider draws it in its own way; the
+// ring opens away as the page is revealed. Decorative and text-free; the
+// styles (full motion only) are "The eight riders' rings" in
+// styles-transition-cinema.css. サーガ's ring is a ring of the owner's
+// forest-green fire, pre-rendered (scripts/render-saga-dive-fire.mjs).
+type RingRider = "saga" | "realm" | "lore" | "vandal" | "leddic" | "argenome" | "over-zeztz" | "cipher";
+// How many motif pieces each rider's gesture moves (arcs, shards, cuts…).
+const RIDER_RING_PIECES: Record<RingRider, number> = {
+  saga: 0,
+  realm: 3,
+  lore: 6,
+  vandal: 8,
+  leddic: 2,
+  argenome: 2,
+  "over-zeztz": 3,
+  cipher: 3,
+};
+const SAGA_DIVE_FIRE = "/saga-dive-fire-20261124.webp";
+
+// Held for the session once decoded, so the dive never waits on it.
+let sagaDiveFire: HTMLImageElement | null = null;
+function warmSagaDiveFire() {
+  if (sagaDiveFire || typeof window === "undefined" || typeof window.Image !== "function") return;
+  // A warm-up is a nicety: anything missing (a bare test DOM, an old
+  // browser) simply skips it, and the dive plays without the sheet.
+  try {
+    const root = document.documentElement;
+    const saver = (window.navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
+    if (
+      root.dataset.worldEffects === "economy" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      saver?.saveData
+    )
+      return;
+    const image = new window.Image();
+    image.decoding = "async";
+    image.src = SAGA_DIVE_FIRE;
+    sagaDiveFire = image;
+    image.decode().catch(() => undefined);
+  } catch {
+    /* Skipped: see above. */
+  }
+}
+
+function isRingRider(variant: string): variant is RingRider {
+  return Object.hasOwn(RIDER_RING_PIECES, variant);
+}
+
+function RiderRing({ variant }: { variant: RingRider }) {
+  return (
+    <span className={`rider-ring is-${variant}-ring`} aria-hidden="true">
+      <i className="rider-ring-well" />
+      {variant === "saga" ? (
+        <span className="rider-ring-fire">
+          <i />
+        </span>
+      ) : null}
+      <i className="rider-ring-glass" />
+      <i className="rider-ring-line" />
+      {RIDER_RING_PIECES[variant] ? (
+        <span className="rider-ring-pieces">
+          {Array.from({ length: RIDER_RING_PIECES[variant] }, (_, index) => (
+            <i key={index} style={{ ["--piece" as string]: index }} />
+          ))}
+        </span>
+      ) : null}
+    </span>
   );
 }
 
