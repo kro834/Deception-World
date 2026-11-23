@@ -51,7 +51,9 @@ test("finite, gated, compositor-only motion; no text", async () => {
   const ungated = css.slice(0, css.indexOf("@media (prefers-reduced-motion: no-preference)"));
   // Outside the gate only the old HUD's endless turns are stopped.
   assert.doesNotMatch(ungated.replace(/animation: none;/g, ""), /\banimation:|\btransition:/);
-  for (const [, selector] of gated.matchAll(/\n {2}(html[^{]+)\{\n {4}(?:animation|transition):/g)) {
+  for (const [, selector] of gated.matchAll(
+    /\n {2}(html[^{]+)\{\n {4}(?:animation|transition):/g,
+  )) {
     assert.match(selector, /^html:not\(\[data-world-effects="economy"\]\)/);
   }
   const title = await read("src/components/cinematic/title-sequence.tsx");

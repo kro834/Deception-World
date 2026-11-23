@@ -266,7 +266,8 @@
   pointer-events: none;
 }
 
-[data-opening-handoff-root] > [data-opening-handoff-rings][data-opening-handoff-rings-on]:not(#opr) {
+[data-opening-handoff-root]
+  > [data-opening-handoff-rings][data-opening-handoff-rings-on]:not(#opr) {
   display: block;
   visibility: visible;
 }
@@ -294,7 +295,8 @@
   background-image: url("/ring-glass-20261123/hero-holo.webp");
 }
 
-[data-opening-handoff-root][data-opening-handoff-tier="reduced"] > [data-opening-handoff-rings]:not(#opr) {
+[data-opening-handoff-root][data-opening-handoff-tier="reduced"]
+  > [data-opening-handoff-rings]:not(#opr) {
   display: none;
 }
 
