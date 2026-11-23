@@ -1366,6 +1366,52 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page 
   --rxs-local-nav-reserve: calc(77px + env(safe-area-inset-top, 0px));
 }
 
+/* Overlap pass (2026-11-23): the form stage's frame (the command deck's 1px
+   edge on `.rxs-stage-switcher`) has no padding, so the copy under the art
+   (code, title, lede, the three points) ran along the frame line itself and
+   the points' 01 / 02 / 03 numerals sat under their own left rail. The copy
+   is inset from the frame; the art keeps its full-bleed seat. Below 901px the
+   copy block dissolves into the panel grid, so its children take the inset;
+   above it the block is a real box and takes it as padding. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div {
+  padding-inline: clamp(14px, 3.4vw, 32px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  li {
+  padding-inline-start: 14px;
+}
+
+@media (max-width: 900px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div {
+    padding-inline: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div
+    > :is(small, h3, p, ul) {
+    margin-inline: clamp(14px, 4vw, 28px);
+  }
+}
+
 /* Overlap pass (2026-11-23): the P14 reading's pill is 120px wide, but 約11.4%
    at the phone's 26px figure is 118px against its 100px inner width, so the
    figure ran 9px out of the pill's left edge on every phone and small tablet

@@ -23,10 +23,23 @@ test("Rexonance's square corner brackets take the radius of the plates the ring 
   assert.match(body, /border-radius:\s*inherit/);
 });
 
+test("Extreme's pill challenger buttons trim their square left rail to the pill", () => {
+  const body = ruleBody(ring, "#top.exs-page[data-command-special]:not(#ring-b)\n    .exs-opponent-options\n    button {");
+  assert.match(body, /overflow:\s*clip/);
+});
+
 test("the P14 reading pill is sized from its widest figure, so 約11.4% stays inside it", () => {
   assert.match(layout, /grid-template-columns:\s*96px calc\(clamp\(26px, 2\.6vw, 36px\) \* 4\.55 \+ 24px\)/);
   // phones: 4.55em of 26px is 118px plus the pill's 20px padding
   assert.match(layout, /@media \(min-width: 375px\) and \(max-width: 700px\)[\s\S]*?grid-template-columns:\s*72px 142px/);
+});
+
+test("the Rexonance form stage insets its copy from the frame and keeps the points' numerals off their rail", () => {
+  assert.match(layout, /> #stages\s+\.rxs-stage-panel\s+> div \{\s*padding-inline: clamp\(14px, 3\.4vw, 32px\);/);
+  assert.match(layout, /> #stages\s+\.rxs-stage-panel\s+li \{\s*padding-inline-start: 14px;/);
+  const at = layout.indexOf("> :is(small, h3, p, ul) {");
+  assert.notEqual(at, -1);
+  assert.match(layout.slice(at, at + 120), /margin-inline: clamp\(14px, 4vw, 28px\)/);
 });
 
 test("a 375px to 429px phone stacks the P14 delta over the readings instead of squeezing it to 60px", () => {

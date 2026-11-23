@@ -400,6 +400,19 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     :is(.rxs-comparison, .rxs-p14-comparator, .rxe-form-comparison, .rxe-form-status)::before {
     border-radius: inherit;
   }
+
+  /* Extreme's challenger buttons carry a 4px steel/gold rail on their left
+     edge (styles-extreme-zenith.css). The ring system made the buttons pills,
+     so the straight rail stood out past the curve; the pill's own shape now
+     trims it. Overflow is clipped on the button only; its focus outline and
+     shadow are drawn outside the clip. */
+  html[data-family="special"]
+    body
+    #top.exs-page[data-command-special]:not(#ring-b)
+    .exs-opponent-options
+    button {
+    overflow: clip;
+  }
 }
 
 /* ---------------------------------------------------------------
