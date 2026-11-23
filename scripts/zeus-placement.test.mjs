@@ -165,3 +165,67 @@ test("the hold fills in, MOVE rides above the finger, landscape takes the phone 
     /event\.pointerType !== "mouse" && event\.timeStamp - pressStartedAt\.current > TAP_MAX_MS/,
   );
 });
+
+/* 2026-11-23 overlap audit: the accordion "+" toggles, the saga spec sheets
+   (9000TOPS), the lab's reduced-motion caption, the cards' text and the world
+   map's rows were covered at rest. They extend the existing avoid lists; the
+   button's own mechanism (hysteresis, debounce, parking) is unchanged. */
+const list = (start) => {
+  const from = zeus.indexOf(start);
+  return zeus.slice(from, zeus.indexOf('].join(",")', from));
+};
+
+test("the audit's controls are stepped off as whole boxes", () => {
+  const avoid = list("const ZEUS_AVOID_SELECTOR");
+  for (const selector of [
+    // Far From's chapters and every saga page's drawers (the "+" is a pseudo-element).
+    '".rxs-page summary"',
+    '".ics-table-scroll"',
+    '".mus-table-wrap"',
+    '".lab-transport button"',
+    '".lab-seek"',
+    '".wm-detail :is(a, button)"',
+    '".wm-view-controls button"',
+    '".wm-node"',
+  ]) {
+    assert.ok(avoid.includes(selector), selector);
+  }
+  // Rows that span the screen with their words at the left count as words:
+  // as boxes they would leave no spot and hide the button on the whole page.
+  assert.ok(!avoid.includes('".wm-index-grid > button"'));
+});
+
+test("the audit's spec text and captions count as words", () => {
+  const words = list("const ZEUS_AVOID_PAGE_TEXT_SELECTOR");
+  for (const selector of [
+    '".rxs-page :is(td, th, dt, dd, small, figcaption, li)"',
+    '".rxs-page :is(.ffs-metric, .ffs-text-rows) :is(header, p, strong)"',
+    '".rxs-page :is(.ics-note, .ffs-note, .ics-lead-line, .mus-lead)"',
+    '".lab-stage-status"',
+    '".tl-part-record p"',
+    '".tl-part-record-heading"',
+    '".lab-field-label"',
+    '".wm-index-grid > button"',
+  ]) {
+    assert.ok(words.includes(selector), selector);
+  }
+});
+
+test("a crowded saga page or world map steps aside in place instead of resting on words", () => {
+  const park = zeus.match(/const ZEUS_PARK_PAGE_SELECTOR = "([^"]+)";/)?.[1] ?? "";
+  for (const page of [".rxs-page", ".form-archive-page", ".wm-page"]) {
+    assert.ok(park.split(", ").includes(page), page);
+  }
+  // A typo in a list would make querySelectorAll throw on every placement pass.
+  for (const name of [
+    "ZEUS_AVOID_SELECTOR",
+    "ZEUS_AVOID_TEXT_SELECTOR",
+    "ZEUS_AVOID_PAGE_TEXT_SELECTOR",
+  ]) {
+    const depth = [...list(`const ${name}`)].reduce(
+      (n, ch) => n + (ch === "(" ? 1 : ch === ")" ? -1 : 0),
+      0,
+    );
+    assert.equal(depth, 0, `${name} parentheses balance`);
+  }
+});

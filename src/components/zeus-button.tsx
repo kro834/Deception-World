@@ -210,6 +210,19 @@ const ZEUS_AVOID_SELECTOR = [
   ".gallery-work-open",
   ".gallery-feature-open",
   ".gallery-tour-course-preview",
+  /* 2026-11-23 overlap audit. The saga pages' accordion rows (the drawn "+"
+     is a pseudo-element of the summary, so the glyph pass cannot see it) and
+     their sideways-scrolling spec tables, the lab's transport chips, copy
+     button and seek bar, the world map's node plates, view controls and detail links. */
+  ".rxs-page summary",
+  ".ics-table-scroll",
+  ".mus-table-wrap",
+  ".lab-transport button",
+  ".lab-seek",
+  ".wm-index-heading a",
+  ".wm-detail :is(a, button)",
+  ".wm-view-controls button",
+  ".wm-node",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
@@ -311,13 +324,30 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".dream-hero-catch > span",
   // Same sweep: the tours entrance's artwork caption (iPad Air landscape).
   ".gallery-tour-opening-artwork figcaption",
+  /* 2026-11-23 overlap audit: the saga pages' spec sheets and cards (the
+     9000TOPS cells, the metric figures and their notes, the lead and note
+     lines of the Illusionculum and Meta Unitas copy blocks), and the lab's
+     reduced-motion caption and part record. */
+  ".rxs-page :is(td, th, dt, dd, small, figcaption, li)",
+  ".rxs-page :is(.ffs-metric, .ffs-text-rows) :is(header, p, strong)",
+  ".rxs-page :is(.ics-note, .ffs-note, .ics-lead-line, .mus-lead)",
+  ".lab-stage-status",
+  ".tl-part-record p",
+  ".tl-part-record-heading",
+  ".lab-field-label",
+  // The world map's index rows span the screen but their words sit at the
+  // left: counted as words, not as whole boxes, so a spot beside a label
+  // stays open (as whole boxes the 111 rows left none and hid the button).
+  ".wm-index-grid > button",
 ].join(",");
-/* Where no spot is clear of words on the Rexonance page or Form Archive (a
-   full-width instrument table, the chapter map's rows, hero lead on 375),
+/* Where no spot is clear of words on a saga page (the .rxs-page family: Rexonance,
+   Extreme, Illusionculum, Meta Unitas, Far From), the Form Archive or the world map
+   (a full-width instrument table or accordion, the chapter map's rows, the index's
+   rows, hero lead on 375; 2026-11-23 audit extended it from Rexonance alone),
    the button steps aside in place (fades out) instead of resting on them, and
    comes back at the next settle that finds a clear spot (2026-10-21 sweep F05).
    Elsewhere it keeps the least-covering spot, as before. */
-const ZEUS_PARK_PAGE_SELECTOR = ".rxs-rexonance-page, .form-archive-page";
+const ZEUS_PARK_PAGE_SELECTOR = ".rxs-page, .form-archive-page, .wm-page";
 /* Art the button keeps off as it keeps off words (2026-10-21 sweep F05): the
    key visual pinned beside Rexonance's chapters. Its drawn box, cut to the
    screen, counts as covered words, so a step (the far side's above all) does
