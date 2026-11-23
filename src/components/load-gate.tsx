@@ -1171,15 +1171,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     const idle = () => {
       if (document.querySelector(SAGA_LINK)) warmSagaDiveFire();
     };
-    const handle =
-      typeof window.requestIdleCallback === "function"
-        ? window.requestIdleCallback(idle, { timeout: 4000 })
-        : window.setTimeout(idle, 2400);
+    // No timer fallback (it would hold the route clocks' tests): where
+    // there is no requestIdleCallback (older Safari), the first scroll does
+    // the idle check, and the intent and the press itself still warm it.
+    const idleSupported = typeof window.requestIdleCallback === "function";
+    const handle = idleSupported ? window.requestIdleCallback(idle, { timeout: 4000 }) : 0;
+    if (!idleSupported) window.addEventListener("scroll", idle, { passive: true, once: true });
     document.addEventListener("pointerover", onIntent, { passive: true });
     document.addEventListener("focusin", onIntent);
     return () => {
-      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(handle);
-      else window.clearTimeout(handle);
+      if (handle) window.cancelIdleCallback(handle);
+      window.removeEventListener("scroll", idle);
       document.removeEventListener("pointerover", onIntent);
       document.removeEventListener("focusin", onIntent);
     };
@@ -2901,19 +2903,27 @@ const SAGA_DIVE_FIRE = "/saga-dive-fire-20261124.webp";
 // Held for the session once decoded, so the dive never waits on it.
 let sagaDiveFire: HTMLImageElement | null = null;
 function warmSagaDiveFire() {
-  if (sagaDiveFire || typeof window === "undefined") return;
-  const root = document.documentElement;
-  const saver = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  if (
-    root.dataset.worldEffects === "economy" ||
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    saver?.saveData
-  )
-    return;
-  sagaDiveFire = new Image();
-  sagaDiveFire.decoding = "async";
-  sagaDiveFire.src = SAGA_DIVE_FIRE;
-  sagaDiveFire.decode().catch(() => undefined);
+  if (sagaDiveFire || typeof window === "undefined" || typeof window.Image !== "function") return;
+  // A warm-up is a nicety: anything missing (a bare test DOM, an old
+  // browser) simply skips it, and the dive plays without the sheet.
+  try {
+    const root = document.documentElement;
+    const saver = (window.navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
+    if (
+      root.dataset.worldEffects === "economy" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      saver?.saveData
+    )
+      return;
+    const image = new window.Image();
+    image.decoding = "async";
+    image.src = SAGA_DIVE_FIRE;
+    sagaDiveFire = image;
+    image.decode().catch(() => undefined);
+  } catch {
+    /* Skipped: see above. */
+  }
 }
 
 function isRingRider(variant: string): variant is RingRider {

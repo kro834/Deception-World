@@ -3092,10 +3092,13 @@ html body .load-gate .rider-ring {
     .load-gate.has-cine.is-cine-full:not(.is-cine-flip)
     > .rider-ring {
     /* The ring's centre and diameter: round the held file, clear of its
-       corners (as the glass band), never larger than the screen. */
+       corners (as the glass band). On a narrow screen, where the held file
+       fills the width, the band may pass the screen's edges (its lit stroke
+       stays about on screen) so the ring and the fire still show round the
+       file instead of hiding behind it. */
     --rr-cx: calc((var(--fx) + var(--fw) / 2) * 1px);
     --rr-cy: calc((var(--fy) + var(--fh) / 2) * 1px);
-    --rr-d: min(calc(hypot(var(--fw) * 1px, var(--fh) * 1px) * 1.22 + 24px), 92vmin);
+    --rr-d: min(calc(hypot(var(--fw) * 1px, var(--fh) * 1px) * 1.22 + 24px), 112vmin);
     --rr-a: var(--dwc-accent);
     --rr-b: var(--dwc-gold);
     --rr-well: color-mix(in srgb, var(--dwc-accent) 16%, transparent);
@@ -3125,6 +3128,9 @@ html body .load-gate .rider-ring {
     --rr-cy: 50%;
     --rr-d: min(84vmin, 580px);
     z-index: 3;
+    /* The stage takes 260 ms to come in over the page: the ring shows on it,
+       never over the page it covers. */
+    animation: rr-well-in 160ms ease-out 150ms both;
   }
 
   html:not([data-world-effects="economy"])
