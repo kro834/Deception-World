@@ -234,6 +234,10 @@ html[data-family="gallery"]
   inset: 0;
   z-index: 1;
   display: grid;
+  /* One row the stage's own height: an auto row grew to the artwork's
+     ratio (1097 px in a 679 px stage on iPad), so while the room prepared
+     the work sat low and cut off under an empty band. */
+  grid-template-rows: minmax(0, 1fr);
   align-items: center;
 }
 
