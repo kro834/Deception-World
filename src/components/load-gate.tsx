@@ -1169,14 +1169,19 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       if (target instanceof Element && target.closest(SAGA_LINK)) warmSagaDiveFire();
     };
     const idle = () => {
-      if (document.querySelector(SAGA_LINK)) warmSagaDiveFire();
+      if (!document.querySelector(SAGA_LINK)) return;
+      warmSagaDiveFire();
+      window.removeEventListener("scroll", idle);
     };
-    // No timer fallback (it would hold the route clocks' tests): where
-    // there is no requestIdleCallback (older Safari), the first scroll does
-    // the idle check, and the intent and the press itself still warm it.
-    const idleSupported = typeof window.requestIdleCallback === "function";
-    const handle = idleSupported ? window.requestIdleCallback(idle, { timeout: 4000 }) : 0;
-    if (!idleSupported) window.addEventListener("scroll", idle, { passive: true, once: true });
+    // No timer fallback (it would hold the route clocks' tests): scrolling
+    // also checks (a section with サーガ's link may render after the idle
+    // check, and older Safari has no requestIdleCallback), and the intent
+    // and the press itself still warm it.
+    const handle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(idle, { timeout: 4000 })
+        : 0;
+    window.addEventListener("scroll", idle, { passive: true });
     document.addEventListener("pointerover", onIntent, { passive: true });
     document.addEventListener("focusin", onIntent);
     return () => {
