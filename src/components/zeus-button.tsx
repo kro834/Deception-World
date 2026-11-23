@@ -183,7 +183,6 @@ const ZEUS_AVOID_SELECTOR = [
   ".search-ring button",
   ".gallery-tour-ring-node",
   ".lab-ring button",
-  ".dogs-ring-node > button",
   ".library-card-actions button",
   ".search-input-row",
   ".export-page :is(.export-page-alt, .export-page-back)",
@@ -307,6 +306,11 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".ffs-copy p",
   ".ffs-stage-copy p",
   ".ffs-articles p",
+  // 2026-11-23 iOS sweep: Dream's hero headline (a p, under the display
+  // floor), whose last words the button covered on an iPhone 18 Pro.
+  ".dream-hero-catch > span",
+  // Same sweep: the tours entrance's artwork caption (iPad Air landscape).
+  ".gallery-tour-opening-artwork figcaption",
 ].join(",");
 /* Where no spot is clear of words on the Rexonance page or Form Archive (a
    full-width instrument table, the chapter map's rows, hero lead on 375),

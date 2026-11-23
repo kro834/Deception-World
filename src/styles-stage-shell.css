@@ -3910,8 +3910,8 @@ html[data-family="archive"]
    with the square centred in it and on the same gutter. The special
    sites' local nav keeps its rule outside the lane (77 / 65, the square
    at 14 / 8): their pages reserve that height before first paint.
-   The transformation lab and DOGS ARCHIVE take the same lane in their own
-   sheets (--sh-bar-h, --sh-gutter).
+   The transformation lab takes the same lane in its own sheet
+   (--sh-bar-h, --sh-gutter).
    ================================================================ */
 /* Saga Cinema: its header was 82px (72px on phones). */
 html[data-family="special"] body .saga-cinema .site-header {

@@ -203,7 +203,7 @@ test("every destination is an existing public route with its actual heading anch
         'id="p16"',
       ),
     "/form-archive": read("src/routes/form-archive.tsx"),
-    "/dogs-archive": read("src/routes/dogs-archive.tsx"),
+    // 2026-11-23: owner removed the DOGS archive (「DOGS archiveは消して」)
     "/gallery": read("src/components/gallery/gallery-page.tsx"),
     // Owner (2026-10-27): public room/cinema entries now participate in site search.
     "/saga-cinema": read("src/components/saga-cinema/saga-cinema.tsx"),

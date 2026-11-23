@@ -55,7 +55,7 @@ test("search, library, tours and archive resolve their own real local targets", 
     ["/gallery-tours", ["main", "gallery-tour-catalogue"]],
     ["/gallery", ["gallery-top", "gallery-collection"]],
     ["/form-archive", ["archive-switcher"]],
-    ["/dogs-archive", ["dogs-selector", "dogs-archive-panel"]],
+    // 2026-11-23: owner removed the DOGS archive (「DOGS archiveは消して」)
   ]) {
     const page = getMenuPageContext(path);
     assert.deepEqual(

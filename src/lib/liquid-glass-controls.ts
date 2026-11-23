@@ -34,7 +34,6 @@ export const GLASS_SEGMENTS = [
   ".mus-compare-pick",
   ".exs-opponent-options",
   ".rxs-p14-range-labels",
-  ".dogs-archive-selector",
   ".dream-karakuri-tabs",
   ".dream-chapter-stage-chapters",
   ".dream-roster-filters",

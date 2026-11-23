@@ -590,25 +590,6 @@ html[data-family="archive"] body .form-archive-page {
   --fx-c: #ff6fd0;
 }
 
-/* The Dogs Archive keeps its green; its frame gains a green-to-cyan neon
-   seam and a lit selector, never touching the viewer. */
-html[data-family="archive"] body main.dogs-archive {
-  --fx-a: #5effa6;
-  --fx-b: #45d6ff;
-  --fx-c: #c8ff73;
-}
-
-html[data-family="archive"]
-  body
-  main.dogs-archive
-  > :is(.dogs-archive-header, .dogs-archive-selector) {
-  background-image:
-    linear-gradient(90deg, transparent, var(--fx-a) 20%, var(--fx-b) 60%, transparent) 0 100% / 100% 1px no-repeat,
-    radial-gradient(50% 160% at 0% 0%, color-mix(in srgb, var(--fx-a) 10%, transparent), transparent 70%),
-    radial-gradient(40% 160% at 100% 100%, color-mix(in srgb, var(--fx-b) 7%, transparent), transparent 70%);
-  box-shadow: 0 12px 30px -22px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
-}
-
 /* ================================================================
    9. Dynamic spectrum (coordinator review, 2026-10-30)
    The first pass only tinted. This pass makes the light the subject:
