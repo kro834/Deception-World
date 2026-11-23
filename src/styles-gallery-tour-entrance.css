@@ -488,7 +488,9 @@ html[data-family="gallery"]
   content: "";
   position: absolute;
   z-index: 2;
-  inset: 0 0 auto;
+  /* The card's corners are 28px round: the hairline starts where the top edge
+     turns straight, not in the square corner outside the curve. */
+  inset: 0 28px auto;
   height: 2px;
   background: linear-gradient(
     90deg,

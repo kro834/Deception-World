@@ -1440,6 +1440,9 @@ html[data-family="world"]:root
     z-index: 3;
     display: block;
     background: var(--ws-ticks);
+    /* The console's corners may be rounded (the glass tiers set a radius):
+       the ticks follow them instead of poking out past the curve. */
+    border-radius: inherit;
     pointer-events: none;
     /* The Mirage sheet's lock-on (mr-lock) rides these pseudo-elements;
        the ticks stay still on every tier. */
