@@ -40,9 +40,14 @@
 //      measures them once when their chain comes near, and at release writes
 //      each part's delay. The lift, the thread's stretch and the
 //      pulley's turn are CSS animations on those delays (the sheet), so no
-//      frame loop runs. Anything that already owns its arrival or its
-//      scroll choreography (the suit-up stages, scroll timelines, reveal
-//      classes, .ring-enter, sticky and fixed boxes) is left alone.
+//      frame loop runs. Anything that owns its scroll choreography (the
+//      suit-up stages, scroll timelines, sticky and fixed boxes) is left
+//      alone. 2026-11-23 (owner: 「変身シーン以外すべて」): the pages' own
+//      reveal classes (.dg-reveal, .rxs-reveal, [data-dream-reveal], the
+//      cinema's [data-reveal]) are absorbed: the chain decides when they
+//      arrive and lifts them itself; a tall one (a dossier chapter) is
+//      opened and its paragraphs chain. The thread nodes come from a pool
+//      made at rest, so nothing is inserted into the page while it scrolls.
 //      Economy keeps the order and a plain fade, without threads; reduced
 //      motion does nothing at all.
 //
@@ -151,18 +156,100 @@ const LINK_OFF = 'dialog, nav, aside, [hidden], [aria-hidden="true"], [data-ring
 // `wa-…-stage` boxes are plain layout grids, so they stay), pinned scroll
 // scenes, and everything that already owns its own arrival. A plain
 // `.ring-enter` is not in this list: it joins the chain as a part (the helper
-// gives it `data-ring-in` at its slot, and its own rise plays there).
+// gives it `data-ring-in` at its slot, and its own rise plays there). Nor are
+// the absorbed reveal classes (2026-11-23, LINK_ABSORB): `dg-reveal` and
+// `rxs-reveal` pass; any other `…reveal` class (a burn, a depth field, the
+// typing) keeps its own.
 const LINK_FORBID =
-  /suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call|(?:^|\s)(?!wa-)\S*stage|sticky|pinned|scene|reveal|ring-(?:stagger|expand|bounce|glass|orbit|arc|divider|halo)|ring-enter-(?:pop|spin)/;
+  /suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call|(?:^|\s)(?!wa-)\S*stage|sticky|pinned|scene|(?<!(?:^|\s)(?:dg|rxs)-)reveal|ring-(?:stagger|expand|bounce|glass|orbit|arc|divider|halo)|ring-enter-(?:pop|spin)/;
+/**
+ * The pages' own reveals the chain absorbs (owner, 2026-11-23: 「変身シーン以外すべて」).
+ * `seen` says whether the page has revealed it, `show` reveals it as the page
+ * would. While absorbed (`data-ring-absorb`) its own transition and arrival
+ * are off (the sheet), so the chain's lift is the only motion.
+ * @type {readonly { test: (el: Element) => boolean, seen: (el: Element) => boolean, show: (el: Element) => void }[]}
+ */
+const LINK_ABSORB = [
+  {
+    // The dynamic GUI kit: dossier chapters, records (styles-dynamic-gui.css).
+    test: (el) => el.classList.contains("dg-reveal"),
+    seen: (el) => el.hasAttribute("data-dg-seen"),
+    show: (el) => el.setAttribute("data-dg-seen", ""),
+  },
+  {
+    // The special sites' chapters (the five sagas, Final Stage).
+    test: (el) => el.classList.contains("rxs-reveal"),
+    seen: (el) => el.classList.contains("is-visible"),
+    show: (el) => el.classList.add("is-visible"),
+  },
+  {
+    test: (el) => el.hasAttribute("data-dream-reveal"),
+    seen: (el) => el.getAttribute("data-dream-visible") === "true",
+    show: (el) => el.setAttribute("data-dream-visible", "true"),
+  },
+  {
+    // The saga cinema's blocks (use-cinema-motion.ts).
+    test: (el) => el.hasAttribute("data-reveal") && el.closest(".saga-cinema") !== null,
+    seen: (el) => el.classList.contains("is-visible"),
+    show: (el) => el.classList.add("is-visible"),
+  },
+];
+const ABSORB = "data-ring-absorb";
+/** @param {Element} el */
+const absorbOf = (el) => {
+  for (const family of LINK_ABSORB) if (family.test(el)) return family;
+  return null;
+};
 // Moved as one piece, never taken apart: measured rails, sliders, control
 // rows. Their inner geometry is read by their own engines.
 const LINK_WHOLE =
   /rail|liquid|slider|switch|tabs?(?![a-z])|pills?(?![a-z])|console|dial|carousel|track|controls?(?![a-z])|toolbar|actions|meter/;
-const LINK_SKIP_TAGS = new Set(["script", "style", "template", "dialog", "canvas", "iframe", "br", "hr", "noscript", "link", "meta", "wbr"]);
+const LINK_SKIP_TAGS = new Set([
+  "script",
+  "style",
+  "template",
+  "dialog",
+  "canvas",
+  "iframe",
+  "br",
+  "hr",
+  "noscript",
+  "link",
+  "meta",
+  "wbr",
+]);
 const LINK_ATOMS = new Set([
-  "p", "h1", "h2", "h3", "h4", "h5", "h6", "figure", "img", "picture", "video", "svg", "a", "button",
-  "blockquote", "table", "details", "form", "fieldset", "dl", "pre", "nav", "li", "label", "input",
-  "select", "textarea", "summary", "span", "time", "output",
+  "p",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "figure",
+  "img",
+  "picture",
+  "video",
+  "svg",
+  "a",
+  "button",
+  "blockquote",
+  "table",
+  "details",
+  "form",
+  "fieldset",
+  "dl",
+  "pre",
+  "nav",
+  "li",
+  "label",
+  "input",
+  "select",
+  "textarea",
+  "summary",
+  "span",
+  "time",
+  "output",
 ]);
 const LINK_CONTROLS = new Set(["a", "button", "input", "select", "label", "span"]);
 const LINK_HEADS = new Set(["h1", "h2", "h3", "h4"]);
@@ -185,6 +272,10 @@ const LINK_PULLEY_R = 8;
 const LINK_ENTER_RISE = 26;
 const LINK_THREAD_BASE = 100;
 const LINK_GATE = 0.92;
+// Thread nodes made at rest (2026-11-23): inserting nodes while the page
+// scrolls restyled the whole document (its :has() rules), so the helper keeps
+// a pool, made when the page is idle, and only shows and places them.
+const LINK_POOL = 12;
 
 /**
  * Watch `doc` for the ring system and return a disposer.
@@ -225,7 +316,8 @@ export function watchRingMotion(doc = document) {
   );
   const glassLive = new view.IntersectionObserver(
     (entries) => {
-      for (const entry of entries) entry.target.toggleAttribute("data-ring-live", entry.isIntersecting);
+      for (const entry of entries)
+        entry.target.toggleAttribute("data-ring-live", entry.isIntersecting);
     },
     { threshold: 0 },
   );
@@ -247,14 +339,16 @@ export function watchRingMotion(doc = document) {
     }
   };
 
-  const onVisibility = () => root.toggleAttribute("data-ring-hidden", doc.visibilityState === "hidden");
+  const onVisibility = () =>
+    root.toggleAttribute("data-ring-hidden", doc.visibilityState === "hidden");
 
   // The route cover's glass band: fetched when the page is idle, so the first
   // covered route change already has it and the first paint never waits for it.
   let coverIdle = 0;
   const fetchCover = () => {
     coverIdle = 0;
-    const saver = /** @type {{ connection?: { saveData?: boolean } }} */ (view.navigator).connection;
+    const saver = /** @type {{ connection?: { saveData?: boolean } }} */ (view.navigator)
+      .connection;
     if (!bounces() || saver?.saveData) return;
     new view.Image().src = COVER_IMAGE;
   };
@@ -333,19 +427,24 @@ export function watchRingMotion(doc = document) {
     lastScrollAt = now;
     // Content lags behind the direction of travel: scrolling down pulls it down.
     pull = Math.max(-KICK_MAX, Math.min(KICK_MAX, speed * KICK_GAIN));
-    if (!frame) frame = view.requestAnimationFrame(tick);
+    // No frame is asked for on a page with nothing to feed (2026-11-23): a
+    // frame callback each scroll frame cost a forced restyle for nothing.
+    if (frame) return;
+    rings ??= Array.from(doc.querySelectorAll(SCROLL));
+    if (rings.length || bounceElements.length || wroteKick)
+      frame = view.requestAnimationFrame(tick);
   };
-
 
   // ---- Linked sections: the pulley-and-thread chain -----------------------
   // A chain is a heading and the parts that follow it, at most about one
   // viewport tall. Only chains that are near and still below the fold are
   // armed (held, measured, threaded). Everything else is untouched.
   /**
+   * @typedef {{ test: (el: Element) => boolean, seen: (el: Element) => boolean, show: (el: Element) => void }} LinkFamily
    * @typedef {{ el: HTMLElement, chain: LinkChain, i: number, figure: boolean, head: boolean, own: boolean, once: boolean,
-   *   state: 0 | 1 | 2, start: number, top: number, bottom: number, left: number, right: number }} LinkPart
+   *   fam: LinkFamily | null, state: 0 | 1 | 2, start: number, top: number, bottom: number, left: number, right: number }} LinkPart
    * @typedef {{ parts: LinkPart[], links: (HTMLElement | null)[], near: boolean, armed: boolean,
-   *   lastStart: number, top: number, body: boolean }} LinkChain
+   *   lastStart: number, top: number, body: boolean, root: Element, wait: number }} LinkChain
    * @typedef {{ el: Element, chains: LinkChain[], done: boolean, dirty: boolean, near: boolean, at: number }} LinkRoot
    */
   /** @type {WeakMap<Element, LinkPart>} */
@@ -410,6 +509,18 @@ export function watchRingMotion(doc = document) {
         continue;
       const cls = child.className;
       if (cls && LINK_FORBID.test(cls)) continue;
+      // One of the pages' own reveals that has not arrived yet: the chain
+      // takes it over (its own hold is invisible below the fold anyway).
+      // One the page has already revealed is taken too while it is wholly
+      // below the fold (its own arrival is spent off screen, or still to run).
+      const family = absorbOf(child);
+      const fam =
+        family &&
+        (!family.seen(child) ||
+          child.hasAttribute(ABSORB) ||
+          child.getBoundingClientRect().top > vh)
+          ? family
+          : null;
       // A plain .ring-enter that has not arrived yet: it keeps its own rise,
       // and the chain decides when (it is held by its own rule until then).
       // Once it has arrived it is never held again (its own rule would outrank the lift).
@@ -418,6 +529,9 @@ export function watchRingMotion(doc = document) {
       const cs = view.getComputedStyle(child);
       const display = cs.display;
       if (display === "none") continue;
+      // A reveal pinned to the scroll (a view or scroll timeline) keeps its own.
+      if (fam && cs.animationTimeline && !/^(?:auto(?:,\s*auto)*)$/.test(cs.animationTimeline))
+        continue;
       if (display === "contents") {
         collectParts(child, depth, out, vh, vw, sy);
         continue;
@@ -427,32 +541,63 @@ export function watchRingMotion(doc = document) {
       if (display === "inline") continue;
       if (cs.position !== "static" && cs.position !== "relative") continue;
       if (
-        cs.animationName !== "none" ||
-        cs.translate !== "none" ||
-        cs.visibility === "hidden" ||
-        (!own && parseFloat(cs.opacity) < 0.99) ||
+        (!fam && cs.animationName !== "none") ||
+        (!fam && cs.translate !== "none") ||
+        (!fam && cs.visibility === "hidden") ||
+        (!own && !fam && parseFloat(cs.opacity) < 0.99) ||
         cs.overflowY === "auto" ||
         cs.overflowY === "scroll"
       )
         continue;
       const rect = child.getBoundingClientRect();
       if (rect.width < 8 || rect.height < 8) continue;
+      // A tall reveal, or one that holds a heading and what follows it (a
+      // dossier chapter, a saga's long copy, the cinema's layouts), is
+      // opened: it is revealed at once while it is still wholly below the
+      // fold, with its own arrival off, and its parts chain. One already on
+      // screen is left to its own reveal.
+      if (child.getAttribute(ABSORB) === "open") {
+        collectParts(child, depth + 1, out, vh, vw, sy);
+        continue;
+      }
+      if (
+        fam &&
+        child.childElementCount > 1 &&
+        (rect.height > Math.min(vh * 0.5, 360) ||
+          (rect.height > 160 && child.querySelector("h1, h2, h3, h4") !== null))
+      ) {
+        if (rect.top <= vh) continue;
+        child.setAttribute(ABSORB, "open");
+        fam.show(child);
+        collectParts(child, depth + 1, out, vh, vw, sy);
+        continue;
+      }
       const card =
         cs.backgroundImage !== "none" ||
         alphaOf(cs.backgroundColor) > 0.02 ||
         (cs.borderTopStyle !== "none" && parseFloat(cs.borderTopWidth) > 0) ||
         cs.boxShadow !== "none";
+      // `data-ring-open` (2026-11-23): a row whose items each arrive (the home's cards).
       const whole =
-        own ||
-        card ||
-        LINK_ATOMS.has(tag) ||
-        depth >= LINK_MAX_DEPTH ||
-        child.childElementCount === 0 ||
-        cs.overflowX !== "visible" ||
-        child.hasAttribute("role") ||
-        (cls !== "" && LINK_WHOLE.test(cls)) ||
-        ownText(child) ||
-        controlsOnly(child);
+        !child.hasAttribute("data-ring-open") &&
+        (own ||
+          fam !== null ||
+          card ||
+          LINK_ATOMS.has(tag) ||
+          depth >= LINK_MAX_DEPTH ||
+          child.childElementCount === 0 ||
+          cs.overflowX !== "visible" ||
+          child.hasAttribute("role") ||
+          (cls !== "" && LINK_WHOLE.test(cls)) ||
+          ownText(child) ||
+          controlsOnly(child) ||
+          // A heading group (a number, a kicker and the title): one part, the
+          // chain's first (2026-11-23).
+          (rect.height < 200 &&
+            child.childElementCount <= 4 &&
+            child.querySelector(
+              ":scope > :is(h1, h2, h3, h4), :scope > * > :is(h1, h2, h3, h4)",
+            ) !== null));
       if (!whole) {
         collectParts(child, depth + 1, out, vh, vw, sy);
         continue;
@@ -476,6 +621,7 @@ export function watchRingMotion(doc = document) {
           (!card && rect.height < 320 && child.querySelector("h1, h2, h3, h4") !== null),
         own,
         once: enter && !own,
+        fam,
         state: 0,
         start: 0,
         top: rect.top + sy,
@@ -495,27 +641,104 @@ export function watchRingMotion(doc = document) {
       if (part.own && !part.el.hasAttribute(IN)) io.observe(part.el);
     }
     if (part.state !== 0) {
+      const landed = part.state === 2;
       part.state = 0;
-      if (part.own) {
-        part.el.style.removeProperty("animation-delay");
-        return;
-      }
+      part.el.style.removeProperty("animation-delay");
+      if (part.own) return;
       part.el.removeAttribute(LINK);
-      part.el.style.removeProperty("--ring-link-d");
-      part.el.style.removeProperty("--ring-link-f");
+      // An absorbed reveal that has arrived gets its own transitions back
+      // (hover and press); its arrival stays off for good.
+      if (landed && part.fam) part.el.setAttribute(ABSORB, "done");
     }
+  };
+
+  // ---- The thread pool. Nodes are made at rest (load, idle) and only
+  // shown, placed and hidden while the page scrolls.
+  /** @type {HTMLElement[]} */
+  const pool = [];
+  let poolIdle = 0;
+  const ensureLayer = () => {
+    if (linkLayer && linkLayer.isConnected) return linkLayer;
+    linkLayer = doc.createElement("div");
+    linkLayer.className = "ring-links";
+    linkLayer.setAttribute("aria-hidden", "true");
+    (doc.body ?? root).appendChild(linkLayer);
+    pool.length = 0;
+    return linkLayer;
+  };
+  const makeNode = () => {
+    const node = doc.createElement("i");
+    node.className = "ring-link";
+    node.setAttribute("data-ring-idle", "");
+    const pull = doc.createElement("i");
+    pull.className = "ring-thread ring-thread-pull";
+    const lift = doc.createElement("i");
+    lift.className = "ring-thread ring-thread-lift";
+    const pulley = doc.createElement("i");
+    pulley.className = "ring-pulley";
+    node.append(pull, lift, pulley);
+    return node;
+  };
+  /** Top the pool up to LINK_POOL free nodes, in one insertion, when the page is idle. */
+  const fillPool = () => {
+    poolIdle = 0;
+    if (!linksOn() || !bounces() || !doc.body) return;
+    const layer = ensureLayer();
+    if (pool.length >= LINK_POOL) return;
+    const batch = doc.createDocumentFragment();
+    while (pool.length < LINK_POOL) {
+      const node = makeNode();
+      pool.push(node);
+      batch.appendChild(node);
+    }
+    layer.appendChild(batch);
+  };
+  const queuePool = () => {
+    if (poolIdle || pool.length >= LINK_POOL / 2) return;
+    poolIdle =
+      typeof view.requestIdleCallback === "function"
+        ? view.requestIdleCallback(fillPool, { timeout: 2000 })
+        : view.setTimeout(fillPool, 600);
+  };
+  /** @param {HTMLElement} node */
+  const freeNode = (node) => {
+    node.removeAttribute("data-ring-run");
+    node.setAttribute("data-ring-idle", "");
+    if (node.parentNode === linkLayer) pool.push(node);
   };
 
   /** @param {LinkChain} chain */
   const dropThreads = (chain) => {
     for (let i = 0; i < chain.links.length; i += 1) {
-      chain.links[i]?.remove();
+      const node = chain.links[i];
+      if (node) freeNode(node);
       chain.links[i] = null;
     }
   };
 
+  /**
+   * How long the section's own entrance still runs, ms (a dossier part that
+   * was just chosen springs into the layout): 0 when it is at rest.
+   * @param {Element} el
+   */
+  const rootSettling = (el) => {
+    if (typeof el.getAnimations !== "function") return 0;
+    let left = 0;
+    for (const animation of el.getAnimations()) {
+      if (animation.playState !== "running" || typeof animation.currentTime !== "number") continue;
+      const end = animation.effect?.getComputedTiming().endTime;
+      if (typeof end === "number" && Number.isFinite(end))
+        left = Math.max(left, end - animation.currentTime);
+    }
+    return left > 0 ? Math.min(1200, Math.ceil(left) + 32) : 0;
+  };
+
   /** Back to the page's own state: nothing held, no threads. @param {LinkChain} chain */
   const disarm = (chain) => {
+    if (chain.wait) {
+      view.clearTimeout(chain.wait);
+      chain.wait = 0;
+    }
     for (const part of chain.parts) clearPart(part);
     dropThreads(chain);
     chain.armed = false;
@@ -554,7 +777,8 @@ export function watchRingMotion(doc = document) {
       cy = (a.bottom + b.top) / 2;
       // The pulling end is tied up the side of the part above (at most 140px
       // up), so the taut thread is long enough to be read as a thread.
-      if (x >= a.left - 16 && x <= a.right + 16) l1 = a.bottom - Math.min(140, a.bottom - a.top) - cy;
+      if (x >= a.left - 16 && x <= a.right + 16)
+        l1 = a.bottom - Math.min(140, a.bottom - a.top) - cy;
       l2 = b.top - cy;
     } else {
       // Side by side: a pulley over the gap at the top edge, one thread end
@@ -569,38 +793,35 @@ export function watchRingMotion(doc = document) {
       l2 = b.top - cy;
     }
     if (cx - r < 2 || cx + r > root.clientWidth - 2 || cy < r) return null;
-    if (!linkLayer || !linkLayer.isConnected) {
-      linkLayer = doc.createElement("div");
-      linkLayer.className = "ring-links";
-      linkLayer.setAttribute("aria-hidden", "true");
-      (doc.body ?? root).appendChild(linkLayer);
+    const layer = ensureLayer();
+    // From the pool; a node is made here only if the pool ran dry.
+    let node = pool.pop();
+    if (!node) {
+      node = makeNode();
+      layer.appendChild(node);
     }
-    const node = doc.createElement("i");
-    node.className = "ring-link";
+    queuePool();
+    const [pull, lift, pulley] = /** @type {HTMLElement[]} */ ([...node.children]);
     node.style.left = `${cx.toFixed(1)}px`;
     node.style.top = `${cy.toFixed(1)}px`;
     const hangB = b.own ? LINK_ENTER_RISE : b.figure ? RING_LINK_HANG.figure : RING_LINK_HANG.text;
+    node.toggleAttribute("data-ring-nopull", l1 !== l1);
     if (l1 === l1) {
-      const hangA = a.own ? LINK_ENTER_RISE : a.figure ? RING_LINK_HANG.figure : RING_LINK_HANG.text;
-      const pull = doc.createElement("i");
-      pull.className = "ring-thread ring-thread-pull";
+      const hangA = a.own
+        ? LINK_ENTER_RISE
+        : a.figure
+          ? RING_LINK_HANG.figure
+          : RING_LINK_HANG.text;
       pull.style.left = `${x1}px`;
       pull.style.setProperty("--ring-thread-to", (l1 / LINK_THREAD_BASE).toFixed(4));
       pull.style.setProperty("--ring-thread-from", ((l1 + hangA) / LINK_THREAD_BASE).toFixed(4));
-      node.appendChild(pull);
     }
-    const lift = doc.createElement("i");
-    lift.className = "ring-thread";
     lift.style.left = `${x2}px`;
     lift.style.setProperty("--ring-thread-to", (l2 / LINK_THREAD_BASE).toFixed(4));
     lift.style.setProperty("--ring-thread-from", ((l2 + hangB) / LINK_THREAD_BASE).toFixed(4));
-    node.appendChild(lift);
-    const pulley = doc.createElement("i");
-    pulley.className = "ring-pulley";
     // The wheel turns by the thread that runs over it: travel / radius.
     pulley.style.setProperty("--ring-pulley-from", `${(-hangB / r).toFixed(2)}rad`);
-    node.appendChild(pulley);
-    linkLayer.appendChild(node);
+    node.removeAttribute("data-ring-idle");
     return node;
   };
 
@@ -610,11 +831,26 @@ export function watchRingMotion(doc = document) {
    * @param {LinkChain} chain
    */
   const arm = (chain) => {
-    // Held only when wholly below the fold: a part with a sliver on screen is never hidden.
+    // A section that is still springing into the layout (a dossier part just
+    // chosen) is measured once it has landed.
+    if (chain.wait) return;
+    const settle = rootSettling(chain.root);
+    if (settle > 0) {
+      chain.wait = view.setTimeout(() => {
+        chain.wait = 0;
+        if (chain.near && !chain.armed) arm(chain);
+      }, settle);
+      return;
+    }
+    // Held only when wholly below the fold: a part with a sliver on screen is
+    // never hidden. An absorbed reveal is invisible by its own hold until it
+    // arrives, so it is always the chain's (its geometry is read without
+    // that hold's offset: the sheet takes it off while absorbed).
     const line = view.innerHeight;
     const sy = root.scrollTop;
     const parts = chain.parts;
     let any = false;
+    for (const part of parts) if (part.fam) part.el.setAttribute(ABSORB, "");
     for (const part of parts) {
       const rect = part.el.getBoundingClientRect();
       part.top = rect.top + sy;
@@ -622,7 +858,11 @@ export function watchRingMotion(doc = document) {
       part.left = rect.left;
       part.right = rect.right;
       part.start = 0;
-      part.state = !part.once && rect.height > 0 && rect.top > line ? 1 : 0;
+      const hidden = part.fam !== null && !part.fam.seen(part.el);
+      part.state = !part.once && rect.height > 0 && (hidden || rect.top > line) ? 1 : 0;
+      // An absorbed part the chain does not hold is simply there.
+      if (part.state === 0 && part.fam && part.el.getAttribute(ABSORB) === "")
+        part.el.setAttribute(ABSORB, "done");
     }
     for (const part of parts) {
       if (part.state !== 1) continue;
@@ -670,6 +910,8 @@ export function watchRingMotion(doc = document) {
     gateIO.unobserve(part.el);
     const delay = Math.round(start - now);
     const style = part.el.style;
+    // An absorbed reveal arrives as the page would show it, on the chain's lift.
+    if (part.fam && !part.fam.seen(part.el)) part.fam.show(part.el);
     if (part.own) {
       // Its own rise, at the chain's moment.
       style.setProperty("animation-delay", `${delay}ms`);
@@ -681,9 +923,11 @@ export function watchRingMotion(doc = document) {
         part.once = true;
       }
     } else {
-      style.setProperty("--ring-link-d", `${delay}ms`);
       // The part shows on its hook one step early, as its thread goes taut.
-      style.setProperty("--ring-link-f", `${Math.max(0, delay - RING_LINK_STEP_MS)}ms`);
+      // The delays are written as the part's own animation-delay (not as
+      // inherited custom properties, which restyled every node inside it).
+      const seen = `${Math.max(0, delay - RING_LINK_STEP_MS)}ms`;
+      style.setProperty("animation-delay", bounces() ? `${delay}ms, ${seen}` : seen);
       part.el.setAttribute(LINK, part.figure ? "figure" : "text");
     }
     const node = chain.links[part.i];
@@ -692,7 +936,10 @@ export function watchRingMotion(doc = document) {
     node.style.setProperty("--ring-link-d", `${delay}ms`);
     node.style.setProperty("--ring-link-f", `${delay - RING_LINK_STEP_MS}ms`);
     // The pulling end follows the part above, wherever that is in its own lift.
-    node.style.setProperty("--ring-link-a", `${puller.start ? Math.round(puller.start - now) : -9999}ms`);
+    node.style.setProperty(
+      "--ring-link-a",
+      `${puller.start ? Math.round(puller.start - now) : -9999}ms`,
+    );
     node.setAttribute("data-ring-run", part.own ? "enter" : "");
   };
 
@@ -708,7 +955,12 @@ export function watchRingMotion(doc = document) {
       part.once = true;
       return;
     }
-    if (event.type === "animationcancel" || name === "ring-link-lift-text" || name === "ring-link-lift-figure" || (name === "ring-link-seen" && !bounces()))
+    if (
+      event.type === "animationcancel" ||
+      name === "ring-link-lift-text" ||
+      name === "ring-link-lift-figure" ||
+      (name === "ring-link-seen" && !bounces())
+    )
       clearPart(part);
   };
 
@@ -785,6 +1037,11 @@ export function watchRingMotion(doc = document) {
       const cs = view.getComputedStyle(up);
       if (cs.position === "fixed" || cs.overflowY === "auto" || cs.overflowY === "scroll") return;
     }
+    // A section out of the layout (a dossier part not chosen) is read when it comes in.
+    if (rec.el.getClientRects().length === 0) {
+      rec.done = false;
+      return;
+    }
     const vh = view.innerHeight;
     /** @type {LinkPart[]} */
     const parts = [];
@@ -798,7 +1055,17 @@ export function watchRingMotion(doc = document) {
         chain.parts.length >= LINK_MAX_PARTS ||
         part.top - chain.top > vh * 0.9
       ) {
-        chain = { parts: [], links: [], near: false, armed: false, lastStart: 0, top: part.top, body: false };
+        chain = {
+          parts: [],
+          links: [],
+          near: false,
+          armed: false,
+          lastStart: 0,
+          top: part.top,
+          body: false,
+          root: rec.el,
+          wait: 0,
+        };
         rec.chains.push(chain);
       }
       if (!part.head) chain.body = true;
@@ -823,6 +1090,12 @@ export function watchRingMotion(doc = document) {
         if (!rec) continue;
         rec.near = entry.isIntersecting;
         if (rec.near && (!rec.done || rec.dirty)) detectRoot(rec);
+        // Taken out of the layout (another dossier part was chosen): nothing
+        // stays held in it, and it is read afresh when it comes back.
+        else if (!rec.near && rec.done && entry.target.getClientRects().length === 0) {
+          forgetRoot(rec);
+          rec.done = false;
+        }
       }
     },
     { rootMargin: "100% 0px", threshold: 0 },
@@ -843,7 +1116,8 @@ export function watchRingMotion(doc = document) {
       }
       if (!rec.done || !rec.dirty || !rec.near) continue;
       let busy = false;
-      for (const chain of rec.chains) for (const part of chain.parts) if (part.state === 2) busy = true;
+      for (const chain of rec.chains)
+        for (const part of chain.parts) if (part.state === 2) busy = true;
       // A chain in motion finishes first; a restless section is re-read at most every 1.5 s.
       if (busy || now - rec.at < 1500) {
         queueLinkScan();
@@ -888,15 +1162,24 @@ export function watchRingMotion(doc = document) {
           continue;
         }
         disarm(chain);
-        if (chain.near && chain.parts[chain.parts.length - 1].el.getBoundingClientRect().bottom > fold) arm(chain);
+        if (
+          chain.near &&
+          chain.parts[chain.parts.length - 1].el.getBoundingClientRect().bottom > fold
+        )
+          arm(chain);
       }
     }
     if (resized) queueLinkScan();
   };
 
-  /** Print, reduced motion switched on: everything back at once. */
+  /** Print, reduced motion switched on: everything back at once, absorbed reveals shown. */
   const releaseAllLinks = () => {
-    for (const rec of linkRoots) for (const chain of rec.chains) disarm(chain);
+    for (const rec of linkRoots)
+      for (const chain of rec.chains) {
+        disarm(chain);
+        for (const part of chain.parts)
+          if (part.fam && !part.fam.seen(part.el)) part.fam.show(part.el);
+      }
   };
 
   const linkSizes =
@@ -950,6 +1233,7 @@ export function watchRingMotion(doc = document) {
   calm.addEventListener?.("change", releaseAllLinks);
   if (doc.body) linkSizes?.observe(doc.body);
   scanLinks();
+  queuePool();
 
   // A stalled observer must never leave content invisible.
   const safety = view.setTimeout(() => {
@@ -963,6 +1247,10 @@ export function watchRingMotion(doc = document) {
     view.clearTimeout(safety);
     view.clearTimeout(linkSafety);
     view.clearTimeout(linkScan);
+    if (poolIdle) {
+      if (typeof view.cancelIdleCallback === "function") view.cancelIdleCallback(poolIdle);
+      else view.clearTimeout(poolIdle);
+    }
     doc.removeEventListener("animationend", onLinkEnd);
     doc.removeEventListener("animationcancel", onLinkEnd);
     view.removeEventListener("beforeprint", releaseAllLinks);

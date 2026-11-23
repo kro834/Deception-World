@@ -207,6 +207,9 @@ test("the helper never blocks input and writes only the ring's own properties", 
   const writes = [...code.matchAll(/style\.setProperty\(\s*"([^"]+)"/g)].map((m) => m[1]);
   // 2026-11-23: the linked sections add the chain's delays (on a part and on
   // its thread) and the thread's own geometry (on the helper's own nodes).
+  // 2026-11-23 (chain-all): a part's delays are its own animation-delay, not
+  // inherited custom properties (those restyled every node inside the part);
+  // --ring-link-d/-f/-a stay on the thread nodes, three children each.
   assert.deepEqual([...new Set(writes)].sort(), [
     "--ring-kick",
     "--ring-link-a",
@@ -244,7 +247,21 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
     assert.match(css, new RegExp(`@keyframes ring-link-lift-${kind} \\{\\s*from \\{\\s*translate: 0 ${RING_LINK_HANG[kind]}px;`), kind);
   }
   // Parts, threads and pulleys all ride the bounce spring on the helper's delays.
-  for (const name of ["ring-link-lift-text", "ring-link-lift-figure", "ring-thread-run", "ring-pulley-turn"]) {
+  // 2026-11-23 (chain-all): a part's delays are written as its own inline
+  // animation-delay (no inherited custom property on a part), and the part
+  // rules outrank a page's own reveal rules (the :not(#r) chain).
+  for (const kind of ["text", "figure"]) {
+    assert.match(
+      css,
+      new RegExp(
+        `\\[data-ring-link="${kind}"\\](?::not\\(#r\\)){6} \\{\\s*animation:\\s*ring-link-lift-${kind} var\\(--ring-dur-bounce\\) var\\(--ring-spring-bounce\\) backwards,\\s*ring-link-seen 320ms ease-out backwards;`,
+      ),
+      kind,
+    );
+  }
+  assert.match(code, /style\.setProperty\("animation-delay", bounces\(\) \? `\$\{delay\}ms, \$\{seen\}` : seen\);/);
+  assert.doesNotMatch(code, /part\.el\.style\.setProperty\("--ring-link/);
+  for (const name of ["ring-thread-run", "ring-pulley-turn"]) {
     assert.match(
       css,
       new RegExp(`animation:\\s*${name} var\\(--ring-dur-bounce\\) var\\(--ring-spring-bounce\\) var\\(--ring-link-d, 0ms\\) backwards`),
@@ -252,13 +269,17 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
     );
   }
   // A part is held only by an attribute the helper sets, and only once the helper runs.
-  assert.match(css, /html\[data-ring-ready\] \[data-ring-link="hold"\] \{\s*opacity: 0;\s*\}/);
+  // (2026-11-23, chain-all: outranking an absorbed reveal's own is-visible rule.)
+  assert.match(
+    css,
+    /html\[data-ring-ready\] \[data-ring-link="hold"\](?::not\(#r\)){6} \{\s*opacity: 0;\s*\}/,
+  );
   assert.equal((css.match(/\[data-ring-link="hold"\]/g) ?? []).length, 1);
   assert.doesNotMatch(read("src/routes/__root.tsx"), /data-ring-link/);
   // Economy: the order and a plain fade, no threads. Reduced motion: no thread layer at all.
   assert.match(
     css,
-    /html\[data-ring-ready\]\[data-world-effects="economy"\] :is\(\[data-ring-link="text"\], \[data-ring-link="figure"\]\) \{\s*animation: ring-link-seen 240ms ease-out/,
+    /html\[data-ring-ready\]\[data-world-effects="economy"\]\s*:is\(\[data-ring-link="text"\], \[data-ring-link="figure"\]\)(?::not\(#r\)){6} \{\s*animation: ring-link-seen 240ms ease-out backwards;/,
   );
   assert.match(css, /\.ring-links \{[^}]*display: none;/);
   assert.match(
@@ -281,6 +302,35 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   assert.ok(forbid);
   for (const word of ["suitup", "henshin", "assembly", "entry", "nanite", "vortex", "engine", "canvas", "stage", "sticky", "reveal", "ring-(?:stagger", "ring-enter-(?:pop|spin)"])
     assert.ok(forbid[1].includes(word), word);
+  // 2026-11-23 (owner: 「変身シーン以外すべて」): the pages' own reveals are
+  // absorbed (dg-, rxs-, Dream, the cinema); every other …reveal class, the
+  // suit-up words and the stages are still never taken.
+  const forbidRe = new RegExp(forbid[1]);
+  for (const kept of ["manager-copy-section dg-reveal", "rxs-section-heading rxs-reveal", "dg-reveal dg-reveal-left"])
+    assert.doesNotMatch(kept, forbidRe, kept);
+  for (const left of ["cine-burn-reveal", "depth-field-reveal", "is-revealing", "rxs-stage-switcher rxs-reveal", "mus-suitup rxs-reveal", "ring-glass"])
+    assert.match(left, forbidRe, left);
+  for (const family of ['"dg-reveal"', '"data-dg-seen"', '"rxs-reveal"', '"is-visible"', '"data-dream-reveal"', '"data-dream-visible"', '".saga-cinema"'])
+    assert.ok(code.includes(family), family);
+  // A reveal pinned to the scroll keeps its own; an absorbed reveal's own
+  // transition and arrival are off while the chain moves it.
+  assert.match(code, /if \(fam && cs\.animationTimeline && !\/\^\(\?:auto/);
+  assert.match(
+    css,
+    /:is\(\[data-ring-absorb=""\], \[data-ring-absorb="open"\]\)(?::not\(#r\)){6} \{\s*translate: none;\s*scale: none;\s*transform: none;\s*transition: none;\s*animation: none;\s*\}/,
+  );
+  assert.match(css, /\[data-ring-absorb="done"\](?::not\(#r\)){6} \{\s*animation: none;\s*\}/);
+  // No node is inserted while the page scrolls: the threads come from a pool
+  // made when the page is idle (inserting restyled the whole document through
+  // its :has() rules), and the pool's free nodes are out of the layout.
+  assert.match(code, /requestIdleCallback\(fillPool/);
+  assert.match(code, /let node = pool\.pop\(\);/);
+  assert.doesNotMatch(code, /chain\.links\[i\]\?\.remove\(\)/);
+  assert.match(css, /\.ring-link\[data-ring-idle\],\s*\.ring-link\[data-ring-nopull\] > \.ring-thread-pull \{\s*display: none;/);
+  // A dossier part taken out of the layout lets go of everything it held.
+  assert.match(code, /forgetRoot\(rec\);\s*rec\.done = false;/);
+  // The film reveal stands aside for a part the chain holds or lifts.
+  assert.match(read("src/lib/film-motion.js"), /if \(node\.hasAttribute\("data-ring-link"\)\) continue;/);
   assert.match(code, /cs\.animationName !== "none"/);
   assert.match(code, /cs\.position !== "static" && cs\.position !== "relative"/);
   assert.match(code, /child\.querySelector\("canvas, iframe"\) !== null/);

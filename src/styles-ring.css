@@ -58,6 +58,12 @@
                             .ring-links holds their amber threads and pulleys.
                             Opt out with data-ring-chain="off"; opt a wrapper
                             in with data-ring-section.
+     [data-ring-absorb]     a page's own reveal (.dg-reveal, .rxs-reveal,
+                            [data-dream-reveal], the cinema's [data-reveal])
+                            taken over by the chain (2026-11-23): its own
+                            transition and arrival are off ("" while held and
+                            lifted, "open" for a chapter whose parts chain,
+                            "done" once it has landed).
 
    GATES. Every animation and transition sits behind
      @media (prefers-reduced-motion: no-preference)
@@ -576,14 +582,16 @@
   }
 }
 
-/* Taut and bright while it pulls, then back to a faint rest. */
+/* Taut and bright while it pulls, then back to a faint rest. (1100 ms
+   since 2026-11-23, was 1500: the same bright span, a shorter fade, so the
+   thread is animated for less of the scroll.) */
 @keyframes ring-thread-show {
   from {
     opacity: 0;
   }
 
-  7%,
-  58% {
+  9%,
+  79% {
     opacity: 1;
   }
 }
@@ -763,32 +771,67 @@
      animation per property, so the compositor can run it). The thread strips stretch
      and the pulley turns on the same curve and the same delays, so the
      whole mechanism runs on the compositor with no frame loop. --- */
-  html[data-ring-ready] [data-ring-link="hold"] {
+  /* The :not(#r) chain (2026-11-23) outranks a page's own reveal rules
+     (.rxs-reveal.is-visible, .dg-reveal[data-dg-seen] and their per-site
+     variants), so an absorbed reveal is held and lifted by the chain alone. */
+  html[data-ring-ready] [data-ring-link="hold"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r) {
     opacity: 0;
+  }
+
+  /* An absorbed reveal (the helper's data-ring-absorb): while it is held and
+     lifted, and for an opened chapter, its own transition and arrival are
+     off and its hold's offset is taken off, so the chain's lift is its only
+     motion and its geometry is read true. Once landed ("done") only its own
+     arrival stays off: its hover and press transitions are back. The page's
+     resting state (is-visible, data-dg-seen, …) is set by the helper. The
+     clip-path / filter arrivals these replace were already kept off WebKit
+     and Samsung Internet 28-30 (styles-fx-motion.css, styles-dream-
+     chapter.css); the chain moves translate and opacity only, everywhere. */
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    :is([data-ring-absorb=""], [data-ring-absorb="open"]):not(#r):not(#r):not(#r):not(#r):not(#r):not(#r),
+  html[data-ring-ready][data-world-effects="economy"]
+    :is([data-ring-absorb=""], [data-ring-absorb="open"]):not(#r):not(#r):not(#r):not(#r):not(#r):not(#r) {
+    translate: none;
+    scale: none;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    [data-ring-absorb="done"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r),
+  html[data-ring-ready][data-world-effects="economy"]
+    [data-ring-absorb="done"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r) {
+    animation: none;
   }
 
   /* Text hangs 30px, figures and cards 52px (RING_LINK_HANG). Literal
      keyframes, one animation per property: nothing here needs the main
-     thread once it has started. */
-  html[data-ring-ready]:not([data-world-effects="economy"]) [data-ring-link="text"] {
+     thread once it has started. The delays are the part's own inline
+     animation-delay (the helper's; 2026-11-23, they were inherited custom
+     properties, which restyled every node inside the part). */
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    [data-ring-link="text"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r) {
     animation:
-      ring-link-lift-text var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
-      ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards;
+      ring-link-lift-text var(--ring-dur-bounce) var(--ring-spring-bounce) backwards,
+      ring-link-seen 320ms ease-out backwards;
   }
 
-  html[data-ring-ready]:not([data-world-effects="economy"]) [data-ring-link="figure"] {
+  html[data-ring-ready]:not([data-world-effects="economy"])
+    [data-ring-link="figure"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r) {
     animation:
-      ring-link-lift-figure var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
-      ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards;
+      ring-link-lift-figure var(--ring-dur-bounce) var(--ring-spring-bounce) backwards,
+      ring-link-seen 320ms ease-out backwards;
   }
 
   /* Economy keeps the order of the chain and nothing else: a plain fade. */
-  html[data-ring-ready][data-world-effects="economy"] :is([data-ring-link="text"], [data-ring-link="figure"]) {
-    animation: ring-link-seen 240ms ease-out var(--ring-link-f, 0ms) backwards;
+  html[data-ring-ready][data-world-effects="economy"]
+    :is([data-ring-link="text"], [data-ring-link="figure"]):not(#r):not(#r):not(#r):not(#r):not(#r):not(#r) {
+    animation: ring-link-seen 240ms ease-out backwards;
   }
 
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] {
-    animation: ring-thread-show 1500ms linear var(--ring-link-f, 0ms) backwards;
+    animation: ring-thread-show 1100ms linear var(--ring-link-f, 0ms) backwards;
   }
 
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-thread {
@@ -849,6 +892,12 @@
 
 .ring-link[data-ring-run] {
   opacity: 0.22;
+}
+
+/* The pool's free nodes, and a thread with no part above to tie to. */
+.ring-link[data-ring-idle],
+.ring-link[data-ring-nopull] > .ring-thread-pull {
+  display: none;
 }
 
 .ring-thread {
