@@ -92,15 +92,6 @@ function Specs() {
             ) : (
               <dd>
                 <b>{jp(row.value)}</b>
-                {"more" in row && row.more ? (
-                  <span className="mus-spec-more-list">
-                    {row.more.map((line) => (
-                      <span key={line} className="mus-spec-more" lang="en">
-                        {line}
-                      </span>
-                    ))}
-                  </span>
-                ) : null}
               </dd>
             )}
           </div>
@@ -522,23 +513,23 @@ export function MetaUnitasSaga() {
       {/* 04 — 装甲: the armour and support mechanisms. */}
       <section id="armor" className="mus-chapter mus-armor" aria-labelledby="mus-armor-title">
         <header className="mus-head rxs-reveal">
-          <h2 id="mus-armor-title">装甲・支援機構</h2>
+          <h2 id="mus-armor-title">装甲・多腕支援機構</h2>
           <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
             <b />
           </i>
         </header>
-        <Articles items={META_UNITAS_SAGA.armor} label="装甲・支援機構" variant="armor" />
+        <Articles items={META_UNITAS_SAGA.armor} label="装甲・多腕支援機構" variant="armor" />
       </section>
 
       {/* 05 — 武装: the armaments. */}
       <section id="arsenal" className="mus-chapter mus-arsenal" aria-labelledby="mus-arsenal-title">
         <header className="mus-head rxs-reveal">
-          <h2 id="mus-arsenal-title">専用武装</h2>
+          <h2 id="mus-arsenal-title">追加武装</h2>
           <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
             <b />
           </i>
         </header>
-        <ul className="mus-weapons rxs-reveal" aria-label="専用武装">
+        <ul className="mus-weapons rxs-reveal" aria-label="追加武装">
           {META_UNITAS_SAGA.arsenal.map((weapon) => (
             <li key={weapon}>
               {/* One flex item: the name breaks only between its phrases. */}

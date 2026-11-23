@@ -225,6 +225,10 @@ export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
     // The armour grows as a nanite skin from the reactor (owner,
     // 2026-11-11): no swarm kit and no gold atlas are fetched.
     generation: metaUnitasSkinGeneration,
+    // The call's four lines (owner's canon, 2026-11-23): 【Ultra UNITAS！】
+    // over the scan, 【REXONANCE！】 over the motes, the chant, then
+    // 【META UNITAS！】×4 over the response and the final beat.
+    callLines: [0, 1, 2, 3, 3] as const,
     forms: {
       chain: META_UNITAS_FORM_CHAIN,
       tones: META_UNITAS_FORM_TONES,

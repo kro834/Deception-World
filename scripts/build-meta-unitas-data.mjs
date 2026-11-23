@@ -59,22 +59,24 @@ const names = lines
 const firstSection = lines.findIndex((line) => /^【\u3000/.test(line));
 const calls = lines.slice(0, firstSection).filter((line) => /^【.+】$/.test(line));
 
-// The spec lines: a ■ key and its value; a value of two forms (ミドル／ウルトラ,
-// the same unit on both sides) is shown side by side; the bare 『 』 lines
-// after the processors continue the list above them.
+// The spec lines: a ■ key and its value. The canon (2026-11-23) sets the
+// body's rows in two columns, ＜ミドル＞ and ＜ウルトラ＞, split by a run of
+// ideographic spaces; such a row is shown side by side, every other value
+// as written. A bare 『 』 line after a row would continue its list.
 const specLines = lines.slice(0, firstSection);
 const specs = [];
 for (const line of specLines) {
   if (line.startsWith("■")) {
-    const [key, ...rest] = line.slice(1).split("：");
-    const value = rest.join("：");
-    const parts = value.split("／");
-    const unit = (part) => part.replace(/^[\d.〜]+/, "");
-    const dual = parts.length === 2 && unit(parts[0]) === unit(parts[1]) && /^\d/.test(parts[1]);
-    specs.push({ key, value, ...(dual ? { middle: parts[0], ultra: parts[1] } : {}) });
-  } else if (/^『.+』$/.test(line) && specs.length) {
-    const last = specs.at(-1);
-    (last.more ??= []).push(line);
+    const [rawKey, ...rest] = line.slice(1).split("：");
+    const key = rawKey.replace(/[\u3000\s]+$/u, "");
+    const value = rest.join("：").replace(/^[\u3000\s]+/u, "");
+    const columns = value.split(/\u3000+ ?/u);
+    const dual = columns.length === 2 && /^\d/.test(columns[0]) && /^\d/.test(columns[1]);
+    specs.push({
+      key,
+      value: dual ? columns.join("\u3000") : value,
+      ...(dual ? { middle: columns[0], ultra: columns[1] } : {}),
+    });
   }
 }
 
@@ -109,14 +111,14 @@ for (const line of sections["形態段階"]) {
   else stages.at(-1).body.push(line);
 }
 
-const arsenal = sections["専用武装"]
-  .filter((line) => /^【.+】$/.test(line))
-  .map((line) => line.slice(1, -1));
-const arsenalNote = sections["専用武装"].filter((line) => !/^【.+】$/.test(line));
+// The 追加武装 section: the weapons in one line of 『 』 names, then the note.
+const arsenalLine = sections["追加武装"].find((line) => /^『[^』]+』(?:／『[^』]+』)+$/.test(line));
+const arsenal = [...arsenalLine.matchAll(/『([^』]+)』/g)].map((match) => match[1]);
+const arsenalNote = sections["追加武装"].filter((line) => line !== arsenalLine);
 
 const finishers = [];
 for (const line of sections["必殺技"]) {
-  if (line.startsWith("■ ")) finishers.push({ name: line.slice(2), calls: [], body: [] });
+  if (/^(?:■|⬛︎) /u.test(line)) finishers.push({ name: line.replace(/^(?:■|⬛︎) /u, ""), calls: [], body: [] });
   else if (/^『.+』$/.test(line)) finishers.at(-1).calls.push(line);
   else finishers.at(-1).body.push(line);
 }
@@ -129,7 +131,7 @@ const data = {
   overview: sections["概要"],
   systems: articles(sections["基幹システム"]),
   abilities: articles(sections["固有能力"]),
-  armor: articles(sections["装甲・支援機構"]),
+  armor: articles(sections["装甲・多腕支援機構"]),
   stages: Object.fromEntries(stages.map((stage, index) => [STAGE_KEYS[index], stage])),
   arsenal,
   arsenalNote,
@@ -140,7 +142,9 @@ const data = {
 {
   const used = JSON.stringify(data);
   const missing = lines
-    .filter((line) => line && !/^✦/.test(line) && !/^【\u3000/.test(line))
+    .filter((line) => line && !/^✦/.test(line) && !/^【\u3000/.test(line) && !/^＜/.test(line) && line !== arsenalLine)
+    .map((line) => line.replace(/^⬛︎ /u, ""))
+    .flatMap((line) => (line.startsWith("■") && line.includes("：") ? line.slice(1).split(/[：\u3000]+ ?/u) : [line]))
     .map((line) =>
       line
         .replace(/^■ ?/, "")
@@ -283,8 +287,6 @@ export type MetaUnitasSpec = {
   /** A value of two forms (ミドル／ウルトラ), split at its 「／」. */
   readonly middle?: string;
   readonly ultra?: string;
-  /** The bare 『 』 lines that continue this row's list. */
-  readonly more?: readonly string[];
 };
 export type MetaUnitasArticle = {
   /** The heading as written: 『 NAME 』（読み）. */

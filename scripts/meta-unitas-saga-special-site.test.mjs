@@ -113,33 +113,66 @@ test("the words are the owner's: generated from the record, current, every line 
     "仮面ライダーメタ・ウニタスサーガ・ウルトラ",
   ]);
   assert.deepEqual(META_UNITAS_SAGA.calls, [
-    "【META！UNITAS！】",
+    "【Ultra UNITAS！】",
     "【REXONANCE！】",
-    "【DIVINEST！RIDER！】",
-    "【SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！！！】",
-    "【META UNITAS！】",
+    "【SA-GA！EX！SA-GA！EX！SA-GA！EX！SA-GA！EX！！！】",
+    "【META UNITAS！META UNITAS！META UNITAS！META UNITAS！】",
   ]);
   // Every prose line of the record is in the data as written.
   const data = JSON.stringify({ ...META_UNITAS_SAGA });
   for (const line of owner.split("\n")) {
     const text = line.trim();
-    if (text.length > 40)
+    if (text.length > 40 && !text.startsWith("■") && !/^『[^』]+』(?:／『[^』]+』)+$/.test(text))
       assert.ok(data.includes(JSON.stringify(text).slice(1, -1)), text.slice(0, 30));
   }
+  // The canon's one line of weapons, as its 『 』 names in order.
+  const weapons = owner.split("\n").map((line) => line.trim()).find((line) => line.startsWith("『フェイタルエッジ』"));
+  assert.deepEqual(META_UNITAS_SAGA.arsenal, [...weapons.matchAll(/『([^』]+)』/g)].map((match) => match[1]));
   // ミドル／ウルトラ side by side, split only where both sides are one quantity.
   const dual = META_UNITAS_SAGA.specs.filter((row) => "middle" in row).map((row) => row.key);
   assert.deepEqual(dual, ["身長", "体重", "パンチ力", "キック力", "ジャンプ力", "走力"]);
+  // The canon's two columns (＜ミドル＞ ＜ウルトラ＞), split by ideographic spaces.
   for (const row of META_UNITAS_SAGA.specs)
-    if ("middle" in row) assert.equal(`${row.middle}／${row.ultra}`, row.value);
-  const processors = META_UNITAS_SAGA.specs.find((row) => row.key === "副演算");
-  assert.deepEqual(processors.more, [
-    "『Paranormal Realizer Ultra』",
-    "『Neural Resonancer Ultra』",
-    "『P16』",
+    if ("middle" in row) assert.equal(`${row.middle}\u3000${row.ultra}`, row.value);
+  // The canon's spec sheet, in its order (2026-11-23).
+  assert.deepEqual(
+    META_UNITAS_SAGA.specs.map((row) => [row.key, "middle" in row ? [row.middle, row.ultra] : row.value]),
+    [
+      ["身長", ["239.8cm", "249.8cm"]],
+      ["体重", ["142.8kg", "188.8kg"]],
+      ["パンチ力", ["148.8t", "222.2t"]],
+      ["キック力", ["228.8t", "338.8t"]],
+      ["ジャンプ力", ["5000m", "6000m"]],
+      ["走力", ["0.0006s／100m", "0.0003s／100m"]],
+      ["飛行速度", "測定不能"],
+      ["主演算", "50000〜YOPS／∞Core『KHAOS DeuX』"],
+      ["副演算", "9000TOPS／300Core『KOSMOS DeuX』"],
+      ["認識・制御", "『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P16』"],
+      ["統合OS", "『SA-GA OS 6.1』支援運用仕様"],
+      ["EMP", "無制限〈総供給可能量〉"],
+    ],
+  );
+  // The canon's sections and weapons.
+  assert.deepEqual(META_UNITAS_SAGA.armor.map((a) => a.name), [
+    "META UNITAS NANO ARMOR",
+    "UNITAS HELIX 』／『 REGALIA LINER 』／『 UNITAS HALO",
+    "META UNITAS BIT",
+    "QUINT CAUDIA",
+    "TETRA MANUS",
+    "ULTRA PARTITION FIELD",
   ]);
+  assert.equal(META_UNITAS_SAGA.arsenal.at(-1), "META UNITAS BIT");
+  assert.ok(META_UNITAS_SAGA.arsenal.includes("ユナイトエッジ・マークⅡ＆Ⅲ（ソード／ランサーモード）"));
+  assert.deepEqual(META_UNITAS_SAGA.finishers.map((f) => [f.name, f.calls]), [
+    ["メタ・サンクチュアリ", ["『META SANCTUARY！』"]],
+    ["メタ・セパレートサルヴェーション", ["『META！』", "『SEPARATE SALVATION！』"]],
+    ["メタ・グランドリベレーション", ["『MIDDLE！HIGH！XHIGH！MAX！ULTRA！』", "『META LIBERATION！』"]],
+  ]);
+  assert.match(page, /<h2 id="mus-armor-title">装甲・多腕支援機構<\/h2>/);
+  assert.match(page, /<h2 id="mus-arsenal-title">追加武装<\/h2>/);
   // Headings print the record's own brackets and readings.
   assert.match(parts, /<span className="mus-bracket">『 <\/span>/);
-  assert.equal(META_UNITAS_SAGA.abilities[0].title, "『 DIVISIBILITY GRANT 』（可分性付与）");
+  assert.equal(META_UNITAS_SAGA.abilities[0].title, "『 DIVISIBILITY GRANT 』");
 });
 
 test("the comparison: Meta Unitas's parts, no Rexonance, no provisos, removal only", () => {

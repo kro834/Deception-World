@@ -31,8 +31,11 @@ const rxDrive = rex("超光速機動・推進制御機構", "REXONANCE DRIVE");
 const rxSelf = rex("能力", "REXONANCE DEUS");
 const icArmor = ILLUSIONCULUM_SAGA.armour[0];
 const muArmor = META_UNITAS_SAGA.armor[0];
-const muHelix = META_UNITAS_SAGA.armor.find((a) => a.name === "UNITAS HELIX")!;
-const muHalo = META_UNITAS_SAGA.armor.find((a) => a.name === "UNITAS HALO")!;
+// The canon (2026-11-23) writes UNITAS HELIX, REGALIA LINER and UNITAS HALO
+// as one article of two sentences: the first names the helix and the liner,
+// the second the halo.
+const muTrio = META_UNITAS_SAGA.armor.find((a) => a.name.startsWith("UNITAS HELIX"))!;
+const muTrioSentence = (index: number) => muTrio.body[0].split(/(?<=。)/u)[index];
 // These are related published records for the selected view, not newly named
 // anatomical components. Where no separate head/leg mechanism is published,
 // show the documented armor or control system instead of inventing one.
@@ -77,9 +80,9 @@ export const LAB_PART_RECORDS: Record<LabRider, Record<LabZoom, LabPartRecord>> 
   },
   "meta-unitas": {
     full: record(muArmor.name, muArmor.body[0], "/meta-unitas-saga#armor", 2),
-    head: record(muHalo.name, muHalo.body[0], "/meta-unitas-saga#armor", 2),
-    reactor: record(muHelix.name, muHelix.body[0], "/meta-unitas-saga#armor", 2),
-    legs: record(muArmor.name, muArmor.body[1], "/meta-unitas-saga#armor", 2),
+    head: record("UNITAS HALO", muTrioSentence(1), "/meta-unitas-saga#armor"),
+    reactor: record("UNITAS HELIX", muTrioSentence(0), "/meta-unitas-saga#armor"),
+    legs: record(muArmor.name, muArmor.body[0].split(/(?<=。)/u)[1], "/meta-unitas-saga#armor"),
   },
 };
 export function labPartRecord(rider: LabRider, zoom: LabZoom): LabPartRecord {

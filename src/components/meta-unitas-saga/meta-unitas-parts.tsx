@@ -146,7 +146,9 @@ export function Lead({ body, className = "" }: { body: readonly string[]; classN
 
 /** Small drawn diagrams of the mechanisms (no text; decorative). */
 export function ArticleDiagram({ name }: { name: string }) {
-  const art = DIAGRAMS[name];
+  // The canon's one article of UNITAS HELIX 』／『 REGALIA LINER 』／『 UNITAS
+  // HALO keeps the HALO's drawing.
+  const art = DIAGRAMS[name] ?? DIAGRAMS[name.split(" 』／『 ").at(-1) ?? name];
   if (!art) return null;
   return (
     <svg className="mus-diagram" viewBox="0 0 240 96" aria-hidden="true" focusable="false">

@@ -12,12 +12,13 @@
 
 import { META_UNITAS_SAGA } from "../components/meta-unitas-saga/meta-unitas-data.ts";
 
-/** The calls' chips: the chant splits into its four SA-GA！DEUS！ (the last
- * keeps its own ！！！), every other call is one chip. The brackets stay
- * with the call (the record writes them). */
+/** The calls' chips: the chant splits into its four SA-GA！EX！ (the last
+ * keeps its own ！！！) and the last call into its four META UNITAS！; every
+ * other call is one chip. The brackets stay with the call (the record
+ * writes them). */
 export function metaUnitasCallUnits(call: string): readonly string[] {
   const inner = call.replace(/^【/, "").replace(/】$/, "");
-  const units = inner.match(/SA-GA！DEUS！(?:！+)?/g);
+  const units = inner.match(/SA-GA！EX！(?:！+)?|META UNITAS！/g);
   return units && units.length > 1 && units.join("") === inner ? units : [inner];
 }
 

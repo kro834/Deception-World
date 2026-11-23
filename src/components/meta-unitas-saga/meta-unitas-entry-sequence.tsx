@@ -103,9 +103,16 @@ const CLOCK: readonly (readonly [number, number])[] = [
   [2917, 0.95],
 ];
 /** The calls on the same clock (ms), one stage each; the chant's four
- * units light one by one (Rexonance's entry staging). */
-const CALL_AT = [0, 389, 860, 1384, 2468] as const;
+ * units light one by one (Rexonance's entry staging). The owner's canon of
+ * 2026-11-23 has four lines (the old third, 【DIVINEST！RIDER！】, is gone):
+ * the scan and the motes keep their stages, the chant and the last call
+ * keep the beats they had on the clock (1384 and 2468), so every plate lands
+ * under the same words as before and only the text beats moved. The last
+ * call's four 【META UNITAS！】 light a little quicker than the chant's (the
+ * clock ends at 3090 ms). */
+const CALL_AT = [0, 389, 1384, 2468] as const;
 const CHANT_STEP = 250;
+const FINAL_STEP = 150;
 /** The plates' shortest run once the engine is live (ms). */
 const ASSEMBLY_MIN_MS = 2000;
 const progressAt = (ms: number) => {
@@ -148,9 +155,9 @@ export function MetaUnitasEntrySequence({
     motion.addEventListener("change", preference);
     preference();
     const lines = [...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li")];
-    const chips = [
-      ...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li[data-chant] .rzn-chip"),
-    ];
+    const chantChips = [
+      ...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li[data-chant]"),
+    ].map((line) => [...line.querySelectorAll<HTMLElement>(".rzn-chip")]);
     // Owner (2026-10-24): the transformation moves from the cover's first
     // frame; the engine (warmed ahead by the gate) joins the running clock
     // as soon as it is in, and completion waits for it.
@@ -184,9 +191,13 @@ export function MetaUnitasEntrySequence({
       lines.forEach((element, index) => {
         element.dataset.cue = index === line ? "on" : index < line ? "done" : "";
       });
-      chips.forEach((chip, index) => {
-        if (t >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
-        else delete chip.dataset.cue;
+      chantChips.forEach((chips, row) => {
+        const at = CALL_AT[row + 2];
+        const step = row === 0 ? CHANT_STEP : FINAL_STEP;
+        chips.forEach((chip, index) => {
+          if (t >= at + index * step) chip.dataset.cue = "on";
+          else delete chip.dataset.cue;
+        });
       });
       // The live engine has removed its stand-in and painted its canvas.
       const ready = runway.dataset.rznState === "live" && !runway.dataset.rznArming;
