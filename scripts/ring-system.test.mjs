@@ -293,7 +293,9 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   assert.match(css, /\.ring-thread \{[^}]*background: var\(--ring-amber\);/);
   assert.match(css, /\.ring-links \{[^}]*pointer-events: none;/);
   assert.match(code, /linkLayer\.setAttribute\("aria-hidden", "true"\)/);
-  const rest = css.match(/\.ring-link\[data-ring-run\] \{\s*opacity: ([\d.]+);/);
+  // (2026-11-23, chain-all: the rest opacity is on the thread's pieces, which
+  // carry the show fade; the node that holds them no longer animates.)
+  const rest = css.match(/\.ring-link\[data-ring-run\] > \* \{\s*opacity: ([\d.]+);/);
   assert.ok(rest && Number(rest[1]) <= 0.3, "the seated thread is faint");
   // No frame loop for the chain: the helper never animates a part itself.
   assert.doesNotMatch(code, /style\.(?:translate|transform|opacity)\b|setProperty\(\s*"(?:translate|transform|opacity)"/);
@@ -340,7 +342,8 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   // scrolls. A later part waits on a timer (still held), not in an animation
   // delay, and the thread is animated only while it pulls.
   assert.match(code, /part\.timer = view\.setTimeout\(/);
-  assert.match(css, /animation: ring-thread-show 830ms linear var\(--ring-link-f, 0ms\) backwards;/);
+  assert.equal((css.match(/ring-thread-show 830ms linear var\(--ring-link-f, 0ms\) backwards;/g) ?? []).length, 2);
+  assert.doesNotMatch(css, /\.ring-link\[data-ring-run\] \{\s*animation/);
   // A box with its own entrance is never moved; once it has played it is only opened.
   assert.match(code, /child\.getAnimations\(\)\.length === 0\s*\) \{\s*collectParts\(child, depth \+ 1, out, vh, vw, sy\);\s*continue;/);
   // The film reveal stands aside for a part the chain holds or lifts.

@@ -753,19 +753,28 @@ export function watchRingMotion(doc = document) {
 
   /**
    * How long the section's own entrance still runs, ms (a dossier part that
-   * was just chosen springs into the layout): 0 when it is at rest. `deep`
-   * counts the entrances inside it too (finite ones only; a loop never ends).
+   * was just chosen springs into the layout): 0 when it is at rest. `up`
+   * counts its ancestors' entrances too (a dossier part's wrapper); finite
+   * ones only, a loop never ends. Never the subtree: on a long page that
+   * walk cost more than the wait saved.
    * @param {Element} el
-   * @param {boolean} [deep]
+   * @param {boolean} [up]
    */
-  const rootSettling = (el, deep = false) => {
+  const rootSettling = (el, up = false) => {
     if (typeof el.getAnimations !== "function") return 0;
     let left = 0;
-    for (const animation of el.getAnimations({ subtree: deep })) {
-      if (animation.playState !== "running" || typeof animation.currentTime !== "number") continue;
-      const end = animation.effect?.getComputedTiming().endTime;
-      if (typeof end === "number" && Number.isFinite(end))
-        left = Math.max(left, end - animation.currentTime);
+    for (
+      let box = /** @type {Element | null} */ (el);
+      box && box !== doc.body;
+      box = up ? box.parentElement : null
+    ) {
+      for (const animation of box.getAnimations()) {
+        if (animation.playState !== "running" || typeof animation.currentTime !== "number")
+          continue;
+        const end = animation.effect?.getComputedTiming().endTime;
+        if (typeof end === "number" && Number.isFinite(end))
+          left = Math.max(left, end - animation.currentTime);
+      }
     }
     return left > 0 ? Math.min(1200, Math.ceil(left) + 32) : 0;
   };

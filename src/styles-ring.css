@@ -831,26 +831,29 @@
     animation: ring-link-seen 240ms ease-out backwards;
   }
 
-  html:not([data-world-effects="economy"]) .ring-link[data-ring-run] {
-    animation: ring-thread-show 830ms linear var(--ring-link-f, 0ms) backwards;
-  }
-
+  /* The show and rest fade rides on the thread's own pieces (2026-11-23):
+     the node that holds them no longer animates, one restyled node fewer
+     per thread on every frame. */
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-thread {
-    animation: ring-thread-run var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards;
+    animation:
+      ring-thread-run var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
+      ring-thread-show 830ms linear var(--ring-link-f, 0ms) backwards;
   }
 
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-thread-pull {
-    animation-delay: var(--ring-link-a, 0ms);
+    animation-delay: var(--ring-link-a, 0ms), var(--ring-link-f, 0ms);
   }
 
   /* The lifted part is a .ring-enter: its own rise is on the default spring. */
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run="enter"] > :is(.ring-thread:not(.ring-thread-pull), .ring-pulley) {
-    animation-duration: var(--ring-dur-spring);
-    animation-timing-function: var(--ring-spring);
+    animation-duration: var(--ring-dur-spring), 830ms;
+    animation-timing-function: var(--ring-spring), linear;
   }
 
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-pulley {
-    animation: ring-pulley-turn var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards;
+    animation:
+      ring-pulley-turn var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
+      ring-thread-show 830ms linear var(--ring-link-f, 0ms) backwards;
   }
 
   /* --- Press: a quick sink, an elastic release. --- */
@@ -892,6 +895,11 @@
 }
 
 .ring-link[data-ring-run] {
+  opacity: 1;
+}
+
+/* At rest the thread and its pulley are faint. */
+.ring-link[data-ring-run] > * {
   opacity: 0.22;
 }
 
