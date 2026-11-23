@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
-  REXONANCE_CALL_BEATS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_SUIT_CASCADE,
   REXONANCE_SUIT_DRIVER,
   REXONANCE_SUIT_FIT,
@@ -77,7 +77,7 @@ test("the seat map: every held plate opens for its own fit, in the call's order 
   for (const value of map.data) latest = Math.max(latest, ms(value));
   assert.ok(latest + SKIN_BANDS * ENTRY_SEAT_UNIT_MS < REXONANCE_SUIT_LIGHT.from);
   assert.ok(latest < SKIN_ENTRY.fade[0]);
-  assert.ok(ENTRY_SEAT_SCALE_MS > REXONANCE_CALL_BEATS[4].start);
+  assert.ok(ENTRY_SEAT_SCALE_MS > REXONANCE_SUIT_BEATS[4].start);
 });
 
 test("the driver, the reactor and the helmet are never held", () => {

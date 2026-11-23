@@ -97,20 +97,20 @@ const contrast = (opacity) => {
 };
 const opacity = (tail, media) => Number(declaration(one(tail, media).body, "opacity"));
 
-test("F04: under 420 px the opening call breaks where its words do, never past the frame", () => {
-  // The call's text carries the break (Ultra DEUS！ / REXONANCE！).
-  assert.equal(REXONANCE_ENTRY_CALLS[0], "Ultra DEUS！\nREXONANCE！");
-  const phone = one(
-    ".rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-state] .rzn-line:first-child .rzn-chip",
-    /\(max-width: 419\.98px\)/,
+test("F04: the opening line is REXONANCE！ alone, on one line, never past the frame", () => {
+  // Owner (2026-11-23): the call opens on REXONANCE！ alone; the old
+  // two-word opening and its phone break (sweep 2, F04) are gone.
+  assert.equal(REXONANCE_ENTRY_CALLS[0], "REXONANCE！");
+  assert.ok(REXONANCE_ENTRY_CALLS.every((call) => !call.includes("\n")));
+  assert.equal(
+    find(
+      ".rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup[data-rzn-state] .rzn-line:first-child .rzn-chip",
+      /\(max-width: 419\.98px\)/,
+    ).length,
+    0,
+    "no break rule for a line that has no break",
   );
-  const query = phone.context.join(" ");
-  assert.match(query, /prefers-reduced-motion: no-preference/, "the motion layout only");
-  assert.match(query, /forced-colors: none/);
-  assert.match(phone.selector, /^html\[data-family="special"\]:not\(\[data-world-effects="economy"\]\)/);
-  assert.equal(declaration(phone.body, "white-space"), "pre-line");
-  assert.equal(declaration(phone.body, "font-size"), undefined, "the call keeps its size");
-  // Wider screens keep the one line.
+  // Every screen keeps the one line.
   assert.equal(declaration(one(`${PAGE} > .rzn-suitup .rzn-chip`).body, "white-space"), "nowrap");
   // The phone's lines share one cell: the rows pack at its top.
   assert.equal(
@@ -160,7 +160,8 @@ test("F22: unlit and passed lines and the parts stay readable; the lit line stay
 });
 
 test("F81: the chant runs two beats to a line, never three and one", () => {
-  const chant = `${PAGE} > .rzn-suitup .rzn-line:is(:nth-child(3), :nth-child(4))`;
+  // Owner (2026-11-23): the chants are the second and third of four lines.
+  const chant = `${PAGE} > .rzn-suitup .rzn-line:is(:nth-child(2), :nth-child(3))`;
   const marker = one(`${chant}::after`);
   assert.equal(declaration(marker.body, "content"), '""');
   assert.equal(declaration(marker.body, "flex"), "0 0 100%", "a full-width break");
@@ -170,7 +171,7 @@ test("F81: the chant runs two beats to a line, never three and one", () => {
   // The beats still wrap where two do not fit.
   assert.equal(declaration(one(`${PAGE} > .rzn-suitup .rzn-line`).body, "flex-wrap"), "wrap");
   // Both chant calls are four beats each.
-  const chants = REXONANCE_ENTRY_CALLS.slice(2, 4).map(
+  const chants = REXONANCE_ENTRY_CALLS.slice(1, 3).map(
     (call) => call.match(/SA-GA！DEUS！|REXONANCE！/g).length,
   );
   assert.deepEqual(chants, [4, 4]);

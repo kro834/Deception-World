@@ -125,7 +125,7 @@
     var active = FORM_META[activeId];
     return '<div class="rexonance-setting-dossier">' +
       '<section class="rexonance-setting-hero"><small>REXONANCE // ' + active.badge + '</small><h4>《 仮面ライダーレクソナンスサーガ 》</h4><p>《 仮面ライダーレクソナンスサーガ・マックス 》</p><p>《 仮面ライダーレクソナンスサーガ・ウルトラ 》</p>' +
-      '<div class="rexonance-call-grid"><span>Ultra DEUS！</span><span>REXONANCE！</span><span>RIDER！</span><span>SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！</span><span>REXONANCE！REXONANCE！REXONANCE！REXONANCE！</span><span>REXONANCE DEUS！</span></div></section>' +
+      '<div class="rexonance-call-grid"><span>REXONANCE！</span><span>SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！</span><span>REXONANCE！REXONANCE！REXONANCE！REXONANCE！</span><span>REXONANCE DEUS！</span></div></section>' +
       '<section class="rexonance-setting-block"><small>STANDARD SPEC</small><h4>標準運用値</h4><dl class="rexonance-stat-grid">' + dossierStatMarkup(FORM_META.rexonance.stats) + '</dl></section>' +
       OWNER_SECTIONS.map(sectionMarkup).join("") +
       "</div>";

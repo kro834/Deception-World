@@ -14,8 +14,6 @@ test("レクソナンス三形態の新設定と基礎値をフォームアー�
     // Owner 2026-10-16: self-resonance, revised catalog values and manufacturing lore.
     "372.2t / 483.5t",
     "REXONANCE DEUS！",
-    "Ultra DEUS！",
-    "RIDER！",
     "SA-GA OS 5.5",
     "超自己進化",
     "自己共鳴",
@@ -42,10 +40,8 @@ test("微調整後の変身音をライダー詳細とフォームアーカイ�
     "utf8",
   );
   const calls = [
-    // Owner 2026-10-16: six printed calls; animation keeps its five original beats.
-    "Ultra DEUS！",
+    // Owner 2026-11-23: four printed calls, one beat each.
     "REXONANCE！",
-    "RIDER！",
     "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
     "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
     "REXONANCE DEUS！",
@@ -62,11 +58,22 @@ test("微調整後の変身音をライダー詳細とフォームアーカイ�
     archivePosition = updateSource.indexOf(call, archivePosition + 1);
     assert.notEqual(archivePosition, -1, `アーカイブに ${call} が順番どおり存在する`);
   }
+  // The archive's call grid is exactly the four lines, in order.
+  assert.ok(
+    updateSource.includes(
+      '<div class="rexonance-call-grid">' +
+        calls.map((call) => `<span>${call}</span>`).join("") +
+        "</div>",
+    ),
+  );
   for (const obsolete of [
     "EXCONVERT！",
     "GODSIDE！RIDER！",
     "FAR UP！",
     "OVER SA-GA！RIDER！",
+    // Owner 2026-11-23: no longer in the call.
+    "Ultra DEUS！",
+    "<span>RIDER！</span>",
   ]) {
     assert.doesNotMatch(riderBlock, new RegExp(obsolete));
     assert.doesNotMatch(updateSource, new RegExp(obsolete));

@@ -1,7 +1,9 @@
 import { useCallback, useState, type CSSProperties } from "react";
 import {
   REXONANCE_CALL_BEATS,
+  REXONANCE_ENTRY_BLACKOUT_MS,
   REXONANCE_ENTRY_CALLS,
+  REXONANCE_ENTRY_SUIT_COVER_MS,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_STAGE_DURATION_MS,
   REXONANCE_STAGE_LABELS,
@@ -13,6 +15,7 @@ import {
   REXONANCE_SUIT_REVEAL_MS,
   REXONANCE_SUIT_SNAP,
   REXONANCE_SUIT_SPARKS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_SUIT_SYSTEMS,
   type RexonanceStage,
 } from "@/lib/rexonance-calls";
@@ -46,19 +49,18 @@ type RexonanceCallSequenceProps = {
   // rx12: "build" when the suit's pieces are decoded (the gate's warm-up);
   // otherwise the call stands the finished figure whole.
   suit?: "build" | "whole";
+  // Owner (2026-11-23): the entry opens on a blacked-out screen with only
+  // REXONANCE！; the suit-up starts after it. LoadGate owns the blackout's
+  // timer and lifts it (REXONANCE_ENTRY_BLACKOUT_MS, or REXONANCE_ENTRY_STILL
+  // on the still tiers); until then nothing of the suit-up is mounted, so
+  // its whole clock starts when the blackout ends.
+  blackout?: boolean;
 };
 
+// One beat per line of the owner's call (REXONANCE_CALLS, 2026-11-23).
 function CallLines({ index }: { index: number }) {
-  if (index === 0) {
-    return (
-      <>
-        <span>Ultra DEUS！</span>
-        <span>REXONANCE！</span>
-      </>
-    );
-  }
-  if (index === 1) return <span>RIDER！</span>;
-  if (index === 2) {
+  if (index === 0) return <span>REXONANCE！</span>;
+  if (index === 1) {
     return (
       <>
         {/* Each line is a call and its answer: SA-GA！, then DEUS！ answers. */}
@@ -77,7 +79,7 @@ function CallLines({ index }: { index: number }) {
       </>
     );
   }
-  if (index === 3) {
+  if (index === 2) {
     return (
       <>
         <span>REXONANCE！</span>
@@ -87,7 +89,7 @@ function CallLines({ index }: { index: number }) {
       </>
     );
   }
-  if (index === 4) {
+  if (index === 3) {
     return (
       <>
         <span>REXONANCE</span>
@@ -429,7 +431,7 @@ const hexagon = (x: number, y: number, size: number) => {
   return `M${f(x)} ${f(y - r)}L${f(x + w)} ${f(y - r / 2)}L${f(x + w)} ${f(y + r / 2)}L${f(x)} ${f(y + r)}L${f(x - w)} ${f(y + r / 2)}L${f(x - w)} ${f(y - r / 2)}z`;
 };
 type Squares = { cyan: string; pink: string; white: string };
-// RIDER！'s nanite motes: squares hanging in the air round the body,
+// The seed's nanite motes (330 ms): squares hanging in the air round the body,
 // thickest near it (figure pixels).
 const suitMotes = (): Squares => {
   const random = seeded(1410);
@@ -563,7 +565,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
   // once it is ready in time; until then, or without it, the DOM plates play.
   // Owner (2026-10-16, 超大幅な改善): when the nanite kit is ready too, the
   // engine's own swarm (Blender hex chips in an orbital cocoon) replaces
-  // the SVG motes of RIDER！ while it runs (the engine reports again, not
+  // the seed's SVG motes while it runs (the engine reports again, not
   // rich, once its swarm is over, so the motes' own end state returns and
   // the finished frame is the classic call's exactly).
   const [swarm, setSwarm] = useState("svg" as "svg" | "canvas");
@@ -631,7 +633,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
             }
           />
         ))}
-        {/* RIDER！: nanite motes gather in the air round the body. */}
+        {/* The seed (330 ms): nanite motes gather in the air round the body. */}
         <svg className="rx-suit-motes" viewBox={`0 0 ${FIG.width} ${FIG.height}`}>
           <SquarePaths squares={motes} />
         </svg>
@@ -836,13 +838,39 @@ export function RexonanceCallSequence({
   tier,
   stage = "standard",
   suit = "whole",
+  blackout = false,
 }: RexonanceCallSequenceProps) {
   const entry = mode === "entry";
   const clock = entry && tier === "full" ? entryElapsedTime : (time: number) => time;
-  const beatDuration = (index: number) => {
-    const beat = REXONANCE_CALL_BEATS[index];
-    return clock(beat.start + beat.duration) - clock(beat.start);
-  };
+  const beatDuration = (beat: { readonly start: number; readonly duration: number }) =>
+    clock(beat.start + beat.duration) - clock(beat.start);
+  if (entry && blackout) {
+    // The blackout: REXONANCE！ alone on the dark screen, before the suit-up.
+    return (
+      <div
+        className="rx-call-sequence"
+        data-mode={mode}
+        data-phase={phase}
+        data-tier={tier}
+        data-stage={stage}
+        data-blackout=""
+        aria-hidden="true"
+        style={
+          {
+            "--rx-call-reveal": `${REXONANCE_ENTRY_TIMINGS.reveal}ms`,
+            "--rx-call-blackout": `${REXONANCE_ENTRY_BLACKOUT_MS}ms`,
+          } as CSSProperties
+        }
+      >
+        <div className="rx-call-blackout">
+          <i className="rx-call-blackout-accent" />
+          <div className="rx-call-blackout-line" data-call={REXONANCE_ENTRY_CALLS[0]}>
+            <CallLines index={0} />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className="rx-call-sequence"
@@ -853,17 +881,19 @@ export function RexonanceCallSequence({
       aria-hidden="true"
       style={
         {
-          "--rx-call-cover": `${REXONANCE_ENTRY_TIMINGS.cover}ms`,
+          // The suit-up's own cover, on its own clock (after the blackout).
+          "--rx-call-cover": `${REXONANCE_ENTRY_SUIT_COVER_MS}ms`,
           "--rx-call-reveal": `${REXONANCE_ENTRY_TIMINGS.reveal}ms`,
           "--rx-call-stage-duration": `${REXONANCE_STAGE_DURATION_MS}ms`,
           "--rx-call-frame-duration": `${clock(560)}ms`,
           // The call and its answer, for the ornaments that keep their beat.
-          "--rx-call-rider-start": `${clock(REXONANCE_CALL_BEATS[1].start)}ms`,
-          "--rx-call-chant-start": `${clock(REXONANCE_CALL_BEATS[2].start)}ms`,
-          "--rx-call-chant-duration": `${beatDuration(2)}ms`,
-          "--rx-call-response-start": `${clock(REXONANCE_CALL_BEATS[3].start)}ms`,
-          "--rx-call-response-duration": `${beatDuration(3)}ms`,
-          "--rx-call-final-start": `${clock(REXONANCE_CALL_BEATS[4].start)}ms`,
+          // The seed's mark keeps the shared sheet's name (FAR FROM's RIDER！).
+          "--rx-call-rider-start": `${clock(REXONANCE_SUIT_BEATS[1].start)}ms`,
+          "--rx-call-chant-start": `${clock(REXONANCE_SUIT_BEATS[2].start)}ms`,
+          "--rx-call-chant-duration": `${beatDuration(REXONANCE_SUIT_BEATS[2])}ms`,
+          "--rx-call-response-start": `${clock(REXONANCE_SUIT_BEATS[3].start)}ms`,
+          "--rx-call-response-duration": `${beatDuration(REXONANCE_SUIT_BEATS[3])}ms`,
+          "--rx-call-final-start": `${clock(REXONANCE_SUIT_BEATS[4].start)}ms`,
           // rx12: the suit's box keeps the artwork's aspect.
           ...(entry ? { "--rx-suit-ar": (FIG.width / FIG.height).toFixed(4) } : null),
         } as CSSProperties
@@ -898,24 +928,34 @@ export function RexonanceCallSequence({
       </div>
       <div className="rx-call-words">
         {entry ? (
-          REXONANCE_ENTRY_CALLS.map((call, index) => (
-            <div
-              key={`${index}-${call}`}
-              className={`rx-call-beat${index < 2 ? " rx-call-opening" : ""}${index === 4 ? " rx-call-final" : ""}${index === 2 ? " rx-call-chant" : ""}${index === 3 ? " rx-call-repetition" : ""}`}
-              data-call={call}
-              style={
-                {
-                  "--rx-call-start": `${clock(REXONANCE_CALL_BEATS[index].start)}ms`,
-                  "--rx-call-duration": `${beatDuration(index)}ms`,
-                } as CSSProperties
-              }
-            >
-              <CallLines index={index} />
-            </div>
-          ))
+          // The suit-up's lines: the first (REXONANCE！) was the blackout's.
+          // Each keeps its mark on the suit-up's clock, which starts after it.
+          REXONANCE_ENTRY_CALLS.map((call, index) => {
+            if (index === 0) return null;
+            const beat = REXONANCE_CALL_BEATS[index];
+            const local = {
+              start: beat.start - REXONANCE_ENTRY_BLACKOUT_MS,
+              duration: beat.duration,
+            };
+            return (
+              <div
+                key={`${index}-${call}`}
+                className={`rx-call-beat${index === 3 ? " rx-call-final" : ""}${index === 1 ? " rx-call-chant" : ""}${index === 2 ? " rx-call-repetition" : ""}`}
+                data-call={call}
+                style={
+                  {
+                    "--rx-call-start": `${clock(local.start)}ms`,
+                    "--rx-call-duration": `${beatDuration(local)}ms`,
+                  } as CSSProperties
+                }
+              >
+                <CallLines index={index} />
+              </div>
+            );
+          })
         ) : (
           <div className="rx-call-beat rx-call-final">
-            <CallLines index={4} />
+            <CallLines index={3} />
             <small className="rx-call-operating-stage">
               <span>OPERATING STAGE</span>
               <b>{REXONANCE_STAGE_LABELS[stage]}</b>
@@ -926,6 +966,8 @@ export function RexonanceCallSequence({
       <div className="rx-call-meter">
         <i />
       </div>
+      {/* After the blackout the suit-up fades up out of the dark. */}
+      {entry ? <i className="rx-call-veil" /> : null}
     </div>
   );
 }

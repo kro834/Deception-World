@@ -39,7 +39,12 @@ import {
   prepareRexonanceTransition,
   type RexonanceTransitionRenderer,
 } from "@/lib/rexonance-transition-loader";
-import { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS } from "@/lib/rexonance-calls";
+import {
+  REXONANCE_ENTRY_BLACKOUT_MS,
+  REXONANCE_ENTRY_STILL,
+  REXONANCE_ENTRY_TIMINGS,
+  REXONANCE_SUIT_LATE_MS,
+} from "@/lib/rexonance-calls";
 import { syncRexonanceRouteCover } from "@/lib/rexonance-route-cover";
 import { prepareRexonanceEntry } from "@/lib/rexonance-entry-preparation";
 import {
@@ -179,6 +184,9 @@ type GateState = {
   rexonanceCall?: RexonanceTransitionRenderer | null;
   // rx12: the suit-up builds from its decoded pieces, or stands whole.
   rexonanceSuit?: "build" | "whole";
+  // Owner (2026-11-23): the call opens on a blackout (REXONANCE！ alone);
+  // the suit-up mounts, on its own clock, once this is lifted.
+  rexonanceBlackout?: boolean;
   // FAR FROM's call (far-from-entry-sequence) and its suit, the same way.
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: "build" | "whole";
@@ -321,12 +329,15 @@ const nextFrame = () =>
 // The call hold can be shortened while it is playing. A live reduced
 // motion/economy preference must not leave the static final word waiting for
 // the old cinematic clock. Cancellation also releases this timer immediately.
-function waitForRexonanceCover(duration: number) {
+// `still`: the still tiers' own short hold (Rexonance's line, then its still:
+// REXONANCE_ENTRY_STILL), which a simplified preference does not end.
+function waitForRexonanceCover(duration: number, still = false) {
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
   const simplified = () =>
     media.matches || document.documentElement.dataset.worldEffects === "economy";
   let cancel: () => void = () => undefined;
-  if (simplified()) return { promise: Promise.resolve(), cancel };
+  const holdStill = still && simplified();
+  if (simplified() && !holdStill) return { promise: Promise.resolve(), cancel };
   const promise = new Promise<void>((resolve) => {
     let observer: MutationObserver | null = null;
     const finish = () => {
@@ -338,7 +349,7 @@ function waitForRexonanceCover(duration: number) {
       resolve();
     };
     const onPreference = () => {
-      if (simplified()) finish();
+      if (!holdStill && simplified()) finish();
     };
     const timer = window.setTimeout(finish, duration);
     cancel = finish;
@@ -1917,6 +1928,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!document.querySelector?.('.side-panel[data-open="true"]')) {
             delete document.documentElement.dataset.sideMenuOpen;
           }
+          // The blackout opens Rexonance's call; LoadGate lifts it below.
+          let rexonanceBlackout = Boolean(rexonanceCall);
           setGate({
             active: true,
             percent: 100,
@@ -1931,6 +1944,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             metaUnitasPlayback,
             illusionculumPlayback,
             extremePlayback,
+            rexonanceBlackout,
           });
           // The skip, from the first painted frame: before the hold it marks
           // the cover spent; during the hold it ends it (below).
@@ -1946,15 +1960,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (assets.length) {
               void preloadAssets(assets, () => undefined).catch(() => undefined);
             }
-            // rx12: pieces that finish decoding while FAR UP！'s scan still
-            // runs switch the call to the build (its clock is already
-            // running unseen); later, the finished figure stays.
+            // rx12: pieces that finish decoding during the blackout or while
+            // the suit-up's opening scan still runs switch the call to the
+            // build (its clock is already running unseen); later, the
+            // finished figure stays.
             if (rexonanceCall && rexonanceSuit === "whole" && rexonanceSuitWarm) {
               void rexonanceSuitWarm.then((decoded) => {
                 if (
                   !decoded ||
                   !isCurrent() ||
-                  performance.now() - startedAt > REXONANCE_SUIT_LATE_MS
+                  performance.now() - startedAt >
+                    REXONANCE_ENTRY_BLACKOUT_MS + REXONANCE_SUIT_LATE_MS
                 )
                   return;
                 rexonanceSuit = "build";
@@ -1996,13 +2012,33 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               await nextFrame();
               await nextFrame();
               if (!isCurrent()) return;
-              // Rexonance's five calls run from the first painted frame, not
+              // Rexonance's call runs from the first painted frame, not
               // from the click (which may have included a long layout task).
               if (diveVariant === "rexonance") startedAt = performance.now();
               if (diveVariant === "far-from") startedAt = performance.now();
               if (diveVariant === "illusionculum") startedAt = performance.now();
               if (extremePlayback) startedAt = performance.now();
               if (diveVariant === "meta-unitas") startedAt = performance.now();
+              // Rexonance's blackout lifts after REXONANCE！ (the still tiers:
+              // after their brief line); the suit-up then mounts on its own
+              // clock, from the first painted frame plus the blackout.
+              if (diveVariant === "rexonance" && rexonanceCall) {
+                window.setTimeout(
+                  () => {
+                    if (!isCurrent()) return;
+                    rexonanceBlackout = false;
+                    setGate((current) =>
+                      current.active &&
+                      current.phase === "covering" &&
+                      current.rexonanceCall &&
+                      current.rexonanceBlackout
+                        ? { ...current, rexonanceBlackout }
+                        : current,
+                    );
+                  },
+                  tier === "full" ? REXONANCE_ENTRY_BLACKOUT_MS : REXONANCE_ENTRY_STILL.line,
+                );
+              }
             }
             // Images warm independently of the route chunk. A stalled chunk
             // releases the cover before navigation, rather than locking the page.
@@ -2042,7 +2078,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 return;
               }
             }
-            const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
+            // Rexonance's still tiers (reduced motion, economy) show the
+            // call's first line briefly, then the still (owner, 2026-11-23).
+            const rexonanceStill =
+              diveVariant === "rexonance" && Boolean(rexonanceCall) && tier !== "full";
+            const coverTimeLeft = Math.max(
+              0,
+              (rexonanceStill ? REXONANCE_ENTRY_STILL.cover : timings.cover) -
+                (performance.now() - startedAt),
+            );
             if (
               !extremePlayback &&
               !clock.skipped &&
@@ -2051,7 +2095,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               coverTimeLeft > 0
             ) {
               if (diveVariant === "rexonance" && rexonanceCall) {
-                const hold = waitForRexonanceCover(coverTimeLeft);
+                const hold = waitForRexonanceCover(coverTimeLeft, rexonanceStill);
                 rexonanceCoverCancel.current = hold.cancel;
                 await clock.wait(hold.promise);
                 if (rexonanceCoverCancel.current === hold.cancel)
@@ -2120,6 +2164,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               metaUnitasPlayback,
               illusionculumPlayback,
               extremePlayback,
+              rexonanceBlackout,
             });
             await clock.wait(
               revealRan(
@@ -2342,6 +2387,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         scene={gate.scene}
         rexonanceCall={gate.rexonanceCall}
         rexonanceSuit={gate.rexonanceSuit}
+        rexonanceBlackout={gate.rexonanceBlackout}
         farFromCall={gate.farFromCall}
         farFromSuit={gate.farFromSuit}
         metaUnitasCall={gate.metaUnitasCall}
@@ -2402,6 +2448,7 @@ function LoadOverlay({
   scene,
   rexonanceCall,
   rexonanceSuit,
+  rexonanceBlackout,
   farFromCall,
   farFromSuit,
   metaUnitasCall,
@@ -2416,6 +2463,7 @@ function LoadOverlay({
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
   rexonanceSuit?: GateState["rexonanceSuit"];
+  rexonanceBlackout?: boolean;
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: GateState["farFromSuit"];
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
@@ -2465,6 +2513,7 @@ function LoadOverlay({
         scene={scene}
         rexonanceCall={rexonanceCall}
         rexonanceSuit={rexonanceSuit}
+        rexonanceBlackout={rexonanceBlackout}
         farFromCall={farFromCall}
         farFromSuit={farFromSuit}
         metaUnitasCall={metaUnitasCall}
@@ -2591,6 +2640,7 @@ function RiderRouteDive({
   scene,
   rexonanceCall: RexonanceCallSequence,
   rexonanceSuit,
+  rexonanceBlackout,
   farFromCall: FarFromCallSequence,
   farFromSuit,
   metaUnitasCall: MetaUnitasCallSequence,
@@ -2604,6 +2654,7 @@ function RiderRouteDive({
   scene?: CineScene | null;
   rexonanceCall?: RexonanceTransitionRenderer | null;
   rexonanceSuit?: GateState["rexonanceSuit"];
+  rexonanceBlackout?: boolean;
   farFromCall?: FarFromTransitionRenderer | null;
   farFromSuit?: GateState["farFromSuit"];
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
@@ -2659,6 +2710,7 @@ function RiderRouteDive({
           phase={phase}
           tier={scene?.tier ?? "reduced"}
           suit={rexonanceSuit}
+          blackout={rexonanceBlackout}
         />
       ) : metaUnitas && MetaUnitasCallSequence && metaUnitasPlayback ? (
         <>

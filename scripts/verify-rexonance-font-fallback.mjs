@@ -3,9 +3,9 @@ import { chromium, webkit } from "playwright";
 import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
+// Owner (2026-11-23): four lines; REXONANCE！ plays on the blackout.
 const calls = [
-  "Ultra DEUS！\nREXONANCE！",
-  "RIDER！",
+  "REXONANCE！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
   "REXONANCE DEUS！",
@@ -79,12 +79,12 @@ try {
     assert.deepEqual(
       report.calls,
       calls,
-      "All five entry beats remain readable without downloaded fonts",
+      "All four entry beats remain readable without downloaded fonts",
     );
     assert.deepEqual(report.clipping, [], "Fallback text must fit even at the impact scale");
     assert.deepEqual(errors, [], "Font failure must not raise a page error");
     console.log(
-      `PASS font fallback ${viewport.width}x${viewport.height}: five entry beats, no clipping`,
+      `PASS font fallback ${viewport.width}x${viewport.height}: four entry beats, no clipping`,
     );
     await context.close();
   }

@@ -12,7 +12,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import {
-  REXONANCE_CALL_BEATS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_SUIT_LIGHT,
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
@@ -374,7 +374,7 @@ test("the skin sits inside each scene's own beats", () => {
   );
   assert.ok(Math.abs(SKIN_ENTRY.head[1] - REXONANCE_SUIT_SNAP.helm) <= 20);
   assert.ok(SKIN_ENTRY.fade[1] <= REXONANCE_SUIT_LIGHT.from);
-  assert.equal(REXONANCE_SUIT_LIGHT.from, REXONANCE_CALL_BEATS[4].start);
+  assert.equal(REXONANCE_SUIT_LIGHT.from, REXONANCE_SUIT_BEATS[4].start);
   assert.ok(
     (SKIN_ENTRY.head[1] - SKIN_ENTRY.body[0]) / 1000 > 1.2,
     "a suit-up of about a second and a half",

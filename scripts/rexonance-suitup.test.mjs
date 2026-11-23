@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 import {
-  REXONANCE_CALL_BEATS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_CHANT_ANSWER,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_SUIT_ACCENTS,
@@ -175,12 +175,11 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
     "OPERATING STAGE",
     "REXONANCE",
     "REXONANCE！",
-    "RIDER！",
     // The chant's call; its answer, DEUS！, is listed above (2026-10-05).
+    // Owner (2026-11-23): Ultra DEUS！ and RIDER！ left the call.
     "SA-GA！",
     "SELF RESONANCE",
     "SYSTEM CHECK",
-    "Ultra DEUS！",
   ]);
   assert.match(component, /REXONANCE_SUIT_SYSTEMS\.map\(\(\[name, status\], index\)/);
   // suitup3: each label lands on the line its region forms. rx12: the
@@ -239,12 +238,12 @@ test("the suit is entry-only, the badge stage-only, both inside the aria-hidden 
 // Production inline clocks are remapped separately below and in the native
 // browser verifier; the reticle's fixed keyframes use real elapsed time.
 const CLOCK = {
-  "--rx-call-rider-start": REXONANCE_CALL_BEATS[1].start,
-  "--rx-call-chant-start": REXONANCE_CALL_BEATS[2].start,
-  "--rx-call-chant-duration": REXONANCE_CALL_BEATS[2].duration,
-  "--rx-call-response-start": REXONANCE_CALL_BEATS[3].start,
-  "--rx-call-response-duration": REXONANCE_CALL_BEATS[3].duration,
-  "--rx-call-final-start": REXONANCE_CALL_BEATS[4].start,
+  "--rx-call-rider-start": REXONANCE_SUIT_BEATS[1].start,
+  "--rx-call-chant-start": REXONANCE_SUIT_BEATS[2].start,
+  "--rx-call-chant-duration": REXONANCE_SUIT_BEATS[2].duration,
+  "--rx-call-response-start": REXONANCE_SUIT_BEATS[3].start,
+  "--rx-call-response-duration": REXONANCE_SUIT_BEATS[3].duration,
+  "--rx-call-final-start": REXONANCE_SUIT_BEATS[4].start,
   "--rx-call-cover": REXONANCE_ENTRY_TIMINGS.cover,
   "--rx-call-reveal": REXONANCE_ENTRY_TIMINGS.reveal,
 };
@@ -327,9 +326,9 @@ const vars = ({ t, s }) => {
 
 test("the suit keeps the call clock and is finished before the hand-over", () => {
   const cover = REXONANCE_ENTRY_TIMINGS.cover;
-  const chant = REXONANCE_CALL_BEATS[2];
-  const response = REXONANCE_CALL_BEATS[3];
-  const final = REXONANCE_CALL_BEATS[4].start;
+  const chant = REXONANCE_SUIT_BEATS[2];
+  const response = REXONANCE_SUIT_BEATS[3];
+  const final = REXONANCE_SUIT_BEATS[4].start;
   // The accents land on the chant's DEUS！ answers, as the call sheet strikes
   // them (rxCallAnswer: 230 ms in, then every 120 ms).
   assert.match(
@@ -383,7 +382,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   }
   assert.ok(
     span("legs")[0] - REXONANCE_SUIT_REVEAL_MS - REXONANCE_SUIT_GATHER_MS >=
-      REXONANCE_CALL_BEATS[1].start,
+      REXONANCE_SUIT_BEATS[1].start,
   );
   assert.ok(
     span("tail")[0] >= response.start && span("tail")[1] < span("helm")[0],
@@ -478,7 +477,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   const scan = declaration(covering(".rx-suit-scan").body, "animation");
   const hold = splitTopLevel(declaration(covering(".rx-suit-scan > i").body, "animation"))[0];
   assert.equal(scan.replace(/^\S+/, ""), hold.replace(/^\S+/, ""));
-  assert.ok(layerTimes(scan, {}).end <= REXONANCE_CALL_BEATS[1].start, "scanned on FAR UP！");
+  assert.ok(layerTimes(scan, {}).end <= REXONANCE_SUIT_BEATS[1].start, "scanned on FAR UP！");
   assert.ok(REXONANCE_SUIT_LATE_MS <= layerTimes(scan, {}).end);
   assert.ok(
     REXONANCE_SUIT_LATE_MS < Math.min(...pieceClocks.map(({ t }) => t)) - REXONANCE_SUIT_GATHER_MS,
@@ -500,7 +499,7 @@ test("the suit keeps the call clock and is finished before the hand-over", () =>
   const stops = [
     ...keyframes.get("rxSuitReticle").matchAll(/([\d.]+)% \{\s*opacity: ([\d.]+);/g),
   ].map(([, offset, opacity]) => [Math.round(at(Number(offset)) * 2) / 2, Number(opacity)]);
-  assert.ok(reticle.delay < REXONANCE_CALL_BEATS[1].start, "acquired on FAR UP！");
+  assert.ok(reticle.delay < REXONANCE_SUIT_BEATS[1].start, "acquired on FAR UP！");
   assert.deepEqual(
     stops.filter(([, opacity]) => opacity === 0.8).at(-1)[0],
     entryElapsedTime(response.start),
@@ -810,21 +809,25 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
   // face's halo with its lights.
   assert.ok(
     layerTimes(declaration(covering(".rx-suit-stage").body, "animation"), {}).end <
-      REXONANCE_CALL_BEATS[1].start + 100,
+      REXONANCE_SUIT_BEATS[1].start + 100,
   );
   const seed = layerTimes(declaration(covering(".rx-suit-halo.is-core").body, "animation"), {});
   assert.ok(
-    seed.delay >= REXONANCE_CALL_BEATS[1].start && seed.delay < REXONANCE_CALL_BEATS[2].start,
+    seed.delay >= REXONANCE_SUIT_BEATS[1].start && seed.delay < REXONANCE_SUIT_BEATS[2].start,
   );
   const eyes = layerTimes(declaration(covering(".rx-suit-halo.is-eyes").body, "animation"), {});
-  assert.ok(eyes.delay >= REXONANCE_CALL_BEATS[4].start);
+  assert.ok(eyes.delay >= REXONANCE_SUIT_BEATS[4].start);
   // The gate warms the pieces on a link's intent and when the call starts,
   // builds only if they are decoded (else the finished figure stands), and
-  // switches late only inside FAR UP！'s scan.
+  // switches late only during the blackout or inside the suit-up's scan
+  // (the suit-up's clock starts after the blackout, owner 2026-11-23).
   const gate = read("src/components/load-gate.tsx");
   assert.match(gate, /if \(to === "\/rexonance-saga"\) \{\s*void prepareRexonanceTransition\.prefetch\(\);\s*void warmRexonanceSuit\("high"\);/);
   assert.match(gate, /if \(isRexonanceSuitReady\(\)\) rexonanceSuit = "build";/);
-  assert.match(gate, /performance\.now\(\) - startedAt > REXONANCE_SUIT_LATE_MS/);
+  assert.match(
+    gate,
+    /performance\.now\(\) - startedAt >\s*REXONANCE_ENTRY_BLACKOUT_MS \+ REXONANCE_SUIT_LATE_MS/,
+  );
   assert.match(gate, /suit=\{rexonanceSuit\}/);
   assert.match(component, /suit = "whole",/);
   // The cold fallback obeys the same material floor as the actual canvas.
@@ -836,7 +839,7 @@ test("rx12/rx13: the raster suit — the artwork's plates, delivery-sized, decod
     "the material floor shifts the finite original mote life, not its speed",
   );
   assert.ok(
-    motes.end <= REXONANCE_CALL_BEATS[4].start,
+    motes.end <= REXONANCE_SUIT_BEATS[4].start,
     "the fallback motes are spent before the final declaration",
   );
 });

@@ -1305,7 +1305,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   translate: -50% -50%;
 }
 
-/* RIDER！'s nanite motes: squares in the air round the body (full tier). */
+/* The seed's nanite motes (330 ms): squares in the air round the body (full tier). */
 .rx-call-sequence .rx-suit-figure > .rx-suit-motes {
   inset: 0;
   display: none;
@@ -1398,7 +1398,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 }
 
 /* With the nanite kit ready, the engine's own swarm (hex chips in an
-   orbital cocoon) replaces RIDER！'s SVG motes; they stay the fallback. */
+   orbital cocoon) replaces the seed's SVG motes; they stay the fallback. */
 .rx-call-sequence .rx-suit[data-swarm="canvas"] .rx-suit-figure > .rx-suit-motes {
   visibility: hidden;
 }
@@ -1791,9 +1791,10 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
-/* Owner 2026-10-16: Ultra DEUS！ / REXONANCE！ share the existing opening
-   beat. Their longer text needs the repeated-call width budget, not FAR UP's
-   short-word scale; timing, movement and typeface remain unchanged. */
+/* The first opening call's size (owner 2026-10-16, for the old Ultra DEUS！ /
+   REXONANCE！ pair). Rexonance's call has no opening beat in the words since
+   2026-11-23 (its REXONANCE！ is the blackout's line, below); the rule stays
+   for the shared sheet's other entries. */
 .rx-call-sequence[data-mode="entry"] .rx-call-opening:first-child {
   font-size: max(24px, min(7.6vw, 100px, 13vh));
 }
@@ -2017,7 +2018,8 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     animation: rxSuitSweep var(--rx-suit-sweep-duration, 330ms) linear 70ms both;
   }
 
-  /* RIDER！: alignment brackets bite on the joints, core first, then
+  /* The seed (330 ms, --rx-call-rider-start; RIDER！'s beat until
+     2026-11-23): alignment brackets bite on the joints, core first, then
      shoulders, elbows, knees; the P14 core seeds (its halo blooms) and
      nanite motes gather in the air round the body, spent as the pieces
      form through the chant. */
@@ -2945,5 +2947,160 @@ html[data-world-effects="economy"] .rx-call-sequence .rx-suit-figure {
     .rx-call-sequence[data-mode="entry"][data-tier="full"]
     :is(.rx-suit-callouts, .rx-suit-boot) {
     display: none;
+  }
+}
+
+/* ================================================================
+   Owner (2026-11-23): the first REXONANCE！ plays on a blacked-out screen,
+   and the transformation starts after it.
+   The entry opens on a blacked-out screen that shows only REXONANCE！:
+   the line punches in with a light accent, holds, and fades; then the
+   suit-up mounts on its own clock (rexonance-call-sequence.tsx) and fades
+   up out of the dark under the veil. The still tiers (reduced motion,
+   economy) show the line with no motion, then the still.
+   ================================================================ */
+.rx-call-sequence .rx-call-blackout {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 max(24px, calc(env(safe-area-inset-right) + 16px)) 0
+    max(24px, calc(env(safe-area-inset-left) + 16px));
+  background: #02050b;
+}
+.rx-call-sequence .rx-call-blackout-line,
+.rx-call-sequence .rx-call-blackout-accent {
+  grid-area: 1 / 1;
+}
+.rx-call-sequence .rx-call-blackout-line {
+  font-size: max(24px, min(8.4vw, 112px, 15vh));
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.045em;
+  font-feature-settings: "palt", "pwid";
+  white-space: nowrap;
+  text-shadow:
+    -1.5px 0 rgb(121 232 255 / 68%),
+    1.5px 0 rgb(255 130 213 / 58%),
+    0 2px 0 rgb(2 6 14 / 90%),
+    0 0 26px rgb(121 232 255 / 32%),
+    0 0 54px rgb(182 163 255 / 22%);
+  transform-origin: center;
+}
+.rx-call-sequence .rx-call-blackout-line > span {
+  display: block;
+}
+/* The accent: a hairline drawn out under the word. */
+.rx-call-sequence .rx-call-blackout-line::after {
+  display: block;
+  height: 1.5px;
+  margin: 0.16em auto 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--rx-call-cyan) 22%,
+    #ffffff 50%,
+    var(--rx-call-pink) 78%,
+    transparent
+  );
+  content: "";
+  opacity: 0.7;
+}
+/* The accent's light: one soft bloom behind the word as it lands. */
+.rx-call-sequence .rx-call-blackout-accent {
+  display: block;
+  width: min(86vw, 1080px);
+  height: min(34vh, 320px);
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    rgb(182 163 255 / 22%),
+    rgb(121 232 255 / 10%) 46%,
+    transparent 72%
+  );
+  opacity: 0;
+}
+.rx-call-sequence .rx-call-veil {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: none;
+  background: #02050b;
+}
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-blackout-line {
+    animation: rxCallBlackoutLine var(--rx-call-blackout, 720ms) var(--rx-call-ease) both;
+  }
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-blackout-line::after {
+    animation: rxCallBlackoutRule var(--rx-call-blackout, 720ms) var(--rx-call-ease) both;
+  }
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-blackout-accent {
+    animation: rxCallBlackoutAccent var(--rx-call-blackout, 720ms) ease-out both;
+  }
+  /* The suit-up fades up out of the dark (it is already running). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-call-veil {
+    display: block;
+    animation: rxCallVeil 240ms ease-out both;
+  }
+  /* The cover lifting during the blackout takes the dark with it. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="revealing"]
+    .rx-call-blackout {
+    animation: rxCallGroundOut var(--rx-call-reveal) ease-out both;
+  }
+}
+@keyframes rxCallBlackoutLine {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  8% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  76% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.035);
+  }
+}
+@keyframes rxCallBlackoutRule {
+  0%,
+  6% {
+    transform: scaleX(0);
+  }
+  34%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes rxCallBlackoutAccent {
+  0%,
+  4% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes rxCallVeil {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }

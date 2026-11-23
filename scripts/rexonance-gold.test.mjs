@@ -8,6 +8,8 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import {
+  REXONANCE_ENTRY_BLACKOUT_MS,
+  REXONANCE_ENTRY_SUIT_COVER_MS,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_SUIT_ACCENTS,
   REXONANCE_SUIT_CASCADE,
@@ -81,7 +83,7 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
     ),
   );
   assert.ok(settled <= REXONANCE_SUIT_PIXELS.scatter, String(settled));
-  assert.ok(settled < REXONANCE_ENTRY_TIMINGS.cover);
+  assert.ok(settled < REXONANCE_ENTRY_SUIT_COVER_MS);
   // The nanites' flight and cooling are short beats of the formation.
   assert.ok(REXONANCE_SUIT_GOLD.approach < REXONANCE_SUIT_GOLD.form / 2);
   assert.ok(REXONANCE_SUIT_GOLD.cool < REXONANCE_SUIT_GOLD.form / 2);
@@ -90,7 +92,9 @@ test("rx17: each plate's gold forms right after it seats, quickly, and is done i
   assert.equal(REXONANCE_SUIT_PIXELS.fill, 1990);
   assert.equal(REXONANCE_SUIT_PIXELS.scatter, 2520);
   // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360) to fit the hand-over budget.
-  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3090);
+  assert.equal(REXONANCE_ENTRY_SUIT_COVER_MS, 3090);
+  // Owner (2026-11-23): the blackout comes first, one offset before the suit-up.
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, REXONANCE_ENTRY_BLACKOUT_MS + 3090);
 });
 
 test("rx17: the gold atlas and the gold cells, generated with the plates", async () => {

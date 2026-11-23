@@ -248,9 +248,11 @@ export function henshinScrollSheet(
   };
 }
 
-/** The Rexonance entry's sheet, in its canonical ms (rexonance-calls.ts:
- * Ultra DEUS！ REXONANCE！ 0, RIDER！ 330, the chant 650 with a DEUS！ every
- * 120 ms from 880, the response 1300, REXONANCE DEUS！ 1980). */
+/** The Rexonance entry's sheet, in canonical ms on the suit-up's own clock
+ * (rexonance-calls.ts REXONANCE_SUIT_BEATS, which starts after the call's
+ * REXONANCE！ blackout: the scan 0, the seed and the fire 330, the chant 650
+ * with a DEUS！ every 120 ms from 880, the response 1300, REXONANCE DEUS！
+ * 1980). `rider` is the 330 mark (RIDER！'s beat until 2026-11-23). */
 export function henshinEntrySheet(
   figure: HenshinFigure,
   beats: {
@@ -271,7 +273,7 @@ export function henshinEntrySheet(
   // The chant's ratchet: legs, waist, arms, chest — up the body.
   const order = [0, 3, 1, 2];
   const zooms = [1.32, 1.46, 1.3, 1.42];
-  // The omen's push lets go as RIDER！ lights the fire (a blaze moved or
+  // The omen's push lets go as the seed (330) lights the fire (a blaze moved or
   // enlarged by the camera reads as flashing): the fire burns in the still,
   // whole frame; the nanites' burst then rushes in with a roll.
   const burst = beats.rider + 230;

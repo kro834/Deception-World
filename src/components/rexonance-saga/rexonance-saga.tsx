@@ -493,10 +493,13 @@ const SUIT_UP: RexonanceAssemblyConfig = {
   // and the scene draws nothing while that layer holds its canvases hidden
   // (the layer's own flag, set only once their opacity is 0).
   hudParts: (runway) => ("rznSkin" in runway.dataset ? SKIN_SCROLL_PARTS : null),
+  // The call's four lines (owner, 2026-11-23): REXONANCE！ over the scan
+  // and the motes, then the chant, the response and REXONANCE DEUS！.
+  callLines: [0, 0, 1, 2, 3],
   covered: (_progress, runway) => "rznCovered" in runway.dataset,
 };
-// The entry overlay follows its established five-beat grouping; repeated
-// chant text still splits into individual visual units within its existing beat.
+// One HUD line per line of the call (owner, 2026-11-23); repeated chant
+// text still splits into individual visual units within its line.
 const SUIT_UP_LINES = REXONANCE_ENTRY_CALLS.map((call) => {
   const repeats = call.match(/SA-GA！DEUS！|REXONANCE！(?=REXONANCE！|$)/g);
   return repeats && repeats.length > 1 && repeats.join("") === call ? repeats : [call];

@@ -135,7 +135,7 @@ const RING_ARCS = 48;
 /* RESONANCE FIELD (owner, 2026-10-21: 「装着方式はダイナミックでありつつ、何度
    見ても飽きない様な革新性や素晴らしさを追求して」): the call's engine also
    runs the field (src/lib/rexonance-field) — a WebGL layer of nanites on
-   helical field lines about the body, charged on RIDER！, converging on each
+   helical field lines about the body, charged on the seed (330 ms), converging on each
    group as it prints, whipping on every DEUS！, imploding into the reactor
    from the helmet's clamp and detonating with the light — with its camera
    (a push, a punch on each lock, a follow, exact identity again before the
@@ -916,7 +916,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           // The field is gone and the camera at rest before the finished
           // frame (its canvases removed, its context released).
           releaseField();
-          // A call that drew its swarm hands RIDER！'s motes back their own end
+          // A call that drew its swarm hands the seed's motes back their own end
           // state (the finished frame is the classic call's exactly). One
           // that started before the kit was ready leaves the kit to the next
           // route's warm (review 2026-10-16: never on the page it lands on).
@@ -958,7 +958,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               return;
             }
             // The extras threw: drop them, settle the canvas's state, and
-            // let the classic engine (and RIDER！'s motes) carry the call.
+            // let the classic engine (and the seed's motes) carry the call.
             extras = null;
             if (typeof flight.reset === "function") flight.reset();
             else for (let k = 0; k < 32; k += 1) flight.restore();

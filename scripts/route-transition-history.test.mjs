@@ -10,7 +10,11 @@ import {
 import { createTransitionDecorationClock } from "../src/lib/transition-decoration-clock.ts";
 import { failedChunkUrl, loaderChunkUrl } from "../src/lib/chunk-retry.js";
 import { guardedHref } from "../src/lib/guarded-href.ts";
-import { REXONANCE_ENTRY_TIMINGS } from "../src/lib/rexonance-calls.ts";
+import {
+  REXONANCE_ENTRY_BLACKOUT_MS,
+  REXONANCE_ENTRY_STILL,
+  REXONANCE_ENTRY_TIMINGS,
+} from "../src/lib/rexonance-calls.ts";
 
 const source = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
 const code = ts.transpileModule(source, {
@@ -238,6 +242,19 @@ function mount(
           useState: (initial) => [
             initial,
             (value) => {
+              // A gate's functional update (the blackout's lift) applies to
+              // the latest gate; other states' updaters are not gates.
+              if (typeof value === "function" && gates.length) {
+                let next;
+                try {
+                  next = value(gates.at(-1));
+                } catch {
+                  next = undefined;
+                }
+                if (next && next !== gates.at(-1) && typeof next === "object" && "active" in next)
+                  gates.push(next);
+                return;
+              }
               if (value && typeof value === "object" && "active" in value) gates.push(value);
               if (value && typeof value === "object" && "href" in value) fallbacks.push(value);
               if (typeof value === "string") signals.push(value);
@@ -263,7 +280,12 @@ function mount(
       if (name === "@/lib/transition-decoration-clock") return { createTransitionDecorationClock };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       if (name === "@/lib/rexonance-calls")
-        return { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS: 300 };
+        return {
+          REXONANCE_ENTRY_BLACKOUT_MS,
+          REXONANCE_ENTRY_STILL,
+          REXONANCE_ENTRY_TIMINGS,
+          REXONANCE_SUIT_LATE_MS: 300,
+        };
       if (name === "@/lib/rexonance-route-cover")
         return { syncRexonanceRouteCover: () => undefined };
       if (name === "@/lib/rexonance-entry-preparation") return entryPreparation;
@@ -1036,8 +1058,9 @@ test("rx17: cold decoding and high-priority plan finish before the full-timing c
   assert.equal(ui.gates.at(-1).rexonanceSuit, "build");
   assert.equal(
     REXONANCE_ENTRY_TIMINGS.cover,
-    // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360).
-    3090,
+    // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360);
+    // owner (2026-11-23): the REXONANCE！ blackout (720 ms) comes first.
+    720 + 3090,
     "preparation cannot shorten or extend the call beats",
   );
   await settleGo(ui, pending);
@@ -1045,6 +1068,59 @@ test("rx17: cold decoding and high-priority plan finish before the full-timing c
   assert.equal(ui.suitWarmHolds(), 0);
   ui.cleanup();
 });
+
+test("owner 2026-11-23: the call opens on a REXONANCE！ blackout that the gate lifts before the suit-up", async () => {
+  const ui = mount("/world", {
+    warmSuit: () => Promise.resolve(true),
+    preparePlan: () => Promise.resolve(true),
+  });
+  const pending = ui.go({ to: "/rexonance-saga" });
+  await flushUntil(ui, () => ui.pendingTimers() > 0, "preparation must begin");
+  ui.setSuitReady(true);
+  ui.releaseWarmup();
+  await reachRexonanceHold(ui);
+  assert.equal(ui.gates.at(-1).rexonanceBlackout, true, "the call opens on the blackout");
+  assert.ok(ui.pendingTimerDelays().includes(REXONANCE_ENTRY_BLACKOUT_MS));
+  await settleGo(ui, pending);
+  const calls = ui.gates.filter((gate) => gate.active && gate.rexonanceCall);
+  const lifted = calls.findIndex(
+    (gate) => gate.phase === "covering" && gate.rexonanceBlackout === false,
+  );
+  const revealing = calls.findIndex((gate) => gate.phase === "revealing");
+  assert.ok(lifted > 0, "the blackout lifts while the call still covers");
+  assert.ok(revealing > lifted);
+  assert.equal(calls[revealing].rexonanceBlackout, false, "the reveal keeps the suit-up");
+  assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+  ui.cleanup();
+});
+
+for (const mode of ["economy", "reduced"]) {
+  test(`owner 2026-11-23: ${mode} shows the line briefly, then the still, inside its short cover`, async () => {
+    const ui = mount("/world");
+    if (mode === "economy") ui.economy();
+    else ui.reduceMotion();
+    const pending = ui.go({ to: "/rexonance-saga" });
+    ui.releaseWarmup();
+    await reachRexonanceHold(ui);
+    assert.equal(ui.gates.at(-1).rexonanceBlackout, true);
+    const delays = ui.pendingTimerDelays();
+    assert.ok(delays.includes(REXONANCE_ENTRY_STILL.line), String(delays));
+    assert.ok(
+      delays.every((delay) => delay <= REXONANCE_ENTRY_STILL.cover),
+      String(delays),
+    );
+    await settleGo(ui, pending);
+    assert.ok(
+      ui.gates.some(
+        (gate) =>
+          gate.phase === "covering" && gate.rexonanceCall && gate.rexonanceBlackout === false,
+      ),
+      "the still follows the line under the cover",
+    );
+    assert.equal(ui.navigations.at(-1).to, "/rexonance-saga");
+    ui.cleanup();
+  });
+}
 
 test("rx17: stalled cold decoding reaches whole fallback after its preparation deadline", async () => {
   let plans = 0;

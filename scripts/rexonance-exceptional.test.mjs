@@ -455,10 +455,11 @@ test("the call ornaments are textless <i> elements and keep the component SSR-st
   assert.match(sequence, /<div className="rx-call-aperture">\s*<i \/>\s*<i \/>\s*<i \/>\s*<\/div>/);
   assert.match(sequence, /<div className="rx-call-signature">\s*<i \/>\s*<\/div>/);
   // The owner added three visible call lines; they remain text, not ornaments.
-  assert.equal((sequence.match(/<span>/g) ?? []).length, 17);
+  // Owner (2026-11-23): Ultra DEUS！ and RIDER！ left the call (17 -> 15).
+  assert.equal((sequence.match(/<span>/g) ?? []).length, 15);
   assert.match(
     sequence,
-    /"--rx-call-response-start": `\$\{clock\(REXONANCE_CALL_BEATS\[3\]\.start\)\}ms`/,
+    /"--rx-call-response-start": `\$\{clock\(REXONANCE_SUIT_BEATS\[3\]\.start\)\}ms`/,
   );
   const ornaments = page.match(/<i className="rxp-[^"]+"[^>]*\/>/g) ?? [];
   assert.equal(ornaments.length, 5);

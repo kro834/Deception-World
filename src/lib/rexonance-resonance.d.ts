@@ -375,6 +375,9 @@ export interface RexonanceAssemblyConfig {
    * which each HUD part lights, in the HUD's order, or null for the scene's
    * own (each part's last tile). */
   hudParts?: (runway: HTMLElement) => readonly number[] | null;
+  /** The HUD line (.rzn-line index) each of the five beats shows (scan,
+   * motes, the chant, the response, the final call); default one a beat. */
+  callLines?: readonly [number, number, number, number, number];
   /** True while that layer hides the scene's canvas whole: the frame then
    * draws nothing. The page sends rexonance:assembly-redraw when its layer
    * comes or goes. */

@@ -1,7 +1,7 @@
 import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
 import {
-  REXONANCE_CALL_BEATS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_SUIT_CASCADE,
   REXONANCE_SUIT_FIT,
   REXONANCE_SUIT_SNAP,
@@ -447,7 +447,7 @@ export function EntrySurge() {
       windows[g * 2] = step?.from ?? 0;
       windows[g * 2 + 1] = step?.to ?? 0;
     });
-    const final = REXONANCE_CALL_BEATS[4].start;
+    const final = REXONANCE_SUIT_BEATS[4].start;
     const tier = surgeTier();
     const engine = new SurgeEngine(back, front, tier);
     // The cells each seating plate takes in (2026-11-19), under the skin.
@@ -463,16 +463,16 @@ export function EntrySurge() {
       // (Owner, 2026-11-11: no line effects on this suit-up.)
       linework: false,
       sheet: henshinEntrySheet(REXONANCE_HENSHIN_FIGURE, {
-        rider: REXONANCE_CALL_BEATS[1].start,
-        chant: REXONANCE_CALL_BEATS[2].start,
+        rider: REXONANCE_SUIT_BEATS[1].start,
+        chant: REXONANCE_SUIT_BEATS[2].start,
         snaps: [
           REXONANCE_SUIT_SNAP.legs,
           REXONANCE_SUIT_SNAP.waist,
           REXONANCE_SUIT_SNAP.arms,
           REXONANCE_SUIT_SNAP.chest,
         ],
-        response: REXONANCE_CALL_BEATS[3].start,
-        tail: tail?.to ?? REXONANCE_CALL_BEATS[3].start + 400,
+        response: REXONANCE_SUIT_BEATS[3].start,
+        tail: tail?.to ?? REXONANCE_SUIT_BEATS[3].start + 400,
         helm: REXONANCE_SUIT_SNAP.helm,
         final,
       }),

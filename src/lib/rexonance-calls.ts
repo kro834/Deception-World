@@ -1,19 +1,14 @@
 // Canonical transformation call, in its original order and punctuation.
+// Owner (2026-11-23): the call is these four lines, exactly.
 export const REXONANCE_CALLS = [
-  "Ultra DEUS！",
   "REXONANCE！",
-  "RIDER！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
   "REXONANCE DEUS！",
 ] as const;
 
-// Keep the established five-beat choreography: the two opening calls share
-// the first beat, while the remaining four canonical calls keep their slots.
-export const REXONANCE_ENTRY_CALLS = [
-  REXONANCE_CALLS.slice(0, 2).join("\n"),
-  ...REXONANCE_CALLS.slice(2),
-] as const;
+// The entry plays one beat per line (rexonance-call-sequence.tsx).
+export const REXONANCE_ENTRY_CALLS = REXONANCE_CALLS;
 
 // EXCELSIOR (owner, 2026-10-11): above ULTRA, also 60 s.
 export type RexonanceStage = "standard" | "max" | "ultra" | "excelsior";
@@ -25,6 +20,20 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
   excelsior: "EXCELSIOR",
 };
 
+// Owner (2026-11-23): the first REXONANCE！ plays on a blacked-out screen,
+// and the transformation starts after it.
+// The entry opens on a blacked-out screen that shows only REXONANCE！; the
+// suit-up starts after it. The whole suit-up (every clock below, the HUD
+// marks, the skin's front, the emitters, the cells, the light and the form
+// burst) runs on its own overlay clock, unchanged, and that clock starts
+// when the blackout ends: one offset for all of it. LoadGate owns the
+// blackout's timer (load-gate.tsx); the cover runs the blackout plus the
+// suit-up's own cover.
+export const REXONANCE_ENTRY_BLACKOUT_MS = 720;
+/** Reduced motion and economy: the line shows briefly, then the still
+ * stands until the cover lifts (ms from the overlay's first frame). */
+export const REXONANCE_ENTRY_STILL = { line: 420, cover: 780 } as const;
+
 // rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before
 // they scatter, so the last call holds 580 ms longer (cover 2300 -> 2880).
 // Owner, 2026-10-11: that hold a little shorter (~0.45 s): canonical cover 2730.
@@ -32,16 +41,38 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
 // between the scan's end and its burst, so its engulf reads. The
 // authored calls and suit plan below stay canonical; only entry elapsed
 // time is stretched, so scroll and stage transformations keep their clocks.
-export const REXONANCE_ENTRY_TIMINGS = { cover: 3090, reveal: 480 } as const;
+// `suit` is the suit-up's own cover (its meter, on its own clock); `cover`
+// adds the blackout before it.
+export const REXONANCE_ENTRY_SUIT_COVER_MS = 3090;
+export const REXONANCE_ENTRY_TIMINGS = {
+  cover: REXONANCE_ENTRY_BLACKOUT_MS + REXONANCE_ENTRY_SUIT_COVER_MS,
+  reveal: 480,
+} as const;
 export const REXONANCE_STAGE_DURATION_MS = 650;
 
-// Cover time is a minimum: the final call holds if the destination is late.
-export const REXONANCE_CALL_BEATS = [
+// The suit-up's marks, in ms on its own overlay clock (0 = the suit-up's
+// first frame, after the blackout): the scan 0, the seed and the fire 330,
+// the chant 650, the response 1300, REXONANCE DEUS！ 1980. Until 2026-11-23
+// these were also the five call beats (the opening pair, RIDER！, ...);
+// the visuals keep every one of them.
+export const REXONANCE_SUIT_BEATS = [
   { start: 0, duration: 330 },
   { start: 330, duration: 320 },
   { start: 650, duration: 650 },
   { start: 1300, duration: 680 },
   { start: 1980, duration: 750 },
+] as const;
+
+// Cover time is a minimum: the final call holds if the destination is late.
+// The four lines' beats on the entry's canonical timeline (0 = the
+// overlay's first frame): REXONANCE！ is the blackout; the chant, the
+// response and REXONANCE DEUS！ keep their suit-up marks, after it.
+export const REXONANCE_CALL_BEATS = [
+  { start: 0, duration: REXONANCE_ENTRY_BLACKOUT_MS },
+  ...REXONANCE_SUIT_BEATS.slice(2).map(({ start, duration }) => ({
+    start: REXONANCE_ENTRY_BLACKOUT_MS + start,
+    duration,
+  })),
 ] as const;
 
 // rx3 suit-up HUD. The system check reads only what the page already states,
@@ -62,8 +93,9 @@ export const REXONANCE_SUIT_SYSTEMS = [
 export const REXONANCE_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
 
 // rx12 (2026-10-10, owner): the suit-up is the approved full-body artwork,
-// cut into raster plates (scripts/build-rexonance-suit.mjs). The opening
-// call pair scans the bare undersuit; RIDER！ seeds the P14 core and motes gather.
+// cut into raster plates (scripts/build-rexonance-suit.mjs). The suit-up
+// opens on a scan of the bare undersuit; at 330 ms the P14 core is seeded
+// and motes gather (RIDER！'s beat until 2026-11-23; the call has no line there now).
 // rx13 (2026-10-11, owner): the armour forms right on the undersuit and
 // fits plate by plate — a cascade up the body (legs, waist, arms, chest and
 // core, shoulders), the tail growing out midway, the helmet last; each
@@ -72,9 +104,9 @@ export const REXONANCE_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
 // plate with the strongest clank. On REXONANCE DEUS！ the face's lights fill
 // with pixel squares that hold, then scatter: transformation complete.
 // Times are ms on the overlay's clock.
-const SUIT_CHANT = REXONANCE_CALL_BEATS[2].start;
-const SUIT_RESPONSE = REXONANCE_CALL_BEATS[3].start;
-const SUIT_FINAL = REXONANCE_CALL_BEATS[4].start;
+const SUIT_CHANT = REXONANCE_SUIT_BEATS[2].start;
+const SUIT_RESPONSE = REXONANCE_SUIT_BEATS[3].start;
+const SUIT_FINAL = REXONANCE_SUIT_BEATS[4].start;
 /** Each chant line's DEUS！ answers 230 ms into the chant, then every
  * 120 ms (the call sheet's rxCallAnswer). */
 export const REXONANCE_CHANT_ANSWER = { first: 230, every: 120 } as const;
@@ -207,7 +239,7 @@ export const REXONANCE_SUIT_FIT: Readonly<Record<string, number>> = Object.fromE
     order.map((id, k) => [id, Math.round(from + ((to - from) * k) / (order.length - 1))]),
   ),
   // The real coil grows while the reactor forms, sharing its final seat.
-  // The surrounding chest leaves and the five call beats keep their clocks.
+  // The surrounding chest leaves and the suit-up's marks keep their clocks.
   ["core-swirl", REXONANCE_SUIT_SNAP.chest],
 ]);
 /** The plates that seat on an accent (the strongest clank). */
@@ -277,7 +309,8 @@ export const REXONANCE_SUIT_PIXELS = {
 } as const;
 /** If the pieces are not decoded when the call starts, the call plays with
  * the finished figure; it switches to the build only while the opening scan
- * is still running, never once any armour could show. */
+ * is still running, never once any armour could show (ms on the suit-up's
+ * clock: LoadGate adds the blackout before it). */
 export const REXONANCE_SUIT_LATE_MS = 300;
 /** Sparks: every accent, and the first bite of each run (the clank's
  * four-point glint, and from 2026-10-16 the nanite engine's shock rings). */
@@ -304,7 +337,8 @@ export const REXONANCE_SUIT_SPARKS: readonly string[] = [
  * reactor before the seal so the implosion is a visible vortex (review 31,
  * round 3); the per-frame draw budget (2,600) holds. */
 export const REXONANCE_SUIT_SWARM = {
-  /** RIDER！: six pump waves of chips spiral out of the P14 core. */
+  /** The seed (330 ms, RIDER！'s beat until 2026-11-23): six pump waves of
+   * chips spiral out of the P14 core. */
   waves: [330, 380, 430, 480, 530, 580],
   /** Each wave's spiral out into the cocoon. */
   wave: 160,

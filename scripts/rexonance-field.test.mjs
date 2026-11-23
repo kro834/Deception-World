@@ -40,7 +40,7 @@ import {
 } from "../src/lib/rexonance-field/index.js";
 import { REXONANCE_FIELD_ENTRY, entryFieldScore } from "../src/lib/rexonance-field/field-entry.ts";
 import {
-  REXONANCE_CALL_BEATS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_ENTRY_TIMINGS,
   REXONANCE_SUIT_LIGHT,
   REXONANCE_SUIT_SNAP,
@@ -150,7 +150,7 @@ test("a score is validated and frozen; the entry's follows the pinned call table
   assert.deepEqual([...entry.wake], [FIELD_WAKE[0] * 2400, FIELD_WAKE[1] * 2400]);
   assert.equal(entry.wake[0], 420);
   assert.equal(entry.wake[1], 780);
-  assert.ok(entry.wake[1] > REXONANCE_CALL_BEATS[2].start && entry.wake[1] < REXONANCE_SUIT_SNAP.legs);
+  assert.ok(entry.wake[1] > REXONANCE_SUIT_BEATS[2].start && entry.wake[1] < REXONANCE_SUIT_SNAP.legs);
   // Legs, waist, arms, chest lock on the four DEUS！ accents, in the fixed
   // order; the shoulders, the tail (with its ribbons) and the helmet follow.
   const locks = [...entry.glock];
@@ -416,7 +416,7 @@ test("the camera is exact identity throughout: the body never moves (owner, 2026
   };
   for (const seed of [1, 2, 3, 99, 4242]) {
     const take = fieldTake(seed);
-    for (let t = 0; t <= REXONANCE_CALL_BEATS[1].start; t += 10) assert.ok(identity(t, take), `${t}`);
+    for (let t = 0; t <= REXONANCE_SUIT_BEATS[1].start; t += 10) assert.ok(identity(t, take), `${t}`);
     // From the light on (the pixel squares, the light, the finished frame):
     // identity, exactly.
     for (let t = REXONANCE_SUIT_LIGHT.from; t <= REXONANCE_ENTRY_TIMINGS.cover; t += 5)

@@ -546,10 +546,10 @@ export function mountRexonanceResonance(page, environment = window) {
    follows the module's piece list whatever its granularity (only each
    piece's id, group, box and seat are read). Over the bare undersuit:
 
-   - FAR UP！ a scan wakes the undersuit, top to bottom, as the fire
-     kindles at its soles and climbs it (REXONANCE_SCROLL_FLAME,
-     rexonance-field/field-clock.js);
-   - RIDER！ the fire covers the undersuit whole, bursts, and its
+   - REXONANCE！ (the scan and the motes; owner 2026-11-23): a scan
+     wakes the undersuit, top to bottom, as the fire kindles at its soles
+     and climbs it (REXONANCE_SCROLL_FLAME, rexonance-field/field-clock.js);
+     then the fire covers the undersuit whole, bursts, and its
      fragments cool into the nanites (the field's particles and every
      tile, hanging in the air round the body) before the first DEUS！;
    - SA-GA！DEUS！ ×4: on each DEUS！ one group lands (legs, arms, chest
@@ -1718,6 +1718,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // keep pace unseen, so the first frame back is whole). Without them
   // (every other page) everything below is as it was.
   const hudPartsOf = typeof config.hudParts === "function" ? config.hudParts : null;
+  // The HUD line each of the scene's five beats shows (scan, motes, the
+  // chant, the response, the final call): by default one line a beat; a call
+  // with fewer lines maps several beats onto one (Rexonance's four, owner
+  // 2026-11-23: REXONANCE！ over the scan and the motes).
+  const lineOfBeat =
+    Array.isArray(config.callLines) && config.callLines.length === 5
+      ? config.callLines
+      : [0, 1, 2, 3, 4];
   const coveredAt = typeof config.covered === "function" ? config.covered : null;
   const closingVisor = config.pieces?.find((piece) => piece.closeFromSides);
   const coldHelmet = closingVisor
@@ -4391,7 +4399,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     hud.form = form;
     hud.formReady = formReady;
     const B = ASSEMBLY_BEATS;
-    const line =
+    const beat =
       progress < B.scan[1]
         ? 0
         : progress < B.motes[1]
@@ -4401,6 +4409,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             : progress < B.rexonance[1]
               ? 3
               : 4;
+    const line = lineOfBeat[beat];
     // The chant's units light one by one while their line is up: the k-th of
     // four at k/5 of the line's beat, so the fourth is lit for the beat's
     // last fifth before the line is done and dims (owner, 2026-10-17:
@@ -4420,14 +4429,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const deusLit = Math.min(4, Math.max(deusDone, chantLit(B.deus)));
     const rexonanceLit = chantLit(B.rexonance);
     const chips = `${deusLit}:${rexonanceLit}`;
-    if (line !== hud.line || chips !== hud.chips) {
-      if (line !== hud.line) runway.dataset.rznLine = String(line);
+    const beatName = String(beat);
+    if (line !== hud.line || chips !== hud.chips || beatName !== runway.dataset.rznLine) {
+      // data-rzn-line names the beat (the sheets' scan and motes are 0 and 1).
+      if (beatName !== runway.dataset.rznLine) runway.dataset.rznLine = beatName;
       hud.line = line;
       hud.chips = chips;
       lines.forEach(({ line: element, chips: units }, index) => {
         setFlag(element, "data-on", index === line);
         setFlag(element, "data-done", index < line);
-        const lit = index === 2 ? deusLit : index === 3 ? rexonanceLit : 0;
+        const lit =
+          index === lineOfBeat[2] ? deusLit : index === lineOfBeat[3] ? rexonanceLit : 0;
         units.forEach((unit, unitIndex) =>
           setFlag(
             unit,

@@ -571,6 +571,8 @@ function environment({
   idleHeld = false,
   // The page's chant lines (SA-GA！DEUS！ and REXONANCE！, ×4 each) as four chips.
   chants = false,
+  // Rexonance's four-line call (owner, 2026-11-23): the chants are lines 1 and 2.
+  four = false,
   // The page has finished loading (the early warm-up waits for it).
   loaded = false,
   // Canvases give a (recording) WebGL context too, and the scene canvas a
@@ -721,8 +723,9 @@ function environment({
   const canvas = makeCanvas();
   if (webgl) canvas.parentNode = { insertBefore: (node) => fieldCanvases.push(node) };
   const frameBox = element({ offsetHeight: 837 });
-  const lines = [0, 1, 2, 3, 4].map((index) => {
-    const count = chants && (index === 2 || index === 3) ? 4 : 1;
+  const lines = (four ? [0, 1, 2, 3] : [0, 1, 2, 3, 4]).map((index) => {
+    const count =
+      chants && (four ? index === 1 || index === 2 : index === 2 || index === 3) ? 4 : 1;
     const chips = Array.from({ length: count }, () => element());
     return element({ querySelectorAll: () => chips, chips });
   });
@@ -1081,6 +1084,53 @@ test("every chant unit lights while its line is up: all four chips of SA-GA！DE
     assert.ok(line.hasAttribute("data-done"));
     assert.ok(line.chips.every((chip) => chip.hasAttribute("data-on")));
   }
+  dispose();
+});
+
+// Owner 2026-11-23: the call is four lines. The scroll keeps its beats; its
+// HUD maps them onto the lines (callLines): REXONANCE！ over the scan and the
+// motes, then the chant, the response and REXONANCE DEUS！.
+test("the four-line call: REXONANCE！ holds the scan and the motes, each chant's units light on their own line", async () => {
+  const t = environment({ chants: true, four: true });
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    { ...engineConfig, callLines: [0, 0, 1, 2, 3] },
+    t.env,
+  );
+  t.observers[0].callback([
+    { isIntersecting: true, boundingClientRect: { top: 400, bottom: 3100 } },
+  ]);
+  await until(() => t.runway.dataset.rznState === "live" && t.frames.size > 0, "scene live");
+  const on = () => t.lines.map((line) => line.hasAttribute("data-on"));
+  for (const [progress, beat] of [
+    [ASSEMBLY_BEATS.scan[0] + 0.01, "0"],
+    [ASSEMBLY_BEATS.motes[0] + 0.02, "1"],
+  ]) {
+    t.scrollTo(progress);
+    assert.deepEqual(on(), [true, false, false, false], String(progress));
+    assert.ok(!t.lines[0].hasAttribute("data-done"));
+    assert.ok(t.lines[0].chips[0].hasAttribute("data-on"));
+    // data-rzn-line still names the scene's beat (the sheets' scan and motes).
+    assert.equal(t.runway.dataset.rznLine, beat);
+  }
+  for (const [index, beat] of [
+    [1, ASSEMBLY_BEATS.deus],
+    [2, ASSEMBLY_BEATS.rexonance],
+  ]) {
+    const line = t.lines[index];
+    let allLit = null;
+    for (let progress = beat[0] + 0.001; progress < beat[1]; progress += 0.004) {
+      t.scrollTo(progress);
+      assert.ok(line.hasAttribute("data-on") && !line.hasAttribute("data-done"), `${index}`);
+      assert.ok(t.lines.slice(0, index).every((done) => done.hasAttribute("data-done")));
+      const count = line.chips.filter((chip) => chip.hasAttribute("data-on")).length;
+      if (count === 4 && allLit === null) allLit = progress;
+    }
+    assert.ok(allLit !== null, `line ${index}: every unit lights while its line is up`);
+  }
+  t.scrollTo(ASSEMBLY_BEATS.rexonance[1] + 0.01);
+  assert.deepEqual(on(), [false, false, false, true]);
+  assert.ok(t.lines[3].chips[0].hasAttribute("data-on"));
   dispose();
 });
 

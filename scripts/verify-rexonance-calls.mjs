@@ -7,9 +7,9 @@ const engine = process.env.PW_ENGINE || "chromium";
 const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: process.env.PW_BROWSER_CHANNEL || "chrome" },
 );
+// Owner (2026-11-23): four lines; REXONANCE！ plays on the blackout.
 const calls = [
-  "Ultra DEUS！\nREXONANCE！",
-  "RIDER！",
+  "REXONANCE！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
   "REXONANCE DEUS！",
@@ -164,7 +164,9 @@ async function installCallRecorder(page) {
         window.__rexonanceEntryFinishedAt = performance.now();
       }
       if (root?.dataset.tier === "full" && root.dataset.phase === "covering") {
-        for (const beat of root.querySelectorAll(".rx-call-beat[data-call]")) {
+        for (const beat of root.querySelectorAll(
+          ":is(.rx-call-beat, .rx-call-blackout-line)[data-call]",
+        )) {
           const style = getComputedStyle(beat);
           if (style.display === "none" || Number(style.opacity) < 0.3) continue;
           const call = beat.dataset.call;
@@ -331,21 +333,22 @@ async function verifyProfile(profile) {
   if (touch) await link.tap();
   else await link.click();
   await page.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 10000 });
-  const entryCall = (index) => {
-    const finalClass = index === 4 ? ".rx-call-final" : "";
-    return `.rx-call-sequence[data-mode="entry"] .rx-call-beat:nth-child(${index + 1})${finalClass}`;
-  };
-  await waitForVisibleCall(page, entryCall(0), 2);
+  // The blackout: REXONANCE！ alone, nothing of the suit-up mounted yet.
+  const entryCall = (index) =>
+    index === 0
+      ? '.rx-call-sequence[data-mode="entry"][data-blackout] .rx-call-blackout-line'
+      : '.rx-call-sequence[data-mode="entry"] .rx-call-final';
+  await waitForVisibleCall(page, entryCall(0), 1);
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-first.png` });
   }
-  await verifySuitClear(page, entryCall(0), profile.name, "Ultra DEUS！ / REXONANCE！");
-  // The system check has booted by RIDER！ (rx3).
-  await page.waitForFunction((target) => {
-    const beat = document.querySelector(target);
-    return beat && Number(getComputedStyle(beat).opacity) > 0.3;
-  }, entryCall(1));
-  await verifySuitClear(page, entryCall(1), profile.name, "RIDER！");
+  if (await page.locator('.rx-call-sequence[data-mode="entry"][data-blackout]').count()) {
+    assert.equal(
+      await page.locator('.rx-call-sequence[data-mode="entry"] :is(.rx-suit, .rx-call-meter)').count(),
+      0,
+      `${profile.name}: the blackout shows the line alone`,
+    );
+  }
   await waitForVisibleCall(
     page,
     '.rx-call-sequence[data-mode="entry"] .rx-call-chant[data-call="SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！"]',
@@ -371,7 +374,7 @@ async function verifyProfile(profile) {
     profile.name,
     "REXONANCE！",
   );
-  await waitForVisibleCall(page, entryCall(4), 2);
+  await waitForVisibleCall(page, entryCall(3), 2);
   // Every callout and the LOCK are up just before the hand-over (rx3).
   await page
     .waitForFunction(
@@ -389,7 +392,7 @@ async function verifyProfile(profile) {
     )
     .catch(() => undefined);
   if (await page.locator('.rx-call-sequence[data-mode="entry"][data-phase="covering"]').count()) {
-    await verifySuitClear(page, entryCall(4), profile.name, "REXONANCE DEUS！");
+    await verifySuitClear(page, entryCall(3), profile.name, "REXONANCE DEUS！");
   }
   if (["desktop", "phone-390"].includes(profile.name)) {
     await page.screenshot({ path: `/tmp/rexonance-entry-${profile.name}-final.png` });
@@ -404,7 +407,7 @@ async function verifyProfile(profile) {
   assert.deepEqual(
     await page.evaluate(() => window.__rexonanceEntryCalls),
     calls,
-    `${profile.name}: five entry beats must appear once and in order`,
+    `${profile.name}: the four entry beats must appear once and in order`,
   );
   assert.equal(
     await page.evaluate(() => window.__rexonanceCallMaxRoots),
@@ -430,7 +433,8 @@ async function verifyProfile(profile) {
     // measure lands at about 3783 ms on a loaded machine (the old 3200 budget
     // missed by the same few ms), so it allows 60 ms of timer slack; the
     // hand-over itself is pinned exactly by verify-route-transitions.
-    entryDuration < 3840,
+    // Owner (2026-11-23): + the 720 ms REXONANCE！ blackout before the suit-up.
+    entryDuration < 3840 + 720,
     `${profile.name}: route entry and call sequence must hand off promptly (${entryDuration.toFixed(0)} ms)`,
   );
   assert.ok(

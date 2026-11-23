@@ -85,7 +85,7 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   // The legs project during RIDER！, before any leg armour seats.
   const legs = calls.REXONANCE_SUIT_CASCADE.find(({ group }) => group === "legs");
   assert.ok(
-    calls.REXONANCE_SUIT_FIT[legs.order[0]] - swarm.project >= calls.REXONANCE_CALL_BEATS[1].start,
+    calls.REXONANCE_SUIT_FIT[legs.order[0]] - swarm.project >= calls.REXONANCE_SUIT_BEATS[1].start,
   );
   // Every clamp has released, and the free chips have imploded, before the
   // face's squares scatter; the crest's clamps are the last.
@@ -98,7 +98,12 @@ test("the swarm rides the pinned call: its timeline, and the pinned clocks uncha
   assert.ok(swarm.implode[1] < calls.REXONANCE_SUIT_PIXELS.scatter);
   // Authored armour clocks remain canonical; the real entry adds 360 ms of flame.
   // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360) to fit the hand-over budget.
-  assert.equal(calls.REXONANCE_ENTRY_TIMINGS.cover, 3090);
+  // Owner (2026-11-23): the blackout comes first; the suit-up's own cover is unchanged.
+  assert.equal(calls.REXONANCE_ENTRY_SUIT_COVER_MS, 3090);
+  assert.equal(
+    calls.REXONANCE_ENTRY_TIMINGS.cover,
+    calls.REXONANCE_ENTRY_BLACKOUT_MS + calls.REXONANCE_ENTRY_SUIT_COVER_MS,
+  );
   assert.equal(calls.REXONANCE_SUIT_REVEAL_MS, 100);
   assert.equal(calls.REXONANCE_SUIT_CLANK_MS, 40);
   assert.equal(calls.REXONANCE_SUIT_PIXELS.fill, 1990);

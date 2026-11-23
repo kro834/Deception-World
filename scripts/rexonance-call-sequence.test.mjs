@@ -4,8 +4,12 @@ import { test } from "node:test";
 import {
   REXONANCE_CALL_BEATS,
   REXONANCE_CALLS,
+  REXONANCE_ENTRY_BLACKOUT_MS,
   REXONANCE_ENTRY_CALLS,
+  REXONANCE_ENTRY_STILL,
+  REXONANCE_ENTRY_SUIT_COVER_MS,
   REXONANCE_ENTRY_TIMINGS,
+  REXONANCE_SUIT_BEATS,
   REXONANCE_STAGE_DURATION_MS,
   REXONANCE_STAGE_LABELS,
   REXONANCE_SUIT_SYSTEMS,
@@ -16,24 +20,17 @@ const component = read("components/rexonance-saga/rexonance-call-sequence.tsx");
 const styles = read("styles-rexonance-calls.css");
 const rider = read("components/world/rider-page.tsx");
 
+// Owner (2026-11-23): the call is exactly these four lines.
 const publishedCalls = [
-  "Ultra DEUS！",
   "REXONANCE！",
-  "RIDER！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
   "REXONANCE DEUS！",
 ];
 
-const entryCalls = [
-  "Ultra DEUS！\nREXONANCE！",
-  "RIDER！",
-  "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
-  "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
-  "REXONANCE DEUS！",
-];
+const entryCalls = publishedCalls;
 
-test("canonical calls stay exact and entry calls retain the five-beat order", () => {
+test("canonical calls stay exact and the entry plays one beat per line", () => {
   assert.deepEqual(REXONANCE_CALLS, publishedCalls);
   assert.deepEqual(REXONANCE_ENTRY_CALLS, entryCalls);
   assert.equal(REXONANCE_CALL_BEATS.length, entryCalls.length);
@@ -50,8 +47,14 @@ test("canonical calls stay exact and entry calls retain the five-beat order", ()
   assert.ok(!component.includes("speechSynthesis"));
   assert.match(component, /REXONANCE_ENTRY_CALLS\.map\(\(call, index\)/);
   assert.match(component, /data-call=\{call\}/);
-  assert.match(component, /<span>Ultra DEUS！<\/span>\s*<span>REXONANCE！<\/span>/);
-  assert.match(component, /if \(index === 1\) return <span>RIDER！<\/span>/);
+  // The first line is REXONANCE！ alone, the blackout's (data-call too).
+  assert.match(component, /if \(index === 0\) return <span>REXONANCE！<\/span>;/);
+  assert.match(
+    component,
+    /className="rx-call-blackout-line" data-call=\{REXONANCE_ENTRY_CALLS\[0\]\}>\s*<CallLines index=\{0\} \/>/,
+  );
+  assert.ok(!component.includes("Ultra DEUS"));
+  assert.ok(!component.includes("<span>RIDER！</span>"));
   // 2026-10-05 (owner): each chant line is SA-GA！ with DEUS！ as its
   // answer; the line's text is still SA-GA！DEUS！, four times.
   assert.equal(
@@ -64,17 +67,41 @@ test("canonical calls stay exact and entry calls retain the five-beat order", ()
   );
   // One opening REXONANCE！ plus the following four-call repetition.
   assert.equal((component.match(/<span>REXONANCE！<\/span>/g) ?? []).length, 5);
+  assert.match(component, /if \(index === 2\)[\s\S]*?(?:<span>REXONANCE！<\/span>\s*){4}<\/>/);
   assert.match(
     component,
-    /if \(index === 4\)[\s\S]*?<span>REXONANCE<\/span>[\s\S]*?<span>DEUS！<\/span>/,
+    /if \(index === 3\)[\s\S]*?<span>REXONANCE<\/span>[\s\S]*?<span>DEUS！<\/span>/,
   );
 });
 
 test("entry and stage timings stay bounded and stage labels are not new calls", () => {
   // Preserve the authored face hold while the preceding flame gains 360 ms.
   // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360) to fit the hand-over budget.
-  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, 3090);
+  assert.equal(REXONANCE_ENTRY_SUIT_COVER_MS, 3090);
+  // Owner (2026-11-23): REXONANCE！ on a blackout first, then the suit-up:
+  // the cover is the blackout plus the suit-up's own, unchanged.
+  assert.equal(REXONANCE_ENTRY_BLACKOUT_MS, 720);
+  assert.equal(REXONANCE_ENTRY_TIMINGS.cover, REXONANCE_ENTRY_BLACKOUT_MS + 3090);
   assert.equal(REXONANCE_ENTRY_TIMINGS.reveal, 480);
+  // The four lines' beats: the blackout, then the suit-up's marks after it.
+  assert.deepEqual(REXONANCE_CALL_BEATS, [
+    { start: 0, duration: 720 },
+    { start: 720 + 650, duration: 650 },
+    { start: 720 + 1300, duration: 680 },
+    { start: 720 + 1980, duration: 750 },
+  ]);
+  // The suit-up's own marks keep their clocks.
+  assert.deepEqual(REXONANCE_SUIT_BEATS, [
+    { start: 0, duration: 330 },
+    { start: 330, duration: 320 },
+    { start: 650, duration: 650 },
+    { start: 1300, duration: 680 },
+    { start: 1980, duration: 750 },
+  ]);
+  // The still tiers: the line briefly, then the still, inside a short cover.
+  assert.ok(REXONANCE_ENTRY_STILL.line > 0);
+  assert.ok(REXONANCE_ENTRY_STILL.cover > REXONANCE_ENTRY_STILL.line);
+  assert.ok(REXONANCE_ENTRY_STILL.cover < 1000);
   assert.equal(REXONANCE_STAGE_DURATION_MS, 650);
   assert.deepEqual(REXONANCE_STAGE_LABELS, {
     standard: "HIGH",
@@ -113,7 +140,8 @@ test("the sequence is SSR-stable, decorative, finite, and compositor-only", () =
   assert.match(styles, /\.rx-call-sequence\s*\{[\s\S]*?pointer-events:\s*none/);
   assert.match(styles, /\.rx-call-sequence\s*\{[\s\S]*?position:\s*absolute/);
   assert.match(styles, /\.rx-call-beat\s*\{[\s\S]*?font-size:\s*clamp\(24px, 6\.5vw, 116px\)/);
-  assert.match(component, /index < 2 \? " rx-call-opening"/);
+  // The words carry no opening beat: REXONANCE！ is the blackout's line.
+  assert.doesNotMatch(component, /rx-call-opening/);
   assert.match(styles, /\.rx-call-opening\s*\{\s*font-size:\s*clamp\(36px, 10\.5vw, 156px\)/);
   assert.match(styles, /\.rx-call-opening\s*\{\s*font-size:\s*min\(10\.5vw, 22vh\)/);
   assert.match(
@@ -175,7 +203,34 @@ test("full, calm, reduced, and reveal states preserve the final call without del
   );
   assert.match(styles, /\.rx-call-sequence\[data-phase="revealing"\]\s*\{\s*opacity:\s*0/);
   assert.match(styles, /\.rx-call-sequence \*\s*\{\s*animation:\s*none !important/);
-  assert.match(component, /index === 4 \? " rx-call-final"/);
-  assert.match(component, /index === 2 \? " rx-call-chant"/);
-  assert.match(component, /index === 3 \? " rx-call-repetition"/);
+  assert.match(component, /index === 3 \? " rx-call-final"/);
+  assert.match(component, /index === 1 \? " rx-call-chant"/);
+  assert.match(component, /index === 2 \? " rx-call-repetition"/);
+});
+
+test("the blackout: REXONANCE！ alone on the dark, then the suit-up on its own clock", () => {
+  // Until LoadGate lifts the blackout, the entry renders only the line: no
+  // suit, ground, HUD, canvases or meter (the suit-up's clock).
+  const blackout = component.slice(
+    component.indexOf("if (entry && blackout) {"),
+    component.indexOf("\n  return (", component.indexOf("if (entry && blackout) {")),
+  );
+  assert.match(blackout, /className="rx-call-blackout"/);
+  for (const absent of ["<Suit", "rx-call-ground", "rx-call-meter", "rx-call-words", "EntrySurge"])
+    assert.ok(!blackout.includes(absent), `${absent} waits for the suit-up`);
+  // Its suit-up lines sit on the suit-up's clock (after the blackout).
+  assert.match(component, /start: beat\.start - REXONANCE_ENTRY_BLACKOUT_MS/);
+  assert.match(component, /"--rx-call-cover": `\$\{REXONANCE_ENTRY_SUIT_COVER_MS\}ms`/);
+  // The sheet: the line punches in, holds and fades within the blackout;
+  // the suit-up fades up under the veil; the still tiers show it unmoving.
+  assert.match(
+    styles,
+    /\[data-tier="full"\]\[data-phase="covering"\]\s*\.rx-call-blackout-line\s*\{\s*animation: rxCallBlackoutLine var\(--rx-call-blackout, 720ms\)/,
+  );
+  assert.match(
+    styles,
+    /\[data-tier="full"\]\[data-phase="covering"\]\s*\.rx-call-veil\s*\{\s*display: block;\s*animation: rxCallVeil 240ms ease-out both;/,
+  );
+  assert.match(styles, /\.rx-call-veil\s*\{[^}]*display: none;/);
+  assert.match(styles, /@keyframes rxCallBlackoutLine\s*\{[\s\S]*?100% \{\s*opacity: 0;/);
 });

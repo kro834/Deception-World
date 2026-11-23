@@ -5,9 +5,7 @@ export const REXONANCE_PROFILE_TEXT = `《 仮面ライダーレクソナンス�
 《 仮面ライダーレクソナンスサーガ・マックス 》
 《 仮面ライダーレクソナンスサーガ・ウルトラ 》
 
-【Ultra DEUS！】
 【REXONANCE！】
-【RIDER！】
 【SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！】
 【REXONANCE！REXONANCE！REXONANCE！REXONANCE！】
 【REXONANCE DEUS！】
