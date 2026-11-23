@@ -679,14 +679,27 @@ export function watchRingMotion(doc = document) {
     node.append(pull, lift, pulley);
     return node;
   };
-  /** Top the pool up to LINK_POOL free nodes, in one insertion, when the page is idle. */
+  /** Threads the sections read near the screen may still ask for. */
+  const poolNeed = () => {
+    let need = 0;
+    for (const rec of linkRoots) {
+      if (!rec.near) continue;
+      for (const chain of rec.chains) if (!chain.armed) need += chain.parts.length - 1;
+    }
+    return need;
+  };
+  /**
+   * Top the pool up, in one insertion, when the page is idle: LINK_POOL free
+   * nodes, or as many as the sections near the screen may ask for.
+   */
   const fillPool = () => {
     poolIdle = 0;
     if (!linksOn() || !bounces() || !doc.body) return;
     const layer = ensureLayer();
-    if (pool.length >= LINK_POOL) return;
+    const want = Math.max(LINK_POOL, poolNeed());
+    if (pool.length >= want) return;
     const batch = doc.createDocumentFragment();
-    while (pool.length < LINK_POOL) {
+    while (pool.length < want) {
       const node = makeNode();
       pool.push(node);
       batch.appendChild(node);
@@ -694,7 +707,7 @@ export function watchRingMotion(doc = document) {
     layer.appendChild(batch);
   };
   const queuePool = () => {
-    if (poolIdle || pool.length >= LINK_POOL / 2) return;
+    if (poolIdle || (pool.length >= LINK_POOL / 2 && pool.length >= poolNeed())) return;
     poolIdle =
       typeof view.requestIdleCallback === "function"
         ? view.requestIdleCallback(fillPool, { timeout: 2000 })
@@ -965,8 +978,12 @@ export function watchRingMotion(doc = document) {
   };
 
   // A stalled observer, or a jump past a held part, must never leave it invisible.
+  // Once the scroll has stopped, a part with any sliver on screen is let go
+  // (the gate line is 8 % up while scrolling; a jump may stop just below it).
   function sweepHeld() {
+    if (linkSafety) view.clearTimeout(linkSafety);
     linkSafety = 0;
+    if (!held.size) return;
     const bottom = view.innerHeight;
     const now = view.performance.now();
     for (const part of [...held]) {
@@ -974,7 +991,7 @@ export function watchRingMotion(doc = document) {
         held.delete(part);
         continue;
       }
-      if (part.el.getBoundingClientRect().top < bottom * LINK_GATE) release(part, now);
+      if (part.el.getBoundingClientRect().top < bottom) release(part, now);
     }
     if (held.size) linkSafety = view.setTimeout(sweepHeld, SAFETY_MS);
   }
@@ -1079,6 +1096,9 @@ export function watchRingMotion(doc = document) {
       chainOf.set(made.parts[0].el, made);
       nearIO.observe(made.parts[0].el);
     }
+    // The section is within a viewport of the screen: its threads are made
+    // now, at idle, before its chains come near.
+    if (rec.chains.length) queuePool();
   };
 
   const rootIO = new view.IntersectionObserver(
@@ -1230,6 +1250,7 @@ export function watchRingMotion(doc = document) {
   doc.addEventListener("animationcancel", onLinkEnd);
   view.addEventListener("beforeprint", releaseAllLinks);
   view.addEventListener("resize", onLinkLayout, { passive: true });
+  view.addEventListener("scrollend", sweepHeld, { passive: true });
   calm.addEventListener?.("change", releaseAllLinks);
   if (doc.body) linkSizes?.observe(doc.body);
   scanLinks();
@@ -1255,6 +1276,7 @@ export function watchRingMotion(doc = document) {
     doc.removeEventListener("animationcancel", onLinkEnd);
     view.removeEventListener("beforeprint", releaseAllLinks);
     view.removeEventListener("resize", onLinkLayout);
+    view.removeEventListener("scrollend", sweepHeld);
     calm.removeEventListener?.("change", releaseAllLinks);
     linkSizes?.disconnect();
     for (const rec of linkRoots) forgetRoot(rec);

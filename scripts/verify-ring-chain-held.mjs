@@ -4,7 +4,10 @@
 // the chain or an absorbed reveal holds may remain above the fold edge. Also:
 // a jump back to the top and a jump into the middle, and on the dossiers every
 // d1 orbit part in turn. Prints how many parts chained per route (coverage).
-//   BASE_URL=http://127.0.0.1:<port> node scripts/verify-ring-chain-held.mjs [route ...]
+// MOTION=reduce: nothing may ever be held or moved. MOTION=economy: the
+// chain's order and fade only, never a thread.
+//   BASE_URL=http://127.0.0.1:<port> [PROFILES=desktop,phone] [MOTION=reduce|economy]
+//     node scripts/verify-ring-chain-held.mjs [route ...]
 import { chromium } from "playwright";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
@@ -28,6 +31,7 @@ const ROUTES = [
 const only = process.argv.slice(2);
 const routes = only.length ? only : ROUTES;
 const profiles = (process.env.PROFILES || "desktop,phone").split(",");
+const motion = process.env.MOTION || "full";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
 let failures = 0;
 
@@ -114,6 +118,14 @@ async function slowScroll(page, cdp, phone, W, H) {
 async function check(page, label) {
   const bad = await page.evaluate(HELD);
   const s = await page.evaluate(stats);
+  if (motion === "reduce" && s?.seen) bad.push(`reduced motion: ${s.seen} element(s) held or absorbed`);
+  if (motion !== "full") {
+    const threads = await page.evaluate(() => {
+      const layer = document.querySelector(".ring-links");
+      return layer ? getComputedStyle(layer).display : "none";
+    });
+    if (threads !== "none") bad.push(`${motion}: the thread layer shows`);
+  }
   const ok = bad.length === 0 && (s?.overflow ?? 0) <= 0;
   if (!ok) failures += 1;
   console.log(`${ok ? "PASS" : "FAIL"} ${label} ${JSON.stringify(s)}${bad.length ? "\n    " + bad.slice(0, 8).join("\n    ") : ""}`);
@@ -138,14 +150,28 @@ async function runOnce(page, cdp, phone, W, H, label) {
 try {
   for (const profile of profiles) {
     const phone = profile === "phone";
-    const W = phone ? 390 : 1440;
+    const W = phone ? Number(process.env.PHONE_WIDTH || 390) : 1440;
     const H = phone ? 844 : 900;
     const ctx = await browser.newContext(
-      phone
-        ? { viewport: { width: W, height: H }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
-        : { viewport: { width: W, height: H } },
+      {
+        ...(phone
+          ? { viewport: { width: W, height: H }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
+          : { viewport: { width: W, height: H } }),
+        reducedMotion: motion === "reduce" ? "reduce" : "no-preference",
+      },
     );
     await ctx.addInitScript(INIT);
+    if (motion === "economy")
+      await ctx.addInitScript(() => {
+        try {
+          localStorage.setItem(
+            "deception-world:render-quality:v1",
+            JSON.stringify({ quality: "lightweight", revision: Date.now() }),
+          );
+        } catch {
+          /* storage blocked: the run reports the page as it is */
+        }
+      });
     for (const route of routes) {
       const page = await ctx.newPage();
       const cdp = await ctx.newCDPSession(page);
@@ -165,7 +191,8 @@ try {
         );
         if (!tabs.length) await runOnce(page, cdp, phone, W, H, `${profile} ${route}`);
         for (const tab of tabs) {
-          await page.locator(`#${tab}`).click({ force: true });
+          // The tab's own click handler (on a phone the dial may hold it off screen).
+          await page.evaluate((id) => /** @type {HTMLElement} */ (document.getElementById(id))?.click(), tab);
           await page.waitForTimeout(1400);
           await runOnce(page, cdp, phone, W, H, `${profile} ${route} [${tab.replace("dossier-orbit-tab-", "")}]`);
         }
