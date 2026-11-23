@@ -5,7 +5,11 @@ import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
-import { rexonanceEntries, rexonanceSection } from "../src/lib/rexonance-profile.ts";
+import {
+  rexonanceEntries,
+  rexonanceEntryHeading,
+  rexonanceSection,
+} from "../src/lib/rexonance-profile.ts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = (path) => readFileSync(resolve(root, path), "utf8");
@@ -115,6 +119,7 @@ test("published manager and rider excerpts and names remain source accurate", ()
     FINAL_STAGE_ENTER_ASSETS: [],
     rexonanceSection,
     rexonanceEntries,
+    rexonanceEntryHeading,
   });
   assert.equal(riders.length, 8);
   for (const rider of riders) {

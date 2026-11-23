@@ -1,3 +1,4 @@
+              <span
                 className="manager-display-name"
                 style={{ ["--name-len" as string]: [...rider.civilian.name].length }}
               >

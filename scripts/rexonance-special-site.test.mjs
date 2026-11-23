@@ -60,7 +60,8 @@ test("Rexonance special site preserves published performance and stage definitio
   }
   assert.match(component, /KHAOSが進化候補を生成し、KOSMOSが整合性を検証し/);
   assert.match(component, /二つの頂点と二本の位相境界/);
-  assert.match(component, /限定的なベクトル仮想演算空間を生成する/);
+  // The canon of 2026-11-23.
+  assert.match(component, /一時的なシミュレーション領域「ベクトル仮想演算空間」を立ち上げる/);
   assert.doesNotMatch(component, /DEUS SHIFT|REXONANCE PERK/);
   assert.doesNotMatch(component, /レックスとゼウス|絶対秩序/);
   assert.doesNotMatch(component, /DEUS SHIFT|REXONANCE PERK/);

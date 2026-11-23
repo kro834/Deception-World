@@ -1666,7 +1666,14 @@ test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme T
   assert.match(rexonanceSite, /『P14 Extreme Tuning』は、/);
   assert.match(rexonanceSite, /"P14 Standard",/);
   assert.doesNotMatch(rexonanceSite, /Extreme tuning/);
-  assert.match(read("src/lib/rexonance-profile.ts"), /『P14 Extreme Tuning』/);
+  // The owner's Rexonance canon of 2026-11-23 states its unit as 『P14』 (the
+  // spec table and the article); the 公式設定's unit names above keep its tuning.
+  const rexonanceProfile = read("src/lib/rexonance-profile.ts");
+  assert.match(
+    rexonanceProfile,
+    /■認識・制御\u3000：『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P14』\n/u,
+  );
+  assert.match(rexonanceProfile, /\n『 P14 』\n/);
 });
 
 // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）. The chapter heads are
