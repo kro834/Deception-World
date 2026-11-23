@@ -548,7 +548,7 @@ export function IllusionculumSaga() {
           <b className="ics-numeral" aria-hidden="true">
             03
           </b>
-          <h2 id="ics-forms-title">形態</h2>
+          <h2 id="ics-forms-title">形態段階</h2>
           <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
             <b />
           </i>
@@ -679,13 +679,13 @@ export function IllusionculumSaga() {
           <b className="ics-numeral" aria-hidden="true">
             06
           </b>
-          <h2 id="ics-abilities-title">能力</h2>
+          <h2 id="ics-abilities-title">固有能力</h2>
           <span className="ics-heading-plate" data-plate="reactor" aria-hidden="true" />
           <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
             <b />
           </i>
         </header>
-        <Articles items={ILLUSIONCULUM_SAGA.abilities} label="能力" />
+        <Articles items={ILLUSIONCULUM_SAGA.abilities} label="固有能力" />
       </section>
 
       {/* 06, continued — 必殺技, each with its calls. */}

@@ -84,10 +84,10 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["specs", "スペック", "SPECS"],
     ["comparison", "性能比較", "COMPARISON"],
     ["suitup", "変身", "SUIT-UP"],
-    ["forms", "形態", "FORMS"],
+    ["forms", "形態段階", "FORMS"],
     ["armour", "装甲・外観", "ARMOR"],
     ["arsenal", "専用武装", "WEAPONS"],
-    ["abilities", "能力", "ABILITY"],
+    ["abilities", "固有能力", "ABILITY"],
     ["finishers", "必殺技", "FINISHER"],
   ],
   // 2026-10-23: the owner's record in the page's order. Owner (2026-11-20):

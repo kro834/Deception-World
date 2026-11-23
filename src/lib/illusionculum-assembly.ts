@@ -22,9 +22,9 @@ import type { IllusionculumFormKey } from "./illusionculum-saga-artwork.ts";
 import { preloadIllusionculumAssembly } from "./illusionculum-preload.ts";
 
 /** The call on the runway, one line per call (the owner's four, verbatim),
- * on the engine's beats: 【ULTRA！VINCULUM！】 with the scan,【ROLLOUT！】 with
+ * on the engine's beats: 【Ultra VINCULUM！】 with the scan,【REXONANCE！】 with
  * the first motes, the SA-GA！EX！ chant with the four armour groups, and
- * ILLUSIONCULUM！ ×3 with the cape, the halo and the helmet. */
+ * ILLUSIONCULUM！ ×4 with the cape, the halo and the helmet. */
 export const ILLUSIONCULUM_SUIT_CALLS: readonly string[] = ILLUSIONCULUM_SAGA.calls;
 
 /** A line's chips: a chant splits into its repeated units. */

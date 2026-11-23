@@ -211,9 +211,11 @@ const ADDED_ROWS = {
 
 /** The owner's YOPS rule (2026-10-23): 「YOPSはエクスプリームは「〜」はつかず、
  * レクソナンスとメタ・ウニタス、イリュージョンクルム、ファーフロムにのみつきます。」
- * — the four lower-bound forms' main compute (50000 and 60000) carries 〜,
- * wherever the comparison prints it (scripts/yops-notation.test.mjs). */
-const notation = (text) => text.replace(/(?<![\d,])(50000|60000)YOPS/g, "$1〜YOPS");
+ * — the lower-bound forms' main compute carries 〜. The owner's canon of
+ * 2026-11-23 writes イリュージョンクルム's as a fixed 50000YOPS (no 〜) and
+ * メタ・ウニタス's 50000〜YOPS in the record itself, so only ファーフロム's
+ * 60000 is written with it here (scripts/yops-notation.test.mjs). */
+const notation = (text) => text.replace(/(?<![\d,])(60000)YOPS/g, "$1〜YOPS");
 
 const applied = new Set();
 const cut = (text) => {

@@ -30,7 +30,8 @@ for (const file of [
     // The ratio table reads the (est.) values as figures, not lower bounds.
     assert.match(html, /aria-label="ヴィンクルムサーガ、パンチ、9\.06×"/);
     assert.match(html, /aria-label="ヴィンクルムサーガ、キック、9\.89×"/);
-    // Rexonance's main compute keeps its lower bound mark.
-    assert.doesNotMatch(html, /50000YOPS/);
+    // Rexonance's main compute keeps its lower bound mark; only
+    // イリュージョンクルム's (canon 2026-11-23) is the fixed 50000YOPS.
+    assert.doesNotMatch(html, /50000YOPS(?!／∞Core)/);
   });
 }

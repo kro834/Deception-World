@@ -62,8 +62,23 @@ test("the scan sees the known YOPS values", () => {
   }
 });
 
+// Owner's canon (2026-11-23): イリュージョンクルム's main compute is 50000YOPS
+// (a fixed basis, no 〜). Its places are pinned by file and count.
+const FIXED_BASIS = {
+  "src/components/illusionculum-saga/illusionculum-data.ts": 5,
+  "src/components/meta-unitas-saga/meta-unitas-data.ts": 2,
+  "archives/saga-form-archive-standalone.html": 3,
+  "public/saga-form-archive-embedded.html": 3,
+};
+const isFixedBasis = (f) => f.value === 50000 && f.before === "" && f.file in FIXED_BASIS;
+
+test("イリュージョンクルム's 50000YOPS (no 〜) sits only where the canon puts it", () => {
+  for (const [file, count] of Object.entries(FIXED_BASIS))
+    assert.equal(found.filter((f) => f.file === file && isFixedBasis(f)).length, count, file);
+});
+
 test("レクソナンス 50000 and ファーフロム 60000 carry 〜 before YOPS", () => {
-  for (const f of found.filter((x) => WITH_WAVE.has(x.value))) {
+  for (const f of found.filter((x) => WITH_WAVE.has(x.value) && !isFixedBasis(x))) {
     assert.equal(f.after, "", `${f.file}: 〜 after YOPS in ${f.raw}`);
     // The Far From Ultra HUD font lacks 〜, so it keeps 「+」 as the lower-bound mark.
     const hud = f.file.endsWith("far-from-ultra-art.ts") && f.before === "+";

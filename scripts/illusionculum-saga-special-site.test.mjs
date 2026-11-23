@@ -17,9 +17,11 @@ const sections = read("src/lib/special-site-sections.ts");
 const styles = read("src/styles-illusionculum-saga.css");
 const suitStyles = read("src/styles-illusionculum-suitup.css");
 // The owner's YOPS rule (scripts/yops-notation.test.mjs): the main compute of
-// イリュージョンクルム, メタ・ウニタス and ファーフロム carries 「〜」. The only
-// change the page makes to the owner's figures, so the sources are read with it.
-const yops = (text) => text.replace(/(?<![\d,])(50000|60000)YOPS/g, "$1〜YOPS");
+// メタ・ウニタス and ファーフロム carries 「〜」; the canon of 2026-11-23 writes
+// イリュージョンクルム's as 50000YOPS (a fixed basis), so only ファーフロム's
+// 60000 is written with it here. The only change the page makes to the
+// owner's figures, so the sources are read with it.
+const yops = (text) => text.replace(/(?<![\d,])(60000)YOPS/g, "$1〜YOPS");
 const ownerText = yops(read("design/illusionculum-saga-20261023/owner-text.md"));
 // Owner (2026-11-20): 「メタ・ウニタスのウルトラだけ英語表記になっていたり…」
 // — on this page メタ・ウニタス's ウルトラ is written in katakana like every
@@ -77,6 +79,7 @@ test("every word of record is the owner's, verbatim (design/illusionculum-saga-2
     ...[...ILLUSIONCULUM_SAGA.armour, ...ILLUSIONCULUM_SAGA.arsenal, ...ILLUSIONCULUM_SAGA.abilities].flatMap(
       (article) => [article.title, ...article.body],
     ),
+    ...ILLUSIONCULUM_SAGA.stages.flatMap((stage) => [`《 ${stage.title} 》`, ...stage.body]),
     ...ILLUSIONCULUM_SAGA.finishers.flatMap((finisher) => [finisher.name, ...finisher.calls, ...finisher.body]),
     ...Object.values(ILLUSIONCULUM_FORMS).flatMap((form) => [form.name, ...form.body]),
   ];
@@ -93,6 +96,66 @@ test("every word of record is the owner's, verbatim (design/illusionculum-saga-2
   assert.match(component, /ILLUSIONCULUM_SAGA\.specs/);
   assert.match(component, /ILLUSIONCULUM_SAGA\.finishers\.map/);
   assert.doesNotMatch(component, /月城悠真が『エクスサーガドライバー』/);
+});
+
+// Owner's canon (2026-11-23): 「設定と変身音の微調整」. The calls, the spec
+// sheet and the sections, pinned as the canon writes them.
+test("the canon's calls, spec sheet, stages and sections are pinned", () => {
+  assert.deepEqual(
+    [...ILLUSIONCULUM_SAGA.calls],
+    [
+      "Ultra VINCULUM！",
+      "REXONANCE！",
+      "SA-GA！EX！SA-GA！EX！SA-GA！EX！SA-GA！EX！",
+      "ILLUSIONCULUM！ILLUSIONCULUM！ILLUSIONCULUM！ILLUSIONCULUM！",
+    ],
+  );
+  assert.deepEqual(
+    ILLUSIONCULUM_SAGA.specs.map((row) => [row.dt, row.dd]),
+    [
+      ["身長", "242.8cm"],
+      ["体重", "168.8kg"],
+      ["パンチ力", "228.8t"],
+      ["キック力", "365.8t"],
+      ["ジャンプ力", "5000.0m"],
+      ["走力", "0.00024s／100m"],
+      ["飛行速度", "測定不能"],
+      ["主演算", "50000YOPS／∞Core『KHAOS DeuX』"],
+      ["副演算", "9000TOPS／300Core『KOSMOS DeuX』"],
+      ["認識・制御", "『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P14』"],
+      ["EMP", "無制限"],
+    ],
+  );
+  assert.deepEqual(
+    ILLUSIONCULUM_SAGA.stages.map((stage) => stage.title),
+    ["イリュージョンクルム（エックスハイ）", "ウルトラ"],
+  );
+  assert.deepEqual(
+    ILLUSIONCULUM_SAGA.armour.map((article) => article.title),
+    ["ゴッドゲート・イリュージョンクルム", "ILLUSIONCULUM NANO ARMOR"],
+  );
+  assert.deepEqual(
+    ILLUSIONCULUM_SAGA.arsenal.map((article) => article.title),
+    ["リアクター・モア", "オーバーレッグ・リアクター"],
+  );
+  assert.deepEqual(
+    ILLUSIONCULUM_SAGA.abilities.map((article) => article.title),
+    ["ILLUSIONCULUM", "OVER CRYSTAL"],
+  );
+  assert.deepEqual(
+    ILLUSIONCULUM_SAGA.finishers.map((finisher) => [finisher.name, [...finisher.calls]]),
+    [
+      [
+        "クリスタルフィナーレ・イリュージョンナイズ",
+        ["MIDDLE！HIGH！XHIGH！MAX！ULTRA！", "CRYSTAL FINALE！", "ILLUSION NISE！"],
+      ],
+    ],
+  );
+  // The record's old calls and sections are gone.
+  const all = JSON.stringify(ILLUSIONCULUM_SAGA);
+  assert.doesNotMatch(all, /ULTRA！VINCULUM|ROLLOUT|イリュージョンクルム・スラッシュ|クリスタル・モアバースト|調整案/);
+  assert.match(component, /<h2 id="ics-forms-title">形態段階<\/h2>/);
+  assert.match(component, /<h2 id="ics-abilities-title">固有能力<\/h2>/);
 });
 
 test("the comparison: the owner's passages with only the Rexonance comparisons removed, never against レクソナンス", () => {
@@ -140,7 +203,8 @@ test("the added ウルトラ figures sit above the standard form and below フ�
   assert.ok(gain.includes(`パンチ力が${((1 - ultra[0] / farFrom[0]) * 100).toFixed(2)}%`));
   assert.ok(gain.includes(`キック力が${((1 - ultra[1] / farFrom[1]) * 100).toFixed(2)}%`));
   // The owner's own standard-form figures are unchanged.
-  assert.deepEqual(rows["イリュージョンクルム"].cells, ["イリュージョンクルム", "328.8t", "405.8t", "5000m", "0.00024秒"]);
+  // (the punch and kick follow the canon of 2026-11-23: 228.8t and 365.8t.)
+  assert.deepEqual(rows["イリュージョンクルム"].cells, ["イリュージョンクルム", "228.8t", "365.8t", "5000m", "0.00024秒"]);
 });
 
 test("the four key visuals, cutouts, details and orbs are one versioned, budgeted set", () => {

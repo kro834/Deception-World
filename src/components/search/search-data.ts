@@ -836,6 +836,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
       ...[...ILLUSIONCULUM_SAGA.armour, ...ILLUSIONCULUM_SAGA.arsenal, ...ILLUSIONCULUM_SAGA.abilities].flatMap(
         (article) => [article.title, ...article.body],
       ),
+      ...ILLUSIONCULUM_SAGA.stages.flatMap((stage) => [stage.title, ...stage.body]),
       ...ILLUSIONCULUM_SAGA.finishers.flatMap((finisher) => [finisher.name, ...finisher.body]),
     ].join("\n"),
     keywords: [
