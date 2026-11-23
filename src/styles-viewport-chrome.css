@@ -398,3 +398,70 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewpor
     color: HighlightText;
   }
 }
+
+/* 2026-11-23 iOS fix (A4): a sideways iPhone. viewport-fit=cover lets the
+   page run under the Dynamic Island or notch, so the page columns step in by
+   the side insets (Rexonance and Far From already did; Exhibition, the lab,
+   Dogs, the archive and Download carry their own). Full-bleed grounds stay
+   full-bleed: the fixed headers, rails and stages pad themselves. Roots with
+   no gutter of their own take the inset; roots with one keep the larger. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  html[data-family] body main.manager-page.manager-page.manager-page.manager-page,
+  html[data-family] body main.rxs-page.rxs-page.rxs-page,
+  html body main.dream-page.dream-page,
+  html body .gallery-page > main:not(.gallery-tours-main),
+  html body .gallery-page > footer,
+  html body .gallery-page > .gallery-tours-colophon {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* World's sections share one gutter: it grows to the inset, so the
+     sections keep their full-bleed grounds. The exploration index is sized
+     from the viewport (92vw) and steps in with it. */
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition.mirage-edition {
+    --sw-gutter: max(
+      clamp(16px, 4.4vw, 72px),
+      env(safe-area-inset-left, 0px),
+      env(safe-area-inset-right, 0px)
+    );
+  }
+
+  html body main.site-shell.site-shell .world-exploration {
+    width: min(1400px, 100% - 2 * max(4vw, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)));
+  }
+
+  /* The cinema's sections keep their own percentage gutters, or the inset
+     if that is larger (a wider padding re-broke its hero lines). */
+  html body .saga-cinema.saga-cinema main > section.hero {
+    padding-left: max(7%, env(safe-area-inset-left, 0px));
+    padding-right: max(7%, env(safe-area-inset-right, 0px));
+  }
+
+  html body .saga-cinema.saga-cinema main > section.section {
+    padding-left: max(6%, env(safe-area-inset-left, 0px));
+    padding-right: max(6%, env(safe-area-inset-right, 0px));
+  }
+
+  html body .gallery-page > main.gallery-tours-main {
+    padding-left: max(clamp(20px, 4vw, 56px), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(20px, 4vw, 56px), env(safe-area-inset-right, 0px));
+  }
+
+  html[data-family] body .world.library-page main#library-main,
+  html[data-family="library"] body .world.command-records.library-page.library-atelier main#library-main {
+    padding-left: max(clamp(16px, 4.2vw, 72px), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(16px, 4.2vw, 72px), env(safe-area-inset-right, 0px));
+  }
+
+  html body .world.search-page.search-observatory[data-search-page][data-search-mode] .search-main.search-main,
+  html body .world.search-page .search-main.search-main {
+    padding-left: max(clamp(12px, 3.8vw, 56px), env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(12px, 3.8vw, 56px), env(safe-area-inset-right, 0px));
+  }
+
+  html[data-family] body main.wm-page.wm-page {
+    padding-left: max(clamp(16px, 4vw, 68px), 50% - 720px, env(safe-area-inset-left, 0px));
+    padding-right: max(clamp(16px, 4vw, 68px), 50% - 720px, env(safe-area-inset-right, 0px));
+  }
+}
