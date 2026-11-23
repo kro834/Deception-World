@@ -28,6 +28,14 @@ test("Extreme's pill challenger buttons trim their square left rail to the pill"
   assert.match(body, /overflow:\s*clip/);
 });
 
+test("an iPad landscape / small laptop (1100px to 1279px) stacks the P14 delta over the readings too", () => {
+  const at = layout.indexOf("@media (min-width: 1100px) and (max-width: 1279.98px)");
+  assert.notEqual(at, -1);
+  const block = layout.slice(at, layout.indexOf("\n}\n", at));
+  assert.match(block, /"delta delta"/);
+  assert.match(block, /"\. values"/);
+});
+
 test("the P14 reading pill is sized from its widest figure, so 約11.4% stays inside it", () => {
   assert.match(layout, /grid-template-columns:\s*96px calc\(clamp\(26px, 2\.6vw, 36px\) \* 4\.55 \+ 24px\)/);
   // phones: 4.55em of 26px is 118px plus the pill's 20px padding
@@ -42,8 +50,8 @@ test("the Rexonance form stage insets its copy from the frame and keeps the poin
   assert.match(layout.slice(at, at + 120), /margin-inline: clamp\(14px, 4vw, 28px\)/);
 });
 
-test("a 375px to 429px phone stacks the P14 delta over the readings instead of squeezing it to 60px", () => {
-  const at = layout.indexOf("@media (min-width: 375px) and (max-width: 429.98px)");
+test("a 375px to 469px phone stacks the P14 delta over the readings instead of squeezing it to 60px", () => {
+  const at = layout.indexOf("@media (min-width: 375px) and (max-width: 469.98px)");
   assert.notEqual(at, -1);
   const block = layout.slice(at, layout.indexOf("\n}\n", at));
   assert.match(block, /"delta delta"/);

@@ -1415,7 +1415,7 @@ html[data-family="special"]
 /* Overlap pass (2026-11-23): the P14 reading's pill is 120px wide, but 約11.4%
    at the phone's 26px figure is 118px against its 100px inner width, so the
    figure ran 9px out of the pill's left edge on every phone and small tablet
-   (375px to 700px). The P14 column is widened to hold it. A 375px to 429px
+   (375px to 700px). The P14 column is widened to hold it. A 375px to 469px
    phone has no room for the delta beside the two readings (the delta kept
    60px and 応答時間短縮 / 約-94.0% overlapped the base figure), so the delta takes
    its own line over the readings as it does under 375px. */
@@ -1430,7 +1430,24 @@ html[data-family="special"]
   }
 }
 
-@media (min-width: 375px) and (max-width: 429.98px) {
+/* The same on a small laptop or an iPad landscape (1100px to 1279px), where the
+   comparator's column leaves the delta 70px to 122px against a 100px chip. */
+@media (min-width: 1100px) and (max-width: 1279.98px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    article {
+    grid-template-areas:
+      "label label"
+      "delta delta"
+      ". values";
+    row-gap: 8px;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 469.98px) {
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
