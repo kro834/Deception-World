@@ -315,7 +315,7 @@ export const ILLUSIONCULUM_COMPARISON = {
  * light, and the owner's own sentences about it (excerpts, verbatim). */
 export const ILLUSIONCULUM_FORMS = {
   standard: {
-    label: "イリュージョンクルム（エックスハイ）",
+    label: "イリュージョンクルム",
     name: "仮面ライダーイリュージョンクルムサーガ",
     accent: "#8fc6ff",
     body: [

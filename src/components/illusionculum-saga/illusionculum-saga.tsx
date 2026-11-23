@@ -501,7 +501,9 @@ export function IllusionculumSaga() {
           {specs.map((row) => (
             <div
               key={row.dt}
-              data-wide={row.sub.length ? "true" : undefined}
+              // The canon prints the compute and control rows whole (『…』 inside them):
+              // they span the sheet.
+              data-wide={row.sub.length || row.dd.includes("『") ? "true" : undefined}
               data-long={!row.sub.length && row.dd.length > 11 ? "true" : undefined}
             >
               <dt>{row.dt}</dt>
