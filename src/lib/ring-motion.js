@@ -445,7 +445,7 @@ export function watchRingMotion(doc = document) {
    *   fam: LinkFamily | null, state: 0 | 1 | 2, start: number, top: number, bottom: number, left: number, right: number }} LinkPart
    * @typedef {{ parts: LinkPart[], links: (HTMLElement | null)[], near: boolean, armed: boolean,
    *   lastStart: number, top: number, body: boolean, root: Element, wait: number }} LinkChain
-   * @typedef {{ el: Element, chains: LinkChain[], done: boolean, dirty: boolean, near: boolean, at: number }} LinkRoot
+   * @typedef {{ el: Element, chains: LinkChain[], done: boolean, dirty: boolean, near: boolean, at: number, wait: number }} LinkRoot
    */
   /** @type {WeakMap<Element, LinkPart>} */
   const partOf = new WeakMap();
@@ -540,6 +540,23 @@ export function watchRingMotion(doc = document) {
       // that is already animated, moved, dimmed or scrolls is not ours.
       if (display === "inline") continue;
       if (cs.position !== "static" && cs.position !== "relative") continue;
+      // A box with its own entrance (a dossier part's card, a form record)
+      // is never moved; once that entrance has played (nothing current on
+      // it, 2026-11-23) it is opened and what is inside it may chain.
+      if (
+        !fam &&
+        (cs.animationName !== "none" || cs.translate !== "none") &&
+        cs.visibility !== "hidden" &&
+        parseFloat(cs.opacity) >= 0.99 &&
+        child.childElementCount > 0 &&
+        cs.overflowY !== "auto" &&
+        cs.overflowY !== "scroll" &&
+        typeof child.getAnimations === "function" &&
+        child.getAnimations().length === 0
+      ) {
+        collectParts(child, depth + 1, out, vh, vw, sy);
+        continue;
+      }
       if (
         (!fam && cs.animationName !== "none") ||
         (!fam && cs.translate !== "none") ||
@@ -731,13 +748,15 @@ export function watchRingMotion(doc = document) {
 
   /**
    * How long the section's own entrance still runs, ms (a dossier part that
-   * was just chosen springs into the layout): 0 when it is at rest.
+   * was just chosen springs into the layout): 0 when it is at rest. `deep`
+   * counts the entrances inside it too (finite ones only; a loop never ends).
    * @param {Element} el
+   * @param {boolean} [deep]
    */
-  const rootSettling = (el) => {
+  const rootSettling = (el, deep = false) => {
     if (typeof el.getAnimations !== "function") return 0;
     let left = 0;
-    for (const animation of el.getAnimations()) {
+    for (const animation of el.getAnimations({ subtree: deep })) {
       if (animation.playState !== "running" || typeof animation.currentTime !== "number") continue;
       const end = animation.effect?.getComputedTiming().endTime;
       if (typeof end === "number" && Number.isFinite(end))
@@ -1109,7 +1128,19 @@ export function watchRingMotion(doc = document) {
         const rec = rootOf.get(entry.target);
         if (!rec) continue;
         rec.near = entry.isIntersecting;
-        if (rec.near && (!rec.done || rec.dirty)) detectRoot(rec);
+        if (rec.near && (!rec.done || rec.dirty)) {
+          // A section springing into the layout (a dossier part just chosen,
+          // while the page scrolls smoothly back to its top) is read once it
+          // has landed: "below the fold" must mean where it will rest.
+          const settle = rootSettling(rec.el, true);
+          if (settle > 0) {
+            if (!rec.wait)
+              rec.wait = view.setTimeout(() => {
+                rec.wait = 0;
+                if (rec.near && (!rec.done || rec.dirty)) detectRoot(rec);
+              }, settle);
+          } else detectRoot(rec);
+        }
         // Taken out of the layout (another dossier part was chosen): nothing
         // stays held in it, and it is read afresh when it comes back.
         else if (!rec.near && rec.done && entry.target.getClientRects().length === 0) {
@@ -1151,7 +1182,7 @@ export function watchRingMotion(doc = document) {
       const cls = el.getAttribute("class");
       if (cls && LINK_FORBID.test(cls)) continue;
       /** @type {LinkRoot} */
-      const rec = { el, chains: [], done: false, dirty: false, near: false, at: 0 };
+      const rec = { el, chains: [], done: false, dirty: false, near: false, at: 0, wait: 0 };
       rootOf.set(el, rec);
       linkRoots.push(rec);
       rootIO.observe(el);
@@ -1279,7 +1310,10 @@ export function watchRingMotion(doc = document) {
     view.removeEventListener("scrollend", sweepHeld);
     calm.removeEventListener?.("change", releaseAllLinks);
     linkSizes?.disconnect();
-    for (const rec of linkRoots) forgetRoot(rec);
+    for (const rec of linkRoots) {
+      view.clearTimeout(rec.wait);
+      forgetRoot(rec);
+    }
     linkRoots.length = 0;
     rootIO.disconnect();
     nearIO.disconnect();
