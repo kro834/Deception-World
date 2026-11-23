@@ -36,6 +36,7 @@ import { chromium } from "playwright";
 import sharp from "sharp";
 import { REXONANCE_SUIT_GOLD_AT } from "../src/lib/rexonance-calls.ts";
 import { REXONANCE_SUIT_PIECES, REXONANCE_SUIT_SIZE } from "../src/lib/rexonance-suit.ts";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL ?? process.env.BASE ?? "http://127.0.0.1:8705";
 const DPR = 2;
@@ -103,6 +104,8 @@ async function enter() {
   // The suit's plan and the nanite kit prepare in idle time.
   await page.waitForTimeout(5000);
   await page.locator(".side-panel-trigger").first().click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
   const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
   await link.waitFor({ state: "visible" });
   await link.evaluate((element) => element.scrollIntoView({ block: "center" }));

@@ -5,6 +5,7 @@
 //   PW_ENGINE=webkit BASE_URL=http://localhost:8189 node scripts/verify-saga-cinema-transition.mjs
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://localhost:8189";
 const engine = process.env.PW_ENGINE === "webkit" ? "webkit" : "chromium";
@@ -80,6 +81,8 @@ async function verifyMenuEntry(page, label, { holdChunk = false } = {}) {
   const trigger = page.locator(".side-panel-trigger").first();
   if (await trigger.evaluate(() => matchMedia("(pointer: coarse)").matches)) await trigger.tap();
   else await trigger.click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/saga-cinema#top"]');
   const link = page.locator('#site-side-panel a[href="/saga-cinema#top"]').first();
   await link.waitFor({ state: "visible" });
   const activateLink = async () => {

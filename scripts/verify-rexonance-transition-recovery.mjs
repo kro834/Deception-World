@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { ROUTE_WARMUP_DEADLINE_MS } from "../src/lib/route-warmup-deadline.ts";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const browser = await chromium.launch({
@@ -32,6 +33,8 @@ async function sourcePage(page, withHistory = false, initialHash = "") {
 
 async function enterRexonance(page) {
   await page.locator(".side-panel-trigger").click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
   await page.locator('#site-side-panel a[href="/rexonance-saga#top"]').click();
   await page.locator(".load-gate.is-rexonance-calls").waitFor();
 }
@@ -196,6 +199,7 @@ try {
       assert.ok(hold.requests() > 0);
       await backFromPending(page, "re-dive");
       await page.locator(".side-panel-trigger").click();
+      await showMenuRow(page, 'a[href="/characters/ciel"]');
       await page.locator('#site-side-panel a[href="/characters/ciel"]').click();
       await page.locator(".load-gate.is-ciel-cutin").waitFor();
       hold.release();

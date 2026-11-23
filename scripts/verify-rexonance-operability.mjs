@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const engine = process.env.PW_ENGINE || "chromium";
@@ -153,6 +154,8 @@ async function verifyAnchor(page, id) {
     // At narrow widths readers use the actual drawer. Assigning location.hash
     // bypasses its scroll-lock release and the router's navigation handling.
     await page.locator(".rxs-menu-trigger").click();
+    // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+    await showMenuRow(page, `a[href="/rexonance-saga#${id}"]`);
     await page.locator(`#site-side-panel a[href="/rexonance-saga#${id}"]`).click();
     await page.waitForFunction(() => !document.documentElement.hasAttribute("data-side-menu-open"));
   }

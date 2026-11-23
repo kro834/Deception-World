@@ -51,6 +51,7 @@ import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium } from "playwright";
 import { checkedUrl } from "./browser-guard.mjs";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8591");
 const out = process.env.OUT_DIR || "/tmp/movie-reliability";
@@ -570,6 +571,8 @@ async function arriveFromHome(page, path) {
   const link = page.locator(`.side-panel-links a[href^="/${path}"]:visible`).first();
   for (let k = 0; k < 3 && !(await link.isVisible().catch(() => false)); k += 1) {
     await trigger.click({ force: true, timeout: 45000 }).catch(() => {});
+    // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+    await showMenuRow(page, `a[href^="/${path}"]`).catch(() => {});
     await link.waitFor({ state: "visible", timeout: 20000 }).catch(() => {});
   }
   must(await link.isVisible().catch(() => false), "the menu did not open on /world");

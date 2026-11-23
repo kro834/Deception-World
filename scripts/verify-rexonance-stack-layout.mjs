@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { chromium, webkit } from "playwright";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8199";
 const out = process.env.OUTPUT_DIR || "/private/tmp/rexonance-stack-layout";
@@ -94,6 +95,8 @@ try {
       if (await localLink.isVisible()) await localLink.click();
       else {
         await page.locator(".side-panel-trigger").first().click();
+        // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+        await showMenuRow(page, 'a[href="/rexonance-saga#p14"]');
         await page.locator('#site-side-panel a[href="/rexonance-saga#p14"]').first().click();
       }
       await page.waitForURL("**#p14");

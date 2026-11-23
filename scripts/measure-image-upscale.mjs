@@ -70,6 +70,18 @@ async function menuDossiers(page) {
     await page.waitForTimeout(1500);
     hrefs = await links();
   }
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  // Every region's rows are read by turning the dial to each tab in turn.
+  if ((await page.locator("#site-side-panel").getAttribute("data-open")) !== "true") {
+    await page.locator(".side-panel-trigger").first().click();
+    await page.waitForTimeout(800);
+  }
+  const tabs = await page.locator('#site-side-panel [id^="command-atlas-tab-"]').count();
+  for (let index = 0; index < tabs; index += 1) {
+    await page.locator('#site-side-panel [id^="command-atlas-tab-"]').nth(index).click();
+    await page.waitForTimeout(400);
+    hrefs = [...hrefs, ...(await links())];
+  }
   return [
     ...new Set(hrefs.filter((href) => /^\/(characters|managers|riders)\/[^/?#]+$/.test(href))),
   ];

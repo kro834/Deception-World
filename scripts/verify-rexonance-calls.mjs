@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium, webkit } from "playwright";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:8082";
 const engine = process.env.PW_ENGINE || "chromium";
@@ -322,6 +323,8 @@ async function verifyProfile(profile) {
   const menu = page.locator(".side-panel-trigger").first();
   if (touch) await menu.tap();
   else await menu.click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
   const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
   await link.waitFor({ state: "visible" });
   await link.evaluate((element) => element.scrollIntoView({ block: "center" }));
@@ -631,6 +634,7 @@ async function verifyProfile(profile) {
       { timeout: 20000 },
     );
     await backEntryPage.locator(".side-panel-trigger").first().click();
+    await showMenuRow(backEntryPage, 'a[href="/world#top"]');
     const worldLink = backEntryPage.locator('#site-side-panel a[href="/world#top"]').first();
     await worldLink.waitFor({ state: "visible" });
     await worldLink.evaluate((element) => element.scrollIntoView({ block: "center" }));
@@ -644,6 +648,7 @@ async function verifyProfile(profile) {
       { timeout: 20000 },
     );
     await backEntryPage.locator(".side-panel-trigger").first().click();
+    await showMenuRow(backEntryPage, 'a[href="/rexonance-saga#top"]');
     const cancelLink = backEntryPage
       .locator('#site-side-panel a[href="/rexonance-saga#top"]')
       .first();
@@ -670,6 +675,7 @@ async function verifyProfile(profile) {
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.locator(".side-panel-trigger").first().click();
+    await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
     const reducedLink = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
     await reducedLink.waitFor({ state: "visible" });
     await reducedLink.evaluate((element) => element.scrollIntoView({ block: "center" }));
@@ -707,6 +713,7 @@ async function verifyProfile(profile) {
     );
     await installCallRecorder(archivePage);
     await archivePage.locator(".side-panel-trigger").first().click();
+    await showMenuRow(archivePage, 'a[href="/rexonance-saga#top"]');
     const archiveLink = archivePage
       .locator('#site-side-panel a[href="/rexonance-saga#top"]')
       .first();

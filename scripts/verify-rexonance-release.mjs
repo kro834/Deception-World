@@ -21,6 +21,7 @@ import { writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 import { checkedUrl } from "./browser-guard.mjs";
 import { detachedDOMReport } from "./heap-retainers.mjs";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8082");
 const baseline = process.argv.includes("--record-baseline");
@@ -77,6 +78,8 @@ async function assertClientNavigation(label) {
 
 async function sidePanel(hrefs) {
   await page.locator(".side-panel-trigger").first().click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, `a:is(${hrefs.map((href) => `[href="${href}"]`).join(", ")})`);
   const links = page.locator(hrefs.map((href) => `.side-panel a[href="${href}"]`).join(", "));
   await links.first().waitFor({ state: "visible", timeout: 15000 });
   await links.first().click();

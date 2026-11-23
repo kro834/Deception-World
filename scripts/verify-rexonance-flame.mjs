@@ -18,6 +18,7 @@ import {
   NANITE_FIRE_PHASES,
 } from "../src/lib/rexonance-ignition.js";
 import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const materialEntry = NANITE_FIRE_PHASES.materialStart * 2400;
 const materialScroll = scrollFlameAt(NANITE_FIRE_PHASES.materialStart);
@@ -365,6 +366,8 @@ const settled = (page) =>
 async function openEntry(page, animated = true) {
   const trigger = page.locator(".side-panel-trigger").first();
   await trigger.click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
   const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
   await link.waitFor({ state: "visible" });
   await link.scrollIntoViewIfNeeded();

@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 import { detachedDOMReport, detachedResourceGrowth } from "./heap-retainers.mjs";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:18642";
 const baseline = process.argv.includes("--record-baseline");
@@ -71,6 +72,8 @@ async function settleNanitePreparation() {
 
 async function go(path) {
   await page.locator(".side-panel-trigger").first().click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, `a:is([href="${path}"], [href="${path}#top"])`);
   await page
     .locator(`.side-panel a[href="${path}"], .side-panel a[href="${path}#top"]`)
     .first()

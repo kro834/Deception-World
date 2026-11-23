@@ -19,6 +19,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { chromium } from "playwright";
 import { REXONANCE_SUIT_ATLAS, REXONANCE_SUIT_GOLD_ATLAS } from "../src/lib/rexonance-suit.ts";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = new URL(process.env.BASE_URL ?? "http://127.0.0.1:8082");
 assert.ok(
@@ -686,6 +687,8 @@ async function runCase(browser, profileName, scenario) {
     if ((await page.locator("#site-side-panel").getAttribute("data-open")) !== "true")
       await tap(".side-panel-trigger", "menu-open");
     const selector = `#site-side-panel a[href="${href}"]`;
+    // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+    await showMenuRow(page, `a[href="${href}"]`);
     await page.locator(selector).first().waitFor({ state: "visible" });
     await page.locator(selector).first().scrollIntoViewIfNeeded();
     return { selector, startedAt: startAt, preparedAt: await now() };

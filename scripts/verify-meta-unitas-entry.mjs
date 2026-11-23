@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
 import { checkedUrl } from "./browser-guard.mjs";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = checkedUrl(process.env.BASE_URL || "http://127.0.0.1:8618");
 const engine = process.env.PW_ENGINE || "webkit";
@@ -93,6 +94,8 @@ try {
           return;
         }
         await press(page.locator(".side-panel-trigger"));
+        // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+        await showMenuRow(page, 'a[href="/meta-unitas-saga#top"]');
         await press(page.locator('#site-side-panel a[href="/meta-unitas-saga#top"]'));
       };
       await enter();

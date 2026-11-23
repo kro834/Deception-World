@@ -1,4 +1,5 @@
 import { chromium, webkit } from "playwright";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const baseUrl = (process.env.BASE_URL ?? "http://127.0.0.1:8594").replace(/\/$/, "");
 const timeoutMs = Number(process.env.STARTUP_TIMEOUT_MS ?? 30000);
@@ -112,6 +113,8 @@ const openPage = async ({
   layoutTrace.push({ milestone: "domcontentloaded", ...(await readLayout(page)) });
   if (clientWorldTransition) {
     await page.getByRole("button", { name: "メニューを開く" }).click({ timeout: timeoutMs });
+    // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+    await showMenuRow(page, 'a[href^="/rexonance-saga"]');
     const menuLink = page.locator('#site-side-panel a[href^="/rexonance-saga"]');
     await menuLink.waitFor({ state: "visible", timeout: timeoutMs });
     await page.evaluate(() => {

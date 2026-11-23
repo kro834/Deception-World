@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const browser = await chromium.launch({ channel: process.env.PW_BROWSER_CHANNEL || "chrome" });
@@ -349,6 +350,8 @@ async function verifyBackClosesMenu(context) {
   const trigger = page.locator(".side-panel-trigger").first();
   await trigger.click();
   await page.waitForFunction(() => document.querySelector(".side-panel-trigger")?.getAttribute("aria-expanded") === "true");
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
   const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
   await link.waitFor({ state: "visible" });
   await link.evaluate((element) => element.scrollIntoView({ block: "center" }));

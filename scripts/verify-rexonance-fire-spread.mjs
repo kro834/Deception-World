@@ -14,6 +14,7 @@ import sharp from "sharp";
 import { entryElapsedTime, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { flameSpreadEvidence } from "./rexonance-spread-evidence.mjs";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8594";
 const out = process.env.OUT_DIR || "output/playwright/rexonance-fire-spread";
@@ -203,6 +204,8 @@ const frames = () =>
   );
 async function openEntry() {
   await page.locator(".side-panel-trigger").first().click();
+  // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+  await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
   const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
   await link.waitFor({ state: "visible" });
   await link.scrollIntoViewIfNeeded();

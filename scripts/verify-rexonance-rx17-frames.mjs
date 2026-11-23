@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { chromium } from "playwright";
 import sharp from "sharp";
 import { REXONANCE_SUIT_PIECES, REXONANCE_SUIT_SIZE } from "../src/lib/rexonance-suit.ts";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:8082";
 const output = process.env.RX17_OUTPUT ?? "/private/tmp/rx17-review/baseline";
@@ -130,6 +131,8 @@ try {
     await page.waitForTimeout(2500);
     const trigger = page.locator(".side-panel-trigger").first();
     await (profile.hasTouch ? trigger.tap() : trigger.click());
+    // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+    await showMenuRow(page, 'a[href="/rexonance-saga#top"]');
     const link = page.locator('#site-side-panel a[href="/rexonance-saga#top"]').first();
     await link.waitFor({ state: "visible" });
     await link.scrollIntoViewIfNeeded();
