@@ -40,8 +40,7 @@ import { reportChapter, sentence } from "./far-from-report-data";
    100; 熱負荷 reads lower = better). Every figure on screen is one of the
    owner's cells or the ratio of two cells in the same row; each table's ※
    note is printed under it, verbatim. In the エクスプリーム and レクソナンス
-   views, 加速機構 adds P16 against that form's unit (P14 Standard / P14
-   Extreme Tuning), from the owner's 公式設定 暫定ベンチマーク
+   views, 加速機構 adds P16 against that form's unit (P14 Standard / P14), from the owner's 公式設定 暫定ベンチマーク
    (far-from-p16-official.ts): the same figures as #p16's comparator. */
 
 type View = BaselineKey | "all";
@@ -201,7 +200,7 @@ function TextRows({ baseline }: { baseline: BaselineKey | null }) {
 }
 
 /** 加速機構の性能差: P16 against the form's unit (エクスプリーム's P14
- * Standard, レクソナンス's P14 Extreme Tuning), the owner's 公式設定 暫定
+ * Standard, レクソナンス's P14), the owner's 公式設定 暫定
  * ベンチマーク (P14 Standard = 100), in a text row's frame: its label, then
  * the pair, then the five changes with their indices. */
 function AccelCompare({ base }: { base: "standard" | "tuning" }) {

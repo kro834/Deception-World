@@ -789,7 +789,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
       "ULTRA",
       "SA-GA OS 5.5",
       "P14",
-      "P14 Extreme Tuning",
+      "P14",
       "第五の犬",
       "終焉",
       "自己共鳴",
@@ -908,7 +908,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     // The owner's OFFICIAL P14 / P16 setting (2026-10-23): the three units'
     // descriptions, 主演算性能との関係 and 総合評価, as #p16 prints them.
     id: "far-from-p16-official",
-    title: "P14 Standard／P14 Extreme Tuning／P16",
+    title: "P14 Standard／P14／P16",
     category: "pages",
     description: "演算加速機構の性能比較（暫定ベンチマーク）",
     body: [
@@ -917,7 +917,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
       ...P16_MAIN.after,
       ...P16_SUMMARY,
     ].join("\n"),
-    keywords: ["P14 Standard", "P14 Extreme Tuning", "P16", "演算加速機構", "暫定ベンチマーク"],
+    keywords: ["P14 Standard", "P14", "P16", "演算加速機構", "暫定ベンチマーク"],
     to: "/far-from-saga",
     hash: "p16",
   },

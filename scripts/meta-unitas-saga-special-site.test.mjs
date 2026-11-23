@@ -240,7 +240,7 @@ test("the comparison: Meta Unitas's parts, no Rexonance, no provisos, removal on
     assert.ok(all.includes(name), name);
   const p16 = META_UNITAS_PERFORMANCE.chapters.find((c) => c.title.startsWith("P14"));
   assert.ok(
-    p16.body.some((p) => p.startsWith("P16はP14 Extreme Tuning比で実効演算加速性能50%向上")),
+    p16.body.some((p) => p.startsWith("P16はP14比で実効演算加速性能50%向上")),
   );
 });
 

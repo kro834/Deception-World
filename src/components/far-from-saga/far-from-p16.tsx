@@ -34,7 +34,7 @@ import {
 /* #p16 — 『P16』, from the owner's comparison text (2026-10-22) and the
    owner's OFFICIAL P14 / P16 setting (公式設定, 2026-10-23).
 
-   The canon: 『P14 Standard』 (エクスプリーム) → 『P14 Extreme Tuning』
+   The canon: 『P14 Standard』 (エクスプリーム) → 『P14』
    (レクソナンス) → 『P16』 (ファーフロム). Every sentence here is the owner's,
    quoted whole: the two 【P16・第16世代演算加速機構】 chapters
    (far-from-p16-data.ts) and the 公式設定 (far-from-p16-official.ts). The
@@ -47,7 +47,7 @@ type UnitBaseline = Exclude<Baseline, "p2">;
 
 /** The three bases: the unit over the form that carries it. */
 const BASELINES: readonly { key: Baseline; unit: string; form: string }[] = [
-  { key: "tuning", unit: "P14 Extreme Tuning", form: "レクソナンス" },
+  { key: "tuning", unit: "P14", form: "レクソナンス" },
   { key: "standard", unit: "P14 Standard", form: "エクスプリーム" },
   { key: "p2", unit: "P2", form: "ヴィンクルム" },
 ];
@@ -62,7 +62,7 @@ function ProvisionalTag() {
   return <span className="ffs-provisional-tag">暫定ベンチマーク</span>;
 }
 
-/** A unit's name, 「P14 Extreme Tuning」: the words after 「P14」 hold
+/** A unit's name, 「P14」: the words after 「P14」 hold
  * together, so a narrow line breaks after 「P14」 if at all. */
 export function UnitName({ value }: { value: string }) {
   const at = value.indexOf(" ");
@@ -408,10 +408,10 @@ export function FarFromP16() {
           <p>
             <ProvisionalTag />
             <span>
-              <UnitName value="P14 Extreme Tuning比" />
+              <UnitName value="P14比" />
             </span>
           </p>
-          <dl aria-label="P16の暫定ベンチマーク（P14 Extreme Tuning比）">
+          <dl aria-label="P16の暫定ベンチマーク（P14比）">
             {P16_OFFICIAL_METRICS.map((metric) => (
               <div key={metric.key}>
                 <dt>{metric.label}</dt>

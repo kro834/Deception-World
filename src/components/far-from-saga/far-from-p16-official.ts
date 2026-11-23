@@ -2,9 +2,8 @@
 // read out of the verbatim text (far-from-p16-official-text.ts).
 //
 // Canon: 『P14 Standard』 is エクスプリームサーガ's acceleration mechanism,
-// 『P14 Extreme Tuning』 is レクソナンスサーガ's (specialised for 第五の犬),
-// 『P16』 is ファーフロムサーガ's; the lineage is P14 Standard → P14 Extreme
-// Tuning → P16. Everything here is a line of the owner's text, quoted whole
+// 『P14』 is レクソナンスサーガ's (specialised for 第五の犬),
+// 『P16』 is ファーフロムサーガ's; the lineage is P14 Standard → P14 → P16. Everything here is a line of the owner's text, quoted whole
 // (line() throws if a prefix stops matching). What belongs to the owner's
 // message rather than the site is left out: the opening lines, the note's
 // 「数値は今回提案する新しい設定値です。」 (ADAPTED) and the closing 「これなら…」
@@ -44,10 +43,10 @@ export type AccelUnit = {
   saga: string;
 };
 
-/** In the owner's order: P14 Standard → P14 Extreme Tuning → P16. */
+/** In the owner's order: P14 Standard → P14 → P16. */
 export const ACCEL_UNITS: readonly AccelUnit[] = [
   { key: "standard", name: "P14 Standard", form: "エクスプリーム", saga: "エクスプリームサーガ" },
-  { key: "tuning", name: "P14 Extreme Tuning", form: "レクソナンス", saga: "レクソナンスサーガ" },
+  { key: "tuning", name: "P14", form: "レクソナンス", saga: "レクソナンスサーガ" },
   { key: "p16", name: "P16", form: "ファーフロム", saga: "ファーフロムサーガ" },
 ];
 
@@ -85,7 +84,7 @@ const METRIC_KEYS: Record<string, OfficialMetricKey> = {
   同一処理量の熱負荷: "heat",
 };
 
-/** 「* 実効演算加速性能：50%向上」: P16 against P14 Extreme Tuning, as listed. */
+/** 「* 実効演算加速性能：50%向上」: P16 against P14, as listed. */
 const STATED_VS_TUNING = linesBetween("この数値を採用した場合", ["P14 Standardとの比較では"]).map(
   (item) => {
     const match = item.match(/^\* (.+)：(\d+(?:\.\d+)?)%(向上|短縮|削減)$/);
@@ -117,7 +116,7 @@ export const P16_BENCHMARK_NOTE = NOTE_LINE.replace("数値は今回提案する
 
 /** What the owner states P16 achieves, by base. */
 export const P16_STATED = {
-  /** P16 against P14 Extreme Tuning (the owner's list). */
+  /** P16 against P14 (the owner's list). */
   tuning: STATED_VS_TUNING.map(({ figure, verb }) => ({ figure, verb })),
   /** P16 against P14 Standard: 140% (2.4倍), then four reductions. */
   standard: (() => {
@@ -160,7 +159,7 @@ export function p16TimesStandard(metric: OfficialMetric): number {
 
 const DESCRIPTION_HEADINGS = [
   "『P14 Standard』— エクスプリームサーガ",
-  "『P14 Extreme Tuning』— レクソナンスサーガ",
+  "『P14』— レクソナンスサーガ",
   "『P16』— ファーフロムサーガ",
 ] as const;
 
@@ -208,10 +207,10 @@ if (P16_MAIN.table.rows.some((row) => row.length !== 3))
   throw new Error("主演算性能との関係's table moved");
 
 /* ---------------------------------------------------------------------------
-   総合評価 — verbatim. The owner's closing line 「これならP14 Extreme Tuningを
+   総合評価 — verbatim. The owner's closing line 「これならP14を
    単なる旧式として扱うことなく、…という技術的な系譜になります。」 speaks about
    the proposal itself, so the site leaves it out.
    --------------------------------------------------------------------------- */
 
 export const P16_SUMMARY_TITLE = line("総合評価");
-export const P16_SUMMARY: readonly string[] = linesBetween("総合評価", ["これならP14 Extreme Tuning"]);
+export const P16_SUMMARY: readonly string[] = linesBetween("総合評価", ["これならP14"]);

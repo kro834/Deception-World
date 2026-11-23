@@ -131,7 +131,7 @@ export const BASIC_METRICS: readonly BasicMetric[] = BASIC_TABLE.rows
 export const ACCEL_LABEL = "加速機構";
 
 /** Rows that are names, not figures (加速機構, 戦闘OS): the owner's cells.
- * 加速機構 reads P2 / P14 Standard / P14 Extreme Tuning / P16 (公式設定). */
+ * 加速機構 reads P2 / P14 Standard / P14 / P16 (公式設定). */
 export const BASIC_TEXT_ROWS: readonly {
   label: string;
   values: Record<FormKey, string>;

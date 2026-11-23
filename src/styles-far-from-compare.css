@@ -262,14 +262,14 @@
   color: #cfeffa;
 }
 
-/* 「P14 Extreme Tuning」: the words after 「P14」 hold together; a narrow
-   line breaks after 「P14」, never inside 「Extreme Tuning」. */
+/* 「P14 Standard」: the words after 「P14」 hold together; a narrow
+   line breaks after 「P14」, never inside 「Standard」. */
 .ffs-page .ffs-unit-tuning {
   white-space: nowrap;
 }
 
 /* In the console's name rows the qualifier reads a step smaller, set close
-   (palt), so 「P14 Extreme Tuning」 holds one line where it can. */
+   (palt), so 「P14」 holds one line where it can. */
 .ffs-page .ffs-text-row dd .ffs-unit-tuning {
   font-size: max(12px, 0.86em);
   font-feature-settings: "palt" 1;
@@ -1570,7 +1570,7 @@
 }
 
 /* The generation comparator (Rexonance's P1 → P14, here P14 Standard /
-   P14 Extreme Tuning / P2 → P16). */
+   P14 / P2 → P16). */
 .ffs-page .ffs-p16-comparator {
   margin-top: clamp(28px, 4vw, 44px);
   padding: clamp(22px, 3.4vw, 42px);
@@ -1801,7 +1801,7 @@
   content: "※";
 }
 
-/* P2 → P14 Standard → P14 Extreme Tuning → P16. */
+/* P2 → P14 Standard → P14 → P16. */
 .ffs-page .ffs-p16-lineage {
   margin-top: clamp(40px, 6vw, 64px);
 }
@@ -2412,7 +2412,7 @@
     line-height: 1.25;
   }
 
-  /* A pill is too narrow for 「Extreme Tuning比」 on one line: it breaks
+  /* A pill is too narrow for a unit name with 比 on one line: it breaks
      between the words, inside the pill. */
   .ffs-page .ffs-p16-switch .ffs-unit-tuning {
     white-space: normal;

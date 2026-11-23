@@ -93,7 +93,7 @@ export const FORM_ARCHIVE_FORMS: readonly ArchiveForm[] = [
     id: "far-from",
     archive: "saga",
     name: "ファーフロムサーガ",
-    tier: "最終到達｜超共鳴と接続・統合・多次元運用",
+    tier: "最終到達｜《自己共鳴》と接続・統合・多次元運用",
   },
   { id: "stella", archive: "realm", name: "ステラフォーム", tier: "01 / 基準｜明示設定" },
   { id: "burst", archive: "realm", name: "バーストフォーム", tier: "02 / 並列｜地上圧縮" },

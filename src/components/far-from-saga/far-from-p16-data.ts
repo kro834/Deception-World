@@ -3,10 +3,9 @@
 //
 // The chapter prints two owner sources. The two 【P16・第16世代演算加速機構】
 // chapters of the comparison text, quoted whole (sentence() throws if a
-// fragment stops matching), with the figures they state: against P14 Extreme
-// Tuning (+50%, −35%, −40%, −27%) and Vinculum's P2 (約3倍, 暫定). And the
+// fragment stops matching), with the figures they state: against P14 (+50%, −35%, −40%, −27%) and Vinculum's P2 (約3倍, 暫定). And the
 // 公式設定 (far-from-p16-official.ts): P14 Standard (エクスプリーム) → P14
-// Extreme Tuning (レクソナンス) → P16 (ファーフロム), its 暫定ベンチマーク with
+// (レクソナンス) → P16 (ファーフロム), its 暫定ベンチマーク with
 // P14 Standard = 100, the three descriptions, 主演算性能との関係 and 総合評価.
 // The test checks each figure against the sentence it comes from and the tables.
 //
@@ -33,8 +32,8 @@ export const P16_FUNCTIONS: readonly string[] = (() => {
   return list.split("、");
 })();
 
-/** The comparison text's four items: P16 with Rexonance's P14 Extreme Tuning
- * = 100 (the same figures as the 公式設定's P14 Extreme Tuning比). */
+/** The comparison text's four items: P16 with Rexonance's P14
+ * = 100 (the same figures as the 公式設定's P14比). */
 export type P16Metric = {
   key: "throughput" | "wait" | "phase" | "heat";
   label: string;
@@ -51,7 +50,7 @@ export type P16Metric = {
 const P14_BENCHMARK_1 = sentence(PART1, "P14比150%");
 const P14_BENCHMARK_1B = sentence(PART1, "位相同期誤差は40%減少");
 const P14_HEAT_1 = sentence(PART1, "P14比で27%削減");
-const P14_BENCHMARK_2 = sentence(PART2, "P14 Extreme Tuning比で対象処理の実効スループットが50%向上");
+const P14_BENCHMARK_2 = sentence(PART2, "P14比で対象処理の実効スループットが50%向上");
 
 export const P16_METRICS: readonly P16Metric[] = [
   {
@@ -136,14 +135,14 @@ export const P16_TOPICS: readonly {
 /** The heat note and the ULTRA 60-second note (part 1's last paragraph). */
 export const P16_HEAT_NOTE: string = paragraphsOf(PART1)[6];
 
-/** P2 → P14 Standard → P14 Extreme Tuning → P16, the forms that carry them
+/** P2 → P14 Standard → P14 → P16, the forms that carry them
  * (公式設定), with part 2's lineage paragraph. */
 export const P16_LINEAGE = {
   text: paragraphsOf(PART2)[1],
   steps: [
     { key: "p2", unit: "P2", form: "ヴィンクルム" },
     { key: "standard", unit: "P14 Standard", form: "エクスプリーム" },
-    { key: "tuning", unit: "P14 Extreme Tuning", form: "レクソナンス" },
+    { key: "tuning", unit: "P14", form: "レクソナンス" },
     { key: "p16", unit: "P16", form: "ファーフロム" },
   ],
 } as const;

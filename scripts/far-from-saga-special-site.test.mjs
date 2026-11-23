@@ -527,14 +527,13 @@ test("the owner's comparison text is kept verbatim and read whole into the two d
   // ファーフロム reads 50000〜YOPS / 60000〜YOPS (lower bounds).
   // Owner (2026-10-23): エクスプリームの加速機構は P14 — the table cell reads P14
   // and the 保留 sentence names 『P14（Extreme tuning）』; nothing else changed.
-  // Owner (2026-10-23, 公式設定): 加速機構 = P2 / P14 Standard / P14 Extreme
-  // Tuning / P16. The table cells read so; the sentences naming Rexonance's
-  // unit name 『P14 Extreme Tuning』 (part 1's basis; part 2's 二世代分, 終焉
-  // and 「P14 Extreme Tuning比」 sentences); part 2's Extreme sentence names
+  // Owner (2026-10-23, 公式設定): 加速機構 = P2 / P14 Standard / P14 / P16. The table cells read so; the sentences naming Rexonance's
+  // unit name 『P14』 (part 1's basis; part 2's 二世代分, 終焉
+  // and 「P14比」 sentences); part 2's Extreme sentence names
   // 『P14 Standard』. Nothing else changed.
   assert.equal(
     createHash("sha256").update(TEXT).digest("hex"),
-    "2359dbaf8255da679c8cbea787bdfdd700feea62cc72eaa28493c27c04a31b58",
+    "1dff50863ae3ed72bdf3a37513ad734b40bd62a7083475e1bbaa67ca8840397e",
   );
   assert.doesNotMatch(TEXT, /個別比較値未確定|機構単体の正確な向上率は保留する/);
   assert.doesNotMatch(TEXT, /P14を高出力と結果固定へ最適化した|Extreme tuning|先行世代|設定案として扱う/);
@@ -659,7 +658,7 @@ test("#performance draws on the owner's two tables only, and each keeps its ※ 
       ["100m走力", "0.1秒（est.）", "0.002秒", "0.00021秒", "0.00018秒"],
       ["主演算", "10000YOPS", "20000YOPS", "50000〜YOPS", "60000〜YOPS"],
       ["副演算", "300TOPS", "5000TOPS", "9000TOPS", "9000TOPS"],
-      ["加速機構", "P2", "P14 Standard", "P14 Extreme Tuning", "P16"],
+      ["加速機構", "P2", "P14 Standard", "P14", "P16"],
       ["戦闘OS", "従来型", "従来型", "SA-GA OS 5.5", "SA-GA OS 6.1"],
     ],
   );
@@ -1095,7 +1094,7 @@ const STATED = [
     ],
   ],
   [
-    "暫定ベンチマークでは、P14 Extreme Tuning比で対象処理の",
+    "暫定ベンチマークでは、P14比で対象処理の",
     [
       ["50%", gain(I.accel(ff), I.accel("rexonance"))],
       ["35%", TEXT_ONLY.p16Wait],
@@ -1312,7 +1311,7 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
     ],
   );
   assert.match(p16.P16_HEAT_NOTE, /ULTRAの60秒制限/);
-  assert.match(p16.P16_INTRO.basis, /^『P16』は、レクソナンスサーガの『P14 Extreme Tuning』を基礎として/);
+  assert.match(p16.P16_INTRO.basis, /^『P16』は、レクソナンスサーガの『P14』を基礎として/);
   assert.match(p16.P16_INTRO.generations, /二世代分の改良/);
   assert.deepEqual(
     [...p16.P16_FUNCTIONS],
@@ -1366,7 +1365,7 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
   assert.equal(p16View.match(/\{reading\(/g)?.length, 2);
   // The comparator: native radios over the three bases, each unit over the
   // form that carries it.
-  assert.match(p16View, /\{ key: "tuning", unit: "P14 Extreme Tuning", form: "レクソナンス" \}/);
+  assert.match(p16View, /\{ key: "tuning", unit: "P14", form: "レクソナンス" \}/);
   assert.match(p16View, /\{ key: "standard", unit: "P14 Standard", form: "エクスプリーム" \}/);
   assert.match(p16View, /\{ key: "p2", unit: "P2", form: "ヴィンクルム" \}/);
   assert.match(p16View, /type="radio"/);
@@ -1488,7 +1487,7 @@ test("the five forms are named in katakana only wherever the page's own labels n
 
 // Owner (2026-10-23): the OFFICIAL P14 / P16 setting (公式設定). It supersedes
 // the earlier P14（Extreme tuning）-as-Extreme 設定案: 『P14 Standard』 is
-// Extreme's, 『P14 Extreme Tuning』 Rexonance's, 『P16』 Far From's.
+// Extreme's, 『P14』 Rexonance's, 『P16』 Far From's.
 const official = loadData("src/components/far-from-saga/far-from-p16-official.ts");
 const { P16_OFFICIAL_TEXT: OFFICIAL } = loadData(
   "src/components/far-from-saga/far-from-p16-official-text.ts",
@@ -1498,13 +1497,13 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
   // sha256 of the owner's 公式設定 as sent (2026-10-23). Any edit fails here.
   assert.equal(
     createHash("sha256").update(OFFICIAL).digest("hex"),
-    "cf796c17c1e2d7988f5be204712d167b15fedebff6e19efb5743bccf4bca365e",
+    "7193c79da08a49901a796bc60096187e55f53c2aba6003df3c281c517bf1e5cb",
   );
   assert.deepEqual(
     official.ACCEL_UNITS.map((unit) => [unit.key, unit.name, unit.form]),
     [
       ["standard", "P14 Standard", "エクスプリーム"],
-      ["tuning", "P14 Extreme Tuning", "レクソナンス"],
+      ["tuning", "P14", "レクソナンス"],
       ["p16", "P16", "ファーフロム"],
     ],
   );
@@ -1570,7 +1569,7 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
   for (const figure of ["比50%", "応答遅延35%", "位相同期誤差40%", "熱負荷27%"])
     assert.ok(summary.includes(figure), figure);
   // The comparison text's P16 chapters agree: +50 / −35 / −40 / −27 against
-  // Rexonance's P14 Extreme Tuning.
+  // Rexonance's P14.
   const byKey = Object.fromEntries(metrics.map((m) => [m.key, m]));
   assert.deepEqual(
     p16.P16_METRICS.map((m) => m.change),
@@ -1579,7 +1578,7 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
   // 主演算性能との関係: 20,000YOPS / 50,000〜YOPS / 60,000〜YOPS; 3倍 and 1.2倍; the caution.
   assert.deepEqual(official.P16_MAIN.table.rows, [
     ["エクスプリーム", "20,000YOPS", "P14 Standard"],
-    ["レクソナンス", "50,000〜YOPS", "P14 Extreme Tuning"],
+    ["レクソナンス", "50,000〜YOPS", "P14"],
     ["ファーフロム", "60,000〜YOPS", "P16"],
   ]);
   assert.match(official.P16_MAIN.after.join(""), /エクスプリームの3倍、レクソナンスの1\.2倍/);
@@ -1605,7 +1604,7 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
     official.P16_DESCRIPTIONS.map((d) => [d.heading, d.paragraphs.length]),
     [
       ["『P14 Standard』— エクスプリームサーガ", 2],
-      ["『P14 Extreme Tuning』— レクソナンスサーガ", 3],
+      ["『P14』— レクソナンスサーガ", 3],
       ["『P16』— ファーフロムサーガ", 5],
     ],
   );
@@ -1622,15 +1621,15 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
   assert.equal(official.ACCEL_TAGLINES.p16, "身体の外側へ分散した機構まで高速制御する新世代設計");
 });
 
-test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme Tuning / P16", () => {
+test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 / P16", () => {
   const accel = data.BASIC_TEXT_ROWS.find((row) => row.label === "加速機構");
   assert.deepEqual(accel.values, {
     vinculum: "P2",
     extreme: "P14 Standard",
-    rexonance: "P14 Extreme Tuning",
+    rexonance: "P14",
     farFrom: "P16",
   });
-  // A long name breaks after 「P14」, never inside 「Extreme Tuning」.
+  // A long name breaks after 「P14」, never inside 「Standard」.
   assert.match(comparison, /<UnitName value=\{row\.values\[item\.key\]\} \/>/);
   assert.match(p16View, /<span className="ffs-unit-tuning">\{value\.slice\(at \+ 1\)\}<\/span>/);
   assert.match(compareStyles, /\.ffs-page \.ffs-unit-tuning \{\s*white-space: nowrap;/);
@@ -1640,13 +1639,13 @@ test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme T
     /<AccelCompare base=\{baseline === "extreme" \? "standard" : "tuning"\} \/>/,
   );
   assert.match(comparison, /signedPercent\(p16ChangeAgainst\(metric, base\)\)/);
-  // The lineage: P2 → P14 Standard → P14 Extreme Tuning → P16, with the forms.
+  // The lineage: P2 → P14 Standard → P14 → P16, with the forms.
   assert.deepEqual(
     p16.P16_LINEAGE.steps.map((step) => [step.unit, step.form]),
     [
       ["P2", "ヴィンクルム"],
       ["P14 Standard", "エクスプリーム"],
-      ["P14 Extreme Tuning", "レクソナンス"],
+      ["P14", "レクソナンス"],
       ["P16", "ファーフロム"],
     ],
   );
@@ -1668,7 +1667,7 @@ test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme T
   assert.match(extremeSite, /『P14 Standard』は、第14世代の標準演算加速機構です。/);
   assert.doesNotMatch(extremeSite, /Extreme tuning|先行世代|EXTREME TUNING/);
   const rexonanceSite = read("src/components/rexonance-saga/rexonance-saga.tsx");
-  assert.match(rexonanceSite, /『P14 Extreme Tuning』は、/);
+  assert.match(rexonanceSite, /『P14』は、/);
   assert.match(rexonanceSite, /"P14 Standard",/);
   assert.doesNotMatch(rexonanceSite, /Extreme tuning/);
   // The owner's Rexonance canon of 2026-11-23 states its unit as 『P14』 (the

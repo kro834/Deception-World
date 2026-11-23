@@ -348,7 +348,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       en: "FAR FROM SAGA",
       sub: "MIDDLE / HIGH / XHIGH / MAX / ULTRA",
       quote:
-        "レクソナンスの超共鳴と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
+        "レクソナンスの《自己共鳴》と、ヴィンクルムの接続を一つの戦闘体系へ。ファイナルステージ限定の超究極フォーム。",
       img: "/rider-far-from-saga-middle.webp",
       pos: "50% 8%",
       to: "/final-stage",
