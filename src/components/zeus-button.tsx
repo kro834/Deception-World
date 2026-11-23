@@ -183,7 +183,6 @@ const ZEUS_AVOID_SELECTOR = [
   ".search-ring button",
   ".gallery-tour-ring-node",
   ".lab-ring button",
-  ".dogs-ring-node > button",
   ".library-card-actions button",
   ".search-input-row",
   ".export-page :is(.export-page-alt, .export-page-back)",

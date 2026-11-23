@@ -1,4 +1,3 @@
-import { DOG_ARCHIVE_ART_PATHS } from "../src/lib/dogs-archive/entries.ts";
 import { NANITE_FORGE_DELIVERIES } from "../src/lib/nanite-surface-assets.js";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -10,7 +9,7 @@ test("public verification rejects an old commit or changed delivered artwork", a
   const expectedSha = "a".repeat(40);
   const image = Buffer.from("current artwork");
   const sha256 = createHash("sha256").update(image).digest("hex");
-  const paths = ["/gallery/g69-1536.webp", ...DOG_ARCHIVE_ART_PATHS];
+  const paths = ["/gallery/g69-1536.webp"];
   const fetchFor = (sha, delivered) => async (url) => {
     const path = new URL(url).pathname;
     if (path === "/release-identity.json")
@@ -326,77 +325,8 @@ const RAIN_CITY_ASSET_PATHS = [
   "/rain-city-materials/asphalt-roughness.png",
   "/rain-city-materials/manifest.json",
 ];
-const DOGS_ARCHIVE_ASSET_PATHS = [
-  // Owner (2026-10-29): v3 model and manifest in dogs-archive-20261029; decoders unchanged.
-  "/dogs-archive-20261029/guardian-v3.glb",
-  "/dogs-archive-20261029/model-manifest.json",
-  "/dogs-archive-20261028/decoders/draco/draco_decoder.wasm",
-  "/dogs-archive-20261028/decoders/draco/draco_wasm_wrapper.js",
-  "/dogs-archive-20261028/decoders/draco/draco_decoder.js",
-  "/dogs-archive-20261028/decoders/draco/asset-manifest.json",
-];
-
-test("guardian release verification checks the model and local decoders without broadening asset access", async () => {
-  const payloads = new Map(
-    DOGS_ARCHIVE_ASSET_PATHS.map((path) => [path, Buffer.from(`asset:${path}`)]),
-  );
-  const assets = DOGS_ARCHIVE_ASSET_PATHS.map((path) => ({
-    path,
-    sha256: createHash("sha256").update(payloads.get(path)).digest("hex"),
-  }));
-  const run = async ({ changed, unknown } = {}) => {
-    const seen = [];
-    const report = await verifyPublicDeployment({
-      baseUrl: "https://example.test",
-      expectedSha: SHA,
-      fetchImpl: async (input) => {
-        const path = new URL(input).pathname;
-        seen.push(path);
-        if (path === "/release-identity.json")
-          return Response.json({
-            sha: SHA,
-            assets: unknown ? [{ path: unknown, sha256: "0".repeat(64) }] : assets,
-          });
-        if (payloads.has(path))
-          return new Response(path === changed ? "wrong model or decoder" : payloads.get(path));
-        return smokeResponse(path);
-      },
-    });
-    return { report, seen };
-  };
-  const valid = await run();
-  assert.equal(valid.report.ok, true);
-  assert.deepEqual(
-    valid.report.results.filter(({ kind }) => kind === "asset").map(({ path }) => path),
-    DOGS_ARCHIVE_ASSET_PATHS,
-  );
-  assert.ok(valid.seen.includes("/dogs-archive"), "the new route is also checked before promotion");
-  for (const changed of DOGS_ARCHIVE_ASSET_PATHS)
-    assert.equal((await run({ changed })).report.ok, false, changed);
-  for (const unknown of [
-    "/dogs-archive-20261029/unknown.glb",
-    "/dogs-archive-20261028/guardian-v.glb",
-    "/dogs-archive-20261028/decoders/draco/unknown.js",
-    "/dogs-archive-20261029/../secret",
-    ...["/extra", "?extra=1", "#extra", "%2fextra", "\n"].map(
-      (suffix) => `${DOGS_ARCHIVE_ASSET_PATHS[0]}${suffix}`,
-    ),
-  ]) {
-    const { report, seen } = await run({ unknown });
-    assert.equal(report.ok, false, unknown);
-    assert.ok(
-      report.results.some(
-        ({ kind, ok, error }) =>
-          kind === "identity" && !ok && error.includes("Invalid release asset path"),
-      ),
-      unknown,
-    );
-    assert.ok(
-      seen.every((path) => !path.startsWith("/dogs-archive-2026")),
-      "invalid paths are rejected before fetch",
-    );
-  }
-});
+// 2026-11-23: owner removed the DOGS archive (「DOGS archiveは消して」); its release assets,
+// route and guardian-model verification are gone.
 const CIEL_BUTTON_PATHS = [144, 216, 360].map((width) => `/ciel-button-20261018-${width}.webp`);
 const CIEL_INFERNO_PATHS = [
   ...[216, 720, 1080].map((width) => `/ciel-inferno-20261019/ciel-${width}.webp`),
@@ -782,7 +712,6 @@ test("new release identity requires shared gallery readiness and preserves artwo
   ).replace(/^import .*;\n/gmu, "");
   let written;
   runInNewContext(source, {
-    DOG_ARCHIVE_ART_PATHS,
     NANITE_FORGE_DELIVERIES,
     process: { env: { PUBLIC_RELEASE_SHA: SHA } },
     createHash,
@@ -812,7 +741,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
     console: { log() {} },
   });
   assert.equal(written.sharedGallery, true);
-  for (const path of [...NANITE_FORGE_DELIVERIES, ...DOG_ARCHIVE_ART_PATHS])
+  for (const path of NANITE_FORGE_DELIVERIES)
     assert.ok(written.assets.some((asset) => asset.path === path), path);
   assert.equal(written.sha, SHA);
   assert.equal(written.artworks, 113);
@@ -837,7 +766,6 @@ test("new release identity requires shared gallery readiness and preserves artwo
     "/exhibition-studio/plaster-normal.png",
     "/exhibition-studio/plaster-roughness.png",
     ...RAIN_CITY_ASSET_PATHS,
-    ...DOGS_ARCHIVE_ASSET_PATHS,
   ]) {
     const asset = written.assets.find((item) => item.path === path);
     assert.ok(asset, `${path} must be attested before production promotion`);
