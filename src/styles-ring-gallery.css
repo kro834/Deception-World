@@ -333,6 +333,14 @@ html[data-family="gallery"] body .exhibition-room-heading > :not(.exhibition-rin
   z-index: 1;
 }
 
+/* The halo hangs past the page edge on purpose. Left to the body's clip alone
+   it still widens the layout width of a phone (and, with the quick-search
+   sheet open, the fixed sheet is centred in that wider width and runs off the
+   right edge). The page clips its own sideways overflow. */
+html[data-family="gallery"] body main.exhibition-room {
+  overflow-x: clip;
+}
+
 /* ---------------------------------------------------------------
    4. /gallery-tours: the courses on one orbit around the heading.
    --------------------------------------------------------------- */
