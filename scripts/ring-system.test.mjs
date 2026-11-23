@@ -330,7 +330,7 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   // A dossier part taken out of the layout lets go of everything it held.
   assert.match(code, /forgetRoot\(rec\);\s*rec\.done = false;/);
   // The film reveal stands aside for a part the chain holds or lifts.
-  assert.match(read("src/lib/film-motion.js"), /if \(node\.hasAttribute\("data-ring-link"\)\) continue;/);
+  assert.match(read("src/lib/film-motion.js"), /if \(node\.hasAttribute\?\.\("data-ring-link"\)\) continue;/);
   assert.match(code, /cs\.animationName !== "none"/);
   assert.match(code, /cs\.position !== "static" && cs\.position !== "relative"/);
   assert.match(code, /child\.querySelector\("canvas, iframe"\) !== null/);

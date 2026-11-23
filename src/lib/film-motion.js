@@ -27,7 +27,7 @@ export function mountFilmMotion(root, environment = globalThis) {
         if (!node.animate) continue;
         // The ring chain is lifting or holding it (ring-motion.js, 2026-11-23):
         // one arrival, the chain's.
-        if (node.hasAttribute("data-ring-link")) continue;
+        if (node.hasAttribute?.("data-ring-link")) continue;
         // The opacity floor deliberately leaves headings readable throughout.
         remember(
           node.animate(
