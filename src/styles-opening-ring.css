@@ -42,8 +42,16 @@
   }
 }
 
-.cine-glass-rings[data-glass] {
+/* Shown while the title plays or holds, never in the idle frame a replay
+   passes through (the logo is dark there). The economy renderer has no
+   assembly: its rings appear once the title holds. */
+.cine-stage:is(.is-playing, .is-complete) .cine-glass-rings[data-glass] {
   opacity: 0.92;
+}
+
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data-glass],
+.cine-stage.is-playing.is-economy-opening .cine-glass-rings[data-glass] {
+  opacity: 0;
 }
 
 .cine-glass-ring,
@@ -297,6 +305,12 @@
 
 [data-opening-handoff-root][data-opening-handoff-tier="reduced"]
   > [data-opening-handoff-rings]:not(#opr) {
+  display: none;
+}
+
+/* The hand-off's old line ring stood in for the title's SVG HUD, which the
+   title no longer shows; on the CSS tiers it would appear from nowhere. */
+[data-opening-handoff-root] > [data-opening-handoff-hud]:not(#opr) {
   display: none;
 }
 

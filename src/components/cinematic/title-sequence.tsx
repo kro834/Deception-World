@@ -303,8 +303,8 @@ const CinematicEditorialFrame = memo(function CinematicEditorialFrame() {
 // hero layers stand concentric with the logo's dial, behind the wordmark
 // (styles-opening-ring.css). Each layer assembles from its own depth on the
 // bounce spring and locks with the logo; its picture (<b>) drifts to rest
-// over the sequence. Textless; the pictures are fetched once the ice logo
-// has decoded, and the stack fades in at rest if they arrive late.
+// over the sequence. Textless; the pictures are fetched at mount at low
+// priority, and the stack fades in at rest if they arrive late.
 // The layers in paint order (OPENING_RINGS.layers in opening-timing.ts).
 const GLASS_RING_LAYERS = ["outer", "mid", "inner", "holo"] as const;
 const GLASS_RING_SOURCES = GLASS_RING_LAYERS.map(
@@ -445,34 +445,27 @@ export function TitleSequence() {
     };
   }, [router]);
 
-  // The glass rings' pictures, once the ice logo has decoded (the title's
-  // first frame never waits on them). The stack shows when all four are
-  // decoded; a late arrival fades in at rest (styles-opening-ring.css).
+  // The glass rings' pictures, fetched at mount at low priority (the ice
+  // logo's preload stays first) so a cold visit has them for the assembly
+  // at 0.5 s. The stack shows when all four are decoded; a late arrival
+  // fades in at rest (styles-opening-ring.css).
   useEffect(() => {
     if (typeof Image !== "function") return;
     let cancelled = false;
-    const first = firstLogoRef.current;
-    const titleReady =
-      typeof first?.decode === "function"
-        ? first.decode().catch(() => undefined)
-        : Promise.resolve(undefined);
-    void titleReady
-      .then(() =>
-        Promise.all(
-          GLASS_RING_SOURCES.map((source) => {
-            const image = new Image();
-            image.decoding = "async";
-            image.src = source;
-            return image.decode();
-          }),
-        ),
-      )
-      .then(
-        () => {
-          if (!cancelled && ringsRef.current) ringsRef.current.dataset.glass = "ready";
-        },
-        () => undefined,
-      );
+    void Promise.all(
+      GLASS_RING_SOURCES.map((source) => {
+        const image = new Image() as HTMLImageElement & { fetchPriority?: string };
+        image.decoding = "async";
+        image.fetchPriority = "low";
+        image.src = source;
+        return image.decode();
+      }),
+    ).then(
+      () => {
+        if (!cancelled && ringsRef.current) ringsRef.current.dataset.glass = "ready";
+      },
+      () => undefined,
+    );
     return () => {
       cancelled = true;
     };
