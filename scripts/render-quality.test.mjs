@@ -209,3 +209,24 @@ test("successful global choices supersede old Back entries and older blocked-sto
     false,
   );
 });
+
+// (2026-11-23, owner: 「高品質モードで、スマホでもPC版と同クオリティになる様にして」.)
+test("the touch budget belongs to the lightweight renderer: high quality on touch is the desktop budget", async () => {
+  const { usesTouchBudget } = await import("../src/lib/rendering-profile.js");
+  assert.equal(usesTouchBudget(true, { renderQuality: "high" }), false);
+  assert.equal(usesTouchBudget(true, { renderQuality: "lightweight" }), true);
+  assert.equal(usesTouchBudget(false, { renderQuality: "lightweight" }), false);
+  assert.equal(usesTouchBudget(undefined, { renderQuality: "lightweight" }), false);
+  // No explicit choice: the document's own attribute (none here: high).
+  assert.equal(usesTouchBudget(true), false);
+  const had = Object.getOwnPropertyDescriptor(globalThis, "document");
+  globalThis.document = { documentElement: { dataset: { worldEffects: "economy" } } };
+  try {
+    assert.equal(usesTouchBudget(true), true);
+    assert.equal(usesTouchBudget(false), false);
+    assert.equal(usesTouchBudget(true, { renderQuality: "high" }), false);
+  } finally {
+    if (had) Object.defineProperty(globalThis, "document", had);
+    else delete globalThis.document;
+  }
+});

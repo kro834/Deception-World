@@ -24,6 +24,7 @@
    in one WebGL pass. The fire is this change's alone: it burns for a second
    and a half and is gone with the blast — it never lingers on a figure. */
 
+import { usesTouchBudget } from "./rendering-profile.js";
 export type FormBurstKind = "max" | "ultra" | "release";
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
@@ -284,15 +285,18 @@ type BudgetEnvironment = {
   matchMedia?: (query: string) => { matches: boolean };
   innerWidth?: number;
   innerHeight?: number;
+  renderQuality?: string;
 };
 
-/** The play's budget by device; none under reduced motion. */
+/** The play's budget by device; none under reduced motion. (Owner,
+ * 2026-11-23: high quality gives touch screens the desktop budget; the touch
+ * tiers are the lightweight renderer's.) */
 export function formBurstBudget(
   environment: BudgetEnvironment = globalThis,
 ): FormBurstBudget | null {
   const media = (query: string) => Boolean(environment.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)")) return null;
-  if (!media("(pointer: coarse), (any-pointer: coarse)"))
+  if (!usesTouchBudget(media("(pointer: coarse), (any-pointer: coarse)"), environment))
     return { shards: 150, embers: 96, large: 140, fine: 1500, ratio: 2, air: 2 };
   const memory = environment.navigator?.deviceMemory;
   const cores = environment.navigator?.hardwareConcurrency ?? 0;

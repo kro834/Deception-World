@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "./rendering-profile.js";
 import { refinedNaniteKit } from "./nanite-surface-assets.js";
 import {
   FORM_LANDMARKS,
@@ -1739,7 +1740,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let drawnVy = 0;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
-  const coarse = environment.matchMedia("(pointer: coarse)");
+  const coarsePointer = environment.matchMedia("(pointer: coarse)");
+  // The reduced touch budget (no comets, holo or walls, wider tiles, 30 fps
+  // at rest, …) is the lightweight renderer's alone (owner, 2026-11-23: in
+  // high quality a phone draws what a desktop draws). The playhead's touch
+  // spring below still follows the real pointer: that is feel, not budget.
+  const coarse = {
+    get matches() {
+      return usesTouchBudget(coarsePointer.matches, environment);
+    },
+  };
   const lines = [...runway.querySelectorAll(".rzn-line")].map((line) => ({
     line,
     chips: [...line.querySelectorAll(".rzn-chip")],
@@ -4786,7 +4796,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         schedule();
         return;
       }
-      shown = head.follow(progress, dt, coarse.matches ? PLAYHEAD.omegaTouch : PLAYHEAD.omega);
+      shown = head.follow(progress, dt, coarsePointer.matches ? PLAYHEAD.omegaTouch : PLAYHEAD.omega);
     } else head.snap(progress);
     force = false;
     const step = lastProgress >= 0 ? Math.min(0.01, Math.abs(shown - lastProgress)) : 0;

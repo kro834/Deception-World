@@ -20,6 +20,7 @@
    The clock is the renderer's own: it advances only on painted frames (a
    hidden page pauses it, and the playback's watchdog with it). No sound. */
 
+import { usesTouchBudget } from "./rendering-profile.js";
 import type { EntryPlayback } from "./entry-playback.ts";
 import {
   EXTREME_SUITUP_BEATS,
@@ -485,7 +486,8 @@ export function mountExtremeSuitup(
     playback.fail();
     return () => undefined;
   }
-  const coarse = window.matchMedia("(any-pointer: coarse)").matches;
+  // (Owner, 2026-11-23: the 1.5x touch cap is the lightweight renderer's.)
+  const coarse = usesTouchBudget(window.matchMedia("(any-pointer: coarse)").matches);
   let cssW = 0;
   let cssH = 0;
   let dpr = 1;

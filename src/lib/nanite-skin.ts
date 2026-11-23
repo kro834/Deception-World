@@ -1501,6 +1501,17 @@ export function* prepareNaniteSkin(
       grow(dirty, x, (i - x) / gw);
     }
     const K = T.ripple * Math.PI * 2;
+    // (2026-11-23: the band's and the rim's boxes are kept in locals over
+    // this loop — it runs for every live pixel of every frame — and written
+    // back once; the result is the same boxes.)
+    let bx0 = band[0];
+    let by0 = band[1];
+    let bx1 = band[2];
+    let by1 = band[3];
+    let rx0 = rim[0];
+    let ry0 = rim[1];
+    let rx1 = rim[2];
+    let ry1 = rim[3];
     for (let k = lo; k < hi; k += 1) {
       const i = idx[k];
       const dt = q - t[k];
@@ -1559,9 +1570,25 @@ export function* prepareNaniteSkin(
       E[i] = (((fr * 255) | 0) << 24) | WHITE;
       const x = i % gw;
       const y = (i - x) / gw;
-      grow(band, x, y);
-      if (fr > 0) grow(rim, x, y);
+      if (x < bx0) bx0 = x;
+      if (y < by0) by0 = y;
+      if (x >= bx1) bx1 = x + 1;
+      if (y >= by1) by1 = y + 1;
+      if (fr > 0) {
+        if (x < rx0) rx0 = x;
+        if (y < ry0) ry0 = y;
+        if (x >= rx1) rx1 = x + 1;
+        if (y >= ry1) ry1 = y + 1;
+      }
     }
+    band[0] = bx0;
+    band[1] = by0;
+    band[2] = bx1;
+    band[3] = by1;
+    rim[0] = rx0;
+    rim[1] = ry0;
+    rim[2] = rx1;
+    rim[3] = ry1;
     grow(dirty, band[0], band[1]);
     if (band[2] > band[0]) grow(dirty, band[2] - 1, band[3] - 1);
     prevLo = lo;

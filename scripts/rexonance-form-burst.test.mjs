@@ -48,9 +48,13 @@ const at = (kind, ms) => ({ ...formBurstFrame(createFormBurstFrame(), kind, ms) 
 
 const desktop = { matchMedia: () => ({ matches: false }) };
 const media = (matches) => ({ matchMedia: (query) => ({ matches: matches.some((m) => query.includes(m)) }) });
-const phone = { ...media(["coarse"]), navigator: { deviceMemory: 8, hardwareConcurrency: 6 }, innerWidth: 390, innerHeight: 844 };
-const tablet = { ...media(["coarse"]), navigator: { hardwareConcurrency: 8 }, innerWidth: 820, innerHeight: 1180 };
-const low = { ...media(["coarse"]), navigator: { deviceMemory: 4, hardwareConcurrency: 4 }, innerWidth: 390, innerHeight: 844 };
+// (2026-11-23, owner: in high quality a touch screen draws the desktop
+// budget. The three touch devices below are on the lightweight renderer,
+// which keeps the touch tiers.)
+const light = { renderQuality: "lightweight" };
+const phone = { ...light, ...media(["coarse"]), navigator: { deviceMemory: 8, hardwareConcurrency: 6 }, innerWidth: 390, innerHeight: 844 };
+const tablet = { ...light, ...media(["coarse"]), navigator: { hardwareConcurrency: 8 }, innerWidth: 820, innerHeight: 1180 };
+const low = { ...light, ...media(["coarse"]), navigator: { deviceMemory: 4, hardwareConcurrency: 4 }, innerWidth: 390, innerHeight: 844 };
 
 // A body: a trunk, two arms and two legs in a 571 x 1040 frame.
 const ASPECT = 571 / 1040;
@@ -695,6 +699,12 @@ test("nothing of the old form is left for the settle: the shatter and the fronts
 
 test("the budget steps down by device, and the governor sheds when frames run long", () => {
   const tiers = [desktop, tablet, phone, low].map((environment) => formBurstBudget(environment));
+  for (const touch of [tablet, phone, low])
+    assert.deepEqual(
+      formBurstBudget({ ...touch, renderQuality: "high" }),
+      tiers[0],
+      "high quality on touch is the desktop budget",
+    );
   for (const key of ["shards", "embers", "large", "fine"])
     for (let n = 1; n < tiers.length; n += 1) assert.ok(tiers[n][key] < tiers[n - 1][key], key);
   for (const tier of tiers) assert.ok(tier.ratio <= 2 && tier.air <= 2, "the backing stores are capped");

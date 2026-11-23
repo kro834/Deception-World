@@ -23,6 +23,7 @@
  * shadows or filters (Android).
  */
 
+import { usesTouchBudget } from "./rendering-profile.js";
 import type { RexonanceAssemblyFormChange } from "./rexonance-resonance.js";
 import {
   buildIllusionculumFireBody,
@@ -57,7 +58,9 @@ export function createIllusionculumFormChange(
 ): RexonanceAssemblyFormChange {
   const { width: W, height: H } = options.size;
   let orbGhosts: HTMLCanvasElement[] | null = null;
-  // Touch devices raster the fire on the coarse grid (read once).
+  // The lightweight renderer rasters a touch screen's fire on the coarse grid
+  // (read once); high quality draws the desktop grid everywhere (owner,
+  // 2026-11-23).
   let coarse: boolean | undefined;
   // The projections: ice and pink silhouettes of the incoming figure, half
   // size, made once per figure (the first frame that wants them).
@@ -119,7 +122,7 @@ export function createIllusionculumFormChange(
         const body =
           illusionculumFireBody(fromKey) ??
           buildIllusionculumFireBody(fromKey, from, context.canvas.ownerDocument);
-        coarse ??= Boolean(
+        coarse ??= usesTouchBudget(
           context.canvas.ownerDocument.defaultView?.matchMedia("(pointer: coarse)").matches,
         );
         const fades = illusionculumFireFades(u);

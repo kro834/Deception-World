@@ -248,6 +248,9 @@ function fixture({ gl = false, coarse = false } = {}) {
   const environment = {
     document,
     navigator: { connection: {} },
+    // (2026-11-23: the touch raster is the lightweight renderer's; `coarse`
+    // here is a touch screen on that budget.)
+    renderQuality: coarse ? "lightweight" : undefined,
     matchMedia: (query) => ({ matches: coarse && query.includes("coarse") }),
     performance: { now: () => clock },
     location: { pathname: "/rexonance-saga" },

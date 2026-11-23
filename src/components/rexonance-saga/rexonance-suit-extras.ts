@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import {
   REXONANCE_SUIT_ACCENTS,
   REXONANCE_SUIT_DRIVER,
@@ -99,9 +100,11 @@ const KIT_CELLS = REXONANCE_NANITES.cells;
 const KIT_COMETS = REXONANCE_NANITES.comets;
 const KIT_FX = REXONANCE_NANITES.fx;
 const KIT_GUIDE = REXONANCE_NANITES.guide;
+// (Owner, 2026-11-23: only in the lightweight renderer; in high quality a
+// touch screen draws the micro-tiles one by one, as a desktop does.)
 const TOUCH =
   typeof globalThis.matchMedia === "function" &&
-  globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches;
+  usesTouchBudget(globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches);
 const W = FIG.width;
 const H = FIG.height;
 const TAU = Math.PI * 2;

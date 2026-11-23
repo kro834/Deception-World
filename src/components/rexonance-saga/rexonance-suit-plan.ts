@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import {
   REXONANCE_SUIT_ACCENTS,
   REXONANCE_SUIT_DRIVER,
@@ -35,9 +36,11 @@ import {
 // Touch screens (owner, 2026-10-11: the call felt heavy on an iPad) draw the
 // nanites in 2 x 2 blocks of the art's micro-tiles: a quarter of the draws a
 // frame, the same art and the same order.
+// (Owner, 2026-11-23: only in the lightweight renderer; in high quality a
+// touch screen draws the micro-tiles one by one, as a desktop does.)
 const TOUCH =
   typeof globalThis.matchMedia === "function" &&
-  globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches;
+  usesTouchBudget(globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches);
 const BLOCK = TOUCH ? 2 : 1;
 export const T = REXONANCE_SUIT_TILE * BLOCK;
 export const G = REXONANCE_SUIT_GOLD_CELL;

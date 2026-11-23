@@ -339,8 +339,10 @@ export function* assemblyNanitePlanSteps({
   const n = tiles.length;
   let work = 0;
   // A checkpoint every few thousand simple steps: well inside an idle
-  // slice, and few enough that a starved idle queue still finishes.
-  const tick = () => ++work % 64 === 0;
+  // slice, and few enough that a starved idle queue still finishes. (32, not
+  // 64, since 2026-11-23: a phone in high quality plans the desktop's finer
+  // tiles, and a 64-step run reached 6.4 ms at 4x CPU; the plan is the same.)
+  const tick = () => ++work % 32 === 0;
 
   // The tiles' own fields, copied once into typed arrays.
   const T0 = new Float64Array(n);

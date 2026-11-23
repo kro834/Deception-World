@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import { useEffect, useRef } from "react";
 import {
   REXONANCE_SUIT_ATLAS,
@@ -187,7 +188,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const atlasWork = forming(atlas, raw);
         // Touch screens draw at up to 1.25x (the tiles are 9 px of art; a 2x
         // backing store only doubled the fill work on a tablet).
-        const coarse = Boolean(
+        // (Owner, 2026-11-23: the touch budget is the lightweight renderer's.)
+        const coarse = usesTouchBudget(
           globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches,
         );
         const scale = Math.min(coarse ? 1.25 : 2, globalThis.devicePixelRatio || 1);

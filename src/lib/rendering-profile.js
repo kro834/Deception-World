@@ -86,6 +86,24 @@ export function hasConstrainedResources(device) {
 }
 
 /**
+ * Whether an engine may draw its reduced touch budget. Owner, 2026-11-23:
+ * in high quality a phone or tablet draws what a desktop draws, so the touch
+ * tiers (particle counts, backing-store caps, block sizes) belong to the
+ * lightweight renderer alone. `environment.renderQuality` lets a test choose
+ * without a document.
+ * @param {boolean | undefined} coarse the device has a coarse pointer
+ * @param {{renderQuality?: string}} [environment]
+ */
+export function usesTouchBudget(coarse, environment) {
+  if (!coarse) return false;
+  // (No object is made here: some engines ask once a frame.)
+  const quality = environment?.renderQuality;
+  if (quality === "lightweight") return true;
+  if (quality === "high") return false;
+  return typeof document !== "undefined" && document.documentElement?.dataset.worldEffects === "economy";
+}
+
+/**
  * Reading progress drawn by the compositor (scroll(root block)) instead of a
  * per-frame --page-progress write: every Android renderer (economy included),
  * and iOS/iPadOS 27 outside economy where view timelines exist; always with

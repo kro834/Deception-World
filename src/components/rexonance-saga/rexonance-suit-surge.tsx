@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
 import {
   REXONANCE_CALL_BEATS,
@@ -706,6 +707,9 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
     const scene = layerBox?.querySelector<HTMLCanvasElement>(":scope > .rzn-canvas");
     if (!frameBox || !layerBox || !back || !front || !scene) return () => {};
     const coarse = Boolean(globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches);
+    // The 30 fps rest is the lightweight renderer's (owner, 2026-11-23); the
+    // playhead's touch spring keeps following the real pointer (feel).
+    const restPaced = usesTouchBudget(coarse);
     const windows = scrollWindows();
     const pieceWindows = scrollPieceWindows(windows);
     let engine: SurgeEngine | null = null;
@@ -1058,9 +1062,10 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       }
       const playing = Boolean(pass && crescendo?.lib.crescendoBusy(pass));
       const busy = engine.busy(now) || playing;
-      // At rest the swarm keeps flowing (touch screens at about 30 fps).
+      // At rest the swarm keeps flowing (lightweight touch screens at about
+      // 30 fps).
       const due =
-        redraw || moving || busy || leaving || (flowing && (!coarse || now - lastDraw > 31));
+        redraw || moving || busy || leaving || (flowing && (!restPaced || now - lastDraw > 31));
       if (due) {
         redraw = false;
         const paced = !moving && !busy;

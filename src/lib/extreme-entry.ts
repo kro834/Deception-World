@@ -53,8 +53,9 @@ export function pickExtremeSuitupWidth(
   return needed <= 900 ? 768 : 1024;
 }
 
-/** Device-pixel ratio cap for the suit-up canvas: phones and tablets draw at
- * most 1.5×, other screens at most 2×. */
+/** Device-pixel ratio cap for the suit-up canvas: at most 2×, and at most
+ * 1.5× where the caller passes `coarse` (a touch screen in the lightweight
+ * renderer; in high quality a phone draws as a desktop does). */
 export function extremeSuitupDpr(dpr: number, coarse: boolean): number {
   const cap = coarse ? 1.5 : 2;
   return Math.max(1, Math.min(cap, Number.isFinite(dpr) && dpr > 0 ? dpr : 1));

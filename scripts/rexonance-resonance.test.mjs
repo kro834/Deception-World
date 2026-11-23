@@ -328,6 +328,9 @@ function scrollAssemblyEnvironment() {
     document,
     navigator: {},
     innerHeight: 600,
+    // (2026-11-23: this harness is a touch screen on the touch budget, which
+    // is the lightweight renderer's now; rendering-profile.js usesTouchBudget.)
+    renderQuality: "lightweight",
     matchMedia: (query) => ({ matches: query.includes("pointer: coarse"), ...eventTarget(query) }),
     getComputedStyle: () => ({ top: "0", getPropertyValue: () => "" }),
     requestAnimationFrame: (callback) => (frames.set(++frameId, callback), frameId),

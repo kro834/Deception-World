@@ -981,3 +981,27 @@ test("the bright departing shell thins into the air instead of staying opaque ov
     assert.equal(measure(.88).light, 0, "the next armour is clear");
   }
 });
+
+// (2026-11-23, owner: in high quality a phone rasters the desktop fire grid.
+// A touch screen that cannot hold it steps down to the touch grid; fine
+// pointers never do.)
+test("the fire grid's governor steps only a slow touch screen down, once, for the visit", async () => {
+  const { FIRE_RASTER_SLOW_MS, FIRE_RASTER_SLOW_RUN, fireGridStepped, fireRasterTook, resetFireGovernor } =
+    await import("../src/lib/far-from-fire-noise.ts");
+  const view = (coarse) => ({ matchMedia: () => ({ matches: coarse }) });
+  const slow = FIRE_RASTER_SLOW_MS + 1;
+  resetFireGovernor();
+  assert.equal(fireGridStepped(view(true)), false);
+  for (let n = 0; n < FIRE_RASTER_SLOW_RUN - 1; n += 1) fireRasterTook(slow);
+  fireRasterTook(FIRE_RASTER_SLOW_MS - 1);
+  for (let n = 0; n < FIRE_RASTER_SLOW_RUN - 1; n += 1) fireRasterTook(slow);
+  assert.equal(fireGridStepped(view(true)), false, "a run broken by a quick raster does not count");
+  fireRasterTook(slow);
+  assert.equal(fireGridStepped(view(true)), true);
+  for (let n = 0; n < 100; n += 1) fireRasterTook(0);
+  assert.equal(fireGridStepped(view(true)), true, "never back up within a visit");
+  resetFireGovernor();
+  for (let n = 0; n < 50; n += 1) fireRasterTook(slow);
+  assert.equal(fireGridStepped(view(false)), false, "a fine pointer keeps the desktop grid");
+  resetFireGovernor();
+});

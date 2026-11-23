@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "./rendering-profile.js";
 import { drawFarFromFormCombustion } from "./far-from-form-combustion.ts";
 import { warmFarFromFireMask } from "./far-from-flame-field.ts";
 import { releasePendingImage } from "./release-pending-images.js";
@@ -73,7 +74,8 @@ export function mountFarFromFormIgnition(
   };
   const context = canvas.getContext("2d");
   if (context) {
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    // (Owner, 2026-11-23: touch screens in high quality draw the desktop fire.)
+    const coarse = usesTouchBudget(window.matchMedia("(pointer: coarse)").matches);
     const releasePlumes = warmFarFromFormPlumes();
     const prepare = () => warmFarFromFireMask(previous);
     const idle = typeof window.requestIdleCallback === "function";

@@ -72,13 +72,24 @@ type TierEnvironment = {
   innerWidth?: number;
   innerHeight?: number;
   devicePixelRatio?: number;
+  renderQuality?: string;
 };
 
-/** The budget by device. Reduced motion has no crescendo at all (null). */
+/** The lightweight renderer (rendering-profile.js usesTouchBudget, written
+ * out here because this chunk imports nothing). */
+const lightweight = (environment: { renderQuality?: string }) =>
+  environment.renderQuality === "lightweight" ||
+  (environment.renderQuality !== "high" &&
+    typeof document !== "undefined" &&
+    document.documentElement?.dataset.worldEffects === "economy");
+
+/** The budget by device. Reduced motion has no crescendo at all (null).
+ * (Owner, 2026-11-23: in high quality a phone and a tablet draw the desktop
+ * budget; the touch tiers below are the lightweight renderer's.) */
 export function crescendoTier(environment: TierEnvironment = globalThis): CrescendoTier | null {
   const media = (query: string) => Boolean(environment.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)")) return null;
-  const coarse = media("(pointer: coarse), (any-pointer: coarse)");
+  const coarse = media("(pointer: coarse), (any-pointer: coarse)") && lightweight(environment);
   const ratio = environment.devicePixelRatio || 1;
   const memory = environment.navigator?.deviceMemory;
   const cores = environment.navigator?.hardwareConcurrency ?? 0;

@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import {
   FAR_FROM_ENTRY_PIECES,
   FAR_FROM_ENTRY_SIZE,
@@ -23,9 +24,11 @@ import { FAR_FROM_ENTRY_MATERIAL } from "@/lib/far-from-entry-ignition.js";
 
 // Touch screens draw the nanites in 2 x 2 blocks of the art's micro-tiles:
 // a quarter of the draws a frame, the same art and the same order.
+// (Owner, 2026-11-23: only in the lightweight renderer; in high quality a
+// touch screen draws the micro-tiles one by one, as a desktop does.)
 const TOUCH =
   typeof globalThis.matchMedia === "function" &&
-  globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches;
+  usesTouchBudget(globalThis.matchMedia("(pointer: coarse), (any-pointer: coarse)").matches);
 const BLOCK = TOUCH ? 2 : 1;
 export const T = FAR_FROM_ENTRY_TILE * BLOCK;
 export const FIG = FAR_FROM_ENTRY_SIZE;

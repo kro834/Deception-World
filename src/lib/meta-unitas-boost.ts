@@ -122,8 +122,9 @@ type Device = Navigator & {
   connection?: { saveData?: boolean; effectiveType?: string };
 };
 
-/** The user's lightweight choice selects the reduced scene; input capability
- * still selects bounded touch versus desktop budgets. */
+/** The user's lightweight choice selects the reduced scene. Everything else
+ * draws the "high" budget (owner, 2026-11-23: in high quality a phone draws
+ * what a desktop draws); "touch" stays in the table for an explicit caller. */
 export function metaUnitasBoostTier(environment: typeof globalThis = window): MetaUnitasBoostTier {
   const device = environment.navigator as Device;
   const info = {
@@ -134,7 +135,7 @@ export function metaUnitasBoostTier(environment: typeof globalThis = window): Me
     connection: device.connection,
   };
   if (hasConstrainedResources(info)) return "lite";
-  return environment.matchMedia("(pointer: coarse)").matches ? "touch" : "high";
+  return "high";
 }
 
 /* ---------------- the suit's geometry (figure px) ---------------- */

@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "@/lib/rendering-profile.js";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   FAR_FROM_CALLS,
@@ -325,7 +326,8 @@ function FarFromEntryNanites({
         return;
       }
       const sources: FarFromEntrySources = { atlas, figure, lights, under, kits: [kitA, kitB] };
-      const coarse = Boolean(
+      // (Owner, 2026-11-23: the touch budget is the lightweight renderer's.)
+      const coarse = usesTouchBudget(
         globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches,
       );
       engine = createFarFromEntryEngine({

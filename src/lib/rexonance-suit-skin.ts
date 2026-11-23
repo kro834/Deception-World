@@ -65,13 +65,25 @@ type BudgetEnvironment = {
   matchMedia?: (query: string) => { matches: boolean };
   innerWidth?: number;
   innerHeight?: number;
+  renderQuality?: string;
 };
 
-/** The skin's budget by device; none under reduced motion. */
+/** The lightweight renderer (rendering-profile.js usesTouchBudget, written
+ * out here because this chunk imports nothing). */
+const lightweight = (environment: { renderQuality?: string }) =>
+  environment.renderQuality === "lightweight" ||
+  (environment.renderQuality !== "high" &&
+    typeof document !== "undefined" &&
+    document.documentElement?.dataset.worldEffects === "economy");
+
+/** The skin's budget by device; none under reduced motion. (Owner,
+ * 2026-11-23: high quality gives touch screens the desktop budget; the touch
+ * tiers are the lightweight renderer's.) */
 export function skinBudget(environment: BudgetEnvironment = globalThis): SkinBudget | null {
   const media = (query: string) => Boolean(environment.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)")) return null;
-  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2, large: 44, fine: 400 };
+  if (!(media("(pointer: coarse), (any-pointer: coarse)") && lightweight(environment)))
+    return { samples: 6000, ratio: 2, large: 44, fine: 400 };
   const memory = environment.navigator?.deviceMemory;
   const cores = environment.navigator?.hardwareConcurrency ?? 0;
   if ((memory !== undefined && memory <= 4) || (cores > 0 && cores <= 4))

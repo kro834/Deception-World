@@ -139,7 +139,9 @@ test("touch screens chase faster, and the engine draws the playhead in place of 
   assert.match(engine, /const head = new ScrollPlayhead\(\);/);
   assert.match(
     engine,
-    /shown = head\.follow\(progress, dt, coarse\.matches \? PLAYHEAD\.omegaTouch : PLAYHEAD\.omega\);/,
+    // (2026-11-23: `coarse` became the lightweight touch budget; the spring
+    // still reads the real pointer.)
+    /shown = head\.follow\(progress, dt, coarsePointer\.matches \? PLAYHEAD\.omegaTouch : PLAYHEAD\.omega\);/,
   );
   // The first live frame and a relayout snap; a still scene forgets the head.
   assert.match(engine, /\} else head\.snap\(progress\);/);
