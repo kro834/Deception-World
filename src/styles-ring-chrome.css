@@ -897,7 +897,15 @@ html[data-family]:not([data-family="dream"])
 @media (max-width: 1019px) and (min-height: 561px), (max-width: 639px) {
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
     --orbit-cx: 50%;
-    --orbit-sink: 118px;
+    /* 2026-11-23 iOS fix (A1): the dial sits wholly on screen. Its centre is
+       lifted by the reach of the two far planets (sin 64.29deg of the radius,
+       plus half a disc) and a margin, over the home indicator's inset. With
+       a fixed 118/92px sink those planets fell below the panel's foot, under
+       Safari's toolbar on an iPhone and an iPad in portrait; they still sit
+       at the rim, now inside it. */
+    --orbit-sink: calc(
+      var(--orbit-r) * 0.9 + var(--orbit-disc) / 2 + 10px + env(safe-area-inset-bottom, 0px)
+    );
     --orbit-cy: calc(var(--orbit-vh) - var(--orbit-sink));
     --orbit-r: min(190px, 50vw - 55px, 21vh);
     --orbit-disc: clamp(68px, 9vw, 88px);
@@ -1043,6 +1051,24 @@ html[data-family]:not([data-family="dream"])
     gap: 4px;
   }
 
+  /* 2026-11-23 iOS fix (A2): ページ内 lays its rows in the two columns 人物
+     uses. As a wrapping flex column, each column was only as wide as its
+     longest row, so the list kept to the left and the right half stood empty. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-group[data-atlas-group="sections"]
+    > .side-panel-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 8px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-group[data-atlas-group="sections"]
+    > .side-panel-links
+    > :is(a, button) {
+    padding-right: 10px;
+  }
+
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
     .side-panel-links
     > :is(a, button) {
@@ -1104,13 +1130,6 @@ html[data-family]:not([data-family="dream"])
     > i {
     padding-left: 2px;
     font-size: 10.5px;
-  }
-}
-
-@media (max-width: 1019px) and (min-height: 561px) and (max-height: 700px),
-  (max-width: 639px) and (max-height: 700px) {
-  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
-    --orbit-sink: 92px;
   }
 }
 
