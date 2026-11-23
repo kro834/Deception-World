@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CharactersRouteImport } from './routes/characters'
-import { Route as DogsArchiveRouteImport } from './routes/dogs-archive'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as DreamChapterRouteImport } from './routes/dream-chapter'
 import { Route as ExhibitionRouteImport } from './routes/exhibition'
@@ -66,11 +65,6 @@ const IndexRoute = IndexRouteImport.update({
 const CharactersRoute = CharactersRouteImport.update({
   id: '/characters',
   path: '/characters',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DogsArchiveRoute = DogsArchiveRouteImport.update({
-  id: '/dogs-archive',
-  path: '/dogs-archive',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloadRoute = DownloadRouteImport.update({
@@ -303,7 +297,6 @@ const ApiGalleryUploadCompleteRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
-  '/dogs-archive': typeof DogsArchiveRoute
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/exhibition': typeof ExhibitionRoute
@@ -352,7 +345,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dogs-archive': typeof DogsArchiveRoute
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/exhibition': typeof ExhibitionRoute
@@ -401,7 +393,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/characters': typeof CharactersRouteWithChildren
-  '/dogs-archive': typeof DogsArchiveRoute
   '/download': typeof DownloadRoute
   '/dream-chapter': typeof DreamChapterRoute
   '/exhibition': typeof ExhibitionRoute
@@ -453,7 +444,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/characters'
-    | '/dogs-archive'
     | '/download'
     | '/dream-chapter'
     | '/exhibition'
@@ -502,7 +492,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dogs-archive'
     | '/download'
     | '/dream-chapter'
     | '/exhibition'
@@ -550,7 +539,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/characters'
-    | '/dogs-archive'
     | '/download'
     | '/dream-chapter'
     | '/exhibition'
@@ -601,7 +589,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CharactersRoute: typeof CharactersRouteWithChildren
-  DogsArchiveRoute: typeof DogsArchiveRoute
   DownloadRoute: typeof DownloadRoute
   DreamChapterRoute: typeof DreamChapterRoute
   ExhibitionRoute: typeof ExhibitionRoute
@@ -646,13 +633,6 @@ declare module '@tanstack/react-router' {
       path: '/characters'
       fullPath: '/characters'
       preLoaderRoute: typeof CharactersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dogs-archive': {
-      id: '/dogs-archive'
-      path: '/dogs-archive'
-      fullPath: '/dogs-archive'
-      preLoaderRoute: typeof DogsArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/download': {
@@ -1058,7 +1038,6 @@ const ApiGalleryUploadRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharactersRoute: CharactersRouteWithChildren,
-  DogsArchiveRoute: DogsArchiveRoute,
   DownloadRoute: DownloadRoute,
   DreamChapterRoute: DreamChapterRoute,
   ExhibitionRoute: ExhibitionRoute,

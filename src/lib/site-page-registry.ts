@@ -67,14 +67,6 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     aliases: ["rexonance saga", "レクソナンス・サーガ"],
   },
   {
-    id: "dogs-archive",
-    title: "DOGS ARCHIVE",
-    path: "/dogs-archive",
-    searchHash: "dogs-selector",
-    description: "アルケオン、ヴァルグ、アガサ、エウレル、シエルの個体記録。",
-    aliases: ["dogs archive", "犬", "個体記録", "立体", "3D", "アルケオン", "ヴァルグ", "アガサ", "エウレル", "シエル"],
-  },
-  {
     id: "extreme",
     title: "エクスプリームサーガ",
     path: "/extreme-saga",

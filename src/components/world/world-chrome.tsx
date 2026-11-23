@@ -1567,23 +1567,6 @@ export function SideMenuLayer({
                 アーカイブ
               </span>
             </GuardedLink>
-            <GuardedLink
-              className="command-atlas-record"
-              to="/dogs-archive"
-              assets={[]}
-              beforeNavigate={close}
-              aria-current={pathname === "/dogs-archive" ? "page" : undefined}
-            >
-              {isOpen ? (
-                <img
-                  src="/dogs-archive-20261028/guardian-480.webp"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : null}
-              <span>DOGS ARCHIVE</span>
-            </GuardedLink>
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
           </div>
         </div>

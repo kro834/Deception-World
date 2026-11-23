@@ -185,6 +185,9 @@ export default defineConfig(({ command }) => ({
             // (scripts/build-font-subsets.mjs), like /assets/.
             routeRules: {
               ...legacyImageRedirects,
+              // 2026-11-23: owner removed the DOGS archive (「DOGS archiveは消して」);
+              // the old URL moves to the home page for good.
+              "/dogs-archive": { redirect: { to: "/", status: 308 } },
               "/fonts/subsets/**": {
                 headers: { "cache-control": "public, max-age=31536000, immutable" },
               },
