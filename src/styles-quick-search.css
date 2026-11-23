@@ -634,6 +634,10 @@ dialog.quick-search mark {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  /* The foot is the panel's last flex row: it never gives its height back to
+     the results, or the wrapped count row and the history link spill out of
+     it and the link's border is cut by the panel's rounded edge. */
+  flex-shrink: 0;
   min-height: 48px;
   padding: 12px 18px;
   border-top: 1px solid rgb(var(--qs-ice-rgb) / 0.22);
