@@ -176,10 +176,12 @@ test("the HUD prints only facts the page states, with generic HUD words", () => 
     "REXONANCE",
     "REXONANCE！",
     // The chant's call; its answer, DEUS！, is listed above (2026-10-05).
-    // Owner (2026-11-23): Ultra DEUS！ and RIDER！ left the call.
+    // Owner (2026-11-23): RIDER！ left the call.
     "SA-GA！",
     "SELF RESONANCE",
     "SYSTEM CHECK",
+    // The owner's canon (2026-11-23): Ultra DEUS！ opens the call again.
+    "Ultra DEUS！",
   ]);
   assert.match(component, /REXONANCE_SUIT_SYSTEMS\.map\(\(\[name, status\], index\)/);
   // suitup3: each label lands on the line its region forms. rx12: the

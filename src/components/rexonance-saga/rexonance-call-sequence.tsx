@@ -1,6 +1,8 @@
 import { useCallback, useState, type CSSProperties } from "react";
 import {
   REXONANCE_CALL_BEATS,
+  REXONANCE_ENTRY_BLACKOUT_BEATS,
+  REXONANCE_ENTRY_BLACKOUT_LINES,
   REXONANCE_ENTRY_BLACKOUT_MS,
   REXONANCE_ENTRY_CALLS,
   REXONANCE_ENTRY_SUIT_COVER_MS,
@@ -49,8 +51,8 @@ type RexonanceCallSequenceProps = {
   // rx12: "build" when the suit's pieces are decoded (the gate's warm-up);
   // otherwise the call stands the finished figure whole.
   suit?: "build" | "whole";
-  // Owner (2026-11-23): the entry opens on a blacked-out screen with only
-  // REXONANCE！; the suit-up starts after it. LoadGate owns the blackout's
+  // Owner (2026-11-23): the entry opens on a blacked-out screen with
+  // Ultra DEUS！, then REXONANCE！; the suit-up starts after them. LoadGate owns the blackout's
   // timer and lifts it (REXONANCE_ENTRY_BLACKOUT_MS, or REXONANCE_ENTRY_STILL
   // on the still tiers); until then nothing of the suit-up is mounted, so
   // its whole clock starts when the blackout ends.
@@ -59,8 +61,13 @@ type RexonanceCallSequenceProps = {
 
 // One beat per line of the owner's call (REXONANCE_CALLS, 2026-11-23).
 function CallLines({ index }: { index: number }) {
-  if (index === 0) return <span>REXONANCE！</span>;
+  if (index === 0) {
+    return <span>Ultra DEUS！</span>;
+  }
   if (index === 1) {
+    return <span>REXONANCE！</span>;
+  }
+  if (index === 2) {
     return (
       <>
         {/* Each line is a call and its answer: SA-GA！, then DEUS！ answers. */}
@@ -79,7 +86,7 @@ function CallLines({ index }: { index: number }) {
       </>
     );
   }
-  if (index === 2) {
+  if (index === 3) {
     return (
       <>
         <span>REXONANCE！</span>
@@ -89,7 +96,7 @@ function CallLines({ index }: { index: number }) {
       </>
     );
   }
-  if (index === 3) {
+  if (index === 4) {
     return (
       <>
         <span>REXONANCE</span>
@@ -845,7 +852,9 @@ export function RexonanceCallSequence({
   const beatDuration = (beat: { readonly start: number; readonly duration: number }) =>
     clock(beat.start + beat.duration) - clock(beat.start);
   if (entry && blackout) {
-    // The blackout: REXONANCE！ alone on the dark screen, before the suit-up.
+    // The blackout: Ultra DEUS！, then REXONANCE！, on the dark screen, before
+    // the suit-up; each line punches in on its own beat (the still tiers show
+    // both at once, without motion).
     return (
       <div
         className="rx-call-sequence"
@@ -863,10 +872,25 @@ export function RexonanceCallSequence({
         }
       >
         <div className="rx-call-blackout">
-          <i className="rx-call-blackout-accent" />
-          <div className="rx-call-blackout-line" data-call={REXONANCE_ENTRY_CALLS[0]}>
-            <CallLines index={0} />
-          </div>
+          {REXONANCE_ENTRY_BLACKOUT_BEATS.map((beat, index) => {
+            const timing = {
+              "--rx-call-blackout-start": `${beat.start}ms`,
+              "--rx-call-blackout-duration": `${beat.duration}ms`,
+            } as CSSProperties;
+            return (
+              <div
+                key={REXONANCE_ENTRY_CALLS[index]}
+                className="rx-call-blackout-beat"
+                data-line={index}
+                style={timing}
+              >
+                <i className="rx-call-blackout-accent" />
+                <div className="rx-call-blackout-line" data-call={REXONANCE_ENTRY_CALLS[index]}>
+                  <CallLines index={index} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -928,10 +952,11 @@ export function RexonanceCallSequence({
       </div>
       <div className="rx-call-words">
         {entry ? (
-          // The suit-up's lines: the first (REXONANCE！) was the blackout's.
-          // Each keeps its mark on the suit-up's clock, which starts after it.
+          // The suit-up's lines: the first two (Ultra DEUS！, REXONANCE！) were
+          // the blackout's. Each keeps its mark on the suit-up's clock, which
+          // starts after it.
           REXONANCE_ENTRY_CALLS.map((call, index) => {
-            if (index === 0) return null;
+            if (index < REXONANCE_ENTRY_BLACKOUT_LINES) return null;
             const beat = REXONANCE_CALL_BEATS[index];
             const local = {
               start: beat.start - REXONANCE_ENTRY_BLACKOUT_MS,
@@ -940,7 +965,7 @@ export function RexonanceCallSequence({
             return (
               <div
                 key={`${index}-${call}`}
-                className={`rx-call-beat${index === 3 ? " rx-call-final" : ""}${index === 1 ? " rx-call-chant" : ""}${index === 2 ? " rx-call-repetition" : ""}`}
+                className={`rx-call-beat${index === 4 ? " rx-call-final" : ""}${index === 2 ? " rx-call-chant" : ""}${index === 3 ? " rx-call-repetition" : ""}`}
                 data-call={call}
                 style={
                   {
@@ -955,7 +980,7 @@ export function RexonanceCallSequence({
           })
         ) : (
           <div className="rx-call-beat rx-call-final">
-            <CallLines index={3} />
+            <CallLines index={4} />
             <small className="rx-call-operating-stage">
               <span>OPERATING STAGE</span>
               <b>{REXONANCE_STAGE_LABELS[stage]}</b>

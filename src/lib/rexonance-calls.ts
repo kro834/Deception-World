@@ -1,6 +1,8 @@
 // Canonical transformation call, in its original order and punctuation.
-// Owner (2026-11-23): the call is these four lines, exactly.
+// Owner (2026-11-23, the canon of that day): the call is these five lines,
+// exactly; Ultra DEUS！ opens it again.
 export const REXONANCE_CALLS = [
+  "Ultra DEUS！",
   "REXONANCE！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
@@ -21,18 +23,24 @@ export const REXONANCE_STAGE_LABELS: Record<RexonanceStage, string> = {
 };
 
 // Owner (2026-11-23): the first REXONANCE！ plays on a blacked-out screen,
-// and the transformation starts after it.
-// The entry opens on a blacked-out screen that shows only REXONANCE！; the
-// suit-up starts after it. The whole suit-up (every clock below, the HUD
-// marks, the skin's front, the emitters, the cells, the light and the form
-// burst) runs on its own overlay clock, unchanged, and that clock starts
-// when the blackout ends: one offset for all of it. LoadGate owns the
-// blackout's timer (load-gate.tsx); the cover runs the blackout plus the
-// suit-up's own cover.
-export const REXONANCE_ENTRY_BLACKOUT_MS = 720;
-/** Reduced motion and economy: the line shows briefly, then the still
+// and the transformation starts after it. With the canon of the same day
+// Ultra DEUS！ is the call's first line again: the blackout shows
+// Ultra DEUS！, then REXONANCE！, one after the other, and the suit-up starts
+// after both. The whole suit-up (every clock below, the HUD marks, the
+// skin's front, the emitters, the cells, the light and the form burst) runs
+// on its own overlay clock, unchanged, and that clock starts when the
+// blackout ends: one offset for all of it. LoadGate owns the blackout's
+// timer (load-gate.tsx); the cover runs the blackout plus the suit-up's own
+// cover.
+/** The blackout's two lines, in ms from the overlay's first frame. */
+export const REXONANCE_ENTRY_BLACKOUT_BEATS = [
+  { start: 0, duration: 480 },
+  { start: 480, duration: 660 },
+] as const;
+export const REXONANCE_ENTRY_BLACKOUT_MS = 1140;
+/** Reduced motion and economy: the two lines show briefly, then the still
  * stands until the cover lifts (ms from the overlay's first frame). */
-export const REXONANCE_ENTRY_STILL = { line: 420, cover: 780 } as const;
+export const REXONANCE_ENTRY_STILL = { line: 600, cover: 960 } as const;
 
 // rx12 (owner, 2026-10-10): the face holds its pixel squares ~0.6 s before
 // they scatter, so the last call holds 580 ms longer (cover 2300 -> 2880).
@@ -64,16 +72,18 @@ export const REXONANCE_SUIT_BEATS = [
 ] as const;
 
 // Cover time is a minimum: the final call holds if the destination is late.
-// The four lines' beats on the entry's canonical timeline (0 = the
-// overlay's first frame): REXONANCE！ is the blackout; the chant, the
-// response and REXONANCE DEUS！ keep their suit-up marks, after it.
+// The five lines' beats on the entry's canonical timeline (0 = the
+// overlay's first frame): Ultra DEUS！ and REXONANCE！ are the blackout; the
+// chant, the response and REXONANCE DEUS！ keep their suit-up marks, after it.
 export const REXONANCE_CALL_BEATS = [
-  { start: 0, duration: REXONANCE_ENTRY_BLACKOUT_MS },
+  ...REXONANCE_ENTRY_BLACKOUT_BEATS,
   ...REXONANCE_SUIT_BEATS.slice(2).map(({ start, duration }) => ({
     start: REXONANCE_ENTRY_BLACKOUT_MS + start,
     duration,
   })),
 ] as const;
+/** How many of the call's lines the blackout shows. */
+export const REXONANCE_ENTRY_BLACKOUT_LINES = REXONANCE_ENTRY_BLACKOUT_BEATS.length;
 
 // rx3 suit-up HUD. The system check reads only what the page already states,
 // exactly as printed there (rexonance-saga.tsx: the P14 / SA-GA OS 5.5 copy,

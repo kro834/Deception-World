@@ -7,8 +7,10 @@ const engine = process.env.PW_ENGINE || "chromium";
 const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: process.env.PW_BROWSER_CHANNEL || "chrome" },
 );
-// Owner (2026-11-23): four lines; REXONANCE！ plays on the blackout.
+// Owner's canon (2026-11-23): five lines; Ultra DEUS！ then REXONANCE！ play
+// on the blackout.
 const calls = [
+  "Ultra DEUS！",
   "REXONANCE！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
@@ -333,7 +335,7 @@ async function verifyProfile(profile) {
   if (touch) await link.tap();
   else await link.click();
   await page.locator('.rx-call-sequence[data-mode="entry"]').waitFor({ timeout: 10000 });
-  // The blackout: REXONANCE！ alone, nothing of the suit-up mounted yet.
+  // The blackout: Ultra DEUS！ then REXONANCE！, nothing of the suit-up mounted yet.
   const entryCall = (index) =>
     index === 0
       ? '.rx-call-sequence[data-mode="entry"][data-blackout] .rx-call-blackout-line'
@@ -346,7 +348,7 @@ async function verifyProfile(profile) {
     assert.equal(
       await page.locator('.rx-call-sequence[data-mode="entry"] :is(.rx-suit, .rx-call-meter)').count(),
       0,
-      `${profile.name}: the blackout shows the line alone`,
+      `${profile.name}: the blackout shows its lines alone`,
     );
   }
   await waitForVisibleCall(
@@ -433,8 +435,9 @@ async function verifyProfile(profile) {
     // measure lands at about 3783 ms on a loaded machine (the old 3200 budget
     // missed by the same few ms), so it allows 60 ms of timer slack; the
     // hand-over itself is pinned exactly by verify-route-transitions.
-    // Owner (2026-11-23): + the 720 ms REXONANCE！ blackout before the suit-up.
-    entryDuration < 3840 + 720,
+    // Owner (2026-11-23): + the 1140 ms Ultra DEUS！ / REXONANCE！ blackout
+    // before the suit-up.
+    entryDuration < 3840 + 1140,
     `${profile.name}: route entry and call sequence must hand off promptly (${entryDuration.toFixed(0)} ms)`,
   );
   assert.ok(

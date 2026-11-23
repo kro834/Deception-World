@@ -26,9 +26,16 @@ test("レクソナンス三形態の新設定と基礎値をフォームアー�
     "レルムスレイヤー・マークⅥ",
     "レルムスレイヤー・マークXIV",
     "レジェンズエッジ",
-    "レクソナンスメテオ",
-    "レクソナンスリボルト",
-    "空間の崩壊を防ぐ為に時間制限が設けられている",
+    // The owner's canon of 2026-11-23: one finisher, its three calls, and
+    // the stages' own words.
+    "デウスシフト・レクソナンスパーク",
+    "『MIDDLE！HIGH！XHIGH！MAX！ULTRA！』",
+    "『DEUS SHIFT！！』",
+    "『REXONANCE PERK！！』",
+    "毎秒5穣（5×10²⁸）回以上",
+    "超高密度の出力収束による周囲の空間崩壊を防ぐための安全制御として60秒の時間制限が設けられている",
+    "レクソナンスコアを強く押し込むことで移行する、時間制限なしの攻撃限界拡張状態である。",
+    '["認識・制御", "『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P14』"]',
   ]) {
     assert.match(updateSource, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
@@ -40,7 +47,9 @@ test("微調整後の変身音をライダー詳細とフォームアーカイ�
     "utf8",
   );
   const calls = [
-    // Owner 2026-11-23: four printed calls, one beat each.
+    // Owner's canon 2026-11-23: five printed calls, one beat each
+    // (Ultra DEUS！ opens the call again).
+    "Ultra DEUS！",
     "REXONANCE！",
     "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
     "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",
@@ -58,7 +67,7 @@ test("微調整後の変身音をライダー詳細とフォームアーカイ�
     archivePosition = updateSource.indexOf(call, archivePosition + 1);
     assert.notEqual(archivePosition, -1, `アーカイブに ${call} が順番どおり存在する`);
   }
-  // The archive's call grid is exactly the four lines, in order.
+  // The archive's call grid is exactly the five lines, in order.
   assert.ok(
     updateSource.includes(
       '<div class="rexonance-call-grid">' +
@@ -72,7 +81,6 @@ test("微調整後の変身音をライダー詳細とフォームアーカイ�
     "FAR UP！",
     "OVER SA-GA！RIDER！",
     // Owner 2026-11-23: no longer in the call.
-    "Ultra DEUS！",
     "<span>RIDER！</span>",
   ]) {
     assert.doesNotMatch(riderBlock, new RegExp(obsolete));
@@ -88,6 +96,13 @@ test("旧レクソナンス設定と旧比較倍率を再表示しない", () =>
     "ゴッドリボルト",
     "パンチ比54.4×",
     "キック比51.1×",
+    // Superseded by the canon of 2026-11-23.
+    "P14 Extreme Tuning",
+    "レクソナンスメテオ",
+    "レクソナンスリボルト",
+    "REXONANCE METEOR",
+    "本形態における神性とは",
+    "明示なし",
   ]) {
     assert.doesNotMatch(updateSource, new RegExp(obsolete.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
@@ -105,10 +120,36 @@ test("the archive carries all nine owner sections verbatim and the dossier share
   assert.ok(data);
   assert.deepEqual(JSON.parse(data[1]), REXONANCE_PROFILE_SECTIONS);
   assert.equal(REXONANCE_PROFILE_SECTIONS.length, 9);
-  assert.equal(rexonanceSection("概要").length, 5);
-  for (const [section, count] of [["製造プロセス", 2], ["統合演算機構", 4], ["超光速機動・推進制御機構", 3], ["装甲・外観", 1], ["能力", 2], ["必殺技", 4]]) {
+  // The canon of 2026-11-23: its nine chapters, by the owner's titles.
+  assert.deepEqual(
+    REXONANCE_PROFILE_SECTIONS.map((section) => section.title),
+    [
+      "概要",
+      "製造プロセス・特殊演算構造",
+      "統合演算・神経接続機構",
+      "超光速機動・推進制御機構",
+      "装甲・外観",
+      "形態段階",
+      "固有能力",
+      "追加武装",
+      "必殺技",
+    ],
+  );
+  assert.equal(rexonanceSection("概要").length, 3);
+  for (const [section, count] of [["製造プロセス・特殊演算構造", 2], ["統合演算・神経接続機構", 4], ["超光速機動・推進制御機構", 3], ["装甲・外観", 1], ["形態段階", 3], ["固有能力", 2], ["必殺技", 1]]) {
     assert.equal(rexonanceEntries(section).length, count, section);
   }
-  assert.ok(rexonanceEntries("必殺技")[3].body.includes("『REXONANCE PERK！！』"));
-  assert.ok(rexonanceEntries("必殺技")[3].body.includes("リベレーターを二度操作し"));
+  assert.deepEqual(rexonanceEntries("製造プロセス・特殊演算構造")[0], {
+    name: "i-2",
+    note: "第2世代・無限縮小製造プロセス",
+    body: rexonanceEntries("製造プロセス・特殊演算構造")[0].body,
+  });
+  const [finisher] = rexonanceEntries("必殺技");
+  assert.equal(finisher.name, "デウスシフト・レクソナンスパーク");
+  assert.ok(
+    finisher.body.startsWith(
+      "『MIDDLE！HIGH！XHIGH！MAX！ULTRA！』\n『DEUS SHIFT！！』\n『REXONANCE PERK！！』\n",
+    ),
+  );
+  assert.ok(finisher.body.includes("デュアルエクスコアへ特殊操作を行い、さらにリベレーターを操作することで発動する"));
 });

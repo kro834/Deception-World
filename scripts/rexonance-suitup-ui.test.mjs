@@ -97,10 +97,11 @@ const contrast = (opacity) => {
 };
 const opacity = (tail, media) => Number(declaration(one(tail, media).body, "opacity"));
 
-test("F04: the opening line is REXONANCE！ alone, on one line, never past the frame", () => {
-  // Owner (2026-11-23): the call opens on REXONANCE！ alone; the old
-  // two-word opening and its phone break (sweep 2, F04) are gone.
-  assert.equal(REXONANCE_ENTRY_CALLS[0], "REXONANCE！");
+test("F04: the opening lines are Ultra DEUS！ and REXONANCE！, each on one line, never past the frame", () => {
+  // Owner (2026-11-23): the call opens on Ultra DEUS！, then REXONANCE！, each
+  // its own line; the old two-word opening and its phone break (sweep 2,
+  // F04) are gone.
+  assert.deepEqual(REXONANCE_ENTRY_CALLS.slice(0, 2), ["Ultra DEUS！", "REXONANCE！"]);
   assert.ok(REXONANCE_ENTRY_CALLS.every((call) => !call.includes("\n")));
   assert.equal(
     find(
@@ -160,8 +161,8 @@ test("F22: unlit and passed lines and the parts stay readable; the lit line stay
 });
 
 test("F81: the chant runs two beats to a line, never three and one", () => {
-  // Owner (2026-11-23): the chants are the second and third of four lines.
-  const chant = `${PAGE} > .rzn-suitup .rzn-line:is(:nth-child(2), :nth-child(3))`;
+  // Owner (2026-11-23): the chants are the third and fourth of five lines.
+  const chant = `${PAGE} > .rzn-suitup .rzn-line:is(:nth-child(3), :nth-child(4))`;
   const marker = one(`${chant}::after`);
   assert.equal(declaration(marker.body, "content"), '""');
   assert.equal(declaration(marker.body, "flex"), "0 0 100%", "a full-width break");
@@ -171,7 +172,7 @@ test("F81: the chant runs two beats to a line, never three and one", () => {
   // The beats still wrap where two do not fit.
   assert.equal(declaration(one(`${PAGE} > .rzn-suitup .rzn-line`).body, "flex-wrap"), "wrap");
   // Both chant calls are four beats each.
-  const chants = REXONANCE_ENTRY_CALLS.slice(1, 3).map(
+  const chants = REXONANCE_ENTRY_CALLS.slice(2, 4).map(
     (call) => call.match(/SA-GA！DEUS！|REXONANCE！/g).length,
   );
   assert.deepEqual(chants, [4, 4]);

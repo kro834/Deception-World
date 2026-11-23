@@ -184,8 +184,8 @@ type GateState = {
   rexonanceCall?: RexonanceTransitionRenderer | null;
   // rx12: the suit-up builds from its decoded pieces, or stands whole.
   rexonanceSuit?: "build" | "whole";
-  // Owner (2026-11-23): the call opens on a blackout (REXONANCE！ alone);
-  // the suit-up mounts, on its own clock, once this is lifted.
+  // Owner (2026-11-23): the call opens on a blackout (Ultra DEUS！, then
+  // REXONANCE！); the suit-up mounts, on its own clock, once this is lifted.
   rexonanceBlackout?: boolean;
   // FAR FROM's call (far-from-entry-sequence) and its suit, the same way.
   farFromCall?: FarFromTransitionRenderer | null;
@@ -2019,8 +2019,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               if (diveVariant === "illusionculum") startedAt = performance.now();
               if (extremePlayback) startedAt = performance.now();
               if (diveVariant === "meta-unitas") startedAt = performance.now();
-              // Rexonance's blackout lifts after REXONANCE！ (the still tiers:
-              // after their brief line); the suit-up then mounts on its own
+              // Rexonance's blackout lifts after Ultra DEUS！ and REXONANCE！
+              // (the still tiers: after their brief lines); the suit-up then mounts on its own
               // clock, from the first painted frame plus the blackout.
               if (diveVariant === "rexonance" && rexonanceCall) {
                 window.setTimeout(
@@ -2079,7 +2079,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               }
             }
             // Rexonance's still tiers (reduced motion, economy) show the
-            // call's first line briefly, then the still (owner, 2026-11-23).
+            // call's first two lines briefly, then the still (owner, 2026-11-23).
             const rexonanceStill =
               diveVariant === "rexonance" && Boolean(rexonanceCall) && tier !== "full";
             const coverTimeLeft = Math.max(

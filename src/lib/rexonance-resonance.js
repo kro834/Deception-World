@@ -546,10 +546,10 @@ export function mountRexonanceResonance(page, environment = window) {
    follows the module's piece list whatever its granularity (only each
    piece's id, group, box and seat are read). Over the bare undersuit:
 
-   - REXONANCE！ (the scan and the motes; owner 2026-11-23): a scan
-     wakes the undersuit, top to bottom, as the fire kindles at its soles
-     and climbs it (REXONANCE_SCROLL_FLAME, rexonance-field/field-clock.js);
-     then the fire covers the undersuit whole, bursts, and its
+   - Ultra DEUS！ (the scan) and REXONANCE！ (the motes; owner's canon
+     2026-11-23): a scan wakes the undersuit, top to bottom, as the fire
+     kindles at its soles and climbs it (REXONANCE_SCROLL_FLAME,
+     rexonance-field/field-clock.js); then the fire covers the undersuit whole, bursts, and its
      fragments cool into the nanites (the field's particles and every
      tile, hanging in the air round the body) before the first DEUS！;
    - SA-GA！DEUS！ ×4: on each DEUS！ one group lands (legs, arms, chest
@@ -1720,8 +1720,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const hudPartsOf = typeof config.hudParts === "function" ? config.hudParts : null;
   // The HUD line each of the scene's five beats shows (scan, motes, the
   // chant, the response, the final call): by default one line a beat; a call
-  // with fewer lines maps several beats onto one (Rexonance's four, owner
-  // 2026-11-23: REXONANCE！ over the scan and the motes).
+  // with fewer lines can map several beats onto one (Rexonance names its
+  // five explicitly: Ultra DEUS！ over the scan, REXONANCE！ over the motes).
   const lineOfBeat =
     Array.isArray(config.callLines) && config.callLines.length === 5
       ? config.callLines
