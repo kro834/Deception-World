@@ -282,8 +282,12 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar > na
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
   --orbit-vh: 100vh;
   --orbit-step: 51.4286deg;
-  --orbit-r: min(270px, 30vh, 19vw);
-  --orbit-disc: clamp(62px, 21vh, 96px);
+  /* 2026-11-23 iOS fix: sized from the visible height (--orbit-vh), not
+     vh, which on iOS is the large viewport: on a sideways iPhone the dial
+     was sized for 402px of a 292px screen and its top and bottom planets
+     ran off it. */
+  --orbit-r: min(270px, var(--orbit-vh) * 0.3, 19vw);
+  --orbit-disc: clamp(62px, var(--orbit-vh) * 0.21, 96px);
   --orbit-cx: max(var(--orbit-r) + var(--orbit-disc) * 0.7 + 26px, 27vw);
   --orbit-cy: calc(var(--orbit-vh) / 2);
   --orbit-focus: 0deg;
@@ -907,7 +911,7 @@ html[data-family]:not([data-family="dream"])
       var(--orbit-r) * 0.9 + var(--orbit-disc) / 2 + 10px + env(safe-area-inset-bottom, 0px)
     );
     --orbit-cy: calc(var(--orbit-vh) - var(--orbit-sink));
-    --orbit-r: min(190px, 50vw - 55px, 21vh);
+    --orbit-r: min(190px, 50vw - 55px, var(--orbit-vh) * 0.21);
     --orbit-disc: clamp(68px, 9vw, 88px);
     --orbit-focus: -90deg;
     --orbit-zone: calc(var(--orbit-sink) + var(--orbit-r) + var(--orbit-disc) * 0.61 + 18px);
@@ -1138,18 +1142,20 @@ html[data-family]:not([data-family="dream"])
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
     --orbit-gap: 104px;
     gap: 8px 10px;
-    padding-right: 16px;
+    /* The rows and the close plate keep clear of the right-hand inset
+       (the island or notch on a sideways iPhone). */
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
     > .side-panel-head {
-    margin-right: -16px;
+    margin-right: calc(max(16px, env(safe-area-inset-right, 0px)) * -1);
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
     .side-panel-close {
     top: 10px;
-    right: 12px;
+    right: max(12px, env(safe-area-inset-right, 0px));
     width: 44px;
     height: 44px;
   }
