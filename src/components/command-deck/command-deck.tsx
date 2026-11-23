@@ -671,9 +671,11 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
         </ArtworkStage>
 
         <i className="ring-divider ring-enter command-deck-divider" aria-hidden="true" />
-        <section className="command-deck-discover ring-enter" aria-labelledby="command-deck-discover-title">
+        {/* The amber pulley-and-thread chain lifts the heading, then each
+            card in turn (ring-motion.js, DESIGN.md section 10; 2026-11-23). */}
+        <section className="command-deck-discover" aria-labelledby="command-deck-discover-title">
           <h2 id="command-deck-discover-title">展示・資料</h2>
-          <div className="command-deck-destinations">
+          <div className="command-deck-destinations" data-ring-open="">
             {DECK_DESTINATIONS.map(({ to, label, art }) => (
               <DeckLink
                 key={to}

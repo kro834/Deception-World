@@ -415,22 +415,9 @@
     transition-timing-function: ease-out;
   }
 
-  /* The exhibition cards arrive one after another. */
-  html[data-ring-ready]:not([data-world-effects="economy"])
-    .command-deck-discover.ring-enter[data-ring-in] {
-    animation: none;
-  }
-
-  html[data-ring-ready]:not([data-world-effects="economy"])
-    .command-deck-discover.ring-enter[data-ring-in]
-    > :is(h2, .command-deck-destinations)
-    > *,
-  html[data-ring-ready]:not([data-world-effects="economy"])
-    .command-deck-discover.ring-enter[data-ring-in]
-    > h2 {
-    animation: ring-home-rise var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: calc(var(--ring-i, 0) * 70ms);
-  }
+  /* The exhibition cards arrive one after another: since 2026-11-23 on the
+     shared pulley-and-thread chain (the heading, then each card; the section
+     is no longer a .ring-enter with its own stagger). */
 
   /* The glass layers answer a hovered rider: each breathes a little, in
      opposite senses, on the bounce spring. */
