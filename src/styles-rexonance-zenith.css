@@ -372,7 +372,7 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup
-  .rzn-line:nth-child(2) {
+  .rzn-line:nth-child(3) {
   font-size: clamp(14px, 1.2vw, 20px);
 }
 
@@ -380,7 +380,7 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup
-  .rzn-line:nth-child(3) {
+  .rzn-line:nth-child(4) {
   font-size: clamp(14px, 1.2vw, 20px);
 }
 
@@ -392,7 +392,7 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup
-  .rzn-line:is(:nth-child(2), :nth-child(3))::after {
+  .rzn-line:is(:nth-child(3), :nth-child(4))::after {
   content: "";
   flex: 0 0 100%;
   order: 1;
@@ -403,7 +403,7 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup
-  .rzn-line:is(:nth-child(2), :nth-child(3))
+  .rzn-line:is(:nth-child(3), :nth-child(4))
   > .rzn-chip:nth-child(n + 3) {
   order: 2;
 }
@@ -1016,7 +1016,7 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rzn-suitup[data-rzn-state]
-    .rzn-line:is(:nth-child(2), :nth-child(3)) {
+    .rzn-line:is(:nth-child(3), :nth-child(4)) {
     font-size: clamp(14px, 2.9vw, 26px);
   }
 
@@ -1037,9 +1037,9 @@ html[data-family="special"]
   }
 }
 
-/* Under 420 px the opening line (REXONANCE！ alone since 2026-11-23) fits on
-   its one line at the call's size; the old two-word opening's break
-   (sweep 2, F04) is gone with it. */
+/* Under 420 px the opening lines (Ultra DEUS！ and REXONANCE！, each its own
+   line since 2026-11-23) fit on their one line at the call's size; the old
+   two-word opening's break (sweep 2, F04) is not needed. */
 
 /* ================================================================
    Motion: the HUD answers the engine's flags; the rail follows the

@@ -2952,21 +2952,29 @@ html[data-world-effects="economy"] .rx-call-sequence .rx-suit-figure {
 
 /* ================================================================
    Owner (2026-11-23): the first REXONANCE！ plays on a blacked-out screen,
-   and the transformation starts after it.
-   The entry opens on a blacked-out screen that shows only REXONANCE！:
-   the line punches in with a light accent, holds, and fades; then the
-   suit-up mounts on its own clock (rexonance-call-sequence.tsx) and fades
-   up out of the dark under the veil. The still tiers (reduced motion,
-   economy) show the line with no motion, then the still.
+   and the transformation starts after it; the canon of the same day opens
+   the call on Ultra DEUS！ again.
+   The entry opens on a blacked-out screen that shows Ultra DEUS！, then
+   REXONANCE！: each line punches in with a light accent on its own beat
+   (REXONANCE_ENTRY_BLACKOUT_BEATS), holds, and fades; then the suit-up
+   mounts on its own clock (rexonance-call-sequence.tsx) and fades up out
+   of the dark under the veil. The still tiers (reduced motion, economy)
+   show the two lines, one over the other, with no motion, then the still.
    ================================================================ */
 .rx-call-sequence .rx-call-blackout {
   position: absolute;
   inset: 0;
   display: grid;
+  place-content: center;
   place-items: center;
+  row-gap: 0.2em;
   padding: 0 max(24px, calc(env(safe-area-inset-right) + 16px)) 0
     max(24px, calc(env(safe-area-inset-left) + 16px));
   background: #02050b;
+}
+.rx-call-sequence .rx-call-blackout-beat {
+  display: grid;
+  place-items: center;
 }
 .rx-call-sequence .rx-call-blackout-line,
 .rx-call-sequence .rx-call-blackout-accent {
@@ -3027,20 +3035,30 @@ html[data-world-effects="economy"] .rx-call-sequence .rx-suit-figure {
   background: #02050b;
 }
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  /* On the full tier the lines take turns in one place, each on its beat
+     (hidden before it by the animation's backwards fill). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"]
+    .rx-call-blackout-beat {
+    grid-area: 1 / 1;
+  }
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-call-blackout-line {
-    animation: rxCallBlackoutLine var(--rx-call-blackout, 720ms) var(--rx-call-ease) both;
+    animation: rxCallBlackoutLine var(--rx-call-blackout-duration, 660ms) var(--rx-call-ease)
+      var(--rx-call-blackout-start, 0ms) both;
   }
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-call-blackout-line::after {
-    animation: rxCallBlackoutRule var(--rx-call-blackout, 720ms) var(--rx-call-ease) both;
+    animation: rxCallBlackoutRule var(--rx-call-blackout-duration, 660ms) var(--rx-call-ease)
+      var(--rx-call-blackout-start, 0ms) both;
   }
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-call-blackout-accent {
-    animation: rxCallBlackoutAccent var(--rx-call-blackout, 720ms) ease-out both;
+    animation: rxCallBlackoutAccent var(--rx-call-blackout-duration, 660ms) ease-out
+      var(--rx-call-blackout-start, 0ms) both;
   }
   /* The suit-up fades up out of the dark (it is already running). */
   html:not([data-world-effects="economy"])

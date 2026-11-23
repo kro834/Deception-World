@@ -95,7 +95,7 @@ const STAGES: Record<
     image: REXONANCE_SITE_ARTWORK.standard,
     alt: "仮面ライダーレクソナンスサーガの全身ビジュアル",
     title: "無限出力が、平常運転。",
-    lede: "精神的変化に伴う著しい適正値上昇によって第五の犬として完全覚醒した悠真が、自身に備わる『終焉』を完全制御した姿です。",
+    lede: "精神的成長に伴う適合値の急上昇によって第五の犬として完全覚醒した悠真が、自身に備わる『終焉』を完全制御した姿です。",
     points: ["終焉の完全制御", "自己共鳴型システム", "標準カタログ値を公開"],
     accent: "#63e2ff",
   },
@@ -429,15 +429,16 @@ const CORE_SYSTEMS = [
   {
     number: "01",
     code: "i-2 / SECOND-GENERATION PROCESS",
-    title: "i-2 第二世代無限縮小製造プロセス",
-    // F64: quote the owner's manufacturing definition, not plate 03's job.
-    body: "REALMS所属のフェイブルが開発した、第二世代無限縮小製造プロセス。『i』はInfinityに由来し、『2』は第二世代を表すため、2nmなどの回路寸法を意味する名称ではない。",
+    title: "i-2 第2世代無限縮小製造プロセス",
+    // F64: quote the owner's manufacturing definition, not plate 03's job
+    // (the canon of 2026-11-23).
+    body: "REALMS所属のフェイブルが開発した、既存の半導体微細化技術の延長線上には存在しない第2世代無限縮小製造プロセスである。『i』はInfinity、『2』は第2世代を表す名称であり、「2nm」のような回路線幅を意味するものではなく、素子の物理寸法を数学的なゼロにする処理とも異なる。",
   },
   {
     number: "02",
     code: "TWO-ANGLE STRUCTURE",
     title: "二角形構造",
-    body: "二つの頂点と二本の位相境界によって構成される特殊な演算構造。通常空間の内部だけでは完結しない閉路を形成し、その内側へ限定的なベクトル仮想演算空間を生成する。",
+    body: "通常の平面幾何学では閉じた図形になり得ない「二つの頂点と二本の位相境界」に特殊な位相曲率を与えることで閉路を形成させた演算構造である。通常空間の内部だけでは完結しないこの閉路の内側に、現実の空間から切り離された一時的なシミュレーション領域「ベクトル仮想演算空間」を立ち上げる。",
   },
   {
     number: "03",
@@ -493,9 +494,10 @@ const SUIT_UP: RexonanceAssemblyConfig = {
   // and the scene draws nothing while that layer holds its canvases hidden
   // (the layer's own flag, set only once their opacity is 0).
   hudParts: (runway) => ("rznSkin" in runway.dataset ? SKIN_SCROLL_PARTS : null),
-  // The call's four lines (owner, 2026-11-23): REXONANCE！ over the scan
-  // and the motes, then the chant, the response and REXONANCE DEUS！.
-  callLines: [0, 0, 1, 2, 3],
+  // The call's five lines (owner's canon, 2026-11-23): Ultra DEUS！ over
+  // the scan, REXONANCE！ over the motes, then the chant, the response and
+  // REXONANCE DEUS！: one line a beat.
+  callLines: [0, 1, 2, 3, 4],
   covered: (_progress, runway) => "rznCovered" in runway.dataset,
 };
 // One HUD line per line of the call (owner, 2026-11-23); repeated chant

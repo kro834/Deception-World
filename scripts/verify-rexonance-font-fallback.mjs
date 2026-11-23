@@ -3,8 +3,10 @@ import { chromium, webkit } from "playwright";
 import { showMenuRow } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8082";
-// Owner (2026-11-23): four lines; REXONANCE！ plays on the blackout.
+// Owner's canon (2026-11-23): five lines; Ultra DEUS！ then REXONANCE！ play
+// on the blackout.
 const calls = [
+  "Ultra DEUS！",
   "REXONANCE！",
   "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！",
   "REXONANCE！REXONANCE！REXONANCE！REXONANCE！",

@@ -3,7 +3,11 @@ import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
 import { REXONANCE_CALLS } from "@/lib/rexonance-calls";
-import { rexonanceEntries, rexonanceSection } from "@/lib/rexonance-profile";
+import {
+  rexonanceEntries,
+  rexonanceEntryHeading,
+  rexonanceSection,
+} from "@/lib/rexonance-profile";
 import { DisplayName } from "@/components/name-text";
 import { useWorldMode } from "./use-world-mode";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
@@ -228,28 +232,32 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "JUMP", dd: "6000m" },
           { dt: "100m", dd: "0.00021s／100m" },
           { dt: "FLIGHT", dd: "測定不能" },
-          { dt: "KHAOS DeuX", dd: "50000〜YOPS／∞Core" },
-          { dt: "KOSMOS DeuX", dd: "9000TOPS／300Core" },
-          { dt: "戦闘OS", dd: "SA-GA OS 5.5" },
+          // The processors' rows as the owner's spec table states them
+          // (canon of 2026-11-23: 主演算／副演算／認識・制御／戦闘OS).
+          { dt: "主演算", dd: "50000〜YOPS／∞Core『KHAOS DeuX』" },
+          { dt: "副演算", dd: "9000TOPS／300Core『KOSMOS DeuX』" },
+          {
+            dt: "認識・制御",
+            dd: "『Paranormal Realizer Ultra』／『Neural Resonancer Ultra』／『P14』",
+          },
+          { dt: "戦闘OS", dd: "『SA-GA OS 5.5』" },
           { dt: "EMP", dd: "無限大" },
         ],
         overview: rexonanceSection("概要"),
         abilities: [
-          ...rexonanceEntries("製造プロセス"),
-          ...rexonanceEntries("統合演算機構"),
+          ...rexonanceEntries("製造プロセス・特殊演算構造"),
+          ...rexonanceEntries("統合演算・神経接続機構"),
           ...rexonanceEntries("超光速機動・推進制御機構"),
           ...rexonanceEntries("装甲・外観"),
-          ...rexonanceEntries("能力"),
-        ],
+          ...rexonanceEntries("固有能力"),
+        ].map((entry) => ({ name: rexonanceEntryHeading(entry), body: entry.body })),
         arsenal: [
           {
-            name: rexonanceSection("追加武装")
-              .filter((line) => /^『 /u.test(line))
-              .map((line) => line.slice(2, -2))
+            // The owner's list line: 『NAME』／『NAME』… (the names, by ／).
+            name: [...rexonanceSection("追加武装")[0].matchAll(/『([^』]+)』/gu)]
+              .map((match) => match[1])
               .join("／"),
-            body: rexonanceSection("追加武装")
-              .filter((line) => !/^『 /u.test(line))
-              .join("\n"),
+            body: rexonanceSection("追加武装").slice(1).join("\n"),
           },
         ],
         finishers: rexonanceEntries("必殺技"),

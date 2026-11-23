@@ -462,11 +462,11 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
   },
   {
     id: "system-rexonance-01",
-    title: "i-2 第二世代無限縮小製造プロセス",
+    title: "i-2 第2世代無限縮小製造プロセス",
     category: "systems",
     description:
-      "REALMS所属のフェイブルが開発した、第二世代無限縮小製造プロセス。『i』はInfinityに由来し、『2』は第二世代を表すため、2nmなどの回路寸法を意味する名称ではない。",
-    keywords: ["i-2", "第二世代無限縮小製造プロセス", "レクソナンスサーガ"],
+      "REALMS所属のフェイブルが開発した、既存の半導体微細化技術の延長線上には存在しない第2世代無限縮小製造プロセスである。『i』はInfinity、『2』は第2世代を表す名称であり、「2nm」のような回路線幅を意味するものではなく、素子の物理寸法を数学的なゼロにする処理とも異なる。",
+    keywords: ["i-2", "第2世代・無限縮小製造プロセス", "レクソナンスサーガ"],
     to: "/rexonance-saga",
     hash: "system",
   },
@@ -475,7 +475,7 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     title: "二角形構造",
     category: "systems",
     description:
-      "二つの頂点と二本の位相境界によって構成される特殊な演算構造。通常空間の内部だけでは完結しない閉路を形成し、その内側へ限定的なベクトル仮想演算空間を生成する。",
+      "通常の平面幾何学では閉じた図形になり得ない「二つの頂点と二本の位相境界」に特殊な位相曲率を与えることで閉路を形成させた演算構造である。通常空間の内部だけでは完結しないこの閉路の内側に、現実の空間から切り離された一時的なシミュレーション領域「ベクトル仮想演算空間」を立ち上げる。",
     keywords: [
       "TWO-ANGLE STRUCTURE",
       "二つの頂点",
@@ -794,7 +794,7 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
       "終焉",
       "自己共鳴",
       "i-2",
-      "第二世代無限縮小製造プロセス",
+      "第2世代・無限縮小製造プロセス",
       "二角形構造",
       "REXONANCE DRIVE",
       "反エントロピー",

@@ -1059,8 +1059,9 @@ test("rx17: cold decoding and high-priority plan finish before the full-timing c
   assert.equal(
     REXONANCE_ENTRY_TIMINGS.cover,
     // Owner (2026-10-22): the fire's hold is 360 ms (cover 2730 + 360);
-    // owner (2026-11-23): the REXONANCE！ blackout (720 ms) comes first.
-    720 + 3090,
+    // owner (2026-11-23): the blackout comes first; with the canon of that
+    // day it holds Ultra DEUS！ then REXONANCE！ (1140 ms).
+    1140 + 3090,
     "preparation cannot shorten or extend the call beats",
   );
   await settleGo(ui, pending);

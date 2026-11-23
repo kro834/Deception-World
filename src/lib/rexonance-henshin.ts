@@ -250,7 +250,7 @@ export function henshinScrollSheet(
 
 /** The Rexonance entry's sheet, in canonical ms on the suit-up's own clock
  * (rexonance-calls.ts REXONANCE_SUIT_BEATS, which starts after the call's
- * REXONANCE！ blackout: the scan 0, the seed and the fire 330, the chant 650
+ * Ultra DEUS！ / REXONANCE！ blackout: the scan 0, the seed and the fire 330, the chant 650
  * with a DEUS！ every 120 ms from 880, the response 1300, REXONANCE DEUS！
  * 1980). `rider` is the 330 mark (RIDER！'s beat until 2026-11-23). */
 export function henshinEntrySheet(

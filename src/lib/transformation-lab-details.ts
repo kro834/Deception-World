@@ -28,7 +28,7 @@ const rex = (section: string, name: string) => {
 };
 const rxArmor = rex("装甲・外観", "ASTRA-16 Ultra");
 const rxDrive = rex("超光速機動・推進制御機構", "REXONANCE DRIVE");
-const rxSelf = rex("能力", "REXONANCE DEUS");
+const rxSelf = rex("固有能力", "REXONANCE DEUS");
 const icArmor = ILLUSIONCULUM_SAGA.armour[0];
 const muArmor = META_UNITAS_SAGA.armor[0];
 // The canon (2026-11-23) writes UNITAS HELIX, REGALIA LINER and UNITAS HALO
