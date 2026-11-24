@@ -966,8 +966,8 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         pos: "50% 8%",
         system: "ゲーマドライバー × ライダーガシャット",
         name: "アルゲノム",
-        sub: "Xゲーマー",
-        calls: ["ゲーマオン!", "X GAMER!", "CRITICAL STRIKE!"],
+        sub: "コレクトゲーマー",
+        calls: ["マイティジャンプ！", "マイティシーフ！", "マイティマイティコレクト！", "X！"],
         stats: [
           { dt: "HEIGHT", dd: "205.0cm" },
           { dt: "WEIGHT", dd: "95.5kg" },
