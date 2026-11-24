@@ -459,11 +459,13 @@ html[data-mode="world"]:has(.exs-page) {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background: repeating-conic-gradient(
-    from 250deg at 0% 50%,
-    rgb(255 213 122 / 42%) 0 0.5deg,
-    transparent 0.5deg 9deg
-  );
+  background:
+    radial-gradient(circle at 0% 50%, rgb(255 213 122 / 26%), transparent 34%),
+    repeating-conic-gradient(
+      from 250deg at 0% 50%,
+      rgb(255 213 122 / 46%) 0 0.5deg,
+      transparent 0.5deg 9deg
+    );
   content: "";
   pointer-events: none;
   -webkit-mask: linear-gradient(90deg, transparent, #000 22%, transparent 96%);
@@ -474,10 +476,10 @@ html[data-mode="world"]:has(.exs-page) {
 .rxs-page.rxs-page.exs-page .exs-p14-comparison article:last-child::after {
   background:
     radial-gradient(circle at 100% 50%, var(--ex-ice) 0 4px, transparent 5px),
-    radial-gradient(circle at 100% 50%, rgb(122 232 255 / 22%), transparent 18%),
+    radial-gradient(circle at 100% 50%, rgb(122 232 255 / 28%), transparent 24%),
     repeating-conic-gradient(
       from 70deg at 100% 50%,
-      rgb(122 232 255 / 38%) 0 0.5deg,
+      rgb(122 232 255 / 44%) 0 0.5deg,
       transparent 0.5deg 9deg
     );
   -webkit-mask: linear-gradient(270deg, #000, #000 14%, transparent 96%);
@@ -510,18 +512,18 @@ html[data-mode="world"]:has(.exs-page) {
 
 .rxs-page.rxs-page.exs-page .rxs-stage-panel[data-stage="middle"] figure {
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 20%),
-    0 16px 44px -8px rgb(0 0 0 / 80%),
-    0 0 44px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold, #ffd57a)) 22%, transparent);
-  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold, #ffd57a)) 46%, transparent);
+    inset 0 1px 0 0 rgb(255 255 255 / 26%),
+    0 16px 46px -8px rgb(0 0 0 / 82%),
+    0 0 48px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold, #ffd57a)) 26%, transparent);
+  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold, #ffd57a)) 52%, transparent);
 }
 
 .rxs-page.rxs-page.exs-page .rxs-stage-panel[data-stage="ultra"] figure {
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 24%),
-    0 16px 44px -8px rgb(0 0 0 / 80%),
-    0 0 48px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-ice, #7ae8ff)) 24%, transparent);
-  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-ice, #7ae8ff)) 52%, transparent);
+    inset 0 1px 0 0 rgb(255 255 255 / 30%),
+    0 16px 46px -8px rgb(0 0 0 / 82%),
+    0 0 54px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-ice, #7ae8ff)) 28%, transparent);
+  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-ice, #7ae8ff)) 58%, transparent);
 }
 
 /* Below 901px the panel is one column with the figure first, which left the
@@ -629,14 +631,14 @@ html[data-mode="world"]:has(.exs-page) {
     .rxs-page.rxs-page.exs-page
     :is(.rxs-footer > a, .rxs-chapter-index a, .rxs-comparison-selector select) {
     transition:
-      background-color 160ms ease,
-      border-color 160ms ease,
-      color 160ms ease,
-      scale 160ms ease;
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      scale var(--ring-dur-spring, 340ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
   }
 
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.exs-page .rxs-footer > a:active {
-    scale: 0.985;
+    scale: 0.965;
   }
 }
 

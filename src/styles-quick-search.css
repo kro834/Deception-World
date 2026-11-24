@@ -76,23 +76,23 @@ dialog.quick-search *::after {
   flex-direction: column;
   max-height: min(680px, calc(100dvh - var(--qs-top) - 24px));
   overflow: hidden;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.5);
-  border-radius: 14px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.56);
+  border-radius: 18px;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.07) 0%, transparent 110px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.08) 0%, transparent 116px),
     var(--qs-trail, none) right top / min(54%, 380px) 140px no-repeat,
-    radial-gradient(ellipse 68% 42% at 88% 0%, rgb(var(--qs-ice-rgb) / 0.18), transparent 70%),
-    radial-gradient(ellipse 56% 40% at 14% 12%, rgb(157 134 255 / 0.15), transparent 70%),
-    radial-gradient(ellipse 56% 38% at 8% 100%, rgb(var(--qs-pink-rgb) / 0.11), transparent 70%),
-    radial-gradient(ellipse 50% 34% at 92% 96%, rgb(242 207 141 / 0.09), transparent 70%),
-    linear-gradient(168deg, #0c192d 0%, #07101f 52%, #050a14 100%);
+    radial-gradient(ellipse 68% 42% at 88% 0%, rgb(var(--qs-ice-rgb) / 0.2), transparent 70%),
+    radial-gradient(ellipse 56% 40% at 14% 12%, rgb(157 134 255 / 0.16), transparent 70%),
+    radial-gradient(ellipse 56% 38% at 8% 100%, rgb(var(--qs-pink-rgb) / 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 34% at 92% 96%, rgb(242 207 141 / 0.1), transparent 70%),
+    linear-gradient(168deg, #0d1b31 0%, #07101f 52%, #050a14 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.34),
-    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.18),
-    0 40px 100px rgb(0 0 0 / 0.9),
-    0 12px 32px rgb(0 0 0 / 0.64),
-    0 0 64px -16px rgb(var(--qs-ice-rgb) / 0.36),
-    0 0 48px -18px rgb(157 134 255 / 0.28);
+    inset 0 1px 0 rgb(255 255 255 / 0.38),
+    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.2),
+    0 42px 104px rgb(0 0 0 / 0.92),
+    0 12px 32px rgb(0 0 0 / 0.66),
+    0 0 68px -16px rgb(var(--qs-ice-rgb) / 0.4),
+    0 0 52px -18px rgb(157 134 255 / 0.3);
 }
 /* Luminous prismatic specular hairline along the top edge. */
 .quick-search-panel::before {
@@ -143,18 +143,19 @@ dialog.quick-search *::after {
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 1px solid rgb(228 248 255 / 0.74);
-  border-radius: 8px;
+  border: 1.5px solid rgb(228 248 255 / 0.78);
+  border-radius: 50%;
   background:
-    radial-gradient(circle at 84% 16%, rgb(255 255 255 / 0.7), rgb(var(--qs-ice-rgb) / 0.32) 34%, transparent 66%),
-    radial-gradient(circle at 16% 86%, rgb(var(--qs-pink-rgb) / 0.28), transparent 62%),
-    linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.26) 0%, #101e34 56%, rgb(157 134 255 / 0.24) 100%);
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.42), transparent 44%),
+    radial-gradient(circle at 82% 18%, rgb(var(--qs-ice-rgb) / 0.36), transparent 64%),
+    radial-gradient(circle at 18% 86%, rgb(var(--qs-pink-rgb) / 0.3), transparent 62%),
+    linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.24) 0%, #0d1b30 56%, rgb(157 134 255 / 0.26) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.8),
-    inset 0 0 14px rgb(var(--qs-ice-rgb) / 0.26),
-    0 0 18px -4px rgb(var(--qs-ice-rgb) / 0.52);
-  color: #f2fbff;
-  text-shadow: 0 0 12px rgb(var(--qs-ice-rgb) / 0.68);
+    inset 0 1px 0 rgb(255 255 255 / 0.84),
+    inset 0 0 14px rgb(var(--qs-ice-rgb) / 0.28),
+    0 0 20px -4px rgb(var(--qs-ice-rgb) / 0.6);
+  color: #f4fcff;
+  text-shadow: 0 0 12px rgb(var(--qs-ice-rgb) / 0.72);
   font-family: var(--qs-hud);
   font-size: 12px;
   font-weight: 400;
@@ -171,16 +172,16 @@ dialog.quick-search button {
   gap: 8px;
   min-width: 44px;
   min-height: 44px;
-  padding: 0 10px 0 14px;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.4);
-  border-radius: 9px;
+  padding: 0 12px 0 16px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.44);
+  border-radius: 999px;
   color: var(--qs-text);
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.09), transparent 58%),
-    #101f32;
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 56%),
+    #102034;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.2),
-    0 6px 14px -6px rgb(0 0 0 / 0.52);
+    inset 0 1px 0 rgb(255 255 255 / 0.26),
+    0 6px 16px -6px rgb(0 0 0 / 0.56);
   font-size: 13px;
   font-weight: 500;
 }
@@ -192,7 +193,7 @@ dialog.quick-search kbd {
   place-items: center;
   padding: 0 7px;
   border: 1px solid rgb(168 238 255 / 0.56);
-  border-radius: 5px;
+  border-radius: 6px;
   color: #dcf9ff;
   background:
     linear-gradient(180deg, rgb(255 255 255 / 0.2) 0%, rgb(var(--qs-ice-rgb) / 0.08) 46%, rgb(4 10 20 / 0.68) 100%),
@@ -213,40 +214,41 @@ dialog.quick-search kbd {
   padding: 0 6px;
 }
 
-/* ---------- The field: recessed optical well ---------- */
+/* ---------- The field: sculpted optical input pill ---------- */
 .quick-search-field {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 62px;
+  min-height: 60px;
   margin: 14px 18px 14px;
-  padding: 2px 14px 2px 16px;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.54);
-  border-radius: 10px;
+  padding: 2px 16px 2px 20px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.58);
+  border-radius: 999px;
   color: var(--qs-ice);
   background:
-    linear-gradient(180deg, rgb(0 0 0 / 0.46) 0%, transparent 18px),
-    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.14) 0%, rgb(157 134 255 / 0.07) 52%, transparent 84%),
+    linear-gradient(180deg, rgb(0 0 0 / 0.44) 0%, transparent 18px),
+    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.16) 0%, rgb(157 134 255 / 0.08) 52%, transparent 86%),
     #05101d;
   box-shadow:
     inset 0 2px 8px rgb(0 0 0 / 0.64),
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
-    0 10px 26px -14px rgb(0 0 0 / 0.78);
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 10px 26px -14px rgb(0 0 0 / 0.8);
 }
 .quick-search-field:focus-within {
-  border-color: color-mix(in srgb, var(--qs-ice) 88%, #ffffff);
+  border-color: color-mix(in srgb, var(--qs-ice) 90%, #ffffff);
   background:
     linear-gradient(90deg, var(--qs-ice) 0%, #ffffff 30%, #9d86ff 62%, var(--qs-pink) 100%) 0 100% / 100% 2px
       no-repeat,
-    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.16) 0%, transparent 30px),
-    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.22) 0%, rgb(157 134 255 / 0.13) 56%, rgb(var(--qs-pink-rgb) / 0.11) 100%),
+    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.18) 0%, transparent 30px),
+    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.24) 0%, rgb(157 134 255 / 0.14) 56%, rgb(var(--qs-pink-rgb) / 0.12) 100%),
     #071628;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.52),
+    inset 0 1px 0 rgb(255 255 255 / 0.56),
     inset 0 2px 6px rgb(0 0 0 / 0.44),
-    0 0 0 3px rgb(var(--qs-ice-rgb) / 0.3),
-    0 0 40px -4px rgb(var(--qs-ice-rgb) / 0.62),
-    0 0 60px -12px rgb(var(--qs-pink-rgb) / 0.4);
+    0 0 0 3px rgb(var(--qs-ice-rgb) / 0.32),
+    0 0 42px -4px rgb(var(--qs-ice-rgb) / 0.66),
+    0 0 64px -12px rgb(var(--qs-pink-rgb) / 0.42);
 }
 .quick-search-field svg {
   width: 18px;
@@ -666,13 +668,16 @@ dialog.quick-search mark {
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.38);
-  border-radius: 9px;
+  padding: 0 18px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.44);
+  border-top-color: rgb(228 248 255 / 0.56);
+  border-radius: 999px;
   background:
-    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.14), rgb(var(--qs-ice-rgb) / 0.04));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
-  color: #cff6ff;
+    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.18), rgb(var(--qs-ice-rgb) / 0.05));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 6px 16px -8px rgb(0 0 0 / 0.64);
+  color: #daf8ff;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -845,27 +850,39 @@ dialog.quick-search :is(button, a):focus-visible {
       border-color 180ms ease,
       box-shadow 200ms ease;
   }
-  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-close {
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-close,
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-full {
     transition:
-      border-color 160ms ease,
-      background-color 160ms ease;
+      scale var(--ring-dur-spring, 420ms) var(--ring-spring, var(--qs-ease)),
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 220ms ease;
   }
   html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option {
     transition:
-      background-color 160ms ease,
-      border-color 180ms ease,
-      box-shadow 220ms ease,
-      transform 220ms var(--qs-ease);
+      background-color 180ms ease,
+      border-color 200ms ease,
+      box-shadow 240ms ease,
+      scale var(--ring-dur-spring, 420ms) var(--ring-spring, var(--qs-ease)),
+      transform var(--ring-dur-spring, 420ms) var(--ring-spring, var(--qs-ease));
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option:active {
+    scale: 0.982;
+    transition: scale 110ms ease-out;
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search :is(.quick-search-close, .quick-search-full):active {
+    scale: 0.95;
+    transition: scale 110ms ease-out;
   }
   html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option-title,
   html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-art img {
-    transition: transform 320ms var(--qs-ease);
+    transition: transform var(--ring-dur-spring, 360ms) var(--ring-spring, var(--qs-ease));
   }
   html:not([data-world-effects="economy"])
     dialog.quick-search
     .quick-search-option[data-active="true"]
     .quick-search-option-title {
-    transform: translateX(5px);
+    transform: translateX(6px);
   }
   html:not([data-world-effects="economy"])
     dialog.quick-search
@@ -878,14 +895,20 @@ dialog.quick-search :is(button, a):focus-visible {
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html:not([data-world-effects="economy"])
     dialog.quick-search
-    .quick-search-option.is-link:hover {
-    transform: translateY(-1.5px);
+    .quick-search-option.is-link:hover:not(:active) {
+    transform: translateY(-2px);
+    scale: 1.012;
+  }
+  html:not([data-world-effects="economy"])
+    dialog.quick-search
+    :is(.quick-search-close, .quick-search-full):hover:not(:active) {
+    scale: 1.03;
   }
   html:not([data-world-effects="economy"])
     dialog.quick-search
     .quick-search-option:hover
     .quick-search-option-title {
-    transform: translateX(5px);
+    transform: translateX(6px);
   }
   html:not([data-world-effects="economy"])
     dialog.quick-search

@@ -33,12 +33,16 @@
       right: 0;
       bottom: -1px;
       left: 0;
-      height: 2px;
+      height: 2.5px;
       background: linear-gradient(
         90deg,
-        var(--mx-progress-from, #69eaff),
-        var(--mx-progress-to, #c8a8ff)
+        var(--mx-progress-from, #69eaff) 0%,
+        var(--mx-progress-mid, #f0cf86) 52%,
+        var(--mx-progress-to, #c8a8ff) 100%
       );
+      box-shadow:
+        0 0 12px rgb(105 234 255 / 38%),
+        0 1px 6px rgb(200 168 255 / 26%);
       transform-origin: 0 50%;
       pointer-events: none;
       animation: mx-progress linear both;
@@ -47,11 +51,13 @@
 
     html:not([data-world-effects="economy"]) .rxs-page.exs-page[data-motion-ready="true"] {
       --mx-progress-from: #69dbff;
+      --mx-progress-mid: #fff0b8;
       --mx-progress-to: #ffd57a;
     }
 
     html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on {
       --mx-progress-from: #6fe3ff;
+      --mx-progress-mid: #ff78c8;
       --mx-progress-to: #e9c982;
     }
 
@@ -75,7 +81,7 @@
     html:not([data-world-effects="economy"])
       .rxs-page[data-motion-ready="true"]
       :is(.rxs-section-heading h2, .rxs-footer h2) {
-      animation: mx-headline cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-headline var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -84,7 +90,7 @@
       .rxs-page[data-motion-ready="true"]
       .rxs-section-heading
       > span {
-      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-rise var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 10% entry 100%;
     }
@@ -94,7 +100,7 @@
       .rxs-page[data-motion-ready="true"]
       :is(.rxs-headline-metrics article strong, .rxs-specs > div strong) {
       transform-origin: 0 100%;
-      animation: mx-figure cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-figure var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -116,8 +122,14 @@
       top: -1px;
       right: 0;
       left: 0;
-      height: 1px;
-      background: var(--sc-accent, #69eaff);
+      height: 1.5px;
+      background: linear-gradient(
+        90deg,
+        var(--sc-accent, #69eaff),
+        rgb(240 207 134 / 78%) 68%,
+        transparent
+      );
+      box-shadow: 0 0 10px rgb(105 234 255 / 30%);
       transform-origin: 0 50%;
       pointer-events: none;
       animation: mx-line cubic-bezier(0.65, 0, 0.35, 1) both;
@@ -130,7 +142,7 @@
       .rxs-p14-copy
       dl
       div {
-      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-rise var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -163,7 +175,7 @@
         .fst-cast-console,
         .fst-pickup-card
       ) {
-      animation: mx-lift cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-lift var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -231,7 +243,7 @@
     html:not([data-world-effects="economy"])
       .site-shell.film-edition.motion-on
       :is(.story-layout, .threat-panel, .world-column, .rider-console, .episode-archive) {
-      animation: mx-lift cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-lift var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
@@ -249,13 +261,13 @@
       .site-shell.film-edition.motion-on
       .manager-slot-grid
       .signal {
-      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-rise var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
 
     html:not([data-world-effects="economy"]) .site-shell.film-edition.motion-on .episode-card {
-      animation: mx-rise cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: mx-rise var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)) both;
       animation-timeline: --mx-episodes;
       animation-range: entry 0% entry 100%;
     }
@@ -345,8 +357,13 @@
 @keyframes mx-headline {
   from {
     opacity: 0;
-    translate: 0 56px;
-    scale: 0.94;
+    translate: 0 58px;
+    scale: 0.935;
+  }
+  65% {
+    opacity: 1;
+    translate: 0 -2px;
+    scale: 1.004;
   }
   to {
     opacity: 1;
@@ -358,7 +375,7 @@
 @keyframes mx-rise {
   from {
     opacity: 0;
-    translate: 0 40px;
+    translate: 0 42px;
   }
   to {
     opacity: 1;
@@ -369,8 +386,13 @@
 @keyframes mx-figure {
   from {
     opacity: 0;
-    translate: 0 32px;
+    translate: 0 34px;
     scale: 0.82;
+  }
+  70% {
+    opacity: 1;
+    translate: 0 -1px;
+    scale: 1.012;
   }
   to {
     opacity: 1;
@@ -391,8 +413,13 @@
 @keyframes mx-lift {
   from {
     opacity: 0;
-    translate: 0 72px;
-    scale: 0.96;
+    translate: 0 74px;
+    scale: 0.955;
+  }
+  68% {
+    opacity: 1;
+    translate: 0 -2px;
+    scale: 1.003;
   }
   to {
     opacity: 1;
@@ -403,8 +430,12 @@
 
 @keyframes mx-lift-flat {
   from {
-    translate: 0 72px;
-    scale: 0.96;
+    translate: 0 74px;
+    scale: 0.955;
+  }
+  68% {
+    translate: 0 -2px;
+    scale: 1.003;
   }
   to {
     translate: 0 0;

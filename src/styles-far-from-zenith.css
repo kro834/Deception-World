@@ -13,23 +13,27 @@
   --ffz-ice: 138 234 255;
   --ffz-violet: 192 142 255;
   --ffz-gold: 255 218 134;
+  --ffz-crimson: 214 54 96;
   --ffz-plate:
-    radial-gradient(125% 92% at 10% 0%, rgb(var(--ffz-ice) / 0.2), transparent 56%),
-    radial-gradient(112% 86% at 92% 100%, rgb(var(--ffz-violet) / 0.17), transparent 58%),
-    radial-gradient(58% 42% at 76% 6%, rgb(var(--ffz-gold) / 0.08), transparent 60%),
+    radial-gradient(ellipse 78% 34% at 50% 0%, rgb(255 250 238 / 0.16), transparent 68%),
+    radial-gradient(125% 92% at 10% 0%, rgb(var(--ffz-ice) / 0.18), transparent 56%),
+    radial-gradient(112% 86% at 92% 100%, rgb(var(--ffz-crimson) / 0.16), transparent 58%),
+    radial-gradient(58% 42% at 76% 6%, rgb(var(--ffz-gold) / 0.1), transparent 60%),
     linear-gradient(
       162deg,
-      rgb(18 32 68 / 0.96) 0%,
-      rgb(9 16 36 / 0.98) 54%,
-      rgb(4 8 20 / 0.99) 100%
+      rgb(16 26 56 / 0.96) 0%,
+      rgb(8 13 30 / 0.98) 56%,
+      rgb(4 7 18 / 0.99) 100%
     );
   --ffz-rail: linear-gradient(
     90deg,
-    rgb(var(--ffz-ice) / 1),
-    rgb(var(--ffz-violet) / 0.88) 50%,
-    rgb(var(--ffz-gold) / 0.96)
+    transparent,
+    rgb(var(--ffz-ice) / 0.96) 14%,
+    rgb(var(--ffz-gold) / 0.96) 52%,
+    rgb(var(--ffz-crimson) / 0.88) 84%,
+    transparent
   );
-  --ffz-cut: 18px;
+  --ffz-cut: 22px;
 }
 
 /* -- chapter heads: the lit rule under the head ------------------------- */
@@ -71,19 +75,13 @@
   isolation: isolate;
   background: var(--ffz-plate);
   border: 1px solid rgb(var(--ffz-ice) / 0.32);
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--ffz-cut)) 0,
-    100% var(--ffz-cut),
-    100% 100%,
-    var(--ffz-cut) 100%,
-    0 calc(100% - var(--ffz-cut))
-  );
+  border-radius: 22px;
+  clip-path: none;
   box-shadow:
-    inset 0 1px 0 rgb(240 252 255 / 0.24),
-    inset 0 0 0 1px rgb(var(--ffz-violet) / 0.12),
-    inset 0 -46px 72px -38px rgb(var(--ffz-ice) / 0.16),
-    0 18px 44px -16px rgb(0 4 16 / 0.76);
+    inset 0 1px 0 rgb(255 250 236 / 0.34),
+    inset 0 0 0 1px rgb(var(--ffz-gold) / 0.12),
+    inset 0 -46px 72px -38px rgb(var(--ffz-crimson) / 0.14),
+    0 18px 44px -16px rgb(0 4 16 / 0.8);
 }
 .rxs-page.rxs-page.ffs-page .ffs-specs > div::before,
 .rxs-page.rxs-page.ffs-page .ffs-articles > article::after,
@@ -91,12 +89,13 @@
 .rxs-page.rxs-page.ffs-page .ffs-finisher::before {
   content: "";
   position: absolute;
-  inset: 0 var(--ffz-cut) auto 0;
+  inset: 0 var(--ffz-cut) auto var(--ffz-cut);
   height: 2px;
+  border-radius: var(--ring-radius-pill, 999px);
   background: var(--ffz-rail);
   box-shadow:
     0 0 10px rgb(var(--ffz-ice) / 0.45),
-    0 0 20px rgb(var(--ffz-violet) / 0.24);
+    0 0 20px rgb(var(--ffz-gold) / 0.24);
   pointer-events: none;
   z-index: 1;
 }
@@ -110,7 +109,7 @@
 }
 .rxs-page.rxs-page.ffs-page .ffs-specs > div {
   padding: clamp(18px, 2vw, 26px) clamp(18px, 2vw, 26px) clamp(20px, 2.2vw, 28px);
-  border-top: 1px solid rgb(var(--ffz-ice) / 0.16);
+  border-top: 1px solid rgb(var(--ffz-ice) / 0.24);
   min-height: 118px;
   display: flex;
   flex-direction: column;
@@ -129,7 +128,7 @@
     0 2px 0 rgb(0 0 0 / 0.6);
 }
 
-/* The articles: the number as a lit badge, Extreme's cut. */
+/* The articles: the number as a lit pill badge. */
 .rxs-page.rxs-page.ffs-page .ffs-articles {
   gap: clamp(12px, 1.6vw, 20px);
 }
@@ -141,10 +140,11 @@
   place-items: center;
   min-width: 48px;
   height: 40px;
-  padding: 0 12px;
+  padding: 0 14px;
+  border-radius: var(--ring-radius-pill, 999px);
   color: rgb(4 12 22);
   background: linear-gradient(135deg, rgb(var(--ffz-ice)), rgb(196 246 255));
-  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  clip-path: none;
   box-shadow: 0 0 18px rgb(var(--ffz-ice) / 0.4);
 }
 
@@ -160,7 +160,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  border-top: 1px solid rgb(var(--ffz-ice) / 0.16);
+  border-top: 1px solid rgb(var(--ffz-gold) / 0.28);
 }
 .rxs-page.rxs-page.ffs-page .ffs-weapons > li > span {
   color: rgb(var(--ffz-gold));
@@ -168,18 +168,24 @@
   text-shadow: 0 0 14px rgb(var(--ffz-gold) / 0.45);
 }
 
-/* The finishers: tall plates with the gold side of the rail. */
+/* The finishers: tall plates with the gold-crimson side of the rail. */
 .rxs-page.rxs-page.ffs-page .ffs-finisher {
   padding: clamp(26px, 3vw, 44px);
 }
 .rxs-page.rxs-page.ffs-page .ffs-finisher::before {
-  background: linear-gradient(90deg, rgb(var(--ffz-gold) / 0.95), rgb(var(--ffz-ice) / 0.6));
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--ffz-gold) / 0.96) 20%,
+    rgb(var(--ffz-crimson) / 0.88) 65%,
+    transparent
+  );
 }
 
-/* Phones: one column, the long specs full width, a tighter cut. */
+/* Phones: one column, the long specs full width, matching rounded corner inset. */
 @media (max-width: 640px) {
   .rxs-page.rxs-page.ffs-page {
-    --ffz-cut: 12px;
+    --ffz-cut: 20px;
   }
   .rxs-page.rxs-page.ffs-page .ffs-specs {
     grid-template-columns: 1fr 1fr;
@@ -192,27 +198,38 @@
   }
 }
 
-/* Fine pointers, full motion: a plate lifts its rail under the pointer. */
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+/* Full motion: Ring System spring hover elevation and all-pointer tactile press. */
+@media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article,
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li,
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div {
     transition:
-      transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      border-color 260ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      border-color 240ms ease,
       box-shadow 260ms ease;
   }
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article:hover,
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li:hover,
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div:hover {
-    transform: translateY(-3px);
-    border-color: rgb(var(--ffz-ice) / 0.48);
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article:active,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li:active,
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div:active {
+    scale: 0.985;
+    transition: scale 90ms ease-out;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article:hover:not(:active),
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li:hover:not(:active),
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div:hover:not(:active) {
+    translate: 0 -4px;
+    scale: 1.015;
+    border-color: rgb(var(--ffz-gold) / 0.56);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.24),
-      inset 0 0 0 1px rgb(var(--ffz-violet) / 0.14),
+      inset 0 1px 0 rgb(255 252 242 / 0.52),
+      inset 0 0 0 1px rgb(var(--ffz-crimson) / 0.16),
       inset 0 -44px 68px -36px rgb(var(--ffz-ice) / 0.16),
-      0 22px 46px -16px rgb(0 0 0 / 0.76),
-      0 0 24px -6px rgb(var(--ffz-ice) / 0.2);
+      0 22px 46px -16px rgb(0 0 0 / 0.84),
+      0 0 26px -6px rgb(var(--ffz-gold) / 0.24);
   }
 }
 
@@ -252,26 +269,21 @@
   }
 }
 
-/* -- stage switcher panel: machined bevel & optical plate ------------- */
+/* -- stage switcher panel: rounded optical plate with inset top rail ---- */
 .rxs-page.rxs-page.ffs-page .ffs-stage-panel {
   position: relative;
   isolation: isolate;
   background:
+    radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 250 238 / 0.16), transparent 68%),
     radial-gradient(92% 70% at 14% 0%, color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 22%, transparent), transparent 58%),
-    radial-gradient(84% 64% at 88% 100%, rgb(var(--ffz-violet) / 0.18), transparent 60%),
+    radial-gradient(84% 64% at 88% 100%, rgb(var(--ffz-crimson) / 0.16), transparent 60%),
     var(--ffz-plate);
-  border: 1px solid color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 48%, rgb(var(--ffz-ice) / 0.28));
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--ffz-cut)) 0,
-    100% var(--ffz-cut),
-    100% 100%,
-    var(--ffz-cut) 100%,
-    0 calc(100% - var(--ffz-cut))
-  );
+  border: 1px solid color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 48%, rgb(var(--ffz-gold) / 0.28));
+  border-radius: var(--ring-radius-card, 28px);
+  clip-path: none;
   box-shadow:
-    inset 0 1px 0 0 rgb(242 252 255 / 30%),
-    inset 0 0 0 1px rgb(var(--ffz-violet) / 14%),
+    inset 0 1px 0 0 rgb(255 250 238 / 38%),
+    inset 0 0 0 1px rgb(var(--ffz-gold) / 12%),
     inset 0 -48px 80px -28px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 24%, transparent),
     0 24px 60px -14px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 34%, transparent);
 }
@@ -279,18 +291,20 @@
 .rxs-page.rxs-page.ffs-page .ffs-stage-panel::before {
   content: "";
   position: absolute;
-  inset: 0 var(--ffz-cut) auto 0;
-  height: 3px;
+  inset: 0 28px auto 28px;
+  height: 2px;
+  border-radius: var(--ring-radius-pill, 999px);
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 86%, white),
-    rgb(var(--ffz-ice) / 0.92) 42%,
-    rgb(var(--ffz-violet) / 0.84) 74%,
-    rgb(var(--ffz-gold) / 0.92)
+    transparent,
+    color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 86%, white) 16%,
+    rgb(var(--ffz-gold) / 0.92) 52%,
+    rgb(var(--ffz-crimson) / 0.84) 84%,
+    transparent
   );
   box-shadow:
-    0 0 18px rgb(var(--ffz-ice) / 0.72),
-    0 0 34px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 76%, transparent);
+    0 0 18px rgb(var(--ffz-ice) / 0.68),
+    0 0 34px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 72%, transparent);
   pointer-events: none;
   z-index: 2;
 }
@@ -331,7 +345,7 @@
   -webkit-text-stroke-color: rgb(var(--ffz-ice) / 0.62);
 }
 
-/* -- the comparison console and P16: machined titanium-glass panels ----- */
+/* -- the comparison console and P16: rounded specular titanium-glass panels - */
 .rxs-page.rxs-page.ffs-page .ffs-console,
 .rxs-page.rxs-page.ffs-page .ffs-panel,
 .rxs-page.rxs-page.ffs-page .ffs-p16-main,
@@ -341,14 +355,14 @@
 .rxs-page.rxs-page.ffs-page .ffs-p16-lineage {
   position: relative;
   background: var(--ffz-plate);
-  border: 1px solid rgb(var(--ffz-ice) / 0.34);
-  border-radius: 12px;
+  border: 1px solid rgb(var(--ffz-ice) / 0.32);
+  border-radius: var(--ring-radius-card, 28px);
   clip-path: none;
   box-shadow:
-    inset 0 1px 0 rgb(242 252 255 / 0.28),
-    inset 0 0 0 1px rgb(var(--ffz-violet) / 0.14),
-    inset 0 -64px 90px -56px rgb(var(--ffz-ice) / 0.22),
-    0 24px 58px -18px rgb(0 4 18 / 0.86);
+    inset 0 1px 0 rgb(255 250 236 / 0.34),
+    inset 0 0 0 1px rgb(var(--ffz-gold) / 0.12),
+    inset 0 -64px 90px -56px rgb(var(--ffz-crimson) / 0.16),
+    0 24px 58px -18px rgb(0 4 18 / 0.88);
 }
 .rxs-page.rxs-page.ffs-page .ffs-console::before,
 .rxs-page.rxs-page.ffs-page .ffs-panel::before,
@@ -359,12 +373,13 @@
 .rxs-page.rxs-page.ffs-page .ffs-p16-lineage::before {
   content: "";
   position: absolute;
-  inset: 0 12px auto 12px;
+  inset: 0 28px auto 28px;
   height: 2px;
+  border-radius: var(--ring-radius-pill, 999px);
   background: var(--ffz-rail);
   box-shadow:
-    0 0 16px rgb(var(--ffz-ice) / 0.52),
-    0 0 28px rgb(var(--ffz-violet) / 0.28);
+    0 0 16px rgb(var(--ffz-ice) / 0.48),
+    0 0 28px rgb(var(--ffz-gold) / 0.26);
   pointer-events: none;
 }
 .rxs-page.rxs-page.ffs-page .ffs-metric-result,
@@ -618,7 +633,7 @@
   from { opacity: 0; translate: 0 22px; }
 }
 @keyframes ffz-ghost {
-  from { opacity: 0; letter-spacing: 0.32em; }
+  from { opacity: 0; translate: 0 12px; scale: 0.96; }
 }
 @keyframes ffz-stage-rise {
   from { opacity: 0; scale: 0.965; }
@@ -765,39 +780,45 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-hero .ffs-hero-rail a {
-  border: 1px solid rgb(138 234 255 / 44%);
+  border: 1px solid rgb(var(--ffz-ice) / 0.44);
+  border-radius: var(--ring-radius-pill, 999px);
+  clip-path: none;
   background:
-    linear-gradient(180deg, rgb(238 251 255 / 18%) 0%, rgb(138 234 255 / 8%) 34%, rgb(10 18 44 / 92%) 100%);
+    radial-gradient(ellipse 78% 46% at 50% 0%, rgb(255 250 238 / 22%), transparent 68%),
+    linear-gradient(180deg, rgb(20 30 62 / 92%) 0%, rgb(8 13 30 / 96%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(242 252 255 / 38%),
-    inset 0 -1px 0 rgb(192 142 255 / 24%),
-    0 12px 28px -12px rgb(0 4 16 / 86%);
-  filter: drop-shadow(0 0 14px rgb(138 234 255 / 24%));
+    inset 0 1px 0 rgb(255 250 238 / 46%),
+    inset 0 -1.5px 0 rgb(var(--ffz-crimson) / 0.28),
+    0 12px 28px -12px rgb(0 4 16 / 88%);
+  filter: none;
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-hero .ffs-hero-rail .ffs-hero-primary {
-  border-color: #fff3cf;
-  color: #071222;
+  border-color: #fff6dc;
+  color: #07101f;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 66%) 0%, rgb(255 255 255 / 8%) 48%, rgb(150 96 18 / 22%) 100%),
-    linear-gradient(112deg, #fffdf4 0%, #ffe6a6 42%, #f4c663 76%, #ddf7ff 100%);
+    radial-gradient(ellipse 78% 48% at 50% 0%, rgb(255 255 255 / 84%), transparent 68%),
+    linear-gradient(180deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 8%) 48%, rgb(138 36 58 / 20%) 100%),
+    linear-gradient(112deg, #fffef8 0%, #ffe8a8 38%, #f3be56 76%, #ffe6be 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 94%),
-    inset 0 -2px 0 rgb(118 76 16 / 46%),
-    inset 0 0 0 1px rgb(255 248 220 / 70%);
-  filter:
-    drop-shadow(0 10px 26px rgb(255 215 122 / 42%))
-    drop-shadow(0 0 18px rgb(127 230 255 / 34%));
+    inset 0 1.5px 0 rgb(255 255 255 / 96%),
+    inset 0 -2px 0 rgb(134 38 56 / 44%),
+    0 12px 28px -8px rgb(255 210 112 / 46%),
+    0 6px 22px -6px rgb(214 54 96 / 28%);
+  filter: none;
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-chapter-map a {
-  border: 1px solid rgb(138 234 255 / 24%);
+  border: 1px solid rgb(var(--ffz-ice) / 0.28);
+  border-radius: var(--ring-radius-pill, 999px);
+  clip-path: none;
   background:
-    radial-gradient(100% 75% at 0% 0%, rgb(138 234 255 / 14%), transparent 60%),
-    linear-gradient(166deg, rgb(14 25 56 / 90%), rgb(5 10 26 / 95%));
+    radial-gradient(ellipse 76% 42% at 50% 0%, rgb(255 250 236 / 16%), transparent 68%),
+    radial-gradient(100% 75% at 0% 0%, rgb(var(--ffz-ice) / 0.14), transparent 60%),
+    linear-gradient(166deg, rgb(14 24 54 / 92%), rgb(5 9 22 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(238 251 255 / 22%),
-    0 10px 24px -14px rgb(0 4 16 / 82%);
+    inset 0 1px 0 rgb(255 248 232 / 32%),
+    0 10px 24px -14px rgb(0 4 16 / 84%);
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] :is(
@@ -808,11 +829,13 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
 ) {
   background: var(--ffz-plate);
   border: 1px solid rgb(var(--ffz-ice) / 0.34);
+  border-radius: 22px;
+  clip-path: none;
   box-shadow:
-    inset 0 1px 0 rgb(240 252 255 / 0.26),
-    inset 0 0 0 1px rgb(var(--ffz-violet) / 0.13),
-    inset 0 -46px 72px -38px rgb(var(--ffz-ice) / 0.18),
-    0 18px 44px -16px rgb(0 4 16 / 0.8);
+    inset 0 1px 0 rgb(255 250 236 / 0.36),
+    inset 0 0 0 1px rgb(var(--ffz-gold) / 0.12),
+    inset 0 -46px 72px -38px rgb(var(--ffz-crimson) / 0.14),
+    0 18px 44px -16px rgb(0 4 16 / 0.84);
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] :is(
@@ -825,36 +848,44 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
   .ffs-p16-lineage
 ) {
   background: var(--ffz-plate);
-  border: 1px solid rgb(var(--ffz-ice) / 0.34);
+  border: 1px solid rgb(var(--ffz-ice) / 0.32);
+  border-radius: var(--ring-radius-card, 28px);
+  clip-path: none;
   box-shadow:
-    inset 0 1px 0 rgb(242 252 255 / 0.26),
-    inset 0 0 0 1px rgb(var(--ffz-violet) / 0.14),
-    inset 0 -64px 90px -56px rgb(var(--ffz-ice) / 0.22),
-    0 22px 54px -18px rgb(0 4 16 / 0.84);
+    inset 0 1px 0 rgb(255 250 236 / 0.34),
+    inset 0 0 0 1px rgb(var(--ffz-gold) / 0.12),
+    inset 0 -64px 90px -56px rgb(var(--ffz-crimson) / 0.16),
+    0 22px 54px -18px rgb(0 4 16 / 0.86);
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-stage-panel {
   background:
+    radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 250 238 / 0.16), transparent 68%),
     radial-gradient(92% 70% at 14% 0%, color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 24%, transparent), transparent 58%),
-    radial-gradient(84% 64% at 88% 100%, rgb(var(--ffz-violet) / 0.2), transparent 60%),
+    radial-gradient(84% 64% at 88% 100%, rgb(var(--ffz-crimson) / 0.18), transparent 60%),
     var(--ffz-plate);
-  border: 1px solid color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 52%, rgb(var(--ffz-ice) / 0.3));
+  border: 1px solid color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 52%, rgb(var(--ffz-gold) / 0.3));
+  border-radius: var(--ring-radius-card, 28px);
+  clip-path: none;
   box-shadow:
-    inset 0 1px 0 0 rgb(242 252 255 / 32%),
-    inset 0 0 0 1px rgb(var(--ffz-violet) / 16%),
+    inset 0 1px 0 0 rgb(255 250 238 / 38%),
+    inset 0 0 0 1px rgb(var(--ffz-gold) / 14%),
     inset 0 -48px 80px -28px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 26%, transparent),
     0 24px 60px -14px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 36%, transparent);
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-form-comparison {
   border: 1px solid rgb(var(--ffz-ice) / 0.32);
+  border-radius: var(--ring-radius-card, 28px);
+  clip-path: none;
   background:
+    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 250 238 / 0.16), transparent 68%),
     radial-gradient(96% 68% at 12% 0%, rgb(var(--ffz-ice) / 0.14), transparent 56%),
-    radial-gradient(88% 64% at 92% 100%, rgb(var(--ffz-violet) / 0.14), transparent 60%),
-    linear-gradient(166deg, rgb(12 22 48 / 0.94), rgb(5 10 24 / 0.97));
+    radial-gradient(88% 64% at 92% 100%, rgb(var(--ffz-crimson) / 0.14), transparent 60%),
+    linear-gradient(166deg, rgb(13 22 48 / 0.95), rgb(5 9 22 / 0.98));
   box-shadow:
-    inset 0 1px 0 rgb(240 252 255 / 0.22),
-    0 20px 50px -20px rgb(0 4 16 / 0.84);
+    inset 0 1px 0 rgb(255 250 236 / 0.32),
+    0 20px 50px -20px rgb(0 4 16 / 0.86);
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-stage-tabs.rxs-stage-tabs {
@@ -866,17 +897,43 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
     0 14px 34px -16px rgb(0 4 16 / 0.84);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]
+    .ffs-chapter-map
+    a {
+    transition:
+      scale var(--ring-dur-elastic, 880ms) var(--ring-spring-elastic, cubic-bezier(0.32, 1.9, 0.4, 0.96)),
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      border-color 220ms ease,
+      box-shadow 260ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]
+    .ffs-chapter-map
+    a:active {
+    transform: none;
+    scale: 0.96;
+    transition: scale 90ms ease-out;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     #top.rxs-page.rxs-page.ffs-page[data-command-special]
     .ffs-chapter-map
-    a:hover {
-    border-color: rgb(var(--ffz-ice) / 0.56);
+    a:hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.015;
+    border-color: rgb(var(--ffz-gold) / 0.62);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.32),
-      0 14px 32px -12px rgb(0 4 16 / 0.88),
-      0 0 22px -6px rgb(var(--ffz-ice) / 0.32);
+      inset 0 1px 0 rgb(255 252 242 / 0.48),
+      0 16px 34px -12px rgb(0 4 16 / 0.9),
+      0 0 24px -6px rgb(var(--ffz-gold) / 0.34);
   }
 }
 

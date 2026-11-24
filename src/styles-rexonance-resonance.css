@@ -39,10 +39,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   --rsn-gold: 242 216 150;
   --rsn-white: 244 251 255;
   /* Overshoot and settle: the lock. */
-  --rsn-hit: cubic-bezier(0.18, 1.5, 0.32, 1);
+  --rsn-hit: var(--ring-spring-bounce, cubic-bezier(0.18, 1.5, 0.32, 1));
   --rsn-out: cubic-bezier(0.16, 1, 0.3, 1);
   --rsn-snap: cubic-bezier(0.7, 0, 0.2, 1);
-  --rsn-spring: cubic-bezier(0.34, 1.8, 0.5, 1);
+  --rsn-spring: var(--ring-spring-elastic, cubic-bezier(0.34, 1.8, 0.5, 1));
   /* The armour's chest core inside the hero stage (both layouts). */
   --rsn-core-x: 59.4%;
   --rsn-core-y: 38%;
@@ -1903,7 +1903,9 @@ html[data-family="special"]
     .rxs-stage-tabs.liquid-swipe-tabs
     > button[role="tab"]
     > :is(span, small) {
-    transition: scale 420ms var(--rsn-spring);
+    transition:
+      scale 420ms var(--rsn-spring),
+      translate 380ms var(--rsn-spring);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -1918,13 +1920,46 @@ html[data-family="special"]
     transition-timing-function: var(--rsn-out);
   }
 
+  /* P14 range toggle buttons and 05 Self-Resonance trinity numeral badges respond on the spring. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-range-labels
+    > button,
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    .rxs-system-grid
+    > article
+    > header
+    > span {
+    transition:
+      scale 420ms var(--rsn-spring),
+      translate 380ms var(--rsn-spring);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-range-labels
+    > button:active {
+    scale: 0.94;
+    transition-duration: 80ms;
+    transition-timing-function: var(--rsn-out);
+  }
+
   /* Doors and shortcuts lean toward where they lead. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     :is(.rxs-footer > a, .rxs-chapter-index a)
     > i {
-    transition: translate 380ms var(--rsn-spring);
+    transition:
+      translate 380ms var(--rsn-spring),
+      scale 380ms var(--rsn-spring);
   }
 }
 
@@ -1935,6 +1970,7 @@ html[data-family="special"]
     :is(.rxs-footer > a:not(.rxs-footer-return), .rxs-chapter-index a):hover
     > i {
     translate: 4px -4px;
+    scale: 1.08;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -1944,6 +1980,29 @@ html[data-family="special"]
     > a.rxs-footer-return:hover
     > i {
     translate: -5px 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]:hover
+    > :is(span, small) {
+    translate: 0 -1.5px;
+    scale: 1.03;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    .rxs-system-grid
+    > article:hover
+    > header
+    > span {
+    translate: 0 -2px;
+    scale: 1.06;
   }
 }
 
@@ -2295,11 +2354,15 @@ html[data-world-effects="economy"]
 }
 
 @keyframes rsn-core-open {
-  from {
+  0% {
     opacity: 0;
     scale: 0.35;
   }
-  to {
+  72% {
+    opacity: 1;
+    scale: 1.035;
+  }
+  100% {
     opacity: 1;
     scale: 1;
   }
@@ -2318,7 +2381,10 @@ html[data-world-effects="economy"]
 
 @keyframes rsn-punch {
   0% {
-    scale: 1.2;
+    scale: 1.22;
+  }
+  64% {
+    scale: 0.975;
   }
   100% {
     scale: 1;
@@ -2451,9 +2517,15 @@ html[data-world-effects="economy"]
     opacity: 0.4;
     transform: translate3d(0, 6%, 0) scale(0.9);
   }
+  68% {
+    opacity: 1;
+    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px - 1%), 0)
+      scale(1.014);
+  }
   100% {
     opacity: 1;
-    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px), 0);
+    transform: translate3d(calc(var(--rsn-px, 0) * 10px), calc(var(--rsn-py, 0) * 8px), 0)
+      scale(1);
   }
 }
 
@@ -2464,6 +2536,10 @@ html[data-world-effects="economy"]
   }
   18% {
     opacity: 1;
+  }
+  66% {
+    opacity: 1;
+    scale: 0.965;
   }
   100% {
     opacity: 1;

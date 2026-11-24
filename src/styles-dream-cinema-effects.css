@@ -15,20 +15,24 @@ html[data-family="dream"]
   .dream-cinema-console {
   position: relative;
   border: 1px solid rgb(228 192 122 / 58%);
-  border-radius: 2px;
+  border-radius: 14px;
   outline: 0;
   background:
-    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 20px 2px no-repeat,
-    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2px 20px no-repeat,
-    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 20px 2px no-repeat,
-    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 20px no-repeat,
-    radial-gradient(ellipse 68% 88% at 24% 0%, rgb(248 206 128 / 16%), transparent 72%),
-    radial-gradient(ellipse 56% 74% at 88% 100%, rgb(206 72 56 / 12%), transparent 72%),
-    linear-gradient(180deg, #1d1228 0%, #100a18 100%);
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(246 218 156 / 54%) 26%,
+        rgb(255 244 210 / 82%) 50%,
+        rgb(246 218 156 / 54%) 74%,
+        transparent 94%
+      )
+      top / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 68% 88% at 24% 0%, rgb(248 206 128 / 18%), transparent 72%),
+    radial-gradient(ellipse 56% 74% at 88% 100%, rgb(206 72 56 / 14%), transparent 72%),
+    linear-gradient(180deg, #1f132b 0%, #100a18 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 244 208 / 22%),
-    inset 0 0 0 3px rgb(12 8 18 / 50%),
-    0 16px 36px rgb(0 0 0 / 52%);
+    inset 0 1px 0 rgb(255 244 208 / 24%),
+    0 16px 36px rgb(0 0 0 / 54%);
 }
 
 html[data-family="dream"]
@@ -74,6 +78,7 @@ html[data-family="dream"]
 html[data-family="dream"]
   main#top.dream-page.dream-page.dream-image-cinema
   .dream-cinema-console-chevron {
+  display: inline-block;
   color: #ebd094;
 }
 
@@ -81,7 +86,7 @@ html[data-family="dream"]
   main#top.dream-page.dream-page.dream-image-cinema
   .dream-cinema-console[open]
   .dream-cinema-console-chevron {
-  transform: rotate(45deg);
+  rotate: 45deg;
 }
 
 html[data-family="dream"]
@@ -128,16 +133,16 @@ html[data-family="dream"]
   align-items: center;
   gap: 10px;
   min-height: 48px;
-  padding: 10px 12px;
-  border: 1px solid rgb(224 188 118 / 48%);
-  border-radius: 2px;
+  padding: 10px 14px;
+  border: 1px solid rgb(224 188 118 / 50%);
+  border-radius: 999px;
   color: #f6ecda;
   background:
-    linear-gradient(#f0d294 0 0) 0 0 / 10px 1.5px no-repeat,
-    linear-gradient(180deg, #281833 0%, #160e20 100%);
+    radial-gradient(88% 72% at 50% 0%, rgb(255 244 214 / 16%), transparent 70%),
+    linear-gradient(180deg, #2a1936 0%, #160e20 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 242 206 / 18%),
-    0 6px 14px rgb(0 0 0 / 38%);
+    inset 0 1px 0 rgb(255 242 206 / 22%),
+    0 6px 16px rgb(0 0 0 / 40%);
   font: inherit;
   font-size: 14px;
   cursor: pointer;
@@ -147,28 +152,26 @@ html[data-family="dream"]
   main#top.dream-page.dream-page.dream-image-cinema
   .dream-cinema-console
   button[aria-pressed="true"] {
-  border-color: #f4d48e;
+  border-color: #f6dc9c;
   color: #fff8ea;
   background:
-    linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
-    linear-gradient(#fff0c2 0 0) 100% 100% / 14px 2px no-repeat,
-    radial-gradient(80% 90% at 24% 0%, rgb(255 202 114 / 24%), transparent 70%),
-    linear-gradient(145deg, #6d232f 0%, #3d1627 64%, #26101f 100%);
+    radial-gradient(90% 76% at 50% 0%, rgb(255 232 178 / 32%), transparent 70%),
+    linear-gradient(135deg, #862730 0%, #551926 58%, #34111f 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 244 212 / 34%),
-    0 8px 18px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 246 218 / 42%),
+    0 0 0 1px rgb(236 200 130 / 48%),
+    0 0 18px rgb(217 85 63 / 28%),
+    0 8px 20px rgb(0 0 0 / 50%);
 }
 
 html[data-family="dream"]
   main#top.dream-page.dream-page.dream-image-cinema
   .dream-cinema-console
   button.dream-cinema-release {
-  border-color: rgb(238 202 132 / 64%);
+  border-color: rgb(238 202 132 / 66%);
   background:
-    linear-gradient(#f8e0a4 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(#f8e0a4 0 0) 100% 100% / 12px 2px no-repeat,
-    radial-gradient(74% 88% at 20% 0%, rgb(246 206 130 / 18%), transparent 70%),
-    linear-gradient(180deg, #321d3d 0%, #1c1026 100%);
+    radial-gradient(88% 76% at 50% 0%, rgb(255 234 182 / 24%), transparent 70%),
+    linear-gradient(180deg, #351f42 0%, #1d1128 100%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -178,20 +181,61 @@ html[data-family="dream"]
     button:hover {
     border-color: #fff0c2;
     background:
-      linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
-      linear-gradient(180deg, #3a2346 0%, #22142d 100%);
+      radial-gradient(90% 78% at 50% 0%, rgb(255 242 204 / 26%), transparent 70%),
+      linear-gradient(180deg, #3f254d 0%, #241531 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 246 218 / 28%),
-      0 8px 18px rgb(0 0 0 / 48%);
+      inset 0 1px 0 rgb(255 246 218 / 36%),
+      0 0 18px rgb(230 200 138 / 24%),
+      0 10px 22px rgb(0 0 0 / 50%);
   }
 
   html[data-family="dream"]
     main#top.dream-page.dream-page.dream-image-cinema
     .dream-cinema-scene-trail
     a:hover {
-    border-color: #f4d48e;
-    background: rgb(244 202 126 / 12%);
+    border-color: #f6dc9c;
+    background:
+      radial-gradient(88% 78% at 50% 0%, rgb(255 236 186 / 18%), transparent 72%),
+      linear-gradient(180deg, #341d3d 0%, #1f1128 100%);
     color: #fff8ea;
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 218 / 28%),
+      0 8px 18px rgb(0 0 0 / 44%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    :is(button, .dream-cinema-scene-trail a) {
+    transition:
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      border-color 220ms ease,
+      box-shadow 260ms ease,
+      color 200ms ease;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    :is(button, .dream-cinema-scene-trail a):active {
+    scale: 0.94;
+    translate: 0 1px;
+    transition:
+      scale 90ms ease-out,
+      translate 90ms ease-out;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    :is(button, .dream-cinema-scene-trail a):hover {
+    translate: 0 -2px;
+    scale: 1.03;
   }
 }
 
@@ -489,7 +533,7 @@ html[data-family="dream"][data-world-effects="economy"]
   }
 }
 
-/* Scene trail — four lacquered bookmark stamps */
+/* Scene trail — four lacquered rounded bookmark stamps */
 html[data-family="dream"]
   main#top.dream-page.dream-page.dream-image-cinema
   .dream-cinema-scene-trail {
@@ -510,11 +554,14 @@ html[data-family="dream"]
   gap: 4px;
   min-height: 52px;
   padding: 6px 4px;
-  border: 1px solid rgb(214 178 112 / 28%);
-  border-bottom: 2px solid rgb(214 178 112 / 44%);
-  border-radius: 2px;
+  border: 1px solid rgb(214 178 112 / 34%);
+  border-bottom: 2px solid rgb(214 178 112 / 52%);
+  border-radius: 10px;
   color: #dfd2e4;
-  background: linear-gradient(180deg, #20142c 0%, #140c1d 100%);
+  background:
+    radial-gradient(88% 72% at 50% 0%, rgb(255 244 214 / 12%), transparent 70%),
+    linear-gradient(180deg, #22152f 0%, #140c1d 100%);
+  box-shadow: inset 0 1px 0 rgb(255 244 212 / 16%);
   font-size: 12px;
   text-decoration: none;
 }
@@ -531,8 +578,10 @@ html[data-family="dream"]
   main#top.dream-page.dream-page.dream-image-cinema
   .dream-cinema-scene-trail
   a[data-visited="true"] {
-  border-color: rgb(232 196 126 / 68%);
-  box-shadow: inset 0 1px 0 rgb(255 242 206 / 18%);
+  border-color: rgb(232 196 126 / 72%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 212 / 24%),
+    0 4px 12px rgb(0 0 0 / 32%);
 }
 
 html[data-family="dream"]
@@ -541,10 +590,13 @@ html[data-family="dream"]
   a[aria-current="location"] {
   border-color: #f4d48e;
   background:
-    radial-gradient(80% 90% at 50% 100%, rgb(214 74 58 / 30%), transparent 74%),
-    linear-gradient(180deg, #351b32 0%, #201023 100%);
+    radial-gradient(80% 90% at 50% 100%, rgb(214 74 58 / 32%), transparent 74%),
+    radial-gradient(86% 70% at 50% 0%, rgb(255 234 182 / 20%), transparent 70%),
+    linear-gradient(180deg, #391c34 0%, #201023 100%);
   color: #fff6e4;
-  box-shadow: inset 0 1px 0 rgb(255 244 210 / 28%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 210 / 34%),
+    0 0 14px rgb(230 200 138 / 22%);
 }
 
 html[data-family="dream"]

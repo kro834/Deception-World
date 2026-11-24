@@ -83,8 +83,9 @@ html[data-family="gallery"]
   content: "";
   position: absolute;
   inset: 9px;
-  border: 1px solid rgb(240 214 164 / 0.18);
-  box-shadow: inset 0 1px 0 rgb(255 251 240 / 0.08);
+  border: 1px solid rgb(244 218 168 / 0.24);
+  border-radius: 19px;
+  box-shadow: inset 0 1px 0 rgb(255 252 244 / 0.14);
   pointer-events: none;
 }
 
@@ -310,7 +311,8 @@ html[data-family="gallery"]
   content: "";
   position: absolute;
   inset: 7px;
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 28%, rgb(244 218 168 / 0.36));
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 32%, rgb(246 220 170 / 0.42));
+  border-radius: 15px;
   pointer-events: none;
 }
 
@@ -467,21 +469,23 @@ html[data-family="gallery"]
   .gallery-tours-main
   .gallery-tour-entrance
   .gallery-tour-course {
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 42%, rgb(238 212 162 / 0.48));
-  border-top-color: color-mix(in srgb, var(--gallery-tour-course-accent) 52%, #fce8be);
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 52%, rgb(244 218 168 / 0.56));
+  border-top-color: color-mix(in srgb, var(--gallery-tour-course-accent) 68%, #fff4da);
   background:
     radial-gradient(
-      ellipse 84% 44% at 26% 0%,
-      color-mix(in srgb, var(--gallery-tour-course-accent) 18%, rgb(244 216 162 / 0.16)),
+      ellipse 86% 48% at 26% -2%,
+      color-mix(in srgb, var(--gallery-tour-course-accent) 26%, rgb(248 222 170 / 0.22)),
       transparent 70%
     ),
-    radial-gradient(ellipse 64% 48% at 86% 6%, rgb(242 212 154 / 0.12), transparent 70%),
-    linear-gradient(156deg, #192536 0%, #0e1622 50%, #070b12 100%);
+    radial-gradient(ellipse 66% 50% at 86% 6%, rgb(158 232 250 / 0.14), transparent 70%),
+    linear-gradient(156deg, #1d2b3f 0%, #101928 50%, #070b13 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 242 / 0.3),
-    inset 0 0 0 1px rgb(240 214 164 / 0.08),
-    0 28px 64px -8px rgb(0 0 0 / 0.68),
-    0 0 36px -14px color-mix(in srgb, var(--gallery-tour-course-accent) 28%, rgb(238 206 148 / 0.2));
+    inset 0 1.5px 0 rgb(255 253 246 / 0.42),
+    inset 0 0 0 1px rgb(244 218 168 / 0.14),
+    0 0 0 4px rgb(5 8 15 / 0.68),
+    0 0 0 5px color-mix(in srgb, var(--gallery-tour-course-accent) 24%, rgb(240 214 164 / 0.2)),
+    0 32px 72px -8px rgb(0 0 0 / 0.74),
+    0 0 44px -12px color-mix(in srgb, var(--gallery-tour-course-accent) 36%, rgb(238 206 148 / 0.26));
 }
 
 .gallery-tour-course::before {
@@ -496,9 +500,10 @@ html[data-family="gallery"]
     90deg,
     var(--tour-champagne-bright) 0%,
     var(--gallery-tour-course-accent) 36%,
-    rgb(238 210 154 / 0.45) 72%,
+    rgb(158 232 250 / 0.52) 72%,
     transparent 96%
   );
+  box-shadow: 0 2px 14px color-mix(in srgb, var(--gallery-tour-course-accent) 44%, transparent);
   pointer-events: none;
 }
 

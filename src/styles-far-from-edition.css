@@ -4,17 +4,18 @@
 @import "./styles-far-from-exhibit.css";
 
 /* Sticky local navigation: fully opaque cosmic obsidian finish with luminous
-   sapphire-gold titanium rim so scrolling content never bleeds through. */
+   sapphire-gold-crimson titanium rim so scrolling content never bleeds through. */
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .rxs-local-nav {
   border-bottom: 1px solid rgb(138 232 255 / 34%);
   background:
-    linear-gradient(90deg, rgb(127 230 255 / 12%), rgb(192 142 255 / 9%) 52%, rgb(255 215 122 / 9%)),
+    linear-gradient(90deg, rgb(127 230 255 / 12%), rgb(214 54 96 / 8%) 46%, rgb(255 215 122 / 10%)),
     #050a18;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 16%),
     inset 0 -1px 0 rgb(138 232 255 / 22%),
-    0 14px 36px rgb(0 4 18 / 76%);
+    0 14px 36px rgb(0 4 18 / 78%);
 }
 
 html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .rxs-local-nav nav a[aria-current] {
@@ -29,43 +30,212 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
     0 0 16px rgb(127 230 255 / 30%);
 }
 
-/* The two striking-power measurements form a sovereign gold-crowned pair
-   within machined sapphire-titanium specification plates. */
+/* ================================================================
+   Wave-7 Optical Sovereign Polish & Ring Harmony (gold × crimson × obsidian)
+   Hero CTAs, Chapter Map doors, Spec cards, Weapon cards, Form Comparison
+   cards, Editorial & Finisher plates, and Closing CTAs. Never touches #suitup.
+   ================================================================ */
+
+/* Hero CTAs: clean pill geometry (no chamfer clips or boxy drop-shadows),
+   arched top specular glass reflection, sovereign gold & obsidian-crimson depth. */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-hero-rail
+  a.ffs-hero-primary {
+  border: 1px solid rgb(255 248 224 / 92%);
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+  color: #07101f;
+  background:
+    radial-gradient(ellipse 78% 48% at 50% 0%, rgb(255 255 255 / 86%), transparent 68%),
+    linear-gradient(180deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 6%) 46%, rgb(138 36 58 / 22%) 100%),
+    linear-gradient(112deg, #fffef8 0%, #ffe8a8 38%, #f3be56 76%, #ffe6be 100%);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 98%),
+    inset 0 -2px 0 rgb(134 38 56 / 46%),
+    inset 0 0 0 1px rgb(255 250 232 / 64%),
+    0 12px 28px -8px rgb(255 210 112 / 48%),
+    0 6px 22px -6px rgb(214 54 96 / 30%);
+  filter: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-hero-rail
+  a.ffs-hero-secondary {
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+  color: #f4f8ff;
+  background:
+    radial-gradient(ellipse 78% 46% at 50% 0%, rgb(255 250 238 / 24%), transparent 66%) padding-box,
+    radial-gradient(ellipse 84% 76% at 16% 0%, rgb(127 230 255 / 24%), transparent 60%) padding-box,
+    radial-gradient(ellipse 78% 72% at 88% 100%, rgb(214 54 96 / 26%), transparent 64%) padding-box,
+    linear-gradient(180deg, rgb(20 30 62 / 92%) 0%, rgb(9 14 32 / 96%) 56%, rgb(5 8 20 / 98%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 246 218 / 72%) 0%,
+      rgb(138 232 255 / 62%) 38%,
+      rgb(214 54 96 / 54%) 74%,
+      rgb(255 215 122 / 60%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 50%),
+    inset 0 -2px 0 rgb(4 6 16 / 84%),
+    0 12px 28px -10px rgb(0 4 16 / 88%),
+    0 0 24px -8px rgb(127 230 255 / 30%);
+  filter: none;
+}
+
+/* Chapter Map doors: the tall featured lead door takes a ring card radius
+   (preventing oversized stadium distortion) while the four index doors stay
+   crisp specular pills with zero square command-deck corner brackets. */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #ffs-chapter-map
+  a {
+  border: 1px solid transparent;
+  overflow: clip;
+  background:
+    radial-gradient(ellipse 76% 42% at 50% 0%, rgb(255 250 236 / 18%), transparent 68%) padding-box,
+    radial-gradient(ellipse 86% 74% at 0% 0%, rgb(127 230 255 / 14%), transparent 62%) padding-box,
+    radial-gradient(ellipse 72% 66% at 100% 100%, rgb(214 54 96 / 14%), transparent 64%) padding-box,
+    linear-gradient(156deg, rgb(16 26 56 / 92%), rgb(6 10 24 / 96%)) padding-box,
+    linear-gradient(
+      152deg,
+      rgb(255 244 214 / 48%) 0%,
+      rgb(138 232 255 / 38%) 42%,
+      rgb(214 54 96 / 34%) 78%,
+      rgb(255 215 122 / 40%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 34%),
+    inset 0 -1px 0 rgb(2 4 12 / 84%),
+    0 12px 26px -14px rgb(0 4 18 / 86%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #ffs-chapter-map
+  a:first-child {
+  border-radius: var(--ring-radius-card) !important;
+  clip-path: none !important;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 78% 30% at 50% 0%, rgb(255 248 228 / 22%), transparent 66%) padding-box,
+    radial-gradient(ellipse 68% 54% at 54% 38%, rgb(96 186 255 / 30%), rgb(68 92 214 / 18%) 42%, transparent 72%) padding-box,
+    radial-gradient(ellipse 56% 42% at 24% 90%, rgb(214 54 96 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 52% 40% at 86% 86%, rgb(255 215 122 / 18%), transparent 66%) padding-box,
+    linear-gradient(160deg, rgb(18 30 66 / 94%), rgb(6 10 24 / 98%)) padding-box,
+    linear-gradient(
+      150deg,
+      rgb(255 246 218 / 72%) 0%,
+      rgb(138 232 255 / 58%) 36%,
+      rgb(214 54 96 / 48%) 72%,
+      rgb(255 215 122 / 64%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 46%),
+    inset 0 -1px 0 rgb(2 4 12 / 86%),
+    0 20px 44px -16px rgb(0 4 18 / 90%),
+    0 0 32px -12px rgb(255 215 122 / 26%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #ffs-chapter-map
+  a:not(:first-child) {
+  padding-inline: 18px;
+}
+
+@media (max-width: 540px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    #ffs-chapter-map
+    a:not(:first-child) {
+    padding-inline: 12px;
+  }
+}
+
+/* The two striking-power measurements form a sovereign gold-and-crimson pair
+   within obsidian specular ring plates (continuous rounded stroke, no corner seams). */
 #top.ffs-page #specs .ffs-specs {
   gap: 12px clamp(12px, 1.8vw, 22px);
 }
 
-#top.ffs-page #specs .ffs-specs > div {
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #specs
+  .ffs-specs
+  > div {
   min-width: 0;
   min-height: 0;
   padding: clamp(16px, 1.8vw, 24px) clamp(16px, 2vw, 24px);
-  border: 1px solid rgb(138 232 255 / 26%);
-  border-block-start: 2px solid rgb(127 230 255 / 56%);
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 22px;
   clip-path: none;
   background:
-    radial-gradient(ellipse 80% 62% at 10% 0%, rgb(127 230 255 / 14%), transparent 60%),
-    linear-gradient(158deg, rgb(14 26 58 / 90%), rgb(6 12 28 / 95%));
+    radial-gradient(ellipse 78% 36% at 50% 0%, rgb(255 250 238 / 19%), transparent 68%) padding-box,
+    linear-gradient(164deg, rgb(255 248 232 / 10%) 0%, rgb(255 255 255 / 2%) 28%, transparent 48%) padding-box,
+    radial-gradient(ellipse 76% 58% at 10% 0%, rgb(127 230 255 / 14%), transparent 60%) padding-box,
+    radial-gradient(ellipse 70% 56% at 94% 100%, rgb(214 54 96 / 14%), transparent 62%) padding-box,
+    linear-gradient(158deg, rgb(15 24 52 / 94%), rgb(6 10 24 / 97%) 64%, rgb(4 7 18 / 99%)) padding-box,
+    linear-gradient(
+      155deg,
+      rgb(255 246 220 / 54%) 0%,
+      rgb(138 232 255 / 44%) 36%,
+      rgb(214 54 96 / 34%) 72%,
+      rgb(255 215 122 / 42%) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 22%),
-    0 14px 34px -16px rgb(0 4 18 / 84%);
+    inset 0 1px 0 rgb(255 250 236 / 38%),
+    inset 0 -1px 0 rgb(2 4 12 / 84%),
+    0 16px 36px -16px rgb(0 4 18 / 88%);
 }
 
 #top.ffs-page #specs .ffs-specs > div::before {
   content: none;
 }
 
-#top.ffs-page #specs .ffs-specs > [data-strike] {
-  border-color: rgb(255 215 122 / 44%);
-  border-block-start: 2px solid var(--fft-gold);
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #specs
+  .ffs-specs
+  > [data-strike] {
   background:
-    radial-gradient(ellipse 84% 66% at 14% 0%, rgb(255 215 122 / 20%), transparent 60%),
-    radial-gradient(ellipse 70% 56% at 92% 100%, rgb(127 230 255 / 16%), transparent 62%),
-    linear-gradient(152deg, rgb(22 34 68 / 94%), rgb(8 15 36 / 98%));
+    radial-gradient(ellipse 82% 38% at 50% 0%, rgb(255 248 224 / 28%), transparent 68%) padding-box,
+    linear-gradient(160deg, rgb(255 240 198 / 14%) 0%, rgb(255 255 255 / 2%) 30%, transparent 50%) padding-box,
+    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 22%), transparent 60%) padding-box,
+    radial-gradient(ellipse 74% 60% at 92% 100%, rgb(214 54 96 / 24%), transparent 62%) padding-box,
+    linear-gradient(152deg, rgb(24 24 54 / 96%), rgb(10 13 30 / 98%) 66%, rgb(5 7 18 / 99%)) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 250 232 / 84%) 0%,
+      rgb(255 215 122 / 78%) 34%,
+      rgb(218 58 100 / 60%) 72%,
+      rgb(138 232 255 / 44%) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 246 218 / 34%),
-    0 18px 44px -16px rgb(0 4 18 / 88%),
-    0 0 30px -12px rgb(255 215 122 / 30%);
+    inset 0 1px 0 rgb(255 250 232 / 54%),
+    inset 0 -1px 0 rgb(34 10 18 / 82%),
+    0 20px 46px -16px rgb(0 4 18 / 92%),
+    0 0 34px -12px rgb(255 215 122 / 36%),
+    0 0 26px -12px rgb(214 54 96 / 26%);
 }
 
 #top.ffs-page #specs .ffs-specs > [data-strike] dd {
@@ -76,70 +246,90 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
   line-height: 1.1;
   text-shadow:
     0 2px 10px rgb(3 8 24 / 82%),
-    0 0 26px rgb(255 215 122 / 44%);
+    0 0 26px rgb(255 215 122 / 48%);
 }
 
-/* Performance Comparison Console: multi-layer glass × titanium chassis */
+/* Performance Comparison Console: rounded obsidian-gold-crimson ring chassis
+   with arched top specular sheen and corner-safe inset top rails. */
 #top.ffs-page #performance .ffs-console {
   position: relative;
   padding: clamp(18px, 2.4vw, 34px);
-  border: 1px solid rgb(138 232 255 / 32%);
-  border-top: 2px solid #7fe6ff;
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-card);
   clip-path: none;
   background:
-    radial-gradient(ellipse 76% 54% at 14% 0%, rgb(112 214 255 / 18%), transparent 60%),
-    radial-gradient(ellipse 68% 50% at 90% 100%, rgb(168 120 255 / 16%), transparent 62%),
-    linear-gradient(162deg, rgb(14 26 58 / 94%) 0%, rgb(7 14 34 / 97%) 56%, rgb(4 9 22 / 99%) 100%);
+    radial-gradient(ellipse 72% 24% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%) padding-box,
+    radial-gradient(ellipse 76% 54% at 14% 0%, rgb(112 214 255 / 16%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 50% at 90% 100%, rgb(214 54 96 / 15%), transparent 62%) padding-box,
+    linear-gradient(162deg, rgb(15 24 54 / 96%) 0%, rgb(7 12 30 / 98%) 56%, rgb(4 8 20 / 99%) 100%) padding-box,
+    linear-gradient(
+      155deg,
+      rgb(255 244 214 / 52%) 0%,
+      rgb(138 232 255 / 44%) 36%,
+      rgb(214 54 96 / 34%) 72%,
+      rgb(255 215 122 / 44%) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(238 251 255 / 26%),
-    inset 0 0 0 1px rgb(192 142 255 / 12%),
-    0 24px 60px -20px rgb(0 4 18 / 90%);
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    inset 0 -1px 0 rgb(2 4 12 / 86%),
+    0 24px 60px -20px rgb(0 4 18 / 92%);
 }
 
 #top.ffs-page #performance .ffs-console::before {
-  inset: 0 12px auto 12px;
+  inset: 0 28px auto 28px;
   height: 2px;
-  background: linear-gradient(90deg, #9ef2ff, #7fe6ff 30%, #c99bff 64%, #ffd77a 92%, transparent);
-  box-shadow: 0 0 16px rgb(127 230 255 / 48%);
+  border-radius: var(--ring-radius-pill);
+  background: linear-gradient(90deg, transparent, #9ef2ff 16%, #ffd77a 52%, #e84672 84%, transparent);
+  box-shadow: 0 0 16px rgb(127 230 255 / 44%);
 }
 
 #top.ffs-page #performance .ffs-panel {
   position: relative;
   padding: clamp(16px, 2.2vw, 28px);
-  border: 1px solid rgb(138 232 255 / 26%);
-  border-radius: 10px;
+  border: 1px solid rgb(138 232 255 / 24%);
+  border-radius: 20px;
   clip-path: none;
   background:
-    radial-gradient(ellipse 80% 56% at 10% 0%, rgb(127 230 255 / 12%), transparent 60%),
-    linear-gradient(164deg, rgb(11 21 48 / 90%), rgb(5 10 24 / 95%));
+    radial-gradient(ellipse 74% 28% at 50% 0%, rgb(255 250 238 / 12%), transparent 68%),
+    radial-gradient(ellipse 80% 56% at 10% 0%, rgb(127 230 255 / 11%), transparent 60%),
+    linear-gradient(164deg, rgb(12 20 46 / 92%), rgb(5 9 22 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 22%),
-    0 16px 40px -18px rgb(0 4 18 / 84%);
+    inset 0 1px 0 rgb(255 250 236 / 28%),
+    0 16px 40px -18px rgb(0 4 18 / 86%);
 }
 
 #top.ffs-page #performance .ffs-panel::before {
-  inset: 0 10px auto 10px;
+  inset: 0 20px auto 20px;
   height: 2px;
-  background: linear-gradient(90deg, #7fe6ff, #c99bff 54%, #ffd77a 92%, transparent);
-  box-shadow: 0 0 12px rgb(127 230 255 / 38%);
+  border-radius: var(--ring-radius-pill);
+  background: linear-gradient(90deg, transparent, #7fe6ff 20%, #ffd77a 62%, #e84672 88%, transparent);
+  box-shadow: 0 0 12px rgb(127 230 255 / 34%);
 }
 
 #top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) {
   padding: clamp(16px, 1.8vw, 26px);
   gap: 13px;
-  border: 1px solid rgb(255 215 122 / 46%);
-  border-block-start: 2px solid #ffd77a;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-radius: 20px;
   background:
-    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 20%), transparent 58%),
-    radial-gradient(ellipse 76% 58% at 92% 100%, rgb(127 230 255 / 18%), transparent 62%),
-    linear-gradient(148deg, rgb(22 36 72 / 94%), rgb(8 16 38 / 98%) 72%);
+    radial-gradient(ellipse 80% 36% at 50% 0%, rgb(255 248 224 / 26%), transparent 68%) padding-box,
+    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 20%), transparent 58%) padding-box,
+    radial-gradient(ellipse 76% 58% at 92% 100%, rgb(214 54 96 / 22%), transparent 62%) padding-box,
+    linear-gradient(148deg, rgb(24 26 56 / 95%), rgb(9 13 30 / 98%) 72%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 250 232 / 78%) 0%,
+      rgb(255 215 122 / 72%) 36%,
+      rgb(218 58 100 / 56%) 74%,
+      rgb(138 232 255 / 44%) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 246 218 / 34%),
-    inset 0 0 0 1px rgb(127 230 255 / 14%),
-    0 20px 48px -16px rgb(0 4 18 / 90%),
-    0 0 32px -12px rgb(255 215 122 / 30%);
+    inset 0 1px 0 rgb(255 250 232 / 50%),
+    inset 0 -1px 0 rgb(34 10 18 / 80%),
+    0 20px 48px -16px rgb(0 4 18 / 92%),
+    0 0 32px -12px rgb(255 215 122 / 34%);
 }
 
 #top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) > header strong {
@@ -163,17 +353,20 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
 #top.ffs-page #p16 .ffs-p16-index {
   width: min(100%, 1312px);
   margin: 0 auto clamp(16px, 2.2vw, 32px);
-  padding: 2px clamp(12px, 1.8vw, 22px);
+  padding: 2px clamp(14px, 1.8vw, 24px);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0 clamp(15px, 2.2vw, 36px);
-  border: 1px solid rgb(138 232 255 / 26%);
-  border-radius: 8px;
+  border: 1px solid rgb(138 232 255 / 28%);
+  border-radius: 20px;
   background:
-    linear-gradient(90deg, rgb(127 230 255 / 10%), rgb(192 142 255 / 6%) 55%, rgb(255 215 122 / 8%)),
-    rgb(9 18 40 / 82%);
-  box-shadow: inset 0 1px 0 rgb(232 250 255 / 18%);
+    radial-gradient(ellipse 72% 48% at 50% 0%, rgb(255 250 238 / 14%), transparent 68%),
+    linear-gradient(90deg, rgb(127 230 255 / 10%), rgb(214 54 96 / 7%) 52%, rgb(255 215 122 / 9%)),
+    rgb(8 14 34 / 88%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 28%),
+    0 12px 28px -16px rgb(0 4 18 / 84%);
 }
 
 #top.ffs-page #p16 .ffs-p16-index a {
@@ -213,6 +406,361 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
   translate: none;
   opacity: 1;
   transition: none;
+}
+
+/* Overview callout score & P16 ring-card geometry alignment (corner-safe top
+   rails, rounded pill tags, and arched specular gloss). */
+#top.ffs-page #overview .ffs-calls {
+  border-radius: var(--ring-radius-card);
+  border: 1px solid transparent;
+  background:
+    radial-gradient(ellipse 74% 34% at 50% 0%, rgb(255 250 236 / 16%), transparent 68%) padding-box,
+    radial-gradient(ellipse 72% 60% at 12% 0%, rgb(255 215 122 / 14%), transparent 60%) padding-box,
+    radial-gradient(ellipse 70% 60% at 88% 100%, rgb(214 54 96 / 14%), transparent 62%) padding-box,
+    linear-gradient(160deg, rgb(14 24 52 / 90%), rgb(6 10 24 / 96%)) padding-box,
+    linear-gradient(
+      155deg,
+      rgb(255 246 218 / 52%) 0%,
+      rgb(138 232 255 / 40%) 40%,
+      rgb(214 54 96 / 34%) 76%,
+      rgb(255 215 122 / 46%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    0 18px 46px -20px rgb(0 4 18 / 88%);
+}
+
+#top.ffs-page #overview .ffs-calls b:not(:first-child):not(:last-child),
+#top.ffs-page #finishers .ffs-calls b {
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+  padding: 6px 15px;
+  border: 1px solid rgb(255 224 148 / 30%);
+  background:
+    linear-gradient(180deg, rgb(255 250 236 / 14%) 0%, transparent 52%),
+    rgb(12 20 44 / 82%);
+  box-shadow: inset 0 1px 0 rgb(255 248 228 / 28%);
+}
+
+#top.ffs-page #p16 :is(.ffs-p16-overview, .ffs-p16-comparator, .ffs-p16-lineage, .ffs-p16-main, .ffs-p16-summary) {
+  border-radius: var(--ring-radius-card);
+  border-top-width: 1px;
+}
+
+#top.ffs-page #p16 :is(.ffs-p16-comparator, .ffs-p16-lineage, .ffs-p16-main, .ffs-p16-summary)::before {
+  inset: 0 28px auto 28px;
+  border-radius: var(--ring-radius-pill);
+}
+
+#top.ffs-page #p16 :is(.ffs-p16-metric, .ffs-p16-generations article, .ffs-p16-topics article, .ffs-p16-note) {
+  border-radius: 20px;
+}
+
+#top.ffs-page #p16 .ffs-p16-functions li {
+  padding: 6px 14px;
+  border: 1px solid rgb(138 232 255 / 34%);
+  border-radius: var(--ring-radius-pill);
+  background:
+    radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 250 238 / 16%), transparent 68%),
+    linear-gradient(155deg, rgb(18 32 66 / 84%), rgb(8 14 34 / 94%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 30%);
+}
+
+/* Stages exhibit panel & 5-form comparison drawer + cards: rounded ring-card
+   geometry, corner-safe inset dispersion seams, pill tags/buttons, and
+   obsidian-gold-crimson-accent top specular gloss. */
+#top.ffs-page > #stages #ffs-stage-panel {
+  border-radius: var(--ring-radius-card);
+  border-top-width: 1px;
+}
+
+#top.ffs-page > #stages #ffs-stage-panel::before,
+#top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"])::before {
+  inset: 0 28px auto 28px;
+  border-radius: var(--ring-radius-pill);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-form-comparison {
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-card);
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 250 238 / 16%), transparent 68%) padding-box,
+    radial-gradient(ellipse 74% 54% at 14% 0%, rgb(127 230 255 / 15%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 52% at 90% 100%, rgb(214 54 96 / 16%), transparent 62%) padding-box,
+    linear-gradient(164deg, rgb(15 24 54 / 96%), rgb(6 10 24 / 98%)) padding-box,
+    linear-gradient(
+      154deg,
+      rgb(255 246 218 / 54%) 0%,
+      rgb(138 232 255 / 46%) 36%,
+      rgb(214 54 96 / 36%) 72%,
+      rgb(255 215 122 / 46%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    inset 0 -1px 0 rgb(2 4 12 / 86%),
+    0 22px 54px -20px rgb(0 4 18 / 90%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-form-comparison
+  > summary {
+  border-radius: calc(var(--ring-radius-card) - 2px);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-codes
+  > b {
+  padding: 5px 11px;
+  border-radius: var(--ring-radius-pill);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 12%) 0%, transparent 56%),
+    rgb(8 14 32 / 78%);
+  box-shadow: inset 0 1px 0 rgb(255 250 238 / 24%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-form-comparison
+  > summary
+  > i {
+  border-radius: 50%;
+  border-color: rgb(255 224 148 / 46%);
+  background:
+    radial-gradient(circle at 32% 24%, rgb(255 250 236 / 22%), transparent 56%),
+    rgb(10 18 40 / 88%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 38%),
+    0 6px 16px -8px rgb(0 4 18 / 84%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card {
+  border: 1px solid transparent;
+  border-radius: 20px;
+  overflow: clip;
+  background:
+    radial-gradient(ellipse 84% 34% at 50% 0%, rgb(255 252 242 / 22%), transparent 68%) padding-box,
+    linear-gradient(164deg, rgb(255 248 232 / 11%) 0%, rgb(255 255 255 / 2%) 28%, transparent 48%) padding-box,
+    radial-gradient(110% 70% at 50% 0%, color-mix(in srgb, var(--ffs-accent) 24%, transparent), transparent 62%) padding-box,
+    radial-gradient(90% 62% at 100% 100%, rgb(214 54 96 / 16%), transparent 66%) padding-box,
+    linear-gradient(168deg, rgb(15 24 52 / 96%), rgb(5 9 22 / 98%)) padding-box,
+    linear-gradient(
+      154deg,
+      rgb(255 250 236 / 58%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 62%, rgb(255 215 122)) 42%,
+      rgb(214 54 96 / 38%) 78%,
+      color-mix(in srgb, var(--ffs-accent) 44%, rgb(255 255 255)) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 42%),
+    inset 0 -1px 0 rgb(2 4 12 / 86%),
+    0 14px 32px -14px rgb(0 4 18 / 88%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card::before {
+  inset: 0 20px auto 20px;
+  border-radius: var(--ring-radius-pill);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card[data-selected="true"] {
+  background:
+    radial-gradient(ellipse 88% 38% at 50% 0%, rgb(255 252 244 / 30%), transparent 68%) padding-box,
+    linear-gradient(162deg, rgb(255 250 236 / 14%) 0%, rgb(255 255 255 / 3%) 30%, transparent 50%) padding-box,
+    radial-gradient(112% 72% at 50% 0%, color-mix(in srgb, var(--ffs-accent) 32%, transparent), transparent 64%) padding-box,
+    radial-gradient(90% 62% at 100% 100%, rgb(214 54 96 / 20%), transparent 66%) padding-box,
+    linear-gradient(168deg, rgb(18 28 60 / 97%), rgb(6 10 26 / 99%)) padding-box,
+    linear-gradient(
+      148deg,
+      #fffaf0 0%,
+      color-mix(in srgb, var(--ffs-accent) 82%, #ffffff) 38%,
+      #ffd77a 72%,
+      color-mix(in srgb, var(--ffs-accent) 68%, #ffffff) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 58%),
+    inset 0 0 24px color-mix(in srgb, var(--ffs-accent) 22%, transparent),
+    0 18px 40px -12px color-mix(in srgb, var(--ffs-accent) 46%, transparent);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card
+  img {
+  border-radius: 12px;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card
+  button {
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 80% 48% at 50% 0%, rgb(255 250 238 / 22%), transparent 68%) padding-box,
+    linear-gradient(180deg, rgb(22 36 72 / 90%), rgb(7 13 30 / 96%)) padding-box,
+    linear-gradient(
+      152deg,
+      rgb(255 248 228 / 58%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 56%, rgb(138 232 255)) 48%,
+      rgb(214 54 96 / 40%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 38%),
+    inset 0 -1.5px 0 rgb(2 4 14 / 82%),
+    0 8px 18px -8px rgb(0 4 18 / 84%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card
+  button[aria-pressed="true"] {
+  border: 1px solid rgb(255 255 255 / 86%);
+  color: #05111e;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(255 255 255 / 78%), transparent 68%),
+    linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 74%, #ffffff), var(--ffs-accent) 74%, color-mix(in srgb, var(--ffs-accent) 74%, #ffd77a));
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 92%),
+    inset 0 -1.5px 0 rgb(10 24 44 / 34%),
+    0 8px 22px -6px color-mix(in srgb, var(--ffs-accent) 54%, transparent);
+}
+
+/* Editorial plates, Arsenal weapon cards & Finisher sanctuary plates:
+   continuous rounded ring-card stroke, arched top specular reflection, and
+   obsidian × sovereign gold × deep crimson depth. */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > :is(#theories, #system, #authority)
+  .ffs-articles
+  > article {
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-card);
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 250 238 / 16%), transparent 68%) padding-box,
+    linear-gradient(164deg, rgb(255 248 232 / 9%) 0%, rgb(255 255 255 / 1.5%) 26%, transparent 46%) padding-box,
+    radial-gradient(ellipse 70% 54% at 8% 0%, color-mix(in srgb, var(--ffs-accent) 16%, transparent), transparent 60%) padding-box,
+    radial-gradient(ellipse 62% 50% at 94% 100%, rgb(214 54 96 / 14%), transparent 62%) padding-box,
+    linear-gradient(158deg, rgb(15 24 52 / 94%), rgb(6 10 24 / 98%)) padding-box,
+    linear-gradient(
+      154deg,
+      rgb(255 246 218 / 50%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 56%, rgb(138 232 255)) 38%,
+      rgb(214 54 96 / 34%) 74%,
+      rgb(255 215 122 / 44%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    inset 0 -1px 0 rgb(2 4 12 / 84%),
+    0 20px 50px -20px rgb(0 4 18 / 88%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #arsenal
+  .ffs-weapons
+  > li {
+  border: 1px solid transparent;
+  border-radius: 22px;
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 78% 40% at 50% 0%, rgb(255 248 228 / 21%), transparent 68%) padding-box,
+    linear-gradient(164deg, rgb(255 244 214 / 11%) 0%, rgb(255 255 255 / 2%) 30%, transparent 50%) padding-box,
+    radial-gradient(ellipse 72% 58% at 6% 0%, rgb(255 215 122 / 14%), transparent 60%) padding-box,
+    radial-gradient(ellipse 70% 58% at 94% 100%, rgb(214 54 96 / 18%), transparent 62%) padding-box,
+    linear-gradient(156deg, rgb(18 24 52 / 94%), rgb(6 10 24 / 98%)) padding-box,
+    linear-gradient(
+      150deg,
+      rgb(255 248 224 / 64%) 0%,
+      rgb(255 215 122 / 56%) 34%,
+      rgb(214 54 96 / 46%) 70%,
+      rgb(138 232 255 / 42%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 232 / 42%),
+    inset 0 -1px 0 rgb(18 6 14 / 84%),
+    0 16px 36px -16px rgb(0 4 18 / 88%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #arsenal
+  .ffs-weapons
+  > li
+  > span {
+  color: #ffe298;
+  text-shadow:
+    0 0 16px rgb(255 215 122 / 52%),
+    0 0 28px rgb(214 54 96 / 26%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #finishers
+  .ffs-finisher {
+  border: 1px solid transparent;
+  border-radius: 22px;
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 78% 34% at 50% 0%, rgb(255 246 226 / 22%), transparent 68%) padding-box,
+    radial-gradient(ellipse 74% 60% at 10% 0%, rgb(224 58 108 / 24%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 56% at 92% 100%, rgb(255 215 122 / 18%), transparent 62%) padding-box,
+    linear-gradient(148deg, rgb(28 18 44 / 96%) 0%, rgb(12 13 30 / 98%) 54%, rgb(6 8 20 / 99%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 248 224 / 72%) 0%,
+      rgb(255 215 122 / 64%) 34%,
+      rgb(232 68 118 / 58%) 70%,
+      rgb(192 142 255 / 44%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 246 230 / 44%),
+    inset 0 -1px 0 rgb(26 6 14 / 86%),
+    0 24px 58px -18px rgb(0 4 18 / 92%),
+    0 0 36px -14px rgb(214 54 96 / 28%);
 }
 
 /* The printed headings sit directly above their artwork on a phone. Let
@@ -311,52 +859,471 @@ html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
   max-width: 100%;
 }
 
-html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-footer > a {
-  border: 1px solid rgb(138 232 255 / 46%);
-  color: #eef7ff;
+/* Closing CTAs: unified pill geometry (including .rxs-footer-return), zero
+   square corner ticks or polygon clips, luminous top specular reflection. */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  .ffs-footer
+  > a {
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+  color: #f2f7ff;
   background:
-    radial-gradient(ellipse 90% 76% at 16% 0%, rgb(127 230 255 / 22%), transparent 62%),
-    linear-gradient(180deg, rgb(255 255 255 / 14%) 0%, rgb(255 255 255 / 2%) 48%, rgb(2 6 20 / 42%) 100%),
-    rgb(11 22 52 / 88%);
+    radial-gradient(ellipse 78% 46% at 50% 0%, rgb(255 250 238 / 22%), transparent 66%) padding-box,
+    radial-gradient(ellipse 84% 76% at 16% 0%, rgb(127 230 255 / 22%), transparent 60%) padding-box,
+    radial-gradient(ellipse 78% 72% at 88% 100%, rgb(214 54 96 / 22%), transparent 64%) padding-box,
+    linear-gradient(180deg, rgb(18 28 58 / 92%) 0%, rgb(8 13 30 / 97%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 246 218 / 64%) 0%,
+      rgb(138 232 255 / 56%) 42%,
+      rgb(214 54 96 / 48%) 78%,
+      rgb(255 215 122 / 56%) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(232 250 255 / 38%),
-    inset 0 -2px 0 rgb(4 10 28 / 76%),
-    0 12px 28px -12px rgb(0 4 18 / 84%);
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    inset 0 1px 0 rgb(255 250 238 / 44%),
+    inset 0 -2px 0 rgb(4 8 20 / 82%),
+    0 12px 28px -12px rgb(0 4 18 / 88%);
+  filter: none;
 }
 
-html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-footer > a:first-of-type {
-  border-color: #fff3cf;
-  color: #071222;
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  .ffs-footer
+  > a:first-of-type {
+  border: 1px solid rgb(255 248 224 / 92%);
+  color: #07101f;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 68%) 0%, rgb(255 255 255 / 8%) 48%, rgb(150 96 18 / 22%) 100%),
-    linear-gradient(112deg, #fffdf4 0%, #ffe6a6 42%, #f4c663 76%, #ddf7ff 100%);
+    radial-gradient(ellipse 78% 48% at 50% 0%, rgb(255 255 255 / 84%), transparent 68%),
+    linear-gradient(180deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 6%) 46%, rgb(138 36 58 / 20%) 100%),
+    linear-gradient(112deg, #fffef8 0%, #ffe8a8 38%, #f3be56 76%, #ffe6be 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 94%),
-    inset 0 -2px 0 rgb(118 76 16 / 46%);
-  filter:
-    drop-shadow(0 10px 26px rgb(255 215 122 / 40%))
-    drop-shadow(0 0 18px rgb(127 230 255 / 30%));
+    inset 0 1.5px 0 rgb(255 255 255 / 96%),
+    inset 0 -2px 0 rgb(134 38 56 / 44%),
+    0 12px 28px -8px rgb(255 210 112 / 46%),
+    0 6px 22px -6px rgb(214 54 96 / 28%);
+  filter: none;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-footer > a:hover {
-    border-color: rgb(186 244 255 / 84%);
-    color: #ffffff;
+/* Fine-pointer visual hover feedback (paint only, works in calm tiers too). */
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > .ffs-hero
+    .ffs-hero-rail
+    a.ffs-hero-primary:hover,
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .ffs-footer
+    > a:first-of-type:hover {
+    border-color: #ffffff;
+    color: #07101f;
+    background:
+      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 255 255 / 94%), transparent 68%),
+      linear-gradient(180deg, rgb(255 255 255 / 72%) 0%, rgb(255 255 255 / 10%) 48%, rgb(138 36 58 / 16%) 100%),
+      linear-gradient(112deg, #ffffff 0%, #fff0c2 38%, #ffd166 74%, #fff2d4 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 54%),
-      0 0 22px rgb(127 230 255 / 30%);
+      inset 0 1.5px 0 #ffffff,
+      inset 0 -2px 0 rgb(134 38 56 / 40%),
+      0 16px 36px -8px rgb(255 215 122 / 62%),
+      0 8px 26px -6px rgb(214 54 96 / 36%);
+    filter: none;
   }
 
-  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-footer > a:first-of-type:hover {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > .ffs-hero
+    .ffs-hero-rail
+    a.ffs-hero-secondary:hover,
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .ffs-footer
+    > a:not(:first-of-type):hover {
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 68%),
+      inset 0 -2px 0 rgb(4 6 16 / 84%),
+      0 16px 34px -10px rgb(0 4 18 / 92%),
+      0 0 28px -4px rgb(255 215 122 / 38%),
+      0 0 24px -6px rgb(214 54 96 / 34%);
+    filter: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #stages
+    .ffs-comparison-card
+    button:hover {
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 64%),
+      0 10px 24px -8px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #stages
+    .ffs-comparison-card
+    button[aria-pressed="true"]:hover {
+    color: #05111e;
+  }
+}
+
+/* ================================================================
+   Ring Spring Hover & All-Pointer Press Motion
+   Gated by prefers-reduced-motion: no-preference and full-quality mode.
+   Compositor-only (scale / translate) + rim luminance; zero layout shift.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      .rxs-local-nav nav a,
+      .ffs-hero .ffs-hero-rail a,
+      #ffs-chapter-map a,
+      #p16 .ffs-p16-index a,
+      #stages .ffs-comparison-card button,
+      .ffs-footer > a,
+      .ffs-footer > .ffs-footer-top a
+    ) {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      translate var(--ring-dur-spring) var(--ring-spring),
+      border-color 220ms ease,
+      box-shadow 260ms ease,
+      color 180ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      .ffs-hero .ffs-hero-rail a i,
+      #ffs-chapter-map a i,
+      #arsenal .ffs-weapons > li > span,
+      .ffs-footer > a i,
+      .ffs-footer > .ffs-footer-top a i
+    ) {
+    transition: translate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #stages
+    .ffs-form-comparison
+    > summary
+    > i {
+    transition:
+      transform var(--ring-dur-bounce) var(--ring-spring-bounce),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      border-color 200ms ease,
+      box-shadow 240ms ease;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      #specs .ffs-specs > div,
+      #arsenal .ffs-weapons > li,
+      #stages .ffs-comparison-card,
+      #stages .ffs-form-comparison > summary,
+      :is(#theories, #system, #authority) .ffs-articles > article,
+      #finishers .ffs-finisher
+    ) {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-spring) var(--ring-spring),
+      border-color 240ms ease,
+      box-shadow 260ms ease;
+  }
+
+  /* All-pointer tactile press: swift sink, elastic spring rebound on release. */
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      .ffs-hero .ffs-hero-rail a,
+      #stages .ffs-comparison-card button,
+      .ffs-footer > a
+    ):active {
+    transform: none;
+    scale: 0.94;
+    translate: 0 1px;
+    transition:
+      scale 90ms ease-out,
+      translate 90ms ease-out,
+      box-shadow 90ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      .rxs-local-nav nav a,
+      #ffs-chapter-map a,
+      #p16 .ffs-p16-index a,
+      .ffs-footer > .ffs-footer-top a
+    ):active {
+    transform: none;
+    scale: 0.96;
+    transition:
+      scale 90ms ease-out,
+      translate 90ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      #specs .ffs-specs > div,
+      #arsenal .ffs-weapons > li,
+      #stages .ffs-comparison-card,
+      #stages .ffs-form-comparison > summary
+    ):active {
+    scale: 0.985;
+    transition: scale 90ms ease-out;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .rxs-local-nav
+    nav
+    a:hover:not(:active) {
+    scale: 1.03;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > .ffs-hero
+    .ffs-hero-rail
+    a.ffs-hero-primary:hover:not(:active),
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .ffs-footer
+    > a:first-of-type:hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.03;
     border-color: #ffffff;
-    color: #071222;
+    color: #07101f;
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 80%) 0%, rgb(255 255 255 / 12%) 50%, rgb(150 96 18 / 16%) 100%),
-      linear-gradient(112deg, #ffffff 0%, #fff0c2 40%, #ffd574 74%, #ecfbff 100%);
-    filter:
-      drop-shadow(0 12px 30px rgb(255 215 122 / 56%))
-      drop-shadow(0 0 24px rgb(127 230 255 / 44%));
+      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 255 255 / 94%), transparent 68%),
+      linear-gradient(180deg, rgb(255 255 255 / 72%) 0%, rgb(255 255 255 / 10%) 48%, rgb(138 36 58 / 16%) 100%),
+      linear-gradient(112deg, #ffffff 0%, #fff0c2 38%, #ffd166 74%, #fff2d4 100%);
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      inset 0 -2px 0 rgb(134 38 56 / 40%),
+      0 16px 36px -8px rgb(255 215 122 / 62%),
+      0 8px 26px -6px rgb(214 54 96 / 36%);
+    filter: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > .ffs-hero
+    .ffs-hero-rail
+    a.ffs-hero-secondary:hover:not(:active),
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .ffs-footer
+    > a:not(:first-of-type):hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.03;
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 68%),
+      inset 0 -2px 0 rgb(4 6 16 / 84%),
+      0 16px 34px -10px rgb(0 4 18 / 92%),
+      0 0 28px -4px rgb(255 215 122 / 38%),
+      0 0 24px -6px rgb(214 54 96 / 34%);
+    filter: none;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > .ffs-hero
+    .ffs-hero-rail
+    a.ffs-hero-primary:hover
+    i {
+    translate: 2px 2px;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(.ffs-hero .ffs-hero-rail a.ffs-hero-secondary, #ffs-chapter-map a, .ffs-footer > a):hover
+    i {
+    translate: 2px -2px;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    #ffs-chapter-map
+    a:hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.015;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 240 / 54%),
+      inset 0 -1px 0 rgb(2 4 12 / 86%),
+      0 18px 36px -14px rgb(0 4 18 / 92%),
+      0 0 26px -8px rgb(255 215 122 / 38%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    #specs
+    .ffs-specs
+    > div:hover:not(:active) {
+    translate: 0 -4px;
+    scale: 1.015;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 56%),
+      inset 0 -1px 0 rgb(2 4 12 / 86%),
+      0 22px 44px -16px rgb(0 4 18 / 92%),
+      0 0 28px -8px rgb(138 232 255 / 34%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    #specs
+    .ffs-specs
+    > [data-strike]:hover:not(:active) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 246 / 74%),
+      inset 0 -1px 0 rgb(34 10 18 / 84%),
+      0 24px 52px -14px rgb(0 4 18 / 94%),
+      0 0 42px -10px rgb(255 215 122 / 48%),
+      0 0 32px -10px rgb(214 54 96 / 34%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #arsenal
+    .ffs-weapons
+    > li:hover:not(:active) {
+    translate: 0 -4px;
+    scale: 1.015;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 240 / 60%),
+      inset 0 -1px 0 rgb(18 6 14 / 86%),
+      0 22px 44px -16px rgb(0 4 18 / 94%),
+      0 0 32px -10px rgb(255 215 122 / 38%),
+      0 0 26px -10px rgb(214 54 96 / 32%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #arsenal
+    .ffs-weapons
+    > li:hover
+    > span {
+    translate: 2px 0;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #stages
+    .ffs-form-comparison
+    > summary:hover
+    > i {
+    scale: 1.09;
+    border-color: rgb(255 232 168 / 82%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 54%),
+      0 0 20px -4px rgb(255 215 122 / 44%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #stages
+    .ffs-comparison-card:hover:not(:active) {
+    translate: 0 -4px;
+    scale: 1.015;
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 246 / 62%),
+      inset 0 -1px 0 rgb(2 4 12 / 86%),
+      0 22px 44px -14px rgb(0 4 18 / 94%),
+      0 0 32px -8px color-mix(in srgb, var(--ffs-accent) 44%, transparent);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #stages
+    .ffs-comparison-card
+    button:hover:not(:active) {
+    translate: 0 -2px;
+    scale: 1.03;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 64%),
+      0 10px 24px -8px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > :is(#theories, #system, #authority)
+    .ffs-articles
+    > article:hover:not(:active),
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    > #finishers
+    .ffs-finisher:hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.008;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 54%),
+      inset 0 -1px 0 rgb(18 6 14 / 86%),
+      0 26px 56px -18px rgb(0 4 18 / 94%),
+      0 0 36px -12px rgb(255 215 122 / 30%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .ffs-footer
+    > .ffs-footer-top
+    a:hover:not(:active) {
+    translate: 0 -2px;
+    color: #ffffff;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    .ffs-footer
+    > .ffs-footer-top
+    a:hover
+    i {
+    translate: 0 -2px;
   }
 }
 
@@ -444,19 +1411,51 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
 
 html[data-family="special"]:is([data-world-effects="economy"], [data-rzn-constrained])
   body
-  #top.rxs-page.rxs-page.ffs-page[data-command-special]
-  :is(.ffs-footer > .ffs-end-figure, .ffs-footer > a, .ffs-footer > a:first-of-type) {
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  :is(.ffs-footer > .ffs-end-figure, .ffs-footer > a, .ffs-footer > a:first-of-type, .ffs-hero .ffs-hero-rail a) {
   filter: none;
 }
 
 @media (forced-colors: active) {
   html[data-family="special"] #top.ffs-page .ffs-footer::before { display: none; }
   html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure { filter: none; }
-  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] .ffs-footer > a,
-  #top.ffs-page #specs .ffs-specs > div,
-  #top.ffs-page #performance .ffs-console,
-  #top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]),
-  #top.ffs-page #p16 .ffs-p16-index {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      .ffs-hero .ffs-hero-rail a,
+      #ffs-chapter-map a,
+      #stages .ffs-comparison-card button,
+      .ffs-footer > a
+    ) {
+    border: 1px solid ButtonText;
+    background: Canvas;
+    color: LinkText;
+    box-shadow: none;
+    filter: none;
+    clip-path: none;
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      #specs .ffs-specs > div,
+      #specs .ffs-specs > [data-strike],
+      #performance .ffs-console,
+      #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]),
+      #p16 .ffs-p16-index,
+      #overview .ffs-calls,
+      #overview .ffs-calls b:not(:first-child):not(:last-child),
+      #finishers .ffs-calls b,
+      #p16 .ffs-p16-functions li,
+      #stages .ffs-form-comparison,
+      #stages .ffs-comparison-codes > b,
+      #stages .ffs-form-comparison > summary > i,
+      #stages .ffs-comparison-card,
+      :is(#theories, #system, #authority) .ffs-articles > article,
+      #arsenal .ffs-weapons > li,
+      #finishers .ffs-finisher
+    ) {
     border: 1px solid CanvasText;
     background: Canvas;
     color: CanvasText;

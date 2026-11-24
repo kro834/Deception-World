@@ -120,23 +120,28 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid rgb(var(--lab-key-rgb) / 48%);
-  border-radius: 7px;
+  padding: 0 18px;
+  border: 1px solid rgb(var(--lab-key-rgb) / 52%);
+  border-radius: 999px;
   background:
-    linear-gradient(var(--lab-key), var(--lab-key)) 0 0 / 12px 1.5px no-repeat,
-    linear-gradient(var(--lab-key), var(--lab-key)) 0 0 / 1.5px 12px no-repeat,
-    linear-gradient(var(--lab-gold), var(--lab-gold)) 100% 100% / 12px 1.5px no-repeat,
-    linear-gradient(var(--lab-gold), var(--lab-gold)) 100% 100% / 1.5px 12px no-repeat,
-    linear-gradient(180deg, rgb(255 255 255 / 14%), transparent 52%, rgb(0 0 0 / 32%)),
-    radial-gradient(ellipse 90% 80% at 50% 0%, rgb(var(--lab-key-rgb) / 16%), transparent 70%),
+    linear-gradient(
+        90deg,
+        transparent 14%,
+        rgb(var(--lab-key-rgb) / 84%) 38%,
+        #ffffff 50%,
+        rgb(var(--lab-gold-rgb) / 76%) 64%,
+        transparent 86%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 52%, rgb(0 0 0 / 34%)),
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgb(var(--lab-key-rgb) / 22%), transparent 70%),
     #0d1b28;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1.5px 0 rgb(0 0 0 / 74%),
-    0 6px 16px -2px rgb(0 0 0 / 58%),
-    0 0 18px -6px rgb(var(--lab-key-rgb) / 28%);
-  color: #e4f8fd;
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1.5px 0 rgb(0 0 0 / 76%),
+    0 6px 18px -2px rgb(0 0 0 / 62%),
+    0 0 20px -6px rgb(var(--lab-key-rgb) / 34%);
+  color: #e8faff;
   font-family: var(--font-display, "Oxanium", system-ui, sans-serif);
   font-size: 12px;
   font-weight: 600;
@@ -167,35 +172,35 @@
   gap: 10px 28px;
   flex-wrap: wrap;
   margin-bottom: 14px;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border: 1px solid rgb(var(--lab-key-rgb) / 52%);
-  border-radius: 11px;
+  border-radius: 28px;
   background:
-    linear-gradient(rgb(var(--lab-key-rgb) / 92%), rgb(var(--lab-key-rgb) / 92%)) 0 0 / 20px 2px
-      no-repeat,
-    linear-gradient(rgb(var(--lab-key-rgb) / 92%), rgb(var(--lab-key-rgb) / 92%)) 0 0 / 2px 20px
-      no-repeat,
-    linear-gradient(rgb(var(--lab-gold-rgb) / 86%), rgb(var(--lab-gold-rgb) / 86%)) 100% 100% /
-      20px 1.5px no-repeat,
-    linear-gradient(rgb(var(--lab-gold-rgb) / 86%), rgb(var(--lab-gold-rgb) / 86%)) 100% 100% /
-      1.5px 20px no-repeat,
     linear-gradient(
         90deg,
-        rgb(var(--lab-key-rgb) / 88%),
-        #ffffff 28%,
-        rgb(var(--lab-gold-rgb) / 72%) 56%,
+        transparent 4%,
+        rgb(var(--lab-key-rgb) / 92%) 22%,
+        #ffffff 46%,
+        rgb(var(--lab-gold-rgb) / 78%) 72%,
         transparent 96%
       )
       0 0 / 100% 1.5px no-repeat,
-    radial-gradient(ellipse 78% 78% at 15% 0%, rgb(var(--lab-key-rgb) / 20%), transparent 68%),
-    radial-gradient(ellipse 68% 68% at 88% 100%, rgb(var(--lab-gold-rgb) / 14%), transparent 70%),
+    linear-gradient(
+        90deg,
+        transparent 14%,
+        rgb(var(--lab-gold-rgb) / 48%) 50%,
+        transparent 86%
+      )
+      0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 78% 78% at 15% 0%, rgb(var(--lab-key-rgb) / 22%), transparent 68%),
+    radial-gradient(ellipse 68% 68% at 88% 100%, rgb(var(--lab-gold-rgb) / 16%), transparent 70%),
     linear-gradient(180deg, rgb(22 39 55 / 95%), rgb(8 16 25 / 97%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 26%),
     inset 0 -1.5px 0 rgb(0 0 0 / 82%),
-    inset 0 0 28px rgb(var(--lab-key-rgb) / 9%),
-    0 18px 42px -14px rgb(0 0 0 / 88%),
-    0 0 28px -8px rgb(var(--lab-key-rgb) / 30%);
+    inset 0 0 30px rgb(var(--lab-key-rgb) / 10%),
+    0 20px 44px -14px rgb(0 0 0 / 88%),
+    0 0 30px -8px rgb(var(--lab-key-rgb) / 32%);
 }
 .lab-compare {
   margin: 18px auto 0;
@@ -509,7 +514,7 @@
 .lab-stage::after {
   content: "";
   position: absolute;
-  inset: 10px;
+  inset: 18px;
   z-index: 2;
   background:
     linear-gradient(rgb(var(--lab-stage-key-rgb) / 96%), rgb(var(--lab-stage-key-rgb) / 96%)) 0 0 /
@@ -548,12 +553,12 @@
 }
 .lab-stage h2 {
   position: absolute;
-  top: 18px;
-  left: 20px;
+  top: 20px;
+  left: 22px;
   z-index: 3;
   display: inline-flex;
   flex-direction: column;
-  padding: 11px 20px 12px 17px;
+  padding: 11px 20px 12px 18px;
   background:
     linear-gradient(
         90deg,
@@ -563,13 +568,9 @@
         transparent 98%
       )
       0 0 / 100% 2px no-repeat,
-    linear-gradient(rgb(var(--lab-stage-sub-rgb) / 92%), rgb(var(--lab-stage-sub-rgb) / 92%)) 100%
-      100% / 14px 1.5px no-repeat,
-    linear-gradient(rgb(var(--lab-stage-sub-rgb) / 92%), rgb(var(--lab-stage-sub-rgb) / 92%)) 100%
-      100% / 1.5px 14px no-repeat,
     radial-gradient(
       ellipse 125% 95% at 0% 0%,
-      rgb(var(--lab-stage-key-rgb) / 32%),
+      rgb(var(--lab-stage-key-rgb) / 34%),
       transparent 68%
     ),
     linear-gradient(
@@ -582,7 +583,7 @@
   -webkit-backdrop-filter: blur(18px) saturate(155%);
   border: 1px solid rgb(var(--lab-stage-key-rgb) / 62%);
   border-left: 3.5px solid rgb(var(--lab-stage-key-rgb));
-  border-radius: 11px;
+  border-radius: 16px;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 32%),
     inset 0 -1.5px 0 rgb(0 0 0 / 82%),
@@ -812,43 +813,43 @@
 }
 .lab-controls {
   margin-top: 16px;
-  padding: 18px 20px;
+  padding: 20px 24px;
   border: 1px solid rgb(var(--lab-gauge-rgb) / 48%);
-  border-radius: 12px;
+  border-radius: 28px;
   background:
-    linear-gradient(rgb(var(--lab-gauge-rgb) / 90%), rgb(var(--lab-gauge-rgb) / 90%)) 0 0 / 20px 2px
-      no-repeat,
-    linear-gradient(rgb(var(--lab-gauge-rgb) / 90%), rgb(var(--lab-gauge-rgb) / 90%)) 0 0 / 2px 20px
-      no-repeat,
-    linear-gradient(rgb(var(--lab-gauge-sub-rgb) / 86%), rgb(var(--lab-gauge-sub-rgb) / 86%)) 100%
-      100% / 20px 1.5px no-repeat,
-    linear-gradient(rgb(var(--lab-gauge-sub-rgb) / 86%), rgb(var(--lab-gauge-sub-rgb) / 86%)) 100%
-      100% / 1.5px 20px no-repeat,
     linear-gradient(
         90deg,
-        rgb(var(--lab-gauge-rgb) / 92%),
-        #ffffff 28%,
-        rgb(var(--lab-gauge-sub-rgb) / 76%) 56%,
+        transparent 4%,
+        rgb(var(--lab-gauge-rgb) / 92%) 22%,
+        #ffffff 46%,
+        rgb(var(--lab-gauge-sub-rgb) / 78%) 72%,
         transparent 96%
       )
       0 0 / 100% 1.5px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 16%,
+        rgb(var(--lab-gauge-sub-rgb) / 48%) 50%,
+        transparent 84%
+      )
+      0 100% / 100% 1px no-repeat,
     radial-gradient(
       ellipse 74% 55% at 22% 0%,
-      rgb(var(--lab-gauge-rgb) / 18%),
+      rgb(var(--lab-gauge-rgb) / 20%),
       transparent 70%
     ),
     radial-gradient(
       ellipse 65% 50% at 86% 100%,
-      rgb(var(--lab-gauge-sub-rgb) / 12%),
+      rgb(var(--lab-gauge-sub-rgb) / 14%),
       transparent 72%
     ),
     linear-gradient(180deg, rgb(18 33 48 / 95%) 0%, rgb(8 16 25 / 97%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
     inset 0 -1.5px 0 rgb(0 0 0 / 82%),
-    inset 0 0 28px rgb(var(--lab-gauge-rgb) / 8%),
-    0 20px 44px -14px rgb(0 0 0 / 88%),
-    0 0 28px -8px rgb(var(--lab-gauge-rgb) / 28%);
+    inset 0 0 30px rgb(var(--lab-gauge-rgb) / 9%),
+    0 22px 46px -14px rgb(0 0 0 / 88%),
+    0 0 30px -8px rgb(var(--lab-gauge-rgb) / 30%);
 }
 .lab-transport {
   display: flex;
@@ -1393,48 +1394,42 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   --tl-rider-sub-rgb: 242 216 150;
   max-width: 1280px;
   margin: 18px auto 0;
-  padding: 20px 22px;
-  border: 1px solid rgb(var(--tl-rider-rgb) / 42%);
+  padding: 22px 26px;
+  border: 1px solid rgb(var(--tl-rider-rgb) / 46%);
   border-left: 3px solid rgb(var(--tl-rider-rgb));
-  border-radius: 10px;
+  border-radius: 28px;
   background:
-    linear-gradient(rgb(var(--tl-rider-sub-rgb) / 86%), rgb(var(--tl-rider-sub-rgb) / 86%)) 100%
-      0 / 18px 1.5px no-repeat,
-    linear-gradient(rgb(var(--tl-rider-sub-rgb) / 86%), rgb(var(--tl-rider-sub-rgb) / 86%)) 100%
-      0 / 1.5px 18px no-repeat,
-    linear-gradient(rgb(var(--tl-rider-rgb) / 74%), rgb(var(--tl-rider-rgb) / 74%)) 100% 100% /
-      18px 1.5px no-repeat,
-    linear-gradient(rgb(var(--tl-rider-rgb) / 74%), rgb(var(--tl-rider-rgb) / 74%)) 100% 100% /
-      1.5px 18px no-repeat,
     linear-gradient(
         90deg,
-        rgb(var(--tl-rider-rgb) / 82%),
-        rgb(var(--tl-rider-sub-rgb) / 56%) 48%,
-        transparent 92%
+        transparent 4%,
+        rgb(var(--tl-rider-rgb) / 86%) 24%,
+        #ffffff 46%,
+        rgb(var(--tl-rider-sub-rgb) / 68%) 72%,
+        transparent 96%
       )
       0 0 / 100% 1.5px no-repeat,
     radial-gradient(
       ellipse 70% 60% at 8% 0%,
-      rgb(var(--tl-rider-rgb) / 18%),
+      rgb(var(--tl-rider-rgb) / 20%),
       transparent 66%
     ),
     radial-gradient(
       ellipse 60% 55% at 92% 100%,
-      rgb(var(--tl-rider-sub-rgb) / 10%),
+      rgb(var(--tl-rider-sub-rgb) / 14%),
       transparent 68%
     ),
     linear-gradient(
       122deg,
-      rgb(16 32 46 / 94%) 0%,
-      rgb(10 20 31 / 92%) 48%,
-      rgb(7 15 24 / 96%) 100%
+      rgb(16 32 46 / 95%) 0%,
+      rgb(10 20 31 / 94%) 48%,
+      rgb(7 15 24 / 97%) 100%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    inset 0 -1px 0 rgb(0 0 0 / 76%),
-    inset 4px 0 20px -8px rgb(var(--tl-rider-rgb) / 62%),
-    0 16px 34px -14px rgb(0 0 0 / 82%),
-    0 0 24px -10px rgb(var(--tl-rider-rgb) / 24%);
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 4px 0 22px -8px rgb(var(--tl-rider-rgb) / 64%),
+    0 18px 38px -14px rgb(0 0 0 / 84%),
+    0 0 26px -10px rgb(var(--tl-rider-rgb) / 28%);
   min-width: 0;
 }
 .tl-part-record[data-rider="rexonance"] {
@@ -1486,17 +1481,24 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid rgb(var(--tl-rider-rgb) / 48%);
-  border-radius: 6px;
+  padding: 0 18px;
+  border: 1px solid rgb(var(--tl-rider-rgb) / 52%);
+  border-radius: 999px;
   background:
-    linear-gradient(rgb(var(--tl-rider-rgb)), rgb(var(--tl-rider-rgb))) 0 0 / 9px 1.5px no-repeat,
-    linear-gradient(rgb(var(--tl-rider-rgb)), rgb(var(--tl-rider-rgb))) 0 0 / 1.5px 9px no-repeat,
-    linear-gradient(180deg, rgb(255 255 255 / 12%), transparent 54%),
-    rgb(13 26 38 / 92%);
+    linear-gradient(
+        90deg,
+        transparent 14%,
+        rgb(var(--tl-rider-rgb) / 82%) 50%,
+        transparent 86%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 14%), transparent 54%),
+    radial-gradient(ellipse 85% 75% at 50% 0%, rgb(var(--tl-rider-rgb) / 22%), transparent 70%),
+    rgb(13 26 38 / 94%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 4px 10px -2px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 6px 14px -2px rgb(0 0 0 / 56%),
+    0 0 16px -6px rgb(var(--tl-rider-rgb) / 34%);
   font-size: 12px;
   font-weight: 600;
   color: #eef9fd;

@@ -2,7 +2,9 @@
    layers or hidden resting content. Artwork and existing signature entrances
    keep their own transforms; only decorative children move. */
 :root {
-  --choreography-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --choreography-ease: var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  --choreography-spring: var(--ring-spring-bounce, var(--ring-spring, cubic-bezier(0.22, 1.15, 0.36, 1)));
+  --choreography-soft: var(--ring-spring-soft, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 /* A keyboard-selected destination receives the same material cue as a mouse. */
@@ -21,7 +23,7 @@ body .gallery-work-open:focus-visible .gallery-work-frame {
     .side-panel-links
     > :is(a, button)
     > span {
-    animation: choreography-label 460ms var(--choreography-ease) backwards;
+    animation: choreography-label 520ms var(--choreography-ease) backwards;
   }
   html:not([data-world-effects="economy"])
     body
@@ -51,51 +53,53 @@ body .gallery-work-open:focus-visible .gallery-work-frame {
     inset: 0;
     pointer-events: none;
     background: linear-gradient(
-      110deg,
-      transparent 32%,
-      rgb(255 232 185 / 0.14) 48%,
-      transparent 64%
+      112deg,
+      transparent 28%,
+      rgb(188 238 255 / 0.08) 41%,
+      rgb(255 236 194 / 0.2) 50%,
+      rgb(188 238 255 / 0.06) 59%,
+      transparent 72%
     );
     opacity: 0;
-    animation: choreography-reflection 850ms var(--choreography-ease);
+    animation: choreography-reflection 920ms var(--choreography-soft);
   }
   html:not([data-world-effects="economy"])
     .gallery-page
     .gallery-work[data-gallery-enter="true"]
     figcaption {
-    animation: choreography-caption 600ms 70ms var(--choreography-ease) backwards;
+    animation: choreography-caption 620ms 70ms var(--choreography-ease) backwards;
   }
   html:not([data-world-effects="economy"])
     .gallery-page
     .gallery-viewer[open]
     .gallery-viewer-stage {
-    animation: choreography-exhibit 480ms var(--choreography-ease);
+    animation: choreography-exhibit 540ms var(--choreography-spring);
   }
   html:not([data-world-effects="economy"])
     .gallery-page
     .gallery-viewer[open]
     .gallery-viewer-footer {
-    animation: choreography-caption 420ms 80ms var(--choreography-ease) backwards;
+    animation: choreography-caption 460ms 80ms var(--choreography-ease) backwards;
   }
 
   /* Native disclosures retain immediate layout, hash navigation and focus. */
   html:not([data-world-effects="economy"]) .inquiry-navigation[open] .inquiry-navigation-panel {
     transform-origin: 0 100%;
-    animation: choreography-panel 320ms var(--choreography-ease);
+    animation: choreography-panel 380ms var(--choreography-spring);
   }
   html:not([data-world-effects="economy"])
     .dream-page.dream-page
     .dream-archive-fold[open]
     > :not(summary) {
-    animation: choreography-reading 520ms var(--choreography-ease);
+    animation: choreography-reading 540ms var(--choreography-ease);
   }
 
   @media (hover: hover) and (pointer: fine) {
     html:not([data-world-effects="economy"]) body :is(.dossier-contents, .dream-contents) a {
       transition:
-        background-color 220ms ease,
-        border-color 220ms ease,
-        box-shadow 220ms ease;
+        background-color 260ms var(--choreography-ease),
+        border-color 260ms var(--choreography-ease),
+        box-shadow 260ms var(--choreography-ease);
     }
     html:not([data-world-effects="economy"])
       body
@@ -103,7 +107,8 @@ body .gallery-work-open:focus-visible .gallery-work-frame {
       a:is(:hover, :focus-visible) {
       box-shadow:
         inset 3px 0 0 currentColor,
-        inset 0 0 24px rgb(159 219 241 / 0.08);
+        inset 0 1px 0 rgb(255 255 255 / 0.16),
+        inset 0 0 28px rgb(159 219 241 / 0.12);
     }
     html:not([data-world-effects="economy"])
       .gallery-page
@@ -114,13 +119,15 @@ body .gallery-work-open:focus-visible .gallery-work-frame {
       inset: 0;
       pointer-events: none;
       background: linear-gradient(
-        110deg,
-        transparent 32%,
-        rgb(255 232 185 / 0.14) 48%,
-        transparent 64%
+        112deg,
+        transparent 28%,
+        rgb(188 238 255 / 0.08) 41%,
+        rgb(255 236 194 / 0.2) 50%,
+        rgb(188 238 255 / 0.06) 59%,
+        transparent 72%
       );
       opacity: 0;
-      animation: choreography-hover-reflection 650ms var(--choreography-ease);
+      animation: choreography-hover-reflection 720ms var(--choreography-soft);
     }
   }
 }

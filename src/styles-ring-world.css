@@ -51,7 +51,7 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
 }
 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring::before {
-  background: rgb(255 255 255 / 0.3);
+  background: rgb(255 255 255 / 0.34);
 }
 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
@@ -79,7 +79,7 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring > i::before 
   height: 8px;
   /* Unlit nodes are quiet ticks: they may cross the artwork, so they carry
      no fill and never read as a mark on a face. */
-  border: 1px solid rgb(255 255 255 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.6);
   border-radius: 50%;
   background: none;
   box-sizing: border-box;
@@ -88,8 +88,11 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring > i::before 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring > i.is-on::before {
   border-color: #fff;
   background: var(--ring-tone);
-  scale: 2.4;
-  box-shadow: 0 0 0 4px rgb(6 16 27 / 0.6);
+  scale: 2.5;
+  box-shadow:
+    0 0 0 3px rgb(6 16 27 / 0.72),
+    0 0 0 5px color-mix(in srgb, var(--ring-tone) 46%, transparent),
+    0 0 16px 2px color-mix(in srgb, var(--ring-tone) 72%, transparent);
 }
 
 /* The rail's markers: a ring instead of a diamond (paint only). */
@@ -198,28 +201,36 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .ws-contents
   > .ws-map::before {
   inset: 12%;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.26);
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.34);
+  box-shadow:
+    inset 0 0 28px -12px rgb(var(--ring-key-rgb) / 0.24),
+    0 0 28px -12px rgb(var(--ring-key-rgb) / 0.24);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-contents
   > .ws-map::after {
-  inset: 32%;
+  inset: 31%;
   background:
     radial-gradient(
       closest-side,
       transparent calc(100% - 1.5px),
-      rgb(var(--ring-gold-rgb) / 0.34) calc(100% - 1.5px) 100%,
+      rgb(var(--ring-gold-rgb) / 0.44) calc(100% - 1.5px) 100%,
       transparent 100%
     ),
     radial-gradient(
       closest-side,
-      transparent calc(76% - 1px),
-      rgb(var(--ring-pink-rgb) / 0.24) calc(76% - 1px) 76%,
+      transparent calc(76% - 1.25px),
+      rgb(var(--ring-pink-rgb) / 0.32) calc(76% - 1.25px) 76%,
       transparent 76%
     ),
-    radial-gradient(closest-side, rgb(var(--ring-key-rgb) / 0.1), transparent 72%);
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-key-rgb) / 0.16) 0%,
+      rgb(var(--ring-pink-rgb) / 0.08) 48%,
+      transparent 76%
+    );
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(2) {
@@ -270,7 +281,123 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   background:
     radial-gradient(120% 120% at 22% 12%, rgb(var(--ws-card-tone-rgb) / 0.34), transparent 58%),
     #07101c;
-  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 20px 44px -16px rgb(0 0 0 / 0.86);
+}
+
+/* Chapters 04, 05, 06 (no picture): a jewel-like double concentric optical
+   ring, cardinal astrolabe nodes, and a soft nebula aura behind the numeral. */
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li:nth-child(4)[data-phase="annex"] {
+  --ws-annex-aura-rgb: 240 207 134;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li:nth-child(5)[data-phase="annex"] {
+  --ws-annex-aura-rgb: 122 232 255;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li:nth-child(6)[data-phase="annex"] {
+  --ws-annex-aura-rgb: 255 110 199;
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li[data-phase="annex"]
+  > a {
+  background:
+    radial-gradient(64% 40% at 30% 15%, rgb(255 255 255 / 0.22), transparent 70%),
+    radial-gradient(
+      circle at 50% 12%,
+      rgb(255 255 255 / 0.72) 0 1.5px,
+      rgb(var(--ws-card-tone-rgb) / 0.35) 2.5px,
+      transparent 4px
+    ),
+    radial-gradient(
+      circle at 50% 88%,
+      rgb(var(--ring-gold-rgb) / 0.76) 0 1.5px,
+      rgb(var(--ring-gold-rgb) / 0.3) 2.5px,
+      transparent 4px
+    ),
+    radial-gradient(
+      circle at 12% 50%,
+      rgb(var(--ws-card-tone-rgb) / 0.72) 0 1.5px,
+      transparent 3.5px
+    ),
+    radial-gradient(
+      circle at 88% 50%,
+      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.72) 0 1.5px,
+      transparent 3.5px
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(76% - 1.5px),
+      rgb(var(--ws-card-tone-rgb) / 0.56) calc(76% - 1.5px) 76%,
+      transparent calc(76% + 0.5px)
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(52% - 1.25px),
+      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.52) calc(52% - 1.25px) 52%,
+      transparent calc(52% + 0.5px)
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ws-card-tone-rgb) / 0.32) 0%,
+      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.18) 42%,
+      rgb(var(--ring-pink-rgb) / 0.12) 66%,
+      transparent 88%
+    ),
+    radial-gradient(115% 115% at 22% 16%, rgb(var(--ws-card-tone-rgb) / 0.44), transparent 58%),
+    radial-gradient(
+      95% 95% at 80% 84%,
+      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.28),
+      transparent 62%
+    ),
+    #06111c;
+  box-shadow:
+    inset 0 1.5px 1px rgb(255 255 255 / 0.34),
+    inset 0 -2px 6px rgb(var(--ws-card-tone-rgb) / 0.24),
+    inset 0 0 26px -4px rgb(var(--ws-card-tone-rgb) / 0.3),
+    0 20px 44px -16px rgb(0 0 0 / 0.88),
+    0 0 28px -10px rgb(var(--ws-card-tone-rgb) / 0.34);
+}
+
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li[data-phase="annex"]
+  > a::before {
+  content: "";
+  position: absolute;
+  inset: 14%;
+  padding: 1.5px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 135deg,
+    rgb(var(--ws-card-tone-rgb) / 0.78),
+    rgb(var(--ring-gold-rgb) / 0.68) 0.28turn,
+    rgb(var(--ring-pink-rgb) / 0.56) 0.55turn,
+    rgb(var(--ring-key-rgb) / 0.72) 0.82turn,
+    rgb(var(--ws-card-tone-rgb) / 0.78)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a::after {
@@ -359,7 +486,12 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   border: 0;
   background: none;
   translate: -50% -50%;
+  color: #f0fffb;
   font-size: clamp(18px, 2.7vw, 36px);
+  text-shadow:
+    0 0 18px rgb(var(--ws-card-tone-rgb) / 0.72),
+    0 0 34px rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.44),
+    0 2px 10px rgb(0 0 0 / 0.86);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -469,6 +601,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     )
     body
     .ws-map
+    > li[data-phase="annex"]
+    > a::before,
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
     > li
     > a::after {
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
@@ -482,6 +621,16 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     > li
     > a:active {
     scale: 0.93;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li[data-phase="annex"]
+    > a:active::before {
+    rotate: -75deg;
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -505,6 +654,16 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     > a:hover {
     translate: none;
     scale: 1.08;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li[data-phase="annex"]
+    > a:hover::before {
+    rotate: -75deg;
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -550,8 +709,24 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   content: "";
   position: absolute;
   inset: 12%;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.26);
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.34);
   border-radius: 50%;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(72% - 1.25px),
+      rgb(var(--ring-gold-rgb) / 0.28) calc(72% - 1.25px) 72%,
+      transparent 72%
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-pink-rgb) / 0.1) 0%,
+      rgb(var(--ring-key-rgb) / 0.08) 46%,
+      transparent 72%
+    );
+  box-shadow:
+    inset 0 0 28px -12px rgb(var(--ring-key-rgb) / 0.22),
+    0 0 28px -12px rgb(var(--ring-key-rgb) / 0.22);
   pointer-events: none;
 }
 
@@ -688,7 +863,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: 36px;
   padding: 0;
   border-radius: 50%;
-  background: #07101c;
+  background:
+    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.22), transparent 64%),
+    #07101c;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    inset 0 0 0 1px rgb(var(--ring-gold-rgb) / 0.48),
+    0 6px 16px -4px rgb(0 0 0 / 0.8);
   translate: -50% 0;
   font-size: 14px;
   line-height: 1;
@@ -827,8 +1008,30 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     #manager-archive
     .manager-archive-panel.is-managers
     .signal-array
+    > .signal {
+    transition: scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
     > .signal::after {
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:active {
+    scale: 0.93;
   }
 
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
@@ -844,6 +1047,18 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:hover {
+    translate: none;
+    scale: 1.08;
+  }
+
   html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
       #r
     )
@@ -878,8 +1093,17 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   content: "";
   position: absolute;
   inset: 9%;
-  border: 1px solid rgb(var(--ring-gold-rgb) / 0.28);
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.36);
   border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    transparent calc(58% - 1.25px),
+    rgb(var(--ring-key-rgb) / 0.24) calc(58% - 1.25px) 58%,
+    transparent 58%
+  );
+  box-shadow:
+    inset 0 0 32px -12px rgb(var(--ring-gold-rgb) / 0.22),
+    0 0 32px -12px rgb(var(--ring-gold-rgb) / 0.22);
   pointer-events: none;
 }
 
@@ -928,7 +1152,9 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   border-radius: 50%;
   overflow: visible;
   background: #07101c;
-  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    0 20px 44px -16px rgb(0 0 0 / 0.86);
   clip-path: none;
 }
 
@@ -1019,6 +1245,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > .ws-doors
   > a.is-far-from {
   --ws-door-size: 27%;
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.36);
+  outline-offset: 12px;
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -1212,6 +1440,15 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     inset: 0;
     display: block;
     border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgb(7 16 28 / 0.76) 0%,
+      rgb(7 16 28 / 0.42) 72%,
+      transparent 100%
+    );
+    box-shadow:
+      inset 0 0 14px rgb(var(--ring-key-rgb) / 0.14),
+      0 10px 26px -8px rgb(0 0 0 / 0.72);
     /* The chapter in view rests at the left, toward the page. */
     rotate: calc((var(--ws-rail-at, 1) - 1) * -60deg - 90deg);
   }
@@ -1236,10 +1473,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     scale: none;
     -webkit-mask: radial-gradient(
       farthest-side,
-      transparent calc(100% - 2.1px),
-      #000 calc(100% - 1.5px)
+      transparent calc(100% - 2.2px),
+      #000 calc(100% - 1.6px)
     );
-    mask: radial-gradient(farthest-side, transparent calc(100% - 2.1px), #000 calc(100% - 1.5px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2.2px), #000 calc(100% - 1.6px));
   }
 
   html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -1247,7 +1484,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     main.site-shell
     > .ws-rail
     > ol::before {
-    background: rgb(var(--ring-key-rgb) / 0.26);
+    background: rgb(var(--ring-key-rgb) / 0.34);
   }
 
   /* The lit arc: from the first chapter round to the one in view. */

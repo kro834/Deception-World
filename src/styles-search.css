@@ -302,14 +302,16 @@
   display: inline-grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgb(242 207 141 / 54%);
-  border-radius: 2px;
-  background: linear-gradient(145deg, rgb(242 207 141 / 22%), rgb(8 22 36 / 90%));
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgb(242 207 141 / 62%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 22%), transparent 50%),
+    linear-gradient(145deg, rgb(242 207 141 / 24%), rgb(8 22 36 / 92%));
   box-shadow:
-    inset 0 1px 0 rgb(255 251 238 / 30%),
-    0 0 14px rgb(242 207 141 / 26%);
+    inset 0 1px 0 rgb(255 251 238 / 34%),
+    0 0 16px rgb(242 207 141 / 30%);
   color: var(--search-gold);
   font-size: 17px;
   line-height: 1;
@@ -1494,14 +1496,14 @@
   html body .world.search-page.search-observatory[data-search-page][data-search-mode]
 )
   mark {
-  padding: 1px 5px;
-  border: 1px solid rgb(242 207 141 / 62%);
-  border-radius: 2px;
+  padding: 1px 6px;
+  border: 1px solid rgb(242 207 141 / 66%);
+  border-radius: 6px;
   color: #fff9eb;
-  background: linear-gradient(180deg, rgb(242 207 141 / 34%), rgb(196 140 52 / 44%));
+  background: linear-gradient(180deg, rgb(242 207 141 / 36%), rgb(196 140 52 / 46%));
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 34%),
-    0 0 12px rgb(242 207 141 / 28%);
+    inset 0 1px 0 rgb(255 248 228 / 38%),
+    0 0 12px rgb(242 207 141 / 30%);
 }
 
 :is(
@@ -1622,7 +1624,7 @@
   height: 38px;
   aspect-ratio: auto;
   border: 1px solid rgb(186 228 248 / 52%);
-  border-radius: 2px;
+  border-radius: 8px;
   box-shadow: 0 0 0 1px rgb(242 207 141 / 28%);
 }
 
@@ -1857,6 +1859,7 @@
       .search-result-card > .dxl-art,
       .search-more-option,
       .search-library-door,
+      .search-library-door > span:last-child,
       .search-categories button,
       .search-suggestions button,
       .search-submit,
@@ -1866,12 +1869,13 @@
     transition:
       border-color 200ms ease,
       box-shadow 220ms ease,
-      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      transform var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
   }
 
   html:not([data-world-effects="economy"]) .search-page .search-result-card > .dxl-art > img,
   html:not([data-world-effects="economy"]) .search-page .search-result-open > span {
-    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--ring-dur-spring, 380ms)
+      var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -1883,12 +1887,21 @@
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       .search-page
-      .search-library-door:hover,
+      :is(
+        .search-library-door,
+        .search-categories button,
+        .search-suggestions button,
+        .search-section-nav a,
+        .search-submit
+      ):hover {
+      transform: translateY(-2px);
+    }
+
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
       .search-page
-      .search-categories
-      button:hover {
-      transform: translateY(-2px);
+      .search-library-door:hover
+      > span:last-child {
+      transform: translate(2px, -2px) scale(1.06);
     }
 
     html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])

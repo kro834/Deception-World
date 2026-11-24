@@ -377,18 +377,18 @@ html[data-family] {
 
   html[data-family] body #site-announcement-dialog .site-announcement-hub,
   html[data-family] body dialog.quick-search .quick-search-panel {
-    border-color: rgb(168 232 255 / 48%);
-    border-radius: 14px;
+    border-color: rgb(168 232 255 / 54%);
+    border-radius: 18px;
     background:
-      radial-gradient(ellipse 68% 44% at 88% 0%, rgb(122 232 255 / 16%), transparent 68%),
-      radial-gradient(ellipse 56% 40% at 14% 12%, rgb(157 134 255 / 13%), transparent 68%),
-      radial-gradient(ellipse 60% 42% at 92% 100%, rgb(var(--sh-l2-rgb) / 11%), transparent 68%),
-      linear-gradient(168deg, #0c192d 0%, #07101f 52%, #050a14 100%);
+      radial-gradient(ellipse 68% 44% at 88% 0%, rgb(122 232 255 / 18%), transparent 68%),
+      radial-gradient(ellipse 56% 40% at 14% 12%, rgb(157 134 255 / 15%), transparent 68%),
+      radial-gradient(ellipse 60% 42% at 92% 100%, rgb(var(--sh-l2-rgb) / 12%), transparent 68%),
+      linear-gradient(168deg, #0d1b31 0%, #07101f 52%, #050a14 100%);
     box-shadow:
-      inset 0 1px 0 rgb(244 252 255 / 32%),
-      inset 0 0 0 1px rgb(var(--sh-l1-rgb) / 18%),
-      0 36px 96px rgb(0 0 0 / 86%),
-      0 0 58px -16px rgb(var(--sh-l1-rgb) / 34%);
+      inset 0 1px 0 rgb(248 253 255 / 38%),
+      inset 0 0 0 1px rgb(var(--sh-l1-rgb) / 20%),
+      0 40px 100px rgb(0 0 0 / 88%),
+      0 0 64px -16px rgb(var(--sh-l1-rgb) / 38%);
   }
 
   html[data-family] body #site-announcement-dialog .site-announcement-header,
@@ -414,16 +414,16 @@ html[data-family] {
   }
 
   html[data-family] body dialog.quick-search .quick-search-field {
-    border-radius: 10px;
-    border-color: rgb(var(--sh-l1-rgb) / 52%);
+    border-radius: 999px;
+    overflow: hidden;
+    border-color: rgb(var(--sh-l1-rgb) / 56%);
     background:
       linear-gradient(180deg, rgb(0 0 0 / 42%) 0%, transparent 24px),
-      linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 11%) 0%, rgb(157 134 255 / 6%) 54%, transparent 88%),
+      linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 14%) 0%, rgb(157 134 255 / 7%) 54%, transparent 88%),
       #05101d;
     box-shadow:
-      inset 3px 0 0 var(--sh-l1),
-      inset 0 1px 0 rgb(238 248 255 / 20%),
-      inset 0 2px 8px rgb(0 0 0 / 56%);
+      inset 0 1px 0 rgb(238 248 255 / 24%),
+      inset 0 2px 8px rgb(0 0 0 / 58%);
   }
 
   /* The old clip reveal hid entire groups before their stagger elapsed.

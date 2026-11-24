@@ -70,7 +70,7 @@
   --pc-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --pc-mono: "Oxanium", "Noto Sans JP", sans-serif;
   --pc-display: "Zen Kaku Gothic New", "Noto Sans JP", "Hiragino Sans", sans-serif;
-  --pc-ease: cubic-bezier(0.2, 0.75, 0.2, 1);
+  --pc-ease: cubic-bezier(0.22, 1.16, 0.34, 1);
   /* Sheet geometry: the bar, the bracket arm and inset, the notch. The
      close plate nests inside the top-right bracket. */
   --pc-bar: 64px;
@@ -742,18 +742,26 @@ html[data-mode="world"]
   margin: 0;
   padding: 6px 12px 6px 11px;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--pc-lock) 24%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--pc-lock) 32%, rgb(255 255 255 / 14%));
   border-left: 2px solid var(--pc-lock);
-  border-radius: 0 3px 3px 0;
-  color: color-mix(in srgb, var(--pc-lock) 76%, #ffffff);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--pc-accent) 16%, transparent),
-    rgb(6 12 22 / 78%) 78%
-  );
+  border-radius: 0 4px 4px 0;
+  color: color-mix(in srgb, var(--pc-lock) 78%, #ffffff);
+  background:
+    linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--pc-lock) 64%, #ffffff) 0%,
+        color-mix(in srgb, var(--pc-gold) 42%, transparent) 52%,
+        transparent 92%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--pc-accent) 18%, transparent),
+      rgb(6 12 22 / 82%) 78%
+    );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 8px 18px -6px rgb(0 0 0 / 56%);
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 8px 20px -6px rgb(0 0 0 / 60%);
   font-family: var(--pc-mono);
   font-size: 12px;
   font-weight: 600;
@@ -938,14 +946,21 @@ html[data-mode="world"]
   min-width: 0;
   padding: 14px 16px 15px;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--pc-lock) 28%, var(--pc-line));
+  border-top: 1px solid color-mix(in srgb, var(--pc-lock) 34%, var(--pc-line));
   border-radius: 0;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 12%, transparent), transparent 68%),
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        color-mix(in srgb, var(--pc-lock) 44%, #ffffff) 50%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 14%, transparent), transparent 68%),
     #070d18;
   box-shadow:
-    inset 1px 0 0 rgb(255 255 255 / 7%),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 1px 0 0 rgb(255 255 255 / 8%),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
     0 16px 32px -12px rgb(0 0 0 / 62%);
 }
 
@@ -1017,16 +1032,23 @@ html[data-mode="world"]
   min-width: 0;
   padding: 16px 18px 17px 20px;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--pc-lock) 26%, var(--pc-line));
+  border-top: 1px solid color-mix(in srgb, var(--pc-lock) 32%, var(--pc-line));
   border-left: 2px solid var(--pc-lock);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 5px 5px 0;
   background:
-    linear-gradient(155deg, color-mix(in srgb, var(--pc-accent) 13%, transparent), transparent 52%),
+    linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--pc-lock) 68%, #ffffff) 0%,
+        color-mix(in srgb, var(--pc-gold) 44%, transparent) 44%,
+        transparent 88%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(155deg, color-mix(in srgb, var(--pc-accent) 14%, transparent), transparent 52%),
     var(--pc-plate);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 0 24px color-mix(in srgb, var(--pc-accent) 6%, transparent),
-    0 16px 36px -10px rgb(0 0 0 / 68%);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 0 24px color-mix(in srgb, var(--pc-accent) 7%, transparent),
+    0 18px 38px -10px rgb(0 0 0 / 70%);
 }
 
 html[data-mode="world"]
@@ -1933,16 +1955,24 @@ html[data-mode="world"]
   > div {
   padding: 16px 18px 16px 20px;
   border: 0;
-  border-top: 1px solid rgb(255 92 200 / 28%);
+  border-top: 1px solid rgb(255 92 200 / 34%);
   border-left: 2px solid var(--pc-lock);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 5px 5px 0;
   background:
-    linear-gradient(155deg, rgb(255 92 200 / 13%), transparent 50%),
-    rgb(12 7 18 / 76%);
+    linear-gradient(
+        90deg,
+        rgb(255 184 232 / 72%) 0%,
+        rgb(255 92 200 / 48%) 42%,
+        rgb(122 232 255 / 24%) 78%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(155deg, rgb(255 92 200 / 14%), transparent 50%),
+    rgb(12 7 18 / 80%);
   box-shadow:
-    inset 0 1px 0 rgb(255 240 250 / 22%),
-    inset 0 0 24px rgb(255 92 200 / 6%),
-    0 18px 38px -10px rgb(0 0 0 / 68%);
+    inset 0 1px 0 rgb(255 240 250 / 26%),
+    inset 0 0 24px rgb(255 92 200 / 7%),
+    0 18px 38px -10px rgb(0 0 0 / 70%);
 }
 
 html[data-mode="world"]
@@ -2261,12 +2291,16 @@ html body #episode-pickup-dialog .episode-pickup-open {
   margin: 6px 0 0;
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--pc-lock) 56%, transparent);
-  border-radius: 3px;
+  border-radius: 4px;
   color: var(--pc-lock);
-  background: linear-gradient(180deg, rgb(122 232 255 / 22%), transparent 70%), var(--pc-deck);
+  background:
+    linear-gradient(90deg, rgb(122 232 255 / 64%) 0%, rgb(240 207 134 / 42%) 56%, transparent 94%)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(122 232 255 / 24%), transparent 70%),
+    var(--pc-deck);
   box-shadow:
-    inset 0 1px 0 rgb(242 252 255 / 32%),
-    0 8px 18px -4px rgb(0 0 0 / 64%);
+    inset 0 1px 0 rgb(242 252 255 / 38%),
+    0 8px 20px -4px rgb(0 0 0 / 68%);
   font: 400 12px/1.2 var(--pc-hud);
   letter-spacing: 0.1em;
   white-space: nowrap;
@@ -2293,7 +2327,7 @@ html body #episode-pickup-dialog .episode-pickup-open {
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-item:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px) scale(1.012);
   }
 
   html:not([data-world-effects="economy"])
@@ -2302,6 +2336,38 @@ html body #episode-pickup-dialog .episode-pickup-open {
     .episode-pickup-item:hover
     img {
     transform: scale(1.03);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    #episode-pickup-dialog
+    .episode-pickup-item:hover
+    .episode-pickup-open
+    > svg {
+    transform: translateX(3px);
+  }
+
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    > .form-pickup-close:hover,
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .rider-nightmare-dialog-close:hover,
+  html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-close:hover,
+  html:not([data-world-effects="economy"])
+    body
+    #world-column-pickup
+    .world-column-dialog-close:hover {
+    transform: scale(1.03);
+  }
+
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-end-close:hover,
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .form-pickup-end-close:hover {
+    transform: translateY(-2px);
   }
 }
 
@@ -2718,6 +2784,56 @@ html body #world-column-pickup .world-column-dialog-copy > div p {
     #world-column-pickup[data-closing="true"]::backdrop {
     animation: pc-fade 300ms ease-in reverse both;
   }
+
+  /* Spring-weighted interactive tactile feedback across all pointers */
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    :is(.form-pickup-close, .form-pickup-end-close),
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    :is(.rider-nightmare-dialog-close, .form-pickup-end-close),
+  html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-close,
+  html:not([data-world-effects="economy"]) body #world-column-pickup .world-column-dialog-close {
+    transition:
+      transform 320ms var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-item,
+  html:not([data-world-effects="economy"])
+    body
+    #episode-pickup-dialog
+    .episode-pickup-open
+    > svg {
+    transition:
+      transform 360ms var(--ring-spring, var(--pc-ease)),
+      border-color 200ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    :is(.form-pickup-close, .form-pickup-end-close):active,
+  html:not([data-world-effects="economy"])[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    :is(.rider-nightmare-dialog-close, .form-pickup-end-close):active,
+  html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-close:active,
+  html:not([data-world-effects="economy"])
+    body
+    #world-column-pickup
+    .world-column-dialog-close:active {
+    transform: scale(0.95);
+    transition-duration: 90ms;
+    transition-timing-function: ease-out;
+  }
+
+  html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-item:active {
+    transform: scale(0.98);
+    transition-duration: 90ms;
+    transition-timing-function: ease-out;
+  }
 }
 
 /* Economy rendering: the column still leaves as a plain fade, the calm
@@ -2747,9 +2863,11 @@ html body #world-column-pickup .world-column-dialog-copy > div p {
 
 @keyframes pc-drop {
   from {
-    transform: translateY(-14px);
+    opacity: 0;
+    transform: translateY(-16px) scale(0.986);
   }
   to {
+    opacity: 1;
     transform: none;
   }
 }
@@ -2777,7 +2895,7 @@ html body #world-column-pickup .world-column-dialog-copy > div p {
 @keyframes pc-settle {
   from {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.045);
   }
   to {
     opacity: 1;
@@ -2797,7 +2915,7 @@ html body #world-column-pickup .world-column-dialog-copy > div p {
 @keyframes pc-rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px) scale(0.985);
   }
   to {
     opacity: 1;

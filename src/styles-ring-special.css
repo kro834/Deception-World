@@ -43,8 +43,9 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   );
   /* A dark lens: the lit surface of a ring control. */
   --rb-lens:
-    radial-gradient(120% 120% at 22% 0%, rgb(var(--cs-key-rgb) / 0.26), transparent 62%),
-    linear-gradient(180deg, #111b29, #070c14);
+    radial-gradient(120% 120% at 22% 0%, rgb(var(--cs-key-rgb) / 0.3), transparent 62%),
+    radial-gradient(88% 76% at 86% 100%, rgb(var(--cs-secondary-rgb) / 0.14), transparent 66%),
+    linear-gradient(180deg, #132032, #070c14);
 }
 
 /* ---------------------------------------------------------------
@@ -58,10 +59,14 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     > .rxs-local-nav
     nav {
     border-radius: var(--ring-radius-pill);
-    background: linear-gradient(180deg, rgb(3 7 13 / 0.82), rgb(12 20 31 / 0.82));
+    background:
+      radial-gradient(110% 140% at 50% 0%, rgb(var(--cs-key-rgb) / 0.12), transparent 68%),
+      linear-gradient(180deg, rgb(5 10 19 / 0.88), rgb(13 22 35 / 0.88));
     box-shadow:
-      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.26),
-      inset 0 2px 6px rgb(0 0 0 / 0.7);
+      inset 0 1px 0 rgb(255 250 242 / 0.16),
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.34),
+      inset 0 2px 8px rgb(0 0 0 / 0.72),
+      0 8px 20px -10px rgb(0 0 0 / 0.72);
   }
 
   html[data-family="special"]
@@ -81,14 +86,32 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     #top.rxs-page[data-command-special]:not(#ring-b)
     > .rxs-local-nav
     nav
+    a:not([aria-current]):focus-visible {
+    color: #fff;
+    background:
+      radial-gradient(110% 120% at 50% 0%, rgb(var(--cs-key-rgb) / 0.24), transparent 72%),
+      rgb(18 30 46 / 0.76);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 242 / 0.24),
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.44);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    nav
     a[aria-current] {
     border-color: transparent;
+    color: #fff;
     background:
       var(--rb-lens) padding-box,
       var(--ring-prism) border-box;
     box-shadow:
-      0 0 0 1px rgb(var(--cs-key-rgb) / 0.2),
-      0 6px 16px -6px rgb(var(--cs-key-rgb) / 0.5);
+      inset 0 1px 0 rgb(255 252 246 / 0.34),
+      0 0 0 1px rgb(var(--cs-key-rgb) / 0.26),
+      0 6px 18px -5px rgb(var(--cs-key-rgb) / 0.62),
+      0 0 24px -6px rgb(var(--cs-secondary-rgb) / 0.34);
   }
 
   /* The DW sigil at the bar's head is a ring, as on the World. */
@@ -103,6 +126,41 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     background:
       var(--rb-lens) padding-box,
       var(--ring-prism) border-box !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 246 / 0.3),
+      0 0 0 1px rgb(var(--cs-key-rgb) / 0.24),
+      0 0 16px -4px rgb(var(--cs-key-rgb) / 0.48);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    nav
+    a:not([aria-current]):hover {
+    color: #fff;
+    background:
+      radial-gradient(120% 130% at 50% 0%, rgb(var(--cs-key-rgb) / 0.26), transparent 74%),
+      linear-gradient(180deg, rgb(22 36 54 / 0.84), rgb(10 17 28 / 0.84));
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 242 / 0.24),
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.42),
+      0 6px 16px -8px rgb(var(--cs-key-rgb) / 0.48);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    nav
+    a[aria-current]:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 250 / 0.44),
+      0 0 0 1px rgb(var(--cs-key-rgb) / 0.36),
+      0 8px 22px -5px rgb(var(--cs-key-rgb) / 0.72),
+      0 0 28px -4px rgb(var(--cs-secondary-rgb) / 0.44);
   }
 }
 
@@ -131,6 +189,12 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   height: var(--rb-size);
   margin: calc(var(--rb-size) / -2) 0 0;
   border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(var(--cs-key-rgb) / 0.14) 0%,
+    rgb(var(--cs-secondary-rgb) / 0.06) 44%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -140,8 +204,8 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   content: "";
   position: absolute;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2px));
 }
 
 html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::before {
@@ -149,18 +213,21 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   background: conic-gradient(
     from 200deg,
     var(--cs-key) 0turn,
-    #f4fbff 0.12turn,
+    #ffffff 0.11turn,
     var(--cs-secondary) 0.34turn,
-    rgb(var(--cs-key-rgb) / 0.16) 0.46turn 1turn
+    rgb(var(--cs-secondary-rgb) / 0.36) 0.48turn,
+    rgb(var(--cs-key-rgb) / 0.2) 0.62turn 1turn
   );
 }
 
 html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::after {
-  inset: 19%;
+  inset: 18%;
   background: conic-gradient(
     from 20deg,
-    rgb(var(--cs-secondary-rgb) / 0.7) 0turn,
-    rgb(var(--cs-secondary-rgb) / 0.12) 0.3turn 1turn
+    rgb(var(--cs-secondary-rgb) / 0.84) 0turn,
+    rgb(255 250 242 / 0.56) 0.12turn,
+    rgb(var(--cs-key-rgb) / 0.42) 0.28turn,
+    rgb(var(--cs-secondary-rgb) / 0.14) 0.42turn 1turn
   );
 }
 
@@ -169,13 +236,16 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 10px;
-  height: 10px;
-  margin: -5px;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px;
   border: 2px solid #fff;
   border-radius: 50%;
   background: var(--cs-key);
-  box-shadow: 0 0 0 4px rgb(6 12 20 / 0.7);
+  box-shadow:
+    0 0 0 3px rgb(6 12 20 / 0.82),
+    0 0 14px 2px rgb(var(--cs-key-rgb) / 0.72),
+    0 0 24px 4px rgb(var(--cs-secondary-rgb) / 0.36);
   /* 200deg on the conic = the lower left of the ring. */
   transform: rotate(110deg) translateX(calc(var(--rb-size) / 2 - 1px));
 }
@@ -215,9 +285,63 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       var(--cs-face) padding-box,
       var(--ring-prism) border-box;
     box-shadow:
-      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.3),
-      0 22px 44px -18px rgb(0 0 0 / 0.9),
-      0 0 30px -12px rgb(var(--cs-key-rgb) / 0.3);
+      inset 0 1px 0 rgb(255 250 242 / 0.22),
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.34),
+      0 24px 48px -18px rgb(0 0 0 / 0.92),
+      0 0 34px -10px rgb(var(--cs-key-rgb) / 0.34);
+  }
+
+  /* Final Stage nocturnal lamplight optical panels: restore deep night-blue
+     atmosphere, warm gold lamplight, and cyan/violet prism depth over the
+     generic --cs-face fill so story/cast/pickup panels radiate rich contrast. */
+  html[data-family="special"]
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-story-layout {
+    background:
+      radial-gradient(ellipse 56% 42% at 6% 0%, rgb(255 212 146 / 0.24), transparent 68%) padding-box,
+      radial-gradient(ellipse 48% 36% at 96% 4%, rgb(122 232 255 / 0.16), transparent 68%) padding-box,
+      radial-gradient(ellipse 54% 44% at 94% 100%, rgb(164 139 255 / 0.16), transparent 72%) padding-box,
+      linear-gradient(164deg, #162244 0%, #0d1631 48%, #070d1f 100%) padding-box,
+      conic-gradient(
+        from var(--ring-from, 210deg),
+        #ffd9a3 0turn,
+        #fff5df 0.15turn,
+        #7ae8ff 0.42turn,
+        rgb(164 139 255 / 0.56) 0.68turn,
+        #ffd9a3 1turn
+      )
+      border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 0.3),
+      inset 0 0 0 1px rgb(255 217 163 / 0.22),
+      0 28px 60px -18px rgb(0 0 0 / 0.92),
+      0 0 42px -12px rgb(255 212 146 / 0.26),
+      0 0 56px -18px rgb(122 232 255 / 0.22);
+  }
+
+  html[data-family="special"]
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    :is(.fst-cast-console, .fst-pickup-card) {
+    background:
+      radial-gradient(ellipse 52% 40% at 8% 0%, rgb(255 212 146 / 0.18), transparent 68%) padding-box,
+      radial-gradient(ellipse 46% 38% at 94% 6%, color-mix(in srgb, var(--fst-accent, #7ae8ff) 20%, transparent), transparent 66%) padding-box,
+      linear-gradient(164deg, #131e3b 0%, #0b1328 52%, #070c1b 100%) padding-box,
+      conic-gradient(
+        from var(--ring-from, 210deg),
+        color-mix(in srgb, var(--fst-accent, #7ae8ff) 78%, #ffd9a3) 0turn,
+        #fff5e2 0.16turn,
+        #ffd9a3 0.44turn,
+        rgb(122 232 255 / 0.46) 0.72turn,
+        color-mix(in srgb, var(--fst-accent, #7ae8ff) 78%, #ffd9a3) 1turn
+      )
+      border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 0.26),
+      inset 0 0 0 1px rgb(255 217 163 / 0.18),
+      0 26px 56px -18px rgb(0 0 0 / 0.92),
+      0 0 38px -12px color-mix(in srgb, var(--fst-accent, #7ae8ff) 32%, transparent);
   }
 
   html[data-family="special"]
@@ -240,8 +364,9 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       var(--cs-face) padding-box,
       var(--ring-prism) border-box;
     box-shadow:
-      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.24),
-      0 14px 30px -16px rgb(0 0 0 / 0.9);
+      inset 0 1px 0 rgb(255 250 242 / 0.2),
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.28),
+      0 16px 32px -16px rgb(0 0 0 / 0.92);
   }
 
   html[data-family="special"]
@@ -260,7 +385,10 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     background:
       var(--cs-face) padding-box,
       var(--ring-prism) border-box;
-    box-shadow: 0 18px 36px -18px rgb(0 0 0 / 0.9);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 242 / 0.18),
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.22),
+      0 20px 38px -18px rgb(0 0 0 / 0.92);
   }
 
   /* Rows that ran edge to edge as flat bands now sit inside a round
@@ -301,7 +429,10 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     background:
       var(--rb-lens) padding-box,
       var(--ring-prism) border-box;
-    box-shadow: 0 10px 22px -10px rgb(0 0 0 / 0.8);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 246 / 0.28),
+      0 12px 26px -10px rgb(0 0 0 / 0.86),
+      0 0 22px -8px rgb(var(--cs-key-rgb) / 0.34);
   }
 
   /* The chapter doors under a hero: keys become ring nodes' pills. */
@@ -316,6 +447,26 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     background:
       var(--cs-face) padding-box,
       var(--ring-prism) border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 242 / 0.22),
+      0 10px 22px -12px rgb(0 0 0 / 0.84);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.rxs-footer-return, .fst-site-door a, .fst-cast-copy > a):hover,
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
+    .rxs-chapter-index
+    a:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 250 / 0.42),
+      0 14px 30px -10px rgb(0 0 0 / 0.9),
+      0 0 28px -4px rgb(var(--cs-key-rgb) / 0.56);
   }
 }
 
@@ -447,6 +598,10 @@ html[data-family="special"]
   > b {
   border-radius: 50% !important; /* the editions' square numeral plate */
   clip-path: none !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 246 / 0.34),
+    0 0 0 3px rgb(6 12 20 / 0.8),
+    0 0 18px -4px rgb(var(--cs-key-rgb) / 0.54);
 }
 
 html[data-family="special"]
@@ -462,16 +617,31 @@ html[data-family="special"]
   height: 360px;
   border-radius: 50%;
   background: conic-gradient(
-    from 38deg,
+    from 36deg,
     transparent 0turn,
     var(--cs-key) 0.03turn,
-    #f4fbff 0.145turn,
+    #ffffff 0.145turn,
     var(--cs-secondary) 0.26turn,
-    transparent 0.29turn
+    transparent 0.3turn
   );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
   pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a:hover
+    > b {
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 250 / 0.48),
+      0 0 0 3px rgb(6 12 20 / 0.86),
+      0 0 0 5px rgb(var(--cs-key-rgb) / 0.48),
+      0 0 24px 0 rgb(var(--cs-key-rgb) / 0.72);
+  }
 }
 
 /* ---------------------------------------------------------------
@@ -501,20 +671,156 @@ html[data-family="special"]
     transform-origin: 50% 0%;
   }
 
-  /* Pills answer a press: a quick sink, an elastic release. */
+  /* Local nav pills, CTA pills, chapter index pills and arc-map doors
+     answer a hover or press on the elastic spring. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     #top.rxs-page[data-command-special]:not(#ring-b)
-    :is(.rxs-footer > a, .rxs-footer-top > a, .mus-end-doors a, .fst-site-door a, .fst-cast-copy > a) {
+    :is(
+      .rxs-local-nav nav a,
+      .rxs-footer > a,
+      .rxs-footer-top > a,
+      .rxs-footer-return,
+      .mus-end-doors a,
+      .fst-site-door a,
+      .fst-cast-copy > a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .ffs-hero-primary,
+      .ffs-hero-secondary,
+      .rxs-chapter-index a,
+      .rxs-scroll-cue
+    ) {
     transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     #top.rxs-page[data-command-special]:not(#ring-b)
-    :is(.rxs-footer > a, .rxs-footer-top > a, .mus-end-doors a, .fst-site-door a, .fst-cast-copy > a):active {
-    scale: 0.94;
+    :is(
+      .rxs-local-nav nav a,
+      .rxs-footer > a,
+      .rxs-footer-top > a,
+      .rxs-footer-return,
+      .mus-end-doors a,
+      .fst-site-door a,
+      .fst-cast-copy > a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .ffs-hero-primary,
+      .ffs-hero-secondary,
+      .rxs-chapter-index a,
+      .rxs-scroll-cue
+    ):active {
+    scale: 0.93;
     transition: scale 90ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a
+    > b {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a:active {
+    scale: 0.96;
+    transition: scale 90ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a:active
+    > b {
+    scale: 0.9;
+    transition: scale 90ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
+    :is(
+      .rxs-specs > div,
+      .ffs-specs > div,
+      .fst-specs > div,
+      .ics-specs > div,
+      .mus-specs > div,
+      .rxs-headline-metrics > article
+    ) {
+    transition: scale var(--ring-dur-spring) var(--ring-spring);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-local-nav nav a,
+      .rxs-footer > a,
+      .rxs-footer-top > a,
+      .rxs-footer-return,
+      .mus-end-doors a,
+      .fst-site-door a,
+      .fst-cast-copy > a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .ffs-hero-primary,
+      .ffs-hero-secondary,
+      .rxs-chapter-index a,
+      .rxs-scroll-cue
+    ):hover {
+    scale: 1.045;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a:hover {
+    scale: 1.03;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+    .rxe-chapter-map
+    > a:hover
+    > b {
+    scale: 1.14;
+    rotate: -6deg;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
+    :is(
+      .rxs-specs > div,
+      .ffs-specs > div,
+      .fst-specs > div,
+      .ics-specs > div,
+      .mus-specs > div,
+      .rxs-headline-metrics > article
+    ):hover {
+    scale: 1.018;
   }
 }
 
@@ -598,6 +904,12 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
   width: min(100%, 560px);
   aspect-ratio: 1;
   border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(var(--saga-accent-rgb), 0.14) 0%,
+    rgba(var(--saga-accent-rgb), 0.05) 42%,
+    transparent 70%
+  );
   pointer-events: none;
 }
 
@@ -606,8 +918,8 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
   content: "";
   position: absolute;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2px));
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::before {
@@ -617,7 +929,14 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::after {
   inset: 14%;
-  background: rgba(var(--saga-accent-rgb), 0.26);
+  background: conic-gradient(
+    from 45deg,
+    rgba(var(--saga-accent-rgb), 0.52) 0turn,
+    rgb(255 246 228 / 0.62) 0.18turn,
+    rgba(var(--saga-accent-rgb), 0.22) 0.48turn,
+    var(--ring-gold) 0.72turn,
+    rgba(var(--saga-accent-rgb), 0.52) 1turn
+  );
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b {
@@ -641,14 +960,16 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b::before {
   content: "";
   position: absolute;
-  top: -4px;
-  left: calc(50% - 5px);
-  width: 10px;
-  height: 10px;
+  top: -5px;
+  left: calc(50% - 5.5px);
+  width: 11px;
+  height: 11px;
   border: 2px solid #fff;
   border-radius: 50%;
   background: var(--saga-accent);
-  box-shadow: 0 0 0 4px rgb(4 8 14 / 0.8);
+  box-shadow:
+    0 0 0 3px rgb(4 8 14 / 0.86),
+    0 0 14px 2px rgba(var(--saga-accent-rgb), 0.72);
 }
 
 /* Two by two: the four on the ring's diagonals. */
@@ -670,8 +991,13 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
   border: 2px solid transparent;
   border-radius: 18px;
   background:
-    linear-gradient(#080a0d, #080a0d) padding-box,
+    radial-gradient(120% 70% at 50% 0%, rgb(255 248 238 / 0.16), transparent 60%) padding-box,
+    linear-gradient(168deg, #131b28, #06090e) padding-box,
     var(--ring-prism) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 240 / 0.36),
+    0 26px 56px -16px rgb(0 0 0 / 0.92),
+    0 0 38px -10px rgba(var(--saga-accent-rgb), 0.3);
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster img {
@@ -683,7 +1009,15 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-open {
+  border: 1.5px solid transparent;
   border-radius: 50%;
+  background:
+    var(--rb-lens) padding-box,
+    var(--ring-prism) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 246 / 0.32),
+    0 8px 20px rgb(0 0 0 / 0.72),
+    0 0 16px -4px rgba(var(--saga-accent-rgb), 0.52);
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-name {
@@ -754,8 +1088,12 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .poster-c
 
 /* An inset ring, not a border: the chosen number must not change size. */
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .chapter-switch button[aria-pressed="true"] {
+  color: #fff;
   background: var(--rb-lens);
-  box-shadow: inset 0 0 0 2px var(--saga-accent);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 246 / 0.34),
+    inset 0 0 0 2px var(--saga-accent),
+    0 0 18px -4px rgba(var(--saga-accent-rgb), 0.68);
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.poster-controls, .auto-play, .desktop-nav) {
@@ -769,6 +1107,9 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .brand-ma
   background:
     var(--rb-lens) padding-box,
     var(--ring-prism) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 246 / 0.3),
+    0 0 18px -4px rgba(var(--saga-accent-rgb), 0.5);
 }
 
 html[data-family="special"]
@@ -789,6 +1130,40 @@ html[data-family="special"]
 /* Artwork stays rectangular: the smaller corner. */
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero-poster, .visual-feature) {
   border-radius: 18px;
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:hover
+    .film-poster {
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 0.48),
+      0 32px 68px -16px rgb(0 0 0 / 0.94),
+      0 0 52px -6px rgba(var(--saga-accent-rgb), 0.54);
+  }
+
+  html[data-family="special"]
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .chapter-switch
+    button:not([aria-pressed="true"]):hover,
+  html[data-family="special"]
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .poster-controls
+    > button:hover {
+    color: #fff;
+    background:
+      radial-gradient(120% 120% at 50% 0%, rgba(var(--saga-accent-rgb), 0.28), transparent 70%),
+      rgb(16 24 36 / 0.88);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 246 / 0.28),
+      inset 0 0 0 1px rgba(var(--saga-accent-rgb), 0.56),
+      0 0 16px -4px rgba(var(--saga-accent-rgb), 0.52);
+  }
 }
 
 @keyframes ring-special-rise {
@@ -841,7 +1216,15 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero
     .saga-cinema.saga-cinema:not(#ring-b)
     #films
     .film-card {
-    transition: scale var(--ring-dur-spring) var(--ring-spring);
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-poster {
+    transition: translate var(--ring-dur-spring) var(--ring-spring);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -849,8 +1232,49 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero
     .saga-cinema.saga-cinema:not(#ring-b)
     #films
     .film-card:active {
-    scale: 0.95;
+    scale: 0.94;
     transition: scale 90ms ease-out;
+  }
+
+  /* Circular chapter buttons and cinema pill controls answer with elastic bounce. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    :is(
+      .chapter-switch button,
+      .poster-controls > button,
+      .world-return-link,
+      .frame-button,
+      .hero-actions > :is(a, button),
+      .auto-play,
+      .chapter-reel button
+    ) {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    :is(.chapter-switch button, .poster-controls > button):active {
+    scale: 0.9;
+    transition: scale 85ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    :is(.world-return-link, .frame-button, .hero-actions > :is(a, button), .auto-play):active {
+    scale: 0.94;
+    transition: scale 85ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    .chapter-reel
+    button:active {
+    scale: 0.97;
+    transition: scale 85ms ease-out;
   }
 
   /* THE EXPANSION RULE: the film sheet springs open from the centre and
@@ -927,7 +1351,30 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero
     .saga-cinema.saga-cinema:not(#ring-b)
     #films
     .film-card:hover {
-    scale: 1.05;
+    scale: 1.06;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    #films
+    .film-card:hover
+    .film-poster {
+    translate: 0 -4px;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    :is(.chapter-switch button, .poster-controls > button):hover {
+    scale: 1.12;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .saga-cinema.saga-cinema:not(#ring-b)
+    :is(.world-return-link, .frame-button, .hero-actions > :is(a, button), .auto-play):hover {
+    scale: 1.035;
   }
 }
 
@@ -955,6 +1402,13 @@ html[data-family="special"] body #top.fst-page[data-command-special]:not(#ring-b
   --ring-item: var(--fst-item);
   --ring-r: var(--fst-r);
   grid-area: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(255 214 150 / 0.1) 0%,
+    rgb(122 232 255 / 0.06) 44%,
+    transparent 70%
+  );
   rotate: calc(var(--fst-turn) * -45deg);
 }
 
@@ -983,6 +1437,9 @@ html[data-family="special"]
   font-size: clamp(13px, calc(var(--fst-inner, 240px) / 9.4), 34px);
   line-height: 1.45;
   text-align: center;
+  text-shadow:
+    0 2px 18px rgb(0 0 0 / 0.85),
+    0 0 26px rgb(255 217 163 / 0.24);
   pointer-events: none;
 }
 
@@ -1012,16 +1469,28 @@ html[data-family="special"]
   width: 100%;
   height: 100%;
   rotate: calc(var(--fst-turn) * 45deg);
-  background: #070c14;
+  background: #081020;
+  box-shadow:
+    0 0 0 3px rgb(6 11 22 / 0.8),
+    0 8px 18px -6px rgb(0 0 0 / 0.86),
+    0 0 16px -4px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 44%, transparent);
 }
 
-/* Unlit people are quiet rings; the chosen one wears its own light. */
+/* Unselected cast nodes wear a clear luminous rim in their own accent so
+   every portrait stands out crisply against the night sky; the chosen node
+   flares with a multi-layered prism halo. */
 html[data-family="special"]
   body
   #top.fst-page[data-command-special]:not(#ring-b)
   .fst-cast-node
   > .ring-frame::before {
-  background: rgb(255 255 255 / 0.3);
+  background: conic-gradient(
+    from 210deg,
+    color-mix(in srgb, var(--fst-accent, var(--cs-key)) 72%, #fff4dc) 0turn,
+    rgb(255 248 232 / 0.78) 0.2turn,
+    rgb(122 232 255 / 0.48) 0.55turn,
+    color-mix(in srgb, var(--fst-accent, var(--cs-key)) 56%, transparent) 1turn
+  );
 }
 
 html[data-family="special"]
@@ -1029,10 +1498,13 @@ html[data-family="special"]
   #top.fst-page[data-command-special]:not(#ring-b)
   .fst-cast-node.is-on
   > .ring-frame {
-  scale: 1.24;
+  scale: 1.28;
   box-shadow:
-    0 0 0 5px rgb(6 12 20 / 0.72),
-    0 10px 26px -8px var(--fst-accent, var(--cs-key));
+    0 0 0 4px rgb(6 11 22 / 0.88),
+    0 0 0 6px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 74%, #fff3d6),
+    0 0 26px 2px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 64%, transparent),
+    0 0 44px -2px rgb(255 217 163 / 0.34),
+    0 16px 32px -10px rgb(0 0 0 / 0.92);
 }
 
 html[data-family="special"]
@@ -1040,7 +1512,28 @@ html[data-family="special"]
   #top.fst-page[data-command-special]:not(#ring-b)
   .fst-cast-node.is-on
   > .ring-frame::before {
-  background: conic-gradient(from 210deg, var(--fst-accent, var(--cs-key)), #fff 0.2turn, var(--cs-secondary) 0.5turn, var(--fst-accent, var(--cs-key)));
+  background: conic-gradient(
+    from 210deg,
+    var(--fst-accent, var(--cs-key)) 0turn,
+    #fff8ec 0.16turn,
+    var(--cs-secondary) 0.42turn,
+    #7ae8ff 0.68turn,
+    var(--fst-accent, var(--cs-key)) 1turn
+  );
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node:not(.is-on):hover
+    > .ring-frame {
+    box-shadow:
+      0 0 0 3px rgb(6 11 22 / 0.86),
+      0 0 0 5px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 56%, #fff3d6),
+      0 0 22px 0 color-mix(in srgb, var(--fst-accent, var(--cs-key)) 56%, transparent),
+      0 12px 24px -8px rgb(0 0 0 / 0.9);
+  }
 }
 
 /* The face, as the rail's tabs cut it: the portrait enlarged about the
@@ -1106,7 +1599,17 @@ html[data-family="special"]
     #top.fst-page[data-command-special]:not(#ring-b)
     .fst-cast-node:not(.is-on):active
     > .ring-frame {
-    scale: 0.92;
+    scale: 0.91;
+    transition: scale 85ms ease-out;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node.is-on:active
+    > .ring-frame {
+    scale: 1.18;
+    transition: scale 85ms ease-out;
   }
 }
 
@@ -1116,6 +1619,29 @@ html[data-family="special"]
     #top.fst-page[data-command-special]:not(#ring-b)
     .fst-cast-node:not(.is-on):hover
     > .ring-frame {
-    scale: 1.1;
+    scale: 1.14;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring {
+    background: none;
+  }
+
+  html[data-family="special"] body #top.fst-page[data-command-special]:not(#ring-b) .fst-cast-orbit {
+    background: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node
+    > .ring-frame,
+  html[data-family="special"]
+    body
+    #top.fst-page[data-command-special]:not(#ring-b)
+    .fst-cast-node.is-on
+    > .ring-frame {
+    box-shadow: none;
   }
 }

@@ -54,45 +54,45 @@
   vector-effect: non-scaling-stroke;
 }
 .rr-surge-route .rr-arc-aura {
-  stroke-width: 7.5;
-  opacity: 0.38;
-  filter: drop-shadow(0 0 8px var(--rr-energy));
+  stroke-width: 8;
+  opacity: 0.44;
+  filter: drop-shadow(0 0 10px var(--rr-energy));
 }
 .rr-surge-route .rr-arc-core {
-  stroke-width: 2.4;
-  filter: drop-shadow(0 0 4px var(--rr-energy));
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 5px var(--rr-energy));
 }
 .rr-surge-route .rr-arc-out {
   stroke: var(--rr-gold);
-  filter: drop-shadow(0 0 6px var(--rr-gold));
+  filter: drop-shadow(0 0 8px var(--rr-gold));
 }
 .rr-surge-route .rr-coronation-canopy {
   stroke: rgb(var(--rr-regalia-rgb));
-  stroke-width: 1.75;
-  opacity: 0.78;
-  filter: drop-shadow(0 0 7px rgb(var(--rr-regalia-rgb) / 0.62));
+  stroke-width: 1.85;
+  opacity: 0.84;
+  filter: drop-shadow(0 0 9px rgb(var(--rr-regalia-rgb) / 0.7));
 }
 .rr-reactor-charge {
-  fill: rgba(255, 246, 214, 0.18);
-  stroke: #fff4c8;
-  stroke-width: 2.15;
+  fill: rgba(255, 246, 214, 0.22);
+  stroke: #fff7d8;
+  stroke-width: 2.2;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 8px var(--rr-gold));
+  filter: drop-shadow(0 0 10px var(--rr-gold));
 }
 .rr-reactor-ring {
   fill: none;
   stroke: var(--rr-energy);
-  stroke-width: 1.5;
+  stroke-width: 1.6;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 6px var(--rr-energy));
+  filter: drop-shadow(0 0 7px var(--rr-energy));
 }
 .rr-reactor-crest {
-  fill: rgba(255, 246, 214, 0.24);
+  fill: rgba(255, 246, 214, 0.28);
   stroke: var(--rr-gold);
-  stroke-width: 1.4;
+  stroke-width: 1.5;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 6px var(--rr-gold));
+  filter: drop-shadow(0 0 8px var(--rr-gold));
 }
 .rr-surge svg {
   display: block;

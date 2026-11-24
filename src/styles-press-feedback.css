@@ -18,13 +18,13 @@
    does: while a press is live its list keeps scale and filter, and touch
    keeps its hold-back. */
 :root {
-  --dw-ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* the house curve: glass, Mirage, Dream */
-  --dw-ease-press: cubic-bezier(0.18, 0, 0, 1);
-  --dw-dur-press: 82ms;
-  --dw-dur-settle: 320ms;
-  --dw-dur-state: 180ms;
-  --dw-press-scale: 0.96;
-  --dw-press-light: 1.16;
+  --dw-ease-out: var(--ring-spring, cubic-bezier(0.16, 1, 0.3, 1)); /* the house curve: glass, Mirage, Dream */
+  --dw-ease-press: cubic-bezier(0.16, 0.04, 0, 1);
+  --dw-dur-press: 76ms;
+  --dw-dur-settle: 360ms;
+  --dw-dur-state: 200ms;
+  --dw-press-scale: 0.955;
+  --dw-press-light: 1.18;
 }
 
 html[data-press-ready] body [data-press][data-press] {
@@ -120,9 +120,28 @@ html[data-press-ready]
   ) {
   background-color: rgb(126 231 255 / 0.1);
   box-shadow:
-    inset 0 1px 0 rgb(198 245 255 / 0.28),
-    inset 0 -1px 0 rgb(126 231 255 / 0.22);
+    inset 0 1px 0 rgb(218 250 255 / 0.36),
+    inset 0 -1px 0 rgb(126 231 255 / 0.32),
+    0 0 16px -4px rgb(126 231 255 / 0.24);
   --dw-press-light: 1.32;
+}
+
+/* Interactive cards answer a press with a crisp glass-edge specular rim. */
+html[data-press-ready]
+  body
+  :is(
+    .signal,
+    .dante-archive,
+    .dossier-contents > a,
+    .manager-pagination > a,
+    .search-result-card,
+    .other-archive-card,
+    .rider-special-site-card
+  ):is([data-press="in"], [data-press="touch"]) {
+  box-shadow:
+    inset 0 1px 0 rgb(224 248 255 / 0.34),
+    inset 0 0 0 1px rgb(126 231 255 / 0.24),
+    0 10px 26px -8px rgb(0 0 0 / 0.65);
 }
 
 /* Menu rows are full-width, each with its own divider: they take the light
@@ -138,8 +157,10 @@ html[data-press-ready]
   :is(a, button.side-panel-link-button):is([data-press="in"], [data-press="touch"]) {
   background-color: rgb(126 231 255 / 0.1);
   box-shadow:
-    inset 3px 0 0 rgb(126 231 255 / 0.82),
-    inset 0 1px 0 rgb(198 245 255 / 0.22);
+    inset 3px 0 0 rgb(126 231 255 / 0.9),
+    inset 0 1px 0 rgb(218 250 255 / 0.3),
+    inset 0 -1px 0 rgb(126 231 255 / 0.16),
+    0 4px 14px -4px rgb(126 231 255 / 0.22);
   --dw-press-light: 1.32;
 }
 
@@ -153,8 +174,9 @@ html[data-press-ready] .dream-chapter-nav a {
 html[data-press-ready] body .dream-chapter-nav a:is([data-press="in"], [data-press="touch"]) {
   background-color: rgb(200 164 92 / 0.12);
   box-shadow:
-    inset 0 1px 0 rgb(240 207 134 / 0.3),
-    inset 0 -2px 0 rgb(200 164 92 / 0.72);
+    inset 0 1px 0 rgb(248 225 168 / 0.4),
+    inset 0 -2px 0 rgb(208 172 98 / 0.82),
+    0 4px 14px -4px rgb(200 164 92 / 0.22);
   --dw-press-light: 1.32;
 }
 

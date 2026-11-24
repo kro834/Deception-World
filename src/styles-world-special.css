@@ -696,10 +696,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     border-color: #fff;
     background: var(--ws-dot);
     box-shadow:
-      0 0 0 3px rgb(var(--ws-pink-rgb) / 30%),
-      0 0 16px rgb(var(--ws-pink-rgb) / 62%),
-      0 0 28px rgb(var(--sw-light-rgb) / 36%);
-    scale: 1.5;
+      0 0 0 3px rgb(var(--ws-pink-rgb) / 36%),
+      0 0 0 5px rgb(var(--sw-light-rgb) / 22%),
+      0 0 18px rgb(var(--ws-pink-rgb) / 72%),
+      0 0 30px rgb(var(--sw-light-rgb) / 44%);
+    scale: 1.55;
   }
 
   html[data-family="world"]:root

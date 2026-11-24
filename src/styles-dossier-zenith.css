@@ -1762,7 +1762,7 @@ html[data-family="dossier"]
   height: 100%;
   object-fit: cover;
   object-position: 50% 18%;
-  opacity: 0.74;
+  opacity: 0.9;
 }
 
 /* The faces sit back in the ink (a white-ground tile no longer outshines
@@ -2346,7 +2346,7 @@ html[data-family="dossier"]
       ):not(.dante-page)
       #dossier-profile
       .dossier-identity {
-      --sd-numeral-reserve: clamp(140px, 11.5vw, 184px);
+      --sd-numeral-reserve: clamp(148px, 12vw, 192px);
     }
 
     html[data-family="dossier"]

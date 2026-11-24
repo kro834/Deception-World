@@ -84,13 +84,30 @@
     body
     [data-press="out"][data-press][data-press] {
     transition-duration:
-      var(--fx-dur-bounce), var(--dw-dur-settle, 320ms), var(--dw-dur-state, 180ms),
-      var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms),
-      var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms);
+      var(--ring-dur-elastic, var(--fx-dur-bounce)), var(--dw-dur-settle, 360ms),
+      var(--ring-dur-bounce, var(--dw-dur-state, 200ms)),
+      var(--ring-dur-bounce, var(--dw-dur-state, 200ms)), var(--dw-dur-state, 200ms),
+      var(--dw-dur-state, 200ms), var(--dw-dur-state, 200ms), var(--dw-dur-state, 200ms),
+      var(--dw-dur-state, 200ms);
     transition-timing-function:
-      var(--fx-spring-bounce), var(--fx-ease-out), var(--fx-ease-out), var(--fx-ease-out),
+      var(--ring-spring-elastic, var(--fx-spring-bounce)), var(--fx-ease-out),
+      var(--ring-spring-bounce, var(--fx-spring)), var(--ring-spring-bounce, var(--fx-spring)),
       var(--fx-ease-out), var(--fx-ease-out), var(--fx-ease-out), var(--fx-ease-out),
       var(--fx-ease-out);
+  }
+
+  html[data-press-ready]:not([data-world-effects="economy"])
+    .episode-card[data-press-within="out"][data-press-within] {
+    transition-duration:
+      var(--ring-dur-elastic, var(--fx-dur-bounce)), var(--dw-dur-settle, 360ms);
+    transition-timing-function:
+      var(--ring-spring-elastic, var(--fx-spring-bounce)), var(--fx-ease-out);
+  }
+
+  html[data-press-ready]:not([data-world-effects="economy"])
+    details.dream-story-case[data-press-within="out"] {
+    transition-duration: var(--ring-dur-elastic, var(--fx-dur-bounce));
+    transition-timing-function: var(--ring-spring-elastic, var(--fx-spring-bounce));
   }
 }
 
@@ -111,14 +128,14 @@
     border-radius: inherit;
     pointer-events: none;
     background: radial-gradient(
-      circle 180px at var(--fx-px) var(--fx-py),
-      rgb(var(--fx-key-rgb) / 16%),
-      rgb(var(--fx-accent-rgb) / 6%) 45%,
-      transparent 70%
+      circle 200px at var(--fx-px) var(--fx-py),
+      rgb(var(--fx-key-rgb) / 20%),
+      rgb(var(--fx-accent-rgb) / 8%) 46%,
+      transparent 72%
     );
     mix-blend-mode: screen;
     opacity: 0;
-    transition: opacity 260ms var(--fx-ease-out);
+    transition: opacity 280ms var(--fx-ease-out);
   }
 
   html[data-fx-ready]:not([data-world-effects="economy"])
@@ -218,7 +235,7 @@
     .side-panel-links
     > :is(a, button.side-panel-link-button)
     > span {
-    animation: fx-row-in 560ms var(--fx-spring) backwards;
+    animation: fx-row-in 580ms var(--ring-spring, var(--fx-spring)) backwards;
     animation-delay: calc(var(--fx-row, 0) * var(--fx-stagger) + var(--fx-group, 0) * 60ms);
   }
 
@@ -295,7 +312,7 @@
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) body dialog.quick-search[open] .quick-search-panel {
-    animation: fx-sheet-in 180ms var(--fx-ease-out);
+    animation: fx-sheet-in 240ms var(--ring-spring, var(--fx-ease-out));
   }
 
   html:not([data-world-effects="economy"])
@@ -303,8 +320,8 @@
     dialog.quick-search[open]
     .quick-search-group
     :is(.quick-search-option) {
-    animation: fx-option-in 150ms var(--fx-ease-out) backwards;
-    animation-delay: calc(var(--fx-row, 0) * 16ms);
+    animation: fx-option-in 180ms var(--ring-spring, var(--fx-ease-out)) backwards;
+    animation-delay: calc(var(--fx-row, 0) * 18ms);
   }
 
   /* 2026-11-23: Android scans its rows too (translate and opacity only). */

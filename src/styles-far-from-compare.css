@@ -169,15 +169,16 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgb(127 230 255 / 32%);
+  border: 1px solid rgb(138 232 255 / 32%);
   border-radius: 999px;
   background:
+    radial-gradient(ellipse 74% 52% at 50% 0%, rgb(255 250 238 / 14%), transparent 68%),
     linear-gradient(180deg, rgb(255 255 255 / 10%) 0%, transparent 44%),
-    rgb(4 10 24 / 76%);
+    rgb(5 10 24 / 82%);
   box-shadow:
-    inset 0 1px 0 0 rgb(226 248 255 / 24%),
-    inset 0 2px 12px rgb(0 4 16 / 70%),
-    0 10px 28px -6px rgb(0 4 18 / 72%);
+    inset 0 1px 0 0 rgb(255 250 238 / 32%),
+    inset 0 2px 12px rgb(0 4 16 / 74%),
+    0 10px 28px -6px rgb(0 4 18 / 76%);
 }
 
 .ffs-page .ffs-p16-switch > div {
@@ -197,33 +198,54 @@
   line-height: 1.3;
   text-align: center;
   cursor: pointer;
-  transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-views label {
+    transition:
+      scale var(--ring-dur-elastic, 880ms) var(--ring-spring-elastic, cubic-bezier(0.32, 1.9, 0.4, 0.96)),
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      background-color 180ms ease,
+      color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-views label:active {
+    scale: 0.95;
+    transition: scale 90ms ease-out;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-views label:hover:not(.is-active) {
     color: var(--ffs-text);
     background: rgb(127 230 255 / 12%);
-    box-shadow: inset 0 0 0 1px rgb(127 230 255 / 30%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 238 / 28%),
+      inset 0 0 0 1px rgb(138 232 255 / 34%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-views label:hover:not(:active) {
+    translate: 0 -1px;
+    scale: 1.02;
   }
 }
 
 .ffs-page .ffs-views label.is-active {
   background:
-    radial-gradient(ellipse 92% 62% at 50% 0%, rgb(255 255 255 / 34%), transparent 62%),
-    radial-gradient(ellipse 80% 60% at 88% 100%, rgb(255 215 122 / 22%), transparent 64%),
-    linear-gradient(180deg, rgb(127 230 255 / 44%), rgb(104 176 255 / 24%) 54%, rgb(168 124 255 / 26%)),
-    rgb(14 42 78 / 88%);
+    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(255 254 246 / 46%), transparent 64%),
+    radial-gradient(ellipse 80% 60% at 88% 100%, rgb(214 54 96 / 26%), transparent 64%),
+    linear-gradient(180deg, rgb(127 230 255 / 44%), rgb(104 176 255 / 24%) 54%, rgb(214 54 96 / 22%)),
+    rgb(14 36 72 / 92%);
   color: #ffffff;
-  border: 1px solid rgb(186 245 255 / 80%);
+  border: 1px solid rgb(255 244 214 / 72%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 60%),
-    inset 0 -2px 0 0 rgb(255 215 122 / 64%),
-    0 0 24px rgb(127 230 255 / 46%),
-    0 4px 16px -2px rgb(0 4 18 / 72%);
+    inset 0 1px 0 0 rgb(255 255 255 / 72%),
+    inset 0 -2px 0 0 rgb(255 215 122 / 72%),
+    0 0 24px rgb(127 230 255 / 44%),
+    0 4px 16px -2px rgb(0 4 18 / 76%);
   text-shadow: 0 0 14px rgb(127 230 255 / 62%);
 }
 
@@ -386,35 +408,50 @@
   gap: 14px;
   min-width: 0;
   padding: 20px;
-  border: 1px solid rgb(127 230 255 / 28%);
-  border-radius: 16px;
+  border: 1px solid rgb(138 232 255 / 28%);
+  border-radius: 20px;
   background:
-    radial-gradient(ellipse 84% 56% at 14% 0%, rgb(127 230 255 / 16%), transparent 62%),
-    radial-gradient(ellipse 76% 52% at 92% 100%, rgb(186 138 255 / 13%), transparent 64%),
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 250 238 / 18%), transparent 68%),
+    radial-gradient(ellipse 84% 56% at 14% 0%, rgb(127 230 255 / 15%), transparent 62%),
+    radial-gradient(ellipse 76% 52% at 92% 100%, rgb(214 54 96 / 14%), transparent 64%),
     linear-gradient(160deg, rgb(255 255 255 / 7%) 0%, rgb(127 230 255 / 3%) 45%, transparent 100%),
-    linear-gradient(180deg, rgb(14 26 52 / 86%), rgb(6 12 28 / 94%));
+    linear-gradient(180deg, rgb(15 24 52 / 90%), rgb(6 10 24 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(228 248 255 / 26%),
-    inset 0 0 0 1px rgb(201 155 255 / 10%),
-    0 18px 40px -14px rgb(0 4 18 / 84%);
+    inset 0 1px 0 rgb(255 250 236 / 36%),
+    inset 0 0 0 1px rgb(255 215 122 / 10%),
+    0 18px 40px -14px rgb(0 4 18 / 86%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ffs-page .ffs-metric {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-metric {
     transition:
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
       border-color 220ms ease,
-      box-shadow 220ms ease;
+      box-shadow 260ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-metric:active {
+    scale: 0.985;
+    transition: scale 90ms ease-out;
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-metric:hover {
-    border-color: rgb(156 241 255 / 58%);
+    border-color: rgb(255 224 148 / 58%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 36%),
-      inset 0 0 0 1px rgb(201 155 255 / 18%),
-      0 22px 48px -14px rgb(0 4 18 / 90%),
-      0 0 26px -4px rgb(127 230 255 / 32%);
+      inset 0 1px 0 rgb(255 254 246 / 54%),
+      inset 0 0 0 1px rgb(214 54 96 / 18%),
+      0 22px 48px -14px rgb(0 4 18 / 92%),
+      0 0 28px -4px rgb(127 230 255 / 32%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-metric:hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.012;
   }
 }
 
@@ -558,9 +595,9 @@
 .ffs-page .ffs-cell-mark {
   display: inline-block;
   margin-left: 6px;
-  padding: 0 6px;
-  border: 1px solid rgb(255 215 122 / 38%);
-  border-radius: 4px;
+  padding: 0 8px;
+  border: 1px solid rgb(255 215 122 / 42%);
+  border-radius: var(--ring-radius-pill, 999px);
   color: #ffe2a1;
   font-family: var(--rxs-font-text);
   font-size: 12px;
@@ -616,14 +653,15 @@
 .ffs-page .ffs-text-row {
   min-width: 0;
   padding: 18px 20px;
-  border: 1px solid rgb(127 230 255 / 22%);
-  border-radius: 16px;
+  border: 1px solid rgb(138 232 255 / 24%);
+  border-radius: 20px;
   background:
+    radial-gradient(ellipse 78% 36% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%),
     radial-gradient(ellipse 80% 50% at 12% 0%, rgb(127 230 255 / 12%), transparent 60%),
-    linear-gradient(160deg, rgb(14 25 48 / 82%), rgb(6 12 26 / 90%));
+    linear-gradient(160deg, rgb(14 24 50 / 88%), rgb(6 10 24 / 94%));
   box-shadow:
-    inset 0 1px 0 rgb(228 248 255 / 20%),
-    0 12px 28px -12px rgb(0 4 18 / 70%);
+    inset 0 1px 0 rgb(255 250 236 / 30%),
+    0 12px 28px -12px rgb(0 4 18 / 76%);
 }
 
 .ffs-page .ffs-text-row h4 {
@@ -681,15 +719,16 @@
   grid-column: 1 / -1;
   min-width: 0;
   padding: 18px 20px;
-  border: 1px solid rgb(138 232 255 / 22%);
-  border-radius: 16px;
+  border: 1px solid rgb(138 232 255 / 26%);
+  border-radius: 20px;
   background:
+    radial-gradient(ellipse 74% 34% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%),
     radial-gradient(110% 80% at 0% 0%, rgb(127 230 255 / 12%), transparent 56%),
-    radial-gradient(90% 70% at 100% 100%, rgb(168 120 255 / 10%), transparent 58%),
-    linear-gradient(166deg, rgb(12 22 48 / 86%), rgb(5 10 24 / 92%));
+    radial-gradient(90% 70% at 100% 100%, rgb(214 54 96 / 12%), transparent 58%),
+    linear-gradient(166deg, rgb(13 22 48 / 90%), rgb(5 10 24 / 95%));
   box-shadow:
-    inset 0 1px 0 rgb(232 250 255 / 20%),
-    0 12px 28px -14px rgb(0 4 16 / 78%);
+    inset 0 1px 0 rgb(255 250 236 / 30%),
+    0 12px 28px -14px rgb(0 4 16 / 82%);
 }
 
 .ffs-page .ffs-accel-compare > header {
@@ -1106,26 +1145,55 @@
 
 .ffs-page .ffs-report-tools button {
   min-height: 44px;
-  padding: 0 18px;
-  border: 1px solid rgb(127 230 255 / 30%);
-  border-radius: 999px;
+  padding: 0 20px;
+  border: 1px solid rgb(255 224 148 / 38%);
+  border-radius: var(--ring-radius-pill, 999px);
   color: var(--ffs-text);
-  background: rgb(127 230 255 / 6%);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(255 250 238 / 20%), transparent 68%),
+    linear-gradient(180deg, rgb(18 32 64 / 86%), rgb(8 14 32 / 94%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 36%),
+    0 8px 20px -10px rgb(0 4 18 / 80%);
   font: inherit;
   font-size: 13px;
   font-weight: 650;
   letter-spacing: 0.06em;
   cursor: pointer;
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report-tools button {
+    transition:
+      scale var(--ring-dur-elastic, 880ms) var(--ring-spring-elastic, cubic-bezier(0.32, 1.9, 0.4, 0.96)),
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      background-color 180ms ease,
+      border-color 200ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report-tools button:active {
+    scale: 0.94;
+    transition: scale 90ms ease-out;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-report-tools button:hover {
-    border-color: rgb(127 230 255 / 65%);
-    background: rgb(127 230 255 / 16%);
-    box-shadow: 0 0 16px rgb(127 230 255 / 28%);
+    border-color: rgb(255 232 168 / 78%);
+    background:
+      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 252 242 / 28%), transparent 68%),
+      linear-gradient(180deg, rgb(24 42 82 / 92%), rgb(10 18 40 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 246 / 52%),
+      0 0 20px rgb(255 215 122 / 28%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report-tools button:hover:not(:active) {
+    translate: 0 -2px;
+    scale: 1.03;
   }
 }
 
@@ -1206,24 +1274,55 @@
   position: relative;
   width: 28px;
   height: 28px;
-  border: 1px solid rgb(127 230 255 / 28%);
+  border: 1px solid rgb(255 224 148 / 36%);
   border-radius: 50%;
-  background: rgb(127 230 255 / 5%);
-  box-shadow: 0 0 8px rgb(127 230 255 / 12%);
+  background:
+    radial-gradient(circle at 32% 24%, rgb(255 250 236 / 20%), transparent 58%),
+    rgb(12 22 48 / 72%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 32%),
+    0 0 10px rgb(127 230 255 / 14%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ffs-page .ffs-report summary {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary {
     transition:
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
       background-color 180ms ease,
       box-shadow 180ms ease;
   }
 
-  .ffs-page .ffs-report summary > i {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary:active {
+    scale: 0.992;
+    transition: scale 90ms ease-out;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary > i {
     transition:
+      scale var(--ring-dur-elastic, 880ms) var(--ring-spring-elastic, cubic-bezier(0.32, 1.9, 0.4, 0.96)),
       border-color 200ms ease,
       background-color 200ms ease,
       box-shadow 200ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary:active > i {
+    scale: 0.9;
+    transition: scale 90ms ease-out;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary > i::before,
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary > i::after {
+    transition: rotate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-report summary:hover > i {
+    scale: 1.09;
+    border-color: rgb(255 232 168 / 76%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 48%),
+      0 0 16px rgb(255 215 122 / 30%);
   }
 }
 
@@ -1238,7 +1337,6 @@
   background: var(--ffs-text-2);
   content: "";
   translate: -50% -50%;
-  transition: rotate 220ms ease;
 }
 
 .ffs-page .ffs-report summary > i::after {
@@ -1623,33 +1721,48 @@
   min-width: 0;
   padding: 18px;
   border: 1px solid rgb(138 232 255 / 28%);
-  border-radius: 16px;
+  border-radius: 20px;
   background:
-    radial-gradient(ellipse 84% 58% at 50% 0%, rgb(127 230 255 / 16%), transparent 62%),
-    radial-gradient(ellipse 68% 52% at 100% 100%, rgb(168 120 255 / 12%), transparent 64%),
-    linear-gradient(172deg, rgb(14 28 58 / 88%), rgb(5 11 26 / 94%));
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 250 238 / 18%), transparent 68%),
+    radial-gradient(ellipse 84% 58% at 50% 0%, rgb(127 230 255 / 15%), transparent 62%),
+    radial-gradient(ellipse 68% 52% at 100% 100%, rgb(214 54 96 / 14%), transparent 64%),
+    linear-gradient(172deg, rgb(15 26 54 / 92%), rgb(5 10 24 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(238 251 255 / 24%),
-    inset 0 0 0 1px rgb(168 120 255 / 10%),
-    0 18px 40px -14px rgb(0 4 16 / 80%);
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    inset 0 0 0 1px rgb(255 215 122 / 10%),
+    0 18px 40px -14px rgb(0 4 16 / 84%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ffs-page .ffs-p16-metric {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-p16-metric {
     transition:
-      border-color 200ms ease,
-      box-shadow 200ms ease;
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      border-color 220ms ease,
+      box-shadow 260ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-p16-metric:active {
+    scale: 0.985;
+    transition: scale 90ms ease-out;
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-p16-metric:hover {
-    border-color: rgb(142 238 255 / 58%);
+    border-color: rgb(255 224 148 / 58%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 34%),
+      inset 0 1px 0 rgb(255 254 246 / 50%),
       inset 0 0 22px rgb(127 230 255 / 12%),
-      0 22px 46px -14px rgb(0 4 16 / 86%),
-      0 0 28px -6px rgb(127 230 255 / 38%);
+      0 22px 46px -14px rgb(0 4 16 / 90%),
+      0 0 28px -6px rgb(255 215 122 / 32%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ffs-page .ffs-p16-metric:hover:not(:active) {
+    translate: 0 -3px;
+    scale: 1.012;
   }
 }
 
@@ -1975,14 +2088,14 @@
   margin: 20px 0 0;
   padding: 20px 22px;
   border: 1px solid rgb(138 232 255 / 30%);
-  border-top: 2px solid rgb(127 230 255 / 66%);
-  border-radius: 12px;
+  border-radius: 20px;
   background:
+    radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%),
     radial-gradient(ellipse 76% 52% at 10% 0%, rgb(127 230 255 / 14%), transparent 60%),
-    linear-gradient(164deg, rgb(12 24 54 / 88%), rgb(5 10 24 / 94%));
+    linear-gradient(164deg, rgb(13 24 52 / 92%), rgb(5 10 24 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 24%),
-    0 16px 38px -18px rgb(0 4 18 / 84%);
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    0 16px 38px -18px rgb(0 4 18 / 86%);
 }
 
 .ffs-page .ffs-p16-table figcaption {
@@ -2563,9 +2676,12 @@
   .ffs-page .ffs-p16-bars i,
   .ffs-page .ffs-p16-trio-track i,
   .ffs-page .ffs-views label,
+  .ffs-page .ffs-metric,
+  .ffs-page .ffs-p16-metric,
   .ffs-page .ffs-console-key li,
   .ffs-page .ffs-bench-rows ul li,
   .ffs-page .ffs-report summary,
+  .ffs-page .ffs-report summary > i,
   .ffs-page .ffs-report summary > i::before,
   .ffs-page .ffs-report summary > i::after,
   .ffs-page .ffs-report-tools button {

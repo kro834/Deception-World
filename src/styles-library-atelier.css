@@ -268,9 +268,9 @@ html[data-family="library"]
   gap: 8px;
   min-height: 48px;
   margin-left: auto;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border: 1px solid #9deafa73;
-  border-radius: 0;
+  border-radius: var(--ring-radius-pill, 999px);
   background: #0d2231;
   color: var(--records-ice, #9deafa);
   font-size: 13px;
@@ -497,7 +497,7 @@ html[data-family="library"]
   .library-card-actions
   :is(a, button) {
   min-height: 48px;
-  border-radius: 0;
+  border-radius: var(--ring-radius-pill, 999px);
   font-size: 13px;
 }
 
@@ -678,13 +678,12 @@ html[data-family="library"]
   a {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   min-height: 48px;
-  padding: 8px 15px;
-  border: 1px solid rgb(157 234 250 / 30%);
-  border-left: 2px solid var(--atelier-brass);
-  border-radius: 0;
-  background: rgb(8 19 30 / 78%);
+  padding: 8px 16px;
+  border: 1px solid rgb(157 234 250 / 38%);
+  border-radius: var(--ring-radius-pill, 999px);
+  background: rgb(8 19 30 / 84%);
   color: var(--dx-text-2);
   font-size: 14px;
 }
@@ -1251,14 +1250,17 @@ html[data-family="library"]
       .library-cast-tile[data-cast-card],
       .library-index-meter > button,
       .library-jump-links a,
+      .library-continue-actions > a,
       .library-shelf-overview a,
+      .library-text-button,
+      .library-browse-submit,
       .library-search
     ) {
     transition:
       border-color 200ms ease,
       background-color 200ms ease,
       box-shadow 220ms ease,
-      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      transform var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
   }
 
   html:not([data-world-effects="economy"])[data-family="library"]
@@ -1266,7 +1268,8 @@ html[data-family="library"]
     .library-card
     > .dxl-art
     > img {
-    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--ring-dur-spring, 380ms)
+      var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
   }
 }
 
@@ -1972,10 +1975,15 @@ html[data-family="library"] .library-screening-room #library-main .library-conti
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-continue-actions > .library-primary-link {
-  border-radius: 0;
-  background: linear-gradient(135deg, #c6f0e5 0%, var(--room-teal) 60%, #86c8b8 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 68%);
-  color: #071a19;
+  padding-inline: 20px;
+  border: 1px solid #e6fff8;
+  border-radius: var(--ring-radius-pill, 999px);
+  background: linear-gradient(135deg, #dcf8f0 0%, var(--room-teal) 54%, #e8ce9c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%),
+    0 10px 24px -10px rgb(164 221 207 / 42%);
+  color: #06181a;
+  font-weight: 750;
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-continue > .library-start-reading {
@@ -3123,15 +3131,22 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
     #library-main
     :is(
       .library-jump-links > a,
+      .library-continue-actions > a,
       .library-shelf-overview a,
+      .library-text-button,
+      .library-browse-submit,
       .library-index-meter > button,
       .library-card-actions > a
-    ) {
+    ),
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .world.command-records.library-page.library-screening-room
+    .library-footer
+    a {
     transition:
       border-color 200ms ease,
       background-color 200ms ease,
       box-shadow 220ms ease,
-      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      transform var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
   }
 
   html:not([data-world-effects="economy"])[data-family="library"]
@@ -3141,7 +3156,8 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
     > button
     > .dxl-art
     img {
-    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform var(--ring-dur-spring, 380ms)
+      var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
   }
 }
 

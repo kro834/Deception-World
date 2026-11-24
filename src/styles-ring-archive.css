@@ -37,7 +37,7 @@ html[data-family="archive"] body .side-panel-trigger:not(#ring-x#ring-x#ring-x) 
    2. /form-archive: the chrome around the archive frame.
    --------------------------------------------------------------- */
 
-/* The loading plate: the crest waits inside a ring. */
+/* The loading plate: the crest waits inside a double-halo ring. */
 html[data-family="archive"] body .form-archive-frame-status:not(#ring-x#ring-x) > i {
   display: grid;
   place-items: center;
@@ -47,12 +47,19 @@ html[data-family="archive"] body .form-archive-frame-status:not(#ring-x#ring-x) 
   border-radius: 50% !important;
   clip-path: none !important;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.26), transparent 62%) padding-box,
-    linear-gradient(#07101c, #07101c) padding-box,
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.16), transparent 38%) padding-box,
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 64%) padding-box,
+    linear-gradient(160deg, #0a1728, #050c16) padding-box,
     var(--ring-prism) border-box !important;
   border: var(--ring-w) solid transparent !important;
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.4);
-  outline-offset: 12px;
+  box-shadow:
+    0 0 0 7px rgb(var(--ring-key-rgb) / 0.24),
+    0 0 28px -2px rgb(var(--ring-key-rgb) / 0.44),
+    0 0 54px -8px rgb(var(--ring-pink-rgb) / 0.28),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.42),
+    inset 0 0 20px rgb(var(--ring-key-rgb) / 0.24) !important;
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.52);
+  outline-offset: 14px;
 }
 
 /* ---------------------------------------------------------------
@@ -141,18 +148,40 @@ html[data-family="utility"] body .lab-ring {
 }
 
 html[data-family="utility"] body .lab-ring > .ring-orbit-track {
-  border-color: rgb(var(--ring-key-rgb) / 0.36);
+  border-color: rgb(var(--ring-key-rgb) / 0.46);
+  box-shadow:
+    0 0 24px -4px rgb(var(--ring-key-rgb) / 0.28),
+    inset 0 0 24px -4px rgb(var(--ring-key-rgb) / 0.22);
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.26);
+  outline-offset: 8px;
 }
 
-/* The centre: a ring lit up to the stage in progress (--ring-p, written by
-   the lab only when the stage changes: no per-frame repaint beside the
-   engine). */
+/* The centre: a precision optical gauge lit up to the stage in progress
+   (--ring-p, written by the lab only when the stage changes: no per-frame
+   repaint beside the figure). */
 html[data-family="utility"] body .lab-ring > .lab-ring-core {
   position: absolute;
   inset: calc(var(--ring-item) + 20px);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.22), transparent 62%), #06101a;
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.16), transparent 36%),
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 58%),
+    radial-gradient(
+      circle at 50% 50%,
+      rgb(var(--ring-gold-rgb) / 0.2) 0 14%,
+      transparent 16% 36%,
+      rgb(var(--ring-key-rgb) / 0.22) 37% 39%,
+      transparent 40% 58%,
+      rgb(var(--ring-pink-rgb) / 0.16) 59% 61%,
+      transparent 62%
+    ),
+    radial-gradient(circle at 72% 76%, rgb(var(--ring-gold-rgb) / 0.18), transparent 56%),
+    #050e18;
+  box-shadow:
+    0 14px 34px -6px rgb(0 0 0 / 0.82),
+    0 0 28px -4px rgb(var(--ring-key-rgb) / 0.34),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.28),
+    inset 0 -2px 6px rgb(0 0 0 / 0.86);
   pointer-events: none;
 }
 
@@ -162,20 +191,25 @@ html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4.6px), #000 calc(100% - 4px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4.6px), #000 calc(100% - 4px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 5.4px),
+    #000 calc(100% - 4.6px)
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5.4px), #000 calc(100% - 4.6px));
 }
 
 html[data-family="utility"] body .lab-ring > .lab-ring-core::before {
-  background: var(--ring-track);
+  background: rgb(var(--ring-key-rgb) / 0.22);
 }
 
 html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
   background: conic-gradient(
     from 0deg,
     var(--ring-key) 0turn,
-    var(--ring-pink) calc(var(--ring-p, 0) * 0.6turn),
-    var(--ring-gold) calc(var(--ring-p, 0) * 1turn),
+    var(--ring-pink) calc(var(--ring-p, 0) * 0.56turn),
+    var(--ring-gold) calc(var(--ring-p, 0) * 0.94turn),
+    #ffffff calc(var(--ring-p, 0) * 1turn),
     transparent calc(var(--ring-p, 0) * 1turn)
   );
 }
@@ -191,8 +225,13 @@ html[data-family="utility"] body .lab-ring button {
   padding: 4px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.16), transparent 64%), #07101c;
-  color: rgb(223 244 255 / 0.74);
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.2), transparent 64%),
+    linear-gradient(160deg, #0b1828, #060e19);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -1.5px 0 rgb(0 0 0 / 0.78),
+    0 6px 16px -4px rgb(0 0 0 / 0.68);
+  color: rgb(226 245 255 / 0.8);
   font-size: clamp(10.5px, 0.9vw, 12.5px);
   font-weight: 700;
   line-height: 1.15;
@@ -209,7 +248,7 @@ html[data-family="utility"] body .lab-ring button::before {
   inset: 0;
   padding: var(--ring-w);
   border-radius: 50%;
-  background: rgb(var(--ring-key-rgb) / 0.3);
+  background: rgb(var(--ring-key-rgb) / 0.34);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -227,18 +266,39 @@ html[data-family="utility"] body .lab-ring button:focus-visible {
 
 /* Stages already passed are lit; the stage in progress wears the prism. */
 html[data-family="utility"] body .lab-ring button[data-state="passed"] {
-  color: #eaf8ff;
+  color: #f2fbff;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.36), transparent 68%),
+    radial-gradient(circle at 72% 78%, rgb(var(--ring-gold-rgb) / 0.18), transparent 64%),
+    #09192a;
+  box-shadow:
+    0 0 18px -3px rgb(var(--ring-key-rgb) / 0.52),
+    0 6px 16px -4px rgb(0 0 0 / 0.72),
+    inset 0 1px 0 rgb(255 255 255 / 0.38);
 }
 
 html[data-family="utility"] body .lab-ring button[data-state="passed"]::before {
-  background: rgb(var(--ring-key-rgb) / 0.85);
+  background: linear-gradient(145deg, var(--ring-key), var(--ring-gold));
 }
 
 html[data-family="utility"] body .lab-ring button[data-state="active"] {
-  scale: 1.14;
+  scale: 1.15;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.5), transparent 70%), #0b1c2e;
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 40%),
+    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.6), transparent 72%),
+    radial-gradient(circle at 70% 78%, rgb(var(--ring-pink-rgb) / 0.28), transparent 66%),
+    #0d2238;
   color: #ffffff;
+  text-shadow:
+    0 1px 4px rgb(0 0 0 / 0.85),
+    0 0 14px rgb(var(--ring-key-rgb) / 0.75);
+  box-shadow:
+    0 0 24px -2px rgb(var(--ring-key-rgb) / 0.74),
+    0 0 42px -6px rgb(var(--ring-pink-rgb) / 0.44),
+    0 10px 22px -4px rgb(0 0 0 / 0.82),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.62);
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.58);
+  outline-offset: 4px;
 }
 
 html[data-family="utility"] body .lab-ring button[data-state="active"]::before {
@@ -267,7 +327,7 @@ html[data-family="utility"] body .lab-ring button[data-state="active"]::before {
 }
 
 /* ---------------------------------------------------------------
-   5. /download: the sigil is a ring inside a halo.
+   5. /download: the sigil is a ring inside a double halo.
    --------------------------------------------------------------- */
 
 html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) {
@@ -279,13 +339,19 @@ html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) {
   border-radius: 50% !important;
   clip-path: none !important;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.3), transparent 62%) padding-box,
-    linear-gradient(#07101c, #07101c) padding-box,
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.18), transparent 38%) padding-box,
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.36), transparent 64%) padding-box,
+    linear-gradient(160deg, #0b182a, #050c17) padding-box,
     var(--ring-prism) border-box !important;
-  box-shadow: none !important;
-  /* The halo: two outer rings that take no layout. */
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.45);
-  outline-offset: 12px;
+  /* The halo: two concentric outer rings + jewel aura that take no layout. */
+  box-shadow:
+    0 0 0 7px rgb(var(--ring-key-rgb) / 0.28),
+    0 0 32px -2px rgb(var(--ring-key-rgb) / 0.48),
+    0 0 58px -8px rgb(var(--ring-gold-rgb) / 0.34),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.46),
+    inset 0 0 24px rgb(var(--ring-key-rgb) / 0.26) !important;
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.56);
+  outline-offset: 14px;
   transform: none !important;
 }
 
@@ -318,19 +384,95 @@ html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) > i {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* The lab's stage in progress settles on the elastic spring. */
+  /* The archive loading ring springs into view with a double halo. */
+  html[data-family="archive"]:not([data-world-effects="economy"])
+    body
+    .form-archive-frame-status
+    > i {
+    animation: ring-archive-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
+  /* The lab's central reactor dial and stage nodes settle on elastic springs. */
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    .lab-ring
+    > .lab-ring-core {
+    animation: ring-archive-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+
   html[data-family="utility"]:not([data-world-effects="economy"]) body .lab-ring button {
-    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      box-shadow var(--ring-dur-soft) var(--ring-spring-soft),
+      background-color var(--ring-dur-soft) var(--ring-spring-soft);
+  }
+
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    .lab-ring
+    button:active:not(:disabled) {
+    scale: 0.92;
+  }
+
+  /* Utility pills, round map controls and download actions respond on springs. */
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .wm-back,
+      .wm-lab-link,
+      .wm-search-clear,
+      .wm-filters > button,
+      .wm-view-controls > button,
+      .wm-source,
+      .wm-detail li > a,
+      .wm-index-grid > button,
+      .wm-footer a,
+      .export-page-btn,
+      .export-page-alt,
+      .export-page-navigation > a
+    ) {
+    transition:
+      scale var(--ring-dur-spring) var(--ring-spring),
+      translate var(--ring-dur-spring) var(--ring-spring),
+      border-color var(--ring-dur-soft) var(--ring-spring-soft),
+      background-color var(--ring-dur-soft) var(--ring-spring-soft),
+      color var(--ring-dur-soft) var(--ring-spring-soft),
+      box-shadow var(--ring-dur-soft) var(--ring-spring-soft);
+  }
+
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .wm-back,
+      .wm-lab-link,
+      .wm-search-clear,
+      .wm-filters > button,
+      .wm-view-controls > button,
+      .wm-source,
+      .wm-detail li > a,
+      .wm-index-grid > button,
+      .wm-footer a,
+      .export-page-btn,
+      .export-page-alt,
+      .export-page-navigation > a
+    ):active:not(:disabled) {
+    scale: 0.96;
+    translate: 0 1px;
   }
 
   /* The map's detail panel unfolds for each newly chosen node. */
-  html[data-family="utility"]:not([data-world-effects="economy"]) body .wm-detail-head {
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    :is(.wm-detail-head, .wm-detail-actions) {
     animation: ring-archive-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
   }
 
-  /* The download card's parts arrive in a cascade around the sigil. */
+  /* The download card's sigil arrives and responds on a bounce spring. */
   html[data-family="utility"]:not([data-world-effects="economy"]) body .export-page-sigil {
     animation: ring-archive-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 }
 
@@ -339,6 +481,35 @@ html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) > i {
     body
     .lab-ring
     button:not([data-state="active"]):hover {
-    scale: 1.08;
+    scale: 1.09;
+    box-shadow:
+      0 0 22px -3px rgb(var(--ring-key-rgb) / 0.58),
+      0 8px 18px -4px rgb(0 0 0 / 0.76),
+      inset 0 1px 0 rgb(255 255 255 / 0.42);
+  }
+
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    .export-page-sigil:hover {
+    scale: 1.06;
+    rotate: 8deg;
+  }
+
+  html[data-family="utility"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .wm-back,
+      .wm-lab-link,
+      .wm-filters > button:not([aria-pressed="true"]),
+      .wm-view-controls > button:not(:disabled),
+      .wm-source,
+      .wm-detail li > a,
+      .wm-footer a,
+      .export-page-btn,
+      .export-page-alt,
+      .export-page-navigation > a
+    ):hover {
+    translate: 0 -1.5px;
+    scale: 1.025;
   }
 }

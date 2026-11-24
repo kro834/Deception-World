@@ -153,8 +153,9 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
     linear-gradient(var(--fst-gold) 0 0) 100% 100% / 12px 2px no-repeat,
     color-mix(in srgb, var(--fsc-door) 12%, var(--fst-ink));
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 24%),
-    0 12px 28px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 250 236 / 30%),
+    0 14px 30px rgb(0 0 0 / 54%),
+    0 0 22px -8px color-mix(in srgb, var(--fsc-door) 38%, transparent);
 }
 
 .fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return) {
@@ -187,7 +188,8 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
   place-items: center;
   width: 28px;
   height: 28px;
-  border: 1px solid color-mix(in srgb, var(--fst-gold) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fst-gold) 68%, transparent);
+  border-radius: 50%;
   color: var(--fsc-door);
   font-style: normal;
   line-height: 1;
@@ -197,7 +199,11 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
   .fst-page.fst-page .fst-cast-copy > a:hover,
   .fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return):hover {
     border-color: var(--fsc-door);
-    background-color: color-mix(in srgb, var(--fsc-door) 14%, var(--fst-ink));
+    background-color: color-mix(in srgb, var(--fsc-door) 18%, var(--fst-ink));
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 42%),
+      0 16px 34px rgb(0 0 0 / 58%),
+      0 0 28px -4px color-mix(in srgb, var(--fsc-door) 54%, transparent);
   }
 
   /* The cell answers instead of the arrow leaning out of it. */
@@ -205,6 +211,7 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
     border-color: var(--fst-gold);
     color: var(--fst-ink);
     background: var(--fst-gold);
+    box-shadow: 0 0 14px rgb(255 217 163 / 64%);
     translate: none;
   }
 }

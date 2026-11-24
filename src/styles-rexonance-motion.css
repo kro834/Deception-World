@@ -45,16 +45,16 @@
   );
 }
 .rxs-page[data-motion-ready="true"] .rxs-stage-panel figure > .rxs-stage-scan {
-  animation: rxsScanPass 750ms ease-out both;
+  animation: rxsScanPass 750ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .rxs-page[data-motion-ready="true"] .rxs-stage-panel figure > span {
   border-color: var(--rxs-stage-accent);
-  animation: rxsConvergence 850ms ease-out both;
+  animation: rxsConvergence 850ms var(--ring-spring, cubic-bezier(0.22, 1.28, 0.36, 1)) both;
 }
 .rxs-page[data-motion-ready="true"] .rxs-stage-panel > div > *,
 .rxs-page[data-motion-ready="true"] .rxs-comparison.is-visible .rxs-comparison-metrics > *,
 .rxs-page[data-motion-ready="true"] .rxs-p14-comparator.is-visible .rxs-p14-metrics > * {
-  animation: rxsSignalResolve 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rxsSignalResolve 480ms var(--ring-spring, cubic-bezier(0.22, 1.28, 0.36, 1)) both;
 }
 .rxs-page[data-motion-ready="true"] .rxs-stage-panel > div > :nth-child(2),
 .rxs-page[data-motion-ready="true"] .rxs-comparison-metrics > :nth-child(2),
@@ -67,7 +67,7 @@
   animation-delay: 100ms;
 }
 .rxs-page[data-motion-ready="true"] .rxs-p14-overview.is-visible figure {
-  animation: rxsCoreMaterialize 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rxsCoreMaterialize 900ms var(--ring-spring, cubic-bezier(0.22, 1.28, 0.36, 1)) both;
 }
 .rxs-page[data-motion-paused="true"] *,
 .rxs-page[data-motion-paused="true"] *::before,
@@ -86,10 +86,14 @@
 @keyframes rxsConvergence {
   0% {
     opacity: 0;
-    transform: scale(1.35) rotate(-24deg);
+    transform: scale(1.38) rotate(-24deg);
   }
   30% {
-    opacity: 0.5;
+    opacity: 0.56;
+  }
+  72% {
+    opacity: 0.18;
+    transform: scale(0.79) rotate(21deg);
   }
   100% {
     opacity: 0;
@@ -97,13 +101,17 @@
   }
 }
 @keyframes rxsSignalResolve {
-  from {
+  0% {
     opacity: 0.15;
-    transform: translate3d(0, 14px, 0);
+    transform: translate3d(0, 16px, 0) scale(0.985);
   }
-  to {
+  68% {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, -2.5px, 0) scale(1.006);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 @keyframes rxsScanPass {
@@ -112,7 +120,7 @@
     transform: translateY(-55%);
   }
   30% {
-    opacity: 0.25;
+    opacity: 0.32;
   }
   100% {
     opacity: 0;
@@ -120,11 +128,15 @@
   }
 }
 @keyframes rxsCoreMaterialize {
-  from {
+  0% {
     opacity: 0.45;
-    transform: perspective(900px) rotateX(7deg) scale(0.97);
+    transform: perspective(900px) rotateX(8deg) scale(0.965);
   }
-  to {
+  66% {
+    opacity: 1;
+    transform: perspective(900px) rotateX(-1.4deg) scale(1.012);
+  }
+  100% {
     opacity: 1;
     transform: perspective(900px) rotateX(0) scale(1);
   }
@@ -149,7 +161,7 @@
     html:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison::details-content {
       block-size: 0;
       overflow: clip;
-      transition: block-size 280ms cubic-bezier(0.16, 1, 0.3, 1);
+      transition: block-size 420ms var(--ring-spring, cubic-bezier(0.22, 1.28, 0.36, 1));
     }
 
     html:not([data-world-effects="economy"]) body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison[open]::details-content {

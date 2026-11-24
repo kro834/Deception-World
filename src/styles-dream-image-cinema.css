@@ -93,18 +93,17 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
 
   & .dream-back-link {
     min-height: 44px;
-    padding: 4px 12px 4px 8px;
+    padding: 4px 14px 4px 10px;
     gap: 8px;
-    border: 1px solid rgb(220 184 118 / 42%);
-    border-radius: 2px;
-    color: #f3e6cc;
+    border: 1px solid rgb(228 192 122 / 48%);
+    border-radius: 999px;
+    color: #f6ead2;
     background:
-      linear-gradient(#f2d698 0 0) 0 0 / 10px 1.5px no-repeat,
-      linear-gradient(#f2d698 0 0) 0 0 / 1.5px 10px no-repeat,
-      linear-gradient(180deg, #271732 0%, #150c1d 100%);
+      radial-gradient(86% 74% at 50% 0%, rgb(255 244 214 / 18%), transparent 70%),
+      linear-gradient(180deg, #291835 0%, #150c1e 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 242 206 / 18%),
-      0 4px 12px rgb(0 0 0 / 38%);
+      inset 0 1px 0 rgb(255 244 212 / 24%),
+      0 6px 16px rgb(0 0 0 / 42%);
     font-size: 12px;
     letter-spacing: 0.06em;
   }
@@ -450,20 +449,16 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     gap: 6px;
     width: 100%;
     min-height: 50px;
-    padding: 10px clamp(10px, 1.4vw, 18px);
+    padding: 10px clamp(14px, 1.6vw, 22px);
     border: 1px solid rgb(232 196 126 / 64%);
-    border-radius: 2px;
+    border-radius: 999px;
     color: #fbf2df;
     background:
-      linear-gradient(135deg, #f8e0a4, #b68c46) 0 0 / 14px 2px no-repeat,
-      linear-gradient(135deg, #f8e0a4, #b68c46) 0 0 / 2px 14px no-repeat,
-      linear-gradient(315deg, #eed296, #9c7234) 100% 100% / 14px 2px no-repeat,
-      linear-gradient(315deg, #eed296, #9c7234) 100% 100% / 2px 14px no-repeat,
-      radial-gradient(82% 94% at 16% 0%, rgb(248 214 146 / 18%), transparent 70%),
-      linear-gradient(180deg, #271834 0%, #150c1f 100%);
+      radial-gradient(84% 72% at 50% 0%, rgb(255 244 214 / 20%), transparent 70%),
+      radial-gradient(68% 82% at 18% 100%, rgb(206 72 58 / 14%), transparent 72%),
+      linear-gradient(180deg, #291937 0%, #150c1f 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 244 212 / 26%),
-      inset 0 0 0 3px rgb(12 8 18 / 48%),
+      inset 0 1px 0 rgb(255 246 218 / 30%),
       0 12px 26px rgb(0 0 0 / 54%);
     font:
       700 clamp(12px, 1.25vw, 15px) / 1.5 "Noto Sans JP",
@@ -474,25 +469,23 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
   }
 
   & .dream-hero-actions a > span:last-child {
+    display: inline-block;
     color: var(--dc-gold-bright);
   }
 
   /* Vermilion lacquer × gilt rim primary CTA */
   & .dream-hero-actions .dream-cinema-primary {
-    border-color: #f4d38c;
+    border-color: #f6d894;
     color: #fff8ea;
     background:
-      linear-gradient(135deg, #fff2c6, #d4a65a) 0 0 / 16px 2px no-repeat,
-      linear-gradient(135deg, #fff2c6, #d4a65a) 0 0 / 2px 16px no-repeat,
-      linear-gradient(315deg, #f6da9c, #b68640) 100% 100% / 16px 2px no-repeat,
-      linear-gradient(315deg, #f6da9c, #b68640) 100% 100% / 2px 16px no-repeat,
-      radial-gradient(88% 96% at 24% 0%, rgb(255 204 118 / 34%), transparent 68%),
-      linear-gradient(135deg, #91292f 0%, #681c24 54%, #45121a 100%);
+      radial-gradient(84% 72% at 50% 0%, rgb(255 236 184 / 36%), transparent 68%),
+      radial-gradient(76% 84% at 18% 100%, rgb(255 126 88 / 22%), transparent 72%),
+      linear-gradient(135deg, #982b31 0%, #6c1c25 54%, #46121b 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 244 210 / 42%),
-      inset 0 0 22px rgb(242 110 78 / 24%),
+      inset 0 1px 0 rgb(255 248 222 / 48%),
+      inset 0 0 22px rgb(246 116 82 / 24%),
       0 14px 34px rgb(0 0 0 / 60%),
-      0 0 24px rgb(214 76 58 / 22%);
+      0 0 26px rgb(217 82 62 / 26%);
     text-shadow: 0 1px 6px rgb(0 0 0 / 54%);
   }
 
@@ -539,35 +532,31 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     translate: none;
   }
 
-  /* DreamStageLantern (夢灯り) — glowing amber gas-mantle toggle */
+  /* DreamStageLantern (夢灯り) — glowing amber gas-mantle capsule toggle */
   & .dream-hero-footer .dream-stage-lantern {
     position: static;
     inset: auto;
     min-height: 48px;
     margin: 0;
-    border: 1px solid rgb(240 206 138 / 76%);
+    border: 1px solid rgb(242 208 140 / 78%);
+    border-radius: 16px;
     background:
-      linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
-      linear-gradient(#fff0c2 0 0) 0 0 / 2px 14px no-repeat,
-      linear-gradient(#e8c688 0 0) 100% 100% / 14px 1.5px no-repeat,
-      linear-gradient(#e8c688 0 0) 100% 100% / 1.5px 14px no-repeat,
-      radial-gradient(ellipse 68% 92% at 24% 50%, rgb(255 204 108 / 30%), transparent 72%),
-      linear-gradient(145deg, #2d1934, #170d1e);
+      radial-gradient(86% 68% at 50% 0%, rgb(255 244 212 / 22%), transparent 70%),
+      radial-gradient(ellipse 68% 92% at 24% 50%, rgb(255 204 108 / 34%), transparent 72%),
+      linear-gradient(145deg, #2f1a37, #170d1f);
     box-shadow:
-      inset 0 1px 0 rgb(255 246 214 / 32%),
-      inset 0 0 0 3px rgb(12 8 18 / 54%),
-      0 0 24px rgb(255 198 104 / 28%),
+      inset 0 1px 0 rgb(255 248 220 / 36%),
+      0 0 26px rgb(255 198 104 / 30%),
       0 12px 26px rgb(0 0 0 / 54%);
   }
 
   & .dream-hero-footer .dream-stage-lantern[aria-pressed="false"] {
-    border-color: rgb(186 154 104 / 44%);
+    border-color: rgb(186 154 104 / 46%);
     background:
-      linear-gradient(#b2915b 0 0) 0 0 / 12px 1.5px no-repeat,
-      linear-gradient(#b2915b 0 0) 0 0 / 1.5px 12px no-repeat,
-      linear-gradient(145deg, #1a1120, #100a15);
+      radial-gradient(84% 66% at 50% 0%, rgb(255 242 206 / 10%), transparent 70%),
+      linear-gradient(145deg, #1b1122, #100a15);
     box-shadow:
-      inset 0 1px 0 rgb(255 240 206 / 10%),
+      inset 0 1px 0 rgb(255 240 206 / 12%),
       0 8px 18px rgb(0 0 0 / 48%);
   }
 
@@ -694,20 +683,26 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     max-width: none;
     margin: 0;
     padding: 0;
-    border: 1px solid rgb(224 188 120 / 54%);
-    border-radius: 2px;
+    border: 1px solid rgb(228 192 122 / 56%);
+    border-radius: 14px;
     color: var(--dc-ink);
     background:
-      linear-gradient(135deg, #f5dca0, #a88040) 0 0 / 18px 2px no-repeat,
-      linear-gradient(135deg, #f5dca0, #a88040) 0 0 / 2px 18px no-repeat,
-      linear-gradient(315deg, #edd090, #9a7234) 100% 100% / 18px 2px no-repeat,
-      linear-gradient(315deg, #edd090, #9a7234) 100% 100% / 2px 18px no-repeat,
-      radial-gradient(66% 86% at 18% 0%, rgb(246 206 136 / 14%), transparent 72%),
-      linear-gradient(180deg, #1d1228 0%, #120b1a 100%);
+      linear-gradient(
+          90deg,
+          transparent 6%,
+          rgb(246 218 156 / 52%) 26%,
+          rgb(255 244 210 / 80%) 50%,
+          rgb(246 218 156 / 52%) 74%,
+          transparent 94%
+        )
+        top / 100% 1.5px no-repeat,
+      radial-gradient(66% 86% at 18% 0%, rgb(246 206 136 / 16%), transparent 72%),
+      radial-gradient(52% 72% at 88% 100%, rgb(206 72 56 / 12%), transparent 72%),
+      linear-gradient(180deg, #1f132b 0%, #110b19 100%);
     outline: 0;
     box-shadow:
-      inset 0 1px 0 rgb(255 242 206 / 20%),
-      0 16px 36px rgb(0 0 0 / 50%);
+      inset 0 1px 0 rgb(255 244 208 / 24%),
+      0 16px 36px rgb(0 0 0 / 52%);
   }
 
   & .dream-opening-tools :is(.dream-contents, .dream-cinema-console) > summary {
@@ -1055,23 +1050,25 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
 
   & .dream-poster-controls button,
   & .dream-poster-hud-step button {
-    border: 1px solid rgb(228 192 122 / 58%);
+    border: 1px solid rgb(232 196 126 / 60%);
     color: #fbf1de;
     background:
-      linear-gradient(#f5dca0 0 0) 0 0 / 12px 1.5px no-repeat,
-      linear-gradient(#f5dca0 0 0) 100% 100% / 12px 1.5px no-repeat,
-      linear-gradient(180deg, #2c1a36 0%, #180e21 100%);
+      radial-gradient(86% 72% at 50% 0%, rgb(255 244 214 / 18%), transparent 70%),
+      linear-gradient(180deg, #2e1b38 0%, #180e22 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 242 206 / 24%),
+      inset 0 1px 0 rgb(255 244 212 / 26%),
       0 8px 20px rgb(0 0 0 / 48%);
   }
 
   & .dream-poster-controls button[aria-pressed="true"] {
-    border-color: #f4d38c;
+    border-color: #f6d894;
     background:
-      linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
-      linear-gradient(#fff0c2 0 0) 100% 100% / 14px 2px no-repeat,
-      linear-gradient(135deg, #86262c 0%, #561820 100%);
+      radial-gradient(88% 74% at 50% 0%, rgb(255 234 182 / 30%), transparent 70%),
+      linear-gradient(135deg, #8e282f 0%, #581821 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 218 / 38%),
+      0 0 18px rgb(217 82 62 / 28%),
+      0 8px 20px rgb(0 0 0 / 52%);
   }
 
   /* 6. Act II & III: Cast & Dolminence portrait plates — gilt lacquer double framing
@@ -1309,17 +1306,16 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     gap: 12px;
     min-height: 40px;
     margin-top: auto;
-    padding: 6px 14px;
-    border: 1px solid rgb(232 196 126 / 58%);
-    border-radius: 2px;
+    padding: 6px 18px;
+    border: 1px solid rgb(236 200 130 / 62%);
+    border-radius: 999px;
     color: #fbe8be;
     background:
-      linear-gradient(#f5dca0 0 0) 0 0 / 10px 1.5px no-repeat,
-      linear-gradient(#f5dca0 0 0) 100% 100% / 10px 1.5px no-repeat,
-      linear-gradient(180deg, #321d3d 0%, #1c1026 100%);
+      radial-gradient(88% 72% at 50% 0%, rgb(255 244 214 / 20%), transparent 70%),
+      linear-gradient(180deg, #351f42 0%, #1c1026 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 242 206 / 22%),
-      0 6px 16px rgb(0 0 0 / 42%);
+      inset 0 1px 0 rgb(255 246 218 / 28%),
+      0 6px 16px rgb(0 0 0 / 44%);
     font-size: 13px;
     font-weight: 700;
     line-height: 1.5;
@@ -1327,6 +1323,7 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
   }
 
   & .dream-cinema-record-link i {
+    display: inline-block;
     font-style: normal;
     color: var(--dc-gold-bright);
   }
@@ -1415,16 +1412,18 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     text-shadow: 0 2px 16px rgb(246 200 118 / 24%);
   }
 
-  /* Kinari washi × gilt rim button inside the dark lacquer reading-room door */
+  /* Kinari washi × gilt rim pill button inside the dark lacquer reading-room door */
   & .dream-reading-doors .dream-reading-entry#dream-reading-room-entry button {
-    border: 1px solid #f5dca2;
-    padding-inline: 18px;
+    border: 1px solid #f6dfa4;
+    border-radius: 999px;
+    padding-inline: 22px;
     color: #241628;
     background:
-      linear-gradient(#8f262c 0 0) 0 0 / 16px 2.5px no-repeat,
+      radial-gradient(88% 70% at 50% 0%, rgb(255 255 250 / 72%), transparent 68%),
       linear-gradient(180deg, #fcf3de 0%, #e7cfa0 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 254 248 / 86%),
+      inset 0 1px 0 rgb(255 254 248 / 90%),
+      0 0 0 1px rgb(143 38 44 / 24%),
       0 10px 26px rgb(0 0 0 / 44%);
     font-size: 14px;
     font-weight: 700;
@@ -1438,7 +1437,7 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
   }
 
   & .dream-reading-crosslinks a {
-    border-left: 3px solid #e4be76;
+    border-color: rgb(232 196 126 / 58%);
   }
 
   & .dream-reading-crosslinks a::after {
@@ -1820,24 +1819,22 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     & :is(.dream-back-link, .dream-hero-actions a, .dream-reading-crosslinks a):hover {
       border-color: #fff0c2;
       box-shadow:
-        inset 0 1px 0 rgb(255 248 224 / 40%),
+        inset 0 1px 0 rgb(255 248 224 / 44%),
+        0 0 20px rgb(230 200 138 / 22%),
         0 14px 32px rgb(0 0 0 / 64%);
     }
 
     & .dream-hero-actions .dream-cinema-primary:hover {
       border-color: #fff4ce;
       background:
-        linear-gradient(135deg, #fff6d4, #e2b666) 0 0 / 18px 2px no-repeat,
-        linear-gradient(135deg, #fff6d4, #e2b666) 0 0 / 2px 18px no-repeat,
-        linear-gradient(315deg, #fce2a4, #c69648) 100% 100% / 18px 2px no-repeat,
-        linear-gradient(315deg, #fce2a4, #c69648) 100% 100% / 2px 18px no-repeat,
-        radial-gradient(88% 96% at 24% 0%, rgb(255 214 134 / 42%), transparent 68%),
-        linear-gradient(135deg, #a83035 0%, #7a212a 54%, #52151f 100%);
+        radial-gradient(86% 74% at 50% 0%, rgb(255 244 206 / 44%), transparent 68%),
+        radial-gradient(76% 84% at 18% 100%, rgb(255 138 98 / 28%), transparent 72%),
+        linear-gradient(135deg, #ae3137 0%, #7d212b 54%, #52151f 100%);
       box-shadow:
-        inset 0 1px 0 rgb(255 248 220 / 50%),
+        inset 0 1px 0 rgb(255 250 226 / 54%),
         inset 0 0 26px rgb(252 126 90 / 28%),
         0 16px 38px rgb(0 0 0 / 66%),
-        0 0 30px rgb(224 84 62 / 32%);
+        0 0 32px rgb(224 84 62 / 36%);
     }
 
     &
@@ -1846,18 +1843,19 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
       button:not(:disabled):hover {
       border-color: #fff7dd;
       background:
-        linear-gradient(#a62c32 0 0) 0 0 / 20px 2.5px no-repeat,
+        radial-gradient(88% 70% at 50% 0%, rgb(255 255 252 / 86%), transparent 68%),
         linear-gradient(180deg, #fff9ea 0%, #f0daac 100%);
       box-shadow:
         inset 0 1px 0 #fff,
+        0 0 22px rgb(246 212 146 / 32%),
         0 14px 32px rgb(0 0 0 / 54%);
     }
 
     & .dream-hero-footer .dream-stage-lantern:hover {
       border-color: #fff0c2;
       box-shadow:
-        inset 0 1px 0 rgb(255 248 220 / 40%),
-        0 0 28px rgb(255 204 114 / 36%),
+        inset 0 1px 0 rgb(255 248 220 / 44%),
+        0 0 30px rgb(255 204 114 / 38%),
         0 14px 30px rgb(0 0 0 / 60%);
     }
 
@@ -1874,9 +1872,12 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
       border-color: #fff0c4;
       color: #fff8ea;
       background:
-        linear-gradient(#fff0c2 0 0) 0 0 / 12px 1.5px no-repeat,
-        linear-gradient(#fff0c2 0 0) 100% 100% / 12px 1.5px no-repeat,
-        linear-gradient(180deg, #4a2648 0%, #2a1530 100%);
+        radial-gradient(88% 74% at 50% 0%, rgb(255 236 184 / 32%), transparent 68%),
+        linear-gradient(135deg, #8c2930 0%, #581924 58%, #34111e 100%);
+      box-shadow:
+        inset 0 1px 0 rgb(255 248 224 / 42%),
+        0 0 20px rgb(217 85 63 / 28%),
+        0 10px 22px rgb(0 0 0 / 52%);
     }
 
     & .dream-opening-tools .dream-contents li > a:hover {
@@ -1888,9 +1889,12 @@ html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
     & .dream-poster-hud-step button:hover {
       border-color: #fff0c2;
       background:
-        linear-gradient(#fff0c2 0 0) 0 0 / 14px 1.5px no-repeat,
-        linear-gradient(#fff0c2 0 0) 100% 100% / 14px 1.5px no-repeat,
-        linear-gradient(180deg, #3c2448 0%, #22142d 100%);
+        radial-gradient(88% 74% at 50% 0%, rgb(255 242 204 / 26%), transparent 70%),
+        linear-gradient(180deg, #40264d 0%, #23142f 100%);
+      box-shadow:
+        inset 0 1px 0 rgb(255 248 224 / 36%),
+        0 0 18px rgb(230 200 138 / 24%),
+        0 10px 22px rgb(0 0 0 / 52%);
     }
   }
 
@@ -1978,6 +1982,43 @@ html[data-family="dream"][data-motion-enabled="false"]
   transition: none;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-reading-doors
+    .dream-reading-entry#dream-reading-room-entry
+    button {
+    transition:
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      border-color 220ms ease,
+      box-shadow 260ms ease;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-reading-doors
+    .dream-reading-entry#dream-reading-room-entry
+    button:not(:disabled):active {
+    scale: 0.95;
+    translate: 0 1px;
+    transition:
+      scale 90ms ease-out,
+      translate 90ms ease-out;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-reading-doors
+    .dream-reading-entry#dream-reading-room-entry
+    button:not(:disabled):hover {
+    translate: 0 -2px;
+    scale: 1.03;
+  }
+}
+
 /* 上映終了: the Dream Chapter's end-of-run notice, a vermilion ticket stamp
    beside one plain line. It sits in the flow between the hero and the
    prologue, so it covers neither the menu nor the auto-movie pill. */
@@ -1990,12 +2031,25 @@ main#top.dream-page .dream-screening-ended {
   width: var(--dc-narrow, min(1120px, calc(100% - 32px)));
   max-width: calc(100% - 32px);
   margin: clamp(22px, 4vw, 44px) auto 0;
-  padding: 12px 18px 14px;
-  border: 1px solid rgb(222 186 120 / 38%);
-  border-radius: 2px;
+  padding: 14px 20px 16px;
+  border: 1px solid rgb(228 192 122 / 48%);
+  border-radius: 12px;
   color: var(--dc-ink, #f6eedc);
-  background: linear-gradient(180deg, rgb(36 22 48 / 82%), rgb(19 12 28 / 90%));
-  box-shadow: inset 0 1px 0 rgb(255 240 200 / 12%);
+  background:
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(246 218 156 / 46%) 26%,
+        rgb(255 244 210 / 72%) 50%,
+        rgb(246 218 156 / 46%) 74%,
+        transparent 94%
+      )
+      top / 100% 1px no-repeat,
+    radial-gradient(56% 90% at 14% 50%, rgb(217 85 63 / 14%), transparent 72%),
+    linear-gradient(180deg, #21142c 0%, #130c1c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 208 / 20%),
+    0 14px 32px rgb(0 0 0 / 48%);
 }
 
 main#top.dream-page .dream-screening-ended-kicker {

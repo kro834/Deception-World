@@ -22,8 +22,49 @@
    ================================================================ */
 
 /* ---------------------------------------------------------------
-   1. Shared material: round corners, pills, ring cards.
+   1. Shared material: round sigils, round corners, pills, ring cards.
    --------------------------------------------------------------- */
+
+/* Topbar DW sigil on /library and /search: unified circular prism ring
+   matching /world and dossiers (replaces the older chamfered square plate). */
+html[data-family="library"]:not([data-button-style="liquid"])
+  body
+  .library-page
+  > header.library-topbar
+  > a:not(#ring-x#ring-x)::before,
+html[data-family="library"]:not([data-button-style="liquid"])
+  body
+  .search-page
+  > header.search-topbar
+  > a.search-brand:not(#ring-x#ring-x)::before {
+  border: 2px solid transparent !important;
+  border-radius: 50% !important;
+  clip-path: none !important;
+  background:
+    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.28), transparent 44%) padding-box,
+    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.36), transparent 62%)
+      padding-box,
+    radial-gradient(circle at 74% 82%, rgb(var(--ring-pink-rgb) / 0.24), transparent 58%)
+      padding-box,
+    linear-gradient(160deg, #0a1626, #060d18) padding-box,
+    var(--ring-prism) border-box !important;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.36),
+    0 0 22px -6px rgb(var(--ring-key-rgb) / 0.86) !important;
+  color: #f4fcff !important;
+}
+
+/* Topbar room pill ("資料室") beside the round Ciel trigger. */
+html[data-family="library"] body .library-topbar-actions > span:not(#ring-x#ring-x) {
+  padding-inline: 14px !important;
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.52) !important;
+  background:
+    radial-gradient(120% 140% at 24% 0%, rgb(255 255 255 / 0.14), transparent 54%),
+    linear-gradient(165deg, rgb(24 36 44 / 0.92), rgb(9 16 24 / 0.96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 0.28),
+    0 8px 20px -10px rgb(0 0 0 / 0.72) !important;
+}
 
 /* Panels and cards: the 28px ring card. The older cut corners go. */
 html[data-family="library"] body
@@ -53,6 +94,17 @@ html[data-family="library"] body
   border-radius: 22px !important;
 }
 
+/* Nested sub-surfaces inside My Library also take soft rounded corners. */
+html[data-family="library"] body
+  :is(
+    .library-continue > .library-start-reading,
+    .library-clear-confirmation,
+    .library-rows > li
+  ):not(#ring-x#ring-x) {
+  border-radius: 16px !important;
+  clip-path: none !important;
+}
+
 /* The ring's material: a dark lens under a prism stroke. The stroke is the
    border box's own gradient, so it follows the round corner and needs no
    pseudo-element; the older corner brackets (background layers) go with the
@@ -69,27 +121,69 @@ html[data-family="library"] body
   ):not(#ring-x#ring-x) {
   border: var(--ring-w) solid transparent !important;
   background:
-    radial-gradient(120% 130% at 0% 0%, rgb(164 221 207 / 0.17), transparent 56%) padding-box,
-    radial-gradient(90% 110% at 100% 100%, rgb(var(--ring-gold-rgb) / 0.08), transparent 60%)
+    radial-gradient(90% 42% at 50% 0%, rgb(255 255 255 / 0.08), transparent 68%) padding-box,
+    radial-gradient(120% 130% at 0% 0%, rgb(164 221 207 / 0.19), transparent 56%) padding-box,
+    radial-gradient(90% 110% at 100% 100%, rgb(var(--ring-gold-rgb) / 0.1), transparent 60%)
       padding-box,
-    linear-gradient(160deg, #101c22, #070c15) padding-box,
+    linear-gradient(160deg, #111e26, #070c15) padding-box,
     var(--ring-prism) border-box !important;
-  box-shadow: 0 22px 48px rgb(0 0 0 / 0.36) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 24px 52px -12px rgb(0 0 0 / 0.54) !important;
 }
 
 html[data-family="library"] body
   :is(.library-shelf, .library-history, .library-searches):not(#ring-x#ring-x) {
-  border-width: 1px !important;
+  border-width: 1.5px !important;
 }
 
 html[data-family="library"] body .search-workbench:not(#ring-x#ring-x) {
   background:
-    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.16), transparent 56%)
+    radial-gradient(90% 42% at 50% 0%, rgb(255 255 255 / 0.09), transparent 68%) padding-box,
+    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 56%)
       padding-box,
-    radial-gradient(90% 110% at 100% 100%, rgb(var(--ring-pink-rgb) / 0.09), transparent 60%)
+    radial-gradient(90% 110% at 100% 100%, rgb(var(--ring-pink-rgb) / 0.11), transparent 60%)
       padding-box,
-    linear-gradient(160deg, #0d1a2a, #060b15) padding-box,
+    linear-gradient(160deg, #0e1c2e, #060b15) padding-box,
     var(--ring-prism) border-box !important;
+}
+
+/* The /search -> /library portal card and its circular arrow lens. */
+html[data-family="library"] body .search-library-door:not(#ring-x#ring-x) {
+  padding-inline: 20px 14px !important;
+  border: 1.5px solid transparent !important;
+  background:
+    radial-gradient(110% 120% at 12% 0%, rgb(255 255 255 / 0.1), transparent 52%) padding-box,
+    radial-gradient(90% 120% at 92% 50%, rgb(var(--ring-gold-rgb) / 0.16), transparent 66%)
+      padding-box,
+    linear-gradient(150deg, #112234, #07101c) padding-box,
+    linear-gradient(
+        135deg,
+        rgb(var(--ring-gold-rgb) / 0.78),
+        rgb(var(--ring-key-rgb) / 0.56) 54%,
+        rgb(var(--ring-pink-rgb) / 0.44)
+      )
+      border-box !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 0.26),
+    0 18px 38px -16px rgb(0 0 0 / 0.72) !important;
+}
+
+html[data-family="library"] body .search-library-door > span:last-child:not(#ring-x#ring-x) {
+  width: 38px !important;
+  height: 38px !important;
+  border: 1.5px solid transparent !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.24), transparent 48%) padding-box,
+    radial-gradient(circle at 34% 28%, rgb(var(--ring-gold-rgb) / 0.28), transparent 66%)
+      padding-box,
+    linear-gradient(155deg, #0d1d2e, #060e18) padding-box,
+    var(--ring-prism) border-box !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 0.34),
+    0 0 18px -4px rgb(var(--ring-gold-rgb) / 0.52) !important;
+  color: #fff3d1 !important;
 }
 
 /* Cards: the same lens, a quieter stroke (there are dozens on a page). */
@@ -97,17 +191,20 @@ html[data-family="library"] body
   :is(.library-card, .search-result-card, .inquiry-choice):not(#ring-x#ring-x) {
   border: 1.5px solid transparent !important;
   background:
-    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.1), transparent 52%)
+    radial-gradient(85% 38% at 50% 0%, rgb(255 255 255 / 0.07), transparent 66%) padding-box,
+    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.12), transparent 52%)
       padding-box,
-    linear-gradient(160deg, #0e1922, #070c15) padding-box,
+    linear-gradient(160deg, #0f1b26, #070c15) padding-box,
     linear-gradient(
         140deg,
-        rgb(var(--ring-key-rgb) / 0.6),
-        rgb(var(--ring-pink-rgb) / 0.22) 46%,
-        rgb(var(--ring-gold-rgb) / 0.55)
+        rgb(var(--ring-key-rgb) / 0.64),
+        rgb(var(--ring-pink-rgb) / 0.26) 46%,
+        rgb(var(--ring-gold-rgb) / 0.58)
       )
       border-box !important;
-  box-shadow: 0 14px 30px rgb(0 0 0 / 0.3) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 16px 34px -10px rgb(0 0 0 / 0.48) !important;
 }
 
 /* A saved or chosen card wears the full prism. */
@@ -118,10 +215,15 @@ html[data-family="library"] body
     .search-result-card[aria-selected="true"]
   ):not(#ring-x#ring-x) {
   background:
-    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 56%)
+    radial-gradient(90% 42% at 50% 0%, rgb(255 255 255 / 0.12), transparent 66%) padding-box,
+    radial-gradient(120% 130% at 0% 0%, rgb(var(--ring-key-rgb) / 0.2), transparent 56%)
       padding-box,
-    linear-gradient(160deg, #101d28, #070c15) padding-box,
+    linear-gradient(160deg, #11202d, #070c15) padding-box,
     var(--ring-prism) border-box !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 20px 42px -12px rgb(0 0 0 / 0.62),
+    0 0 26px -8px rgb(var(--ring-gold-rgb) / 0.36) !important;
 }
 
 html[data-family="library"] body
@@ -140,23 +242,41 @@ html[data-family="library"] body
   overflow: hidden;
 }
 
+html[data-family="library"] body .search-more-peek > .dxl-art:not(#ring-x#ring-x) {
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
 html[data-family="library"] body .inquiry-choice-art:not(#ring-x#ring-x) {
   border-radius: 18px !important;
   overflow: hidden;
 }
 
-/* Text controls: pills. */
+/* Text controls & chips: unified pills across /library and /search. */
 html[data-family="library"] body
   :is(
     .library-jump-links > a,
+    .library-continue-actions > a,
+    .library-primary-link,
     .library-start-reading > a,
+    .library-shelf-overview > a,
+    .library-shelf-overview > a > b,
     .library-data-controls > button,
     .library-shelf-tools > :is(a, button),
+    .library-text-button,
+    .library-search-chips a,
+    .library-rows button,
+    .library-clear-confirmation button,
     .library-browse-submit,
+    .library-query-clear,
     .library-scope-row > button,
     .library-filter-row > button,
     .library-active-filters,
+    .library-active-filters > button,
+    .library-query-summary,
     .library-card-actions > :is(a, button),
+    .library-empty button,
+    .library-fulltext-inline,
     .library-footer > a,
     .library-topbar-actions > span,
     .inquiry-choice-action,
@@ -168,6 +288,7 @@ html[data-family="library"] body
     .search-suggestions > span,
     .search-recent-term,
     .search-recent-clear,
+    .search-active-filter,
     .search-active-filter > button,
     .search-section-nav > a,
     .search-group-head,
@@ -183,12 +304,146 @@ html[data-family="library"] body
   clip-path: none !important;
 }
 
-/* The fields: one pill each. */
+/* Split recent-search capsule keeps outer pill ends and flush inner seam. */
+html[data-family="library"] body .search-recent-term > button:first-child:not(#ring-x#ring-x) {
+  border-radius: var(--ring-radius-pill) 0 0 var(--ring-radius-pill) !important;
+}
+
+html[data-family="library"] body .search-recent-term > .search-recent-remove:not(#ring-x#ring-x) {
+  border-radius: 0 var(--ring-radius-pill) var(--ring-radius-pill) 0 !important;
+}
+
+/* Primary reading & hero CTAs ("続きを読む ↗", "資料を探す", "検索"):
+   sculpted optical pills with top specular arc and subtle prism glow. */
+html[data-family="library"] body
+  .library-continue-actions
+  > .library-primary-link:not(#ring-x#ring-x) {
+  padding-inline: 22px !important;
+  border: 1.5px solid #e9fff8 !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.56) 0%, transparent 46%),
+    linear-gradient(132deg, #ecfff9 0%, #a4e4d6 48%, #f0d7a2 100%) !important;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(160 120 56 / 0.36),
+    0 12px 28px -10px rgb(var(--ring-key-rgb) / 0.48),
+    0 0 22px -6px rgb(var(--ring-gold-rgb) / 0.34) !important;
+  color: #06181c !important;
+  font-weight: 750 !important;
+}
+
+html[data-family="library"] body
+  .library-continue-actions
+  > a:not(.library-primary-link):not(#ring-x#ring-x) {
+  padding-inline: 18px !important;
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.46) !important;
+  background:
+    radial-gradient(120% 140% at 24% 0%, rgb(255 255 255 / 0.12), transparent 54%),
+    linear-gradient(160deg, rgb(20 38 48 / 0.92), rgb(8 16 25 / 0.96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 255 / 0.24),
+    0 10px 22px -12px rgb(0 0 0 / 0.72) !important;
+}
+
+/* My Library shelf overview pills ("しおり 0", "閲覧履歴 12", "最近の検索 0"). */
+html[data-family="library"] body .library-shelf-overview > a:not(#ring-x#ring-x) {
+  padding: 7px 10px 7px 16px !important;
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.42) !important;
+  background:
+    radial-gradient(110% 140% at 20% 0%, rgb(255 255 255 / 0.11), transparent 54%),
+    linear-gradient(160deg, rgb(20 38 46 / 0.92), rgb(8 16 24 / 0.96)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(245 253 255 / 0.24),
+    0 10px 22px -12px rgb(0 0 0 / 0.72) !important;
+}
+
+html[data-family="library"] body .library-shelf-overview > a > b:not(#ring-x#ring-x) {
+  min-width: 28px;
+  padding: 2px 9px !important;
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.62) !important;
+  background:
+    linear-gradient(180deg, rgb(255 250 236 / 0.2) 0%, transparent 52%),
+    linear-gradient(145deg, rgb(var(--ring-gold-rgb) / 0.24), rgb(7 14 22 / 0.94)) !important;
+  box-shadow: inset 0 1px 0 rgb(255 252 242 / 0.34) !important;
+}
+
+/* Utility action pills ("履歴を消去", "検索履歴を消す", chip links). */
+html[data-family="library"] body .library-text-button:not(#ring-x#ring-x) {
+  padding: 6px 14px !important;
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.36) !important;
+  background:
+    radial-gradient(110% 140% at 24% 0%, rgb(255 255 255 / 0.1), transparent 54%),
+    linear-gradient(160deg, rgb(18 32 42 / 0.88), rgb(8 15 24 / 0.94)) !important;
+  box-shadow: inset 0 1px 0 rgb(244 253 255 / 0.2) !important;
+  text-decoration: none !important;
+}
+
+/* Symmetrical optical rim on pill buttons that formerly wore a square left bar. */
+html[data-family="library"] body
+  :is(
+    .library-jump-links > a:not(:first-child),
+    .library-scope-row > button:not([aria-pressed="true"]),
+    .library-filter-row > button:not([aria-pressed="true"]),
+    .library-card-actions > a,
+    .library-footer > a,
+    .search-suggestions > button,
+    .search-section-nav > a,
+    .search-more-option
+  ):not(#ring-x#ring-x) {
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.42) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(244 254 255 / 0.22),
+    0 10px 22px -12px rgb(0 0 0 / 0.72) !important;
+}
+
+/* Stat count pills ("41件の資料", "210件の記録"): prism-gold optical capsule. */
+html[data-family="library"] body
+  :is(.library-results-heading > p, .search-results-heading > p):not(#ring-x#ring-x) {
+  padding-inline: 18px !important;
+  border: 1.5px solid transparent !important;
+  background:
+    radial-gradient(110% 140% at 18% 0%, rgb(255 252 240 / 0.16), transparent 54%) padding-box,
+    linear-gradient(140deg, #162634, #09131e) padding-box,
+    linear-gradient(
+        135deg,
+        rgb(var(--ring-gold-rgb) / 0.82),
+        rgb(var(--ring-key-rgb) / 0.56) 58%,
+        rgb(var(--ring-pink-rgb) / 0.42)
+      )
+      border-box !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 0.3),
+    0 14px 28px -14px rgb(0 0 0 / 0.76) !important;
+}
+
+/* The fields: one recessed optical lens pill each, with luminous focus aura. */
 html[data-family="library"] body
   :is(.library-search, .search-input-row):not(#ring-x#ring-x) {
+  border: 1.5px solid rgb(var(--ring-key-rgb) / 0.58) !important;
   border-radius: var(--ring-radius-pill) !important;
   clip-path: none !important;
   overflow: hidden;
+  background:
+    radial-gradient(80% 90% at 16% 0%, rgb(var(--ring-key-rgb) / 0.14), transparent 62%),
+    linear-gradient(180deg, rgb(2 6 12 / 0.88), rgb(6 15 26 / 0.94)) !important;
+  box-shadow:
+    0 0 0 1px rgb(3 8 16 / 0.9),
+    0 12px 28px -12px rgb(var(--ring-key-rgb) / 0.28),
+    inset 0 3px 12px rgb(0 0 0 / 0.76),
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 -1px 0 rgb(var(--ring-gold-rgb) / 0.24) !important;
+}
+
+html[data-family="library"] body
+  :is(.library-search, .search-input-row):not(#ring-x#ring-x):focus-within {
+  border-color: #ecfcff !important;
+  outline: none !important;
+  box-shadow:
+    inset 0 3px 10px rgb(0 0 0 / 0.66),
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 0 0 2px rgb(var(--ring-key-rgb) / 0.62),
+    0 0 32px -2px rgb(var(--ring-key-rgb) / 0.46),
+    0 0 56px -10px rgb(var(--ring-gold-rgb) / 0.32) !important;
 }
 
 html[data-family="library"] body .search-input-row:not(#ring-x#ring-x) {
@@ -196,21 +451,33 @@ html[data-family="library"] body .search-input-row:not(#ring-x#ring-x) {
 }
 
 html[data-family="library"] body .library-search:not(#ring-x#ring-x) {
-  padding-inline-start: 14px;
+  padding-inline: 16px 6px;
 }
 
-/* Small counts become round marks. */
+/* Small counts & query highlights become round marks. */
 html[data-family="library"] body
   :is(
     .library-shelf-title > span,
     .library-hub-subhead > b,
+    .library-scope-row > button > span,
+    .library-filter-row > button > span,
     .search-result-meta > span:first-child
   ):not(#ring-x#ring-x) {
   border-radius: var(--ring-radius-pill) !important;
 }
 
+html[data-family="library"] body .search-page mark:not(#ring-x#ring-x) {
+  border-radius: 6px !important;
+}
+
 html[data-family="library"] body .search-group-head:not(#ring-x#ring-x)::before {
   border-radius: var(--ring-radius-pill) !important;
+}
+
+/* Hero intro accent bar: prism hairline pill. */
+html[data-family="library"] body .library-intro-copy:not(#ring-x#ring-x)::before {
+  border-radius: var(--ring-radius-pill) !important;
+  background: var(--ring-prism) !important;
 }
 
 /* The section rule under a heading becomes the ring's hairline. */
@@ -286,7 +553,10 @@ html[data-family="library"] body .library-hero > .library-screen > .dxl-art:not(
   border-radius: 50% !important;
   clip-path: none !important;
   overflow: hidden !important;
-  box-shadow: none !important;
+  box-shadow:
+    inset 0 1.5px 1px rgb(255 255 255 / 0.28),
+    inset 0 -3px 12px rgb(var(--ring-key-rgb) / 0.22),
+    0 24px 52px -16px rgb(0 0 0 / 0.72) !important;
 }
 
 html[data-family="library"] body
@@ -334,6 +604,9 @@ html[data-family="library"] body .ring-cast:not(#ring-x#ring-x) > h2 {
   font-size: clamp(20px, 2.4vw, 36px) !important;
   line-height: 1.25 !important;
   text-align: center !important;
+  text-shadow:
+    0 2px 18px rgb(0 0 0 / 0.72),
+    0 0 28px rgb(var(--ring-key-rgb) / 0.18);
   pointer-events: none;
 }
 
@@ -372,9 +645,10 @@ html[data-family="library"] body .ring-cast-orbit {
 
 /* The orbit line: a gold inner companion makes it read as a ring, not a rule. */
 html[data-family="library"] body :is(.ring-kinds-orbit, .ring-cast-orbit) > .ring-orbit-track {
-  border-color: rgb(var(--ring-key-rgb) / 0.34);
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.2);
+  border-color: rgb(var(--ring-key-rgb) / 0.42);
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.26);
   outline-offset: calc(var(--ring-item) * -0.5 - 14px);
+  box-shadow: inset 0 0 32px rgb(var(--ring-key-rgb) / 0.08);
 }
 
 /* A node: the round picture is the control; its words hang under it. */
@@ -400,7 +674,12 @@ html[data-family="library"] body :is(.ring-kind-art, .ring-cast-art) {
   --ring-gap: 4px;
   position: absolute;
   inset: 0;
-  background: #07101c;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.24), transparent 58%),
+    #07101c;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.26),
+    0 12px 26px -10px rgb(0 0 0 / 0.72);
 }
 
 html[data-family="library"] body .ring-kind-art > .dxl-art {
@@ -469,6 +748,7 @@ html[data-family="library"] body :is(.ring-kind-label, .ring-cast-name) {
   font-weight: 600;
   line-height: 1.3;
   text-align: center;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 0.78);
 }
 
 html[data-family="library"] body .ring-cast-name {
@@ -476,7 +756,7 @@ html[data-family="library"] body .ring-cast-name {
 }
 
 html[data-family="library"] body .ring-kind-count {
-  color: rgb(var(--ring-gold-rgb) / 0.92);
+  color: rgb(var(--ring-gold-rgb) / 0.94);
   font-size: 11px;
   font-weight: 500;
 }
@@ -486,12 +766,14 @@ html[data-family="library"] body .ring-kind-count > b {
   font-weight: 700;
 }
 
-/* The chosen kind: a second ring and a larger lens. */
+/* The chosen kind: a second ring, warm halo and a larger lens. */
 html[data-family="library"] body .ring-kind[aria-pressed="true"] > .ring-kind-art {
   scale: 1.1;
   box-shadow:
-    0 0 0 5px rgb(var(--ring-ink-rgb)),
-    0 0 0 6px rgb(var(--ring-gold-rgb) / 0.8);
+    inset 0 1px 1px rgb(255 255 255 / 0.36),
+    0 0 0 4px rgb(var(--ring-ink-rgb)),
+    0 0 0 6px rgb(var(--ring-gold-rgb) / 0.88),
+    0 14px 32px -8px rgb(var(--ring-gold-rgb) / 0.52);
 }
 
 html[data-family="library"] body .ring-kind[aria-pressed="true"] .ring-kind-name {
@@ -510,10 +792,14 @@ html[data-family="library"] body .search-ring {
 }
 
 html[data-family="library"] body .search-ring > .ring-orbit-track {
-  border-color: rgb(var(--ring-key-rgb) / 0.36);
+  border-color: rgb(var(--ring-key-rgb) / 0.44);
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.22);
+  outline-offset: -12px;
+  box-shadow: inset 0 0 28px rgb(var(--ring-key-rgb) / 0.1);
 }
 
-/* The lens: a progress ring whose lit arc is the chosen kind's share. */
+/* The lens: a progress ring whose lit arc is the chosen kind's share,
+   with an inner concentric optical ring and deep cyan-rose-gold refraction. */
 html[data-family="library"] body .search-ring-lens {
   --ring-p: 1;
   position: absolute;
@@ -522,7 +808,15 @@ html[data-family="library"] body .search-ring-lens {
   place-items: center;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.24), transparent 62%), #07101c;
+    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.2), transparent 44%),
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 62%),
+    radial-gradient(circle at 74% 82%, rgb(var(--ring-pink-rgb) / 0.18), transparent 60%),
+    #060f1b;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.22),
+    inset 0 0 0 10px rgb(var(--ring-ink-rgb) / 0.48),
+    inset 0 0 0 11px rgb(var(--ring-key-rgb) / 0.22),
+    0 18px 40px -12px rgb(0 0 0 / 0.72);
   pointer-events: none;
 }
 
@@ -550,14 +844,23 @@ html[data-family="library"] body .search-ring-lens::after {
   );
 }
 
-/* The glass and its handle, drawn from two strokes. */
+/* The glass and its handle, drawn as an illuminated loupe. */
 html[data-family="library"] body .search-ring-lens > i {
   position: relative;
   width: 34%;
   aspect-ratio: 1;
   translate: -8% -8%;
-  border: 2px solid rgb(var(--ring-key-rgb) / 0.9);
+  border: 2px solid rgb(var(--ring-key-rgb) / 0.94);
   border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    rgb(255 255 255 / 0.28),
+    rgb(var(--ring-key-rgb) / 0.1) 58%,
+    transparent 74%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    0 0 18px rgb(var(--ring-key-rgb) / 0.38);
 }
 
 html[data-family="library"] body .search-ring-lens > i::after {
@@ -566,9 +869,10 @@ html[data-family="library"] body .search-ring-lens > i::after {
   top: 92%;
   left: 92%;
   width: 46%;
-  height: 2px;
+  height: 2.5px;
   border-radius: 2px;
-  background: rgb(var(--ring-gold-rgb) / 0.9);
+  background: linear-gradient(90deg, #fff4d6, var(--ring-gold));
+  box-shadow: 0 0 10px rgb(var(--ring-gold-rgb) / 0.56);
   rotate: 45deg;
   transform-origin: 0 50%;
 }
@@ -600,7 +904,7 @@ html[data-family="library"] body .search-ring.is-compact button > span {
   font-size: 10px;
 }
 
-/* A kind: a dark lens with its name; the count is a round mark on its rim. */
+/* A kind: a dark specular lens with its name; the count is a round mark on its rim. */
 html[data-family="library"] body .search-ring button {
   all: unset;
   position: relative;
@@ -612,8 +916,13 @@ html[data-family="library"] body .search-ring button {
   padding: 6px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.2), transparent 64%), #07101c;
-  color: #dff4ff;
+    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.18), transparent 44%),
+    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.28), transparent 64%),
+    #07111e;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.22),
+    0 10px 22px -10px rgb(0 0 0 / 0.68);
+  color: #e6f7ff;
   font-size: clamp(11px, 0.95vw, 13px);
   font-weight: 700;
   line-height: 1.2;
@@ -630,7 +939,12 @@ html[data-family="library"] body .search-ring button::before {
   inset: 0;
   padding: var(--ring-w);
   border-radius: 50%;
-  background: rgb(var(--ring-key-rgb) / 0.34);
+  background: linear-gradient(
+    145deg,
+    rgb(var(--ring-key-rgb) / 0.64),
+    rgb(var(--ring-pink-rgb) / 0.28) 52%,
+    rgb(var(--ring-gold-rgb) / 0.48)
+  );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -656,9 +970,14 @@ html[data-family="library"] body .search-ring button > span {
   min-width: 26px;
   height: 22px;
   padding: 0 6px;
-  border: 1px solid rgb(var(--ring-gold-rgb) / 0.6);
+  border: 1px solid rgb(var(--ring-gold-rgb) / 0.68);
   border-radius: var(--ring-radius-pill);
-  background: #0a1422;
+  background:
+    linear-gradient(180deg, rgb(255 250 236 / 0.16), transparent 52%),
+    #0a1524;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 0.28),
+    0 4px 10px rgb(0 0 0 / 0.56);
   color: var(--ring-gold);
   font-size: 11px;
   font-weight: 700;
@@ -668,7 +987,15 @@ html[data-family="library"] body .search-ring button > span {
 html[data-family="library"] body .search-ring button[aria-pressed="true"] {
   scale: 1.12;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.5), transparent 70%), #0b1c2e;
+    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.3), transparent 44%),
+    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.56), transparent 70%),
+    radial-gradient(circle at 74% 82%, rgb(var(--ring-pink-rgb) / 0.24), transparent 64%),
+    #0b1d30;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 0.42),
+    0 0 0 3px rgb(var(--ring-ink-rgb)),
+    0 0 0 4.5px rgb(var(--ring-gold-rgb) / 0.72),
+    0 12px 28px -6px rgb(var(--ring-key-rgb) / 0.58);
   color: #ffffff;
 }
 
@@ -677,9 +1004,12 @@ html[data-family="library"] body .search-ring button[aria-pressed="true"]::befor
 }
 
 html[data-family="library"] body .search-ring button[aria-pressed="true"] > span {
-  border-color: var(--ring-gold);
-  background: var(--ring-gold);
-  color: #0a1422;
+  border-color: #fff3d1;
+  background: linear-gradient(145deg, #fff1c9, var(--ring-gold));
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 4px 12px rgb(var(--ring-gold-rgb) / 0.46);
+  color: #081320;
 }
 
 /* Wide screens: the orbit stands beside the field, not under it. */
@@ -717,11 +1047,86 @@ html[data-family="library"] body .search-ring button[aria-pressed="true"] > span
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* The chosen node settles on the elastic spring (a small ornament). */
+  /* Orbit nodes settle on the elastic spring for crisp rebound. */
   html[data-family="library"]:not([data-world-effects="economy"])
     body
-    :is(.ring-kind-art, .search-ring button) {
-    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+    :is(.ring-kind-art, .ring-cast-art, .search-ring button) {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      box-shadow 220ms ease;
+  }
+
+  /* Interactive pills, topbar sigils and cards ride the ring spring on all pointers. */
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .library-page > header.library-topbar > a::before,
+      .search-page > header.search-topbar > a.search-brand::before,
+      .ring-kind,
+      .ring-cast-node,
+      .library-jump-links > a,
+      .library-continue-actions > a,
+      .library-shelf-overview > a,
+      .library-text-button,
+      .library-browse-submit,
+      .library-scope-row > button,
+      .library-filter-row > button,
+      .library-card-actions > :is(a, button),
+      .library-footer > a,
+      .library-card,
+      .inquiry-choice,
+      .search-library-door,
+      .search-library-door > span:last-child,
+      .search-submit,
+      .search-suggestions > button,
+      .search-section-nav > a,
+      .search-result-card,
+      .search-more-option,
+      .search-more
+    ) {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-spring) var(--ring-spring),
+      box-shadow 220ms ease,
+      border-color 200ms ease;
+  }
+
+  /* Tactile press sink across touch and mouse; releasing springs back with overshoot. */
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .ring-kind,
+      .ring-cast-node,
+      .search-ring button,
+      .library-jump-links > a,
+      .library-continue-actions > a,
+      .library-shelf-overview > a,
+      .library-text-button,
+      .library-browse-submit,
+      .library-scope-row > button,
+      .library-filter-row > button,
+      .library-card-actions > :is(a, button),
+      .library-footer > a,
+      .search-submit,
+      .search-suggestions > button,
+      .search-section-nav > a,
+      .search-more
+    ):active {
+    scale: 0.94;
+    transition-duration: 110ms;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .library-card,
+      .inquiry-choice,
+      .search-result-card,
+      .search-library-door,
+      .search-more-option
+    ):active {
+    scale: 0.985;
+    transition-duration: 110ms;
   }
 
   /* EXPANSION RULE: the inquiry's guide unfolds when a question opens it;
@@ -763,31 +1168,94 @@ html[data-family="library"] body .search-ring button[aria-pressed="true"] > span
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html[data-family="library"]:not([data-world-effects="economy"])
     body
-    :is(.ring-kind, .ring-cast-node, .library-card, .search-result-card) {
-    transition:
-      translate var(--ring-dur-spring) var(--ring-spring),
-      scale var(--ring-dur-spring) var(--ring-spring);
+    :is(
+      .library-page > header.library-topbar > a:hover::before,
+      .search-page > header.search-topbar > a.search-brand:hover::before
+    ) {
+    scale: 1.07;
   }
 
   html[data-family="library"]:not([data-world-effects="economy"])
     body
-    :is(.ring-kind, .ring-cast-node):hover {
+    :is(.ring-kind, .ring-cast-node):hover:not(:active) {
+    translate: 0 -3px;
     scale: 1.08;
   }
 
   html[data-family="library"]:not([data-world-effects="economy"])
     body
-    :is(.library-card, .search-result-card):hover {
-    translate: 0 -4px;
+    :is(.ring-kind, .ring-cast-node):hover
+    > :is(.ring-kind-art, .ring-cast-art) {
+    box-shadow:
+      inset 0 1px 1px rgb(255 255 255 / 0.42),
+      0 0 0 3px rgb(var(--ring-ink-rgb)),
+      0 0 0 4px rgb(var(--ring-key-rgb) / 0.68),
+      0 16px 32px -10px rgb(var(--ring-key-rgb) / 0.56);
   }
 
-  html[data-family="library"]:not([data-world-effects="economy"]) body .search-ring button:hover {
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(.library-card, .search-result-card, .inquiry-choice, .search-more-option):hover:not(:active) {
+    transform: none !important;
+    translate: 0 -4px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.3),
+      0 24px 48px -14px rgb(0 0 0 / 0.68),
+      0 0 28px -8px rgb(var(--ring-key-rgb) / 0.42) !important;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .library-jump-links > a,
+      .library-continue-actions > a,
+      .library-shelf-overview > a,
+      .library-browse-submit,
+      .library-scope-row > button,
+      .library-filter-row > button,
+      .library-footer > a,
+      .search-library-door,
+      .search-submit,
+      .search-suggestions > button,
+      .search-section-nav > a,
+      .search-more
+    ):hover:not(:active) {
+    transform: none !important;
+    translate: 0 -2px;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    .search-library-door:hover
+    > span:last-child {
+    translate: 2px -2px;
+    scale: 1.08;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    .search-ring
+    button:hover:not(:active) {
     scale: 1.1;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    .search-ring
+    button[aria-pressed="true"]:hover:not(:active) {
+    scale: 1.15;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"])
+    body
+    .search-ring
+    button:hover::before {
+    background: var(--ring-prism);
   }
 }
 
 /* ---------------------------------------------------------------
-   6. Phone.
+   6. Phone & Forced Colors.
    --------------------------------------------------------------- */
 
 @media (max-width: 700px) {
@@ -856,5 +1324,50 @@ html[data-family="library"] body .search-ring button[aria-pressed="true"] > span
 
   html[data-family="library"] body .ring-cast-orbit {
     --ring-item: 56px;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"] body .library-page > header.library-topbar > a:not(#ring-x#ring-x)::before,
+  html[data-family="library"]
+    body
+    .search-page
+    > header.search-topbar
+    > a.search-brand:not(#ring-x#ring-x)::before,
+  html[data-family="library"] body
+    :is(
+      .library-hero,
+      .library-continue,
+      .library-shelf,
+      .library-history,
+      .library-searches,
+      .library-browse-controls,
+      .library-card,
+      .inquiry-choice,
+      .search-workbench,
+      .search-result-card,
+      .search-library-door,
+      .search-library-door > span:last-child,
+      .library-continue-actions > a,
+      .library-shelf-overview > a,
+      .library-shelf-overview > a > b,
+      .library-results-heading > p,
+      .search-results-heading > p,
+      .ring-kind,
+      .ring-cast-node,
+      .search-ring button,
+      .search-ring-lens
+    ):not(#ring-x#ring-x) {
+    border-color: CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none !important;
+    color: CanvasText !important;
+  }
+
+  html[data-family="library"] body
+    :is(.library-search, .search-input-row):not(#ring-x#ring-x):focus-within {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+    box-shadow: none !important;
   }
 }

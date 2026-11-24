@@ -1886,15 +1886,16 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > .exs-hero
   .rxs-scroll-cue {
-  border: 1px solid rgb(255 224 142 / 84%);
+  border: 1px solid rgb(255 228 152 / 86%);
   background:
-    radial-gradient(ellipse 74% 88% at 14% 0%, rgb(255 218 128 / 34%), transparent 64%),
-    radial-gradient(ellipse 56% 76% at 94% 100%, rgb(58 176 255 / 24%), transparent 64%),
-    linear-gradient(135deg, rgb(48 37 21 / 97%), rgb(12 17 28 / 99%));
+    radial-gradient(ellipse 76% 86% at 16% 0%, rgb(255 222 134 / 38%), transparent 64%),
+    radial-gradient(ellipse 60% 78% at 92% 100%, rgb(64 184 255 / 26%), transparent 64%),
+    linear-gradient(135deg, rgb(52 40 22 / 97%), rgb(12 18 30 / 99%));
   box-shadow:
-    0 20px 46px rgb(0 0 0 / 82%),
-    0 0 32px -6px rgb(255 212 114 / 48%),
-    inset 0 1px 0 rgb(255 253 244 / 48%);
+    0 20px 46px rgb(0 0 0 / 84%),
+    0 0 34px -6px rgb(255 214 114 / 50%),
+    inset 0 1px 0 rgb(255 254 246 / 58%),
+    inset 0 -1px 0 rgb(92 206 255 / 24%);
 }
 
 /* 4-Bout Fight Card Strip — Alternating Molten Gold (01/03) × Electric Cobalt (02/04) */
@@ -2149,26 +2150,26 @@ html[data-family="special"]
     0 0 28px rgb(58 184 255 / 68%);
 }
 
-/* Tale of the Tape console & comparison cards (defeating command-special slate) */
+/* Tale of the Tape console & comparison cards (harmonized with Ring card/pill geometry) */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #performance
   .rxs-comparison {
-  border: 1px solid rgb(255 218 134 / 58%);
-  border-top: 0;
+  border: 1px solid rgb(255 220 138 / 54%);
+  border-top: 2px solid rgb(255 236 178 / 76%);
   border-radius: 0;
   background:
-    linear-gradient(90deg, #fff0be 0%, #f8cf70 46%, #4cc2ff 54%, #b8f4ff 100%) 0 0 / 100% 4px
-      no-repeat,
-    radial-gradient(ellipse 64% 54% at 14% 0%, rgb(255 216 124 / 26%), transparent 64%),
-    radial-gradient(ellipse 62% 52% at 88% 0%, rgb(46 160 255 / 24%), transparent 64%),
+    radial-gradient(ellipse 68% 28% at 18% 0%, rgb(255 222 134 / 30%), transparent 66%),
+    radial-gradient(ellipse 66% 28% at 84% 0%, rgb(62 184 255 / 28%), transparent 66%),
+    radial-gradient(ellipse 56% 36% at 50% 100%, rgb(255 206 104 / 12%), transparent 72%),
     var(--exe-surface-1);
   box-shadow:
-    0 36px 86px -20px rgb(0 0 0 / 98%),
-    0 0 54px -14px rgb(255 212 114 / 30%),
-    0 0 54px -14px rgb(54 168 255 / 24%),
-    inset 0 1px 0 rgb(255 252 240 / 42%);
+    0 38px 90px -20px rgb(0 0 0 / 98%),
+    0 0 58px -14px rgb(255 212 114 / 32%),
+    0 0 58px -14px rgb(54 168 255 / 26%),
+    inset 0 1px 0 rgb(255 254 246 / 54%),
+    inset 0 -1px 0 rgb(94 210 255 / 24%);
 }
 
 html[data-family="special"]
@@ -2178,15 +2179,16 @@ html[data-family="special"]
   .rxs-comparison
   > .rxs-comparison-key
   > .exf-vs {
-  border: 2px solid #ffe49c;
+  border: 2px solid #ffebb3;
   background:
-    radial-gradient(circle at 30% 30%, rgb(255 214 114 / 34%), transparent 56%),
-    radial-gradient(circle at 74% 74%, rgb(58 176 255 / 34%), transparent 56%),
+    radial-gradient(circle at 28% 28%, rgb(255 220 128 / 42%), transparent 56%),
+    radial-gradient(circle at 74% 74%, rgb(64 188 255 / 38%), transparent 56%),
     #0b0e16;
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 82%),
-    0 0 24px rgb(255 212 114 / 46%),
-    0 0 28px rgb(58 176 255 / 34%);
+    0 12px 28px rgb(0 0 0 / 84%),
+    0 0 26px rgb(255 214 114 / 50%),
+    0 0 30px rgb(58 176 255 / 38%),
+    inset 0 1px 0 rgb(255 254 246 / 48%);
 }
 
 html[data-family="special"]
@@ -2194,12 +2196,15 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-opponent-options
   button {
-  border: 1px solid rgb(120 202 255 / 30%);
+  border: 1px solid rgb(134 214 255 / 36%);
   background:
-    linear-gradient(180deg, rgb(22 30 46 / 95%), rgb(10 14 22 / 98%));
+    radial-gradient(88% 72% at 18% 0%, rgb(114 220 255 / 16%), transparent 64%),
+    linear-gradient(180deg, rgb(24 34 54 / 96%), rgb(10 15 26 / 98%));
+  color: #e6ecf5;
   box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 18%),
-    0 8px 22px -10px rgb(0 0 0 / 82%);
+    inset 0 1px 0 rgb(236 251 255 / 30%),
+    inset 0 -1px 0 rgb(54 166 255 / 18%),
+    0 10px 24px -10px rgb(0 0 0 / 86%);
 }
 
 html[data-family="special"]
@@ -2207,16 +2212,27 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-opponent-options
   button[aria-pressed="true"] {
-  border-color: #ffe49c;
+  border-color: #ffe8a8;
   background:
-    radial-gradient(88% 82% at 14% 0%, rgb(255 216 122 / 34%), transparent 66%),
-    linear-gradient(148deg, rgb(48 36 18 / 96%), rgb(18 14 10 / 98%));
+    radial-gradient(92% 84% at 16% 0%, rgb(255 224 138 / 42%), transparent 66%),
+    radial-gradient(64% 68% at 92% 100%, rgb(244 176 58 / 22%), transparent 64%),
+    linear-gradient(148deg, rgb(58 43 20 / 97%), rgb(20 15 10 / 99%));
   color: #ffffff;
   box-shadow:
-    inset 0 1px 0 rgb(255 253 244 / 44%),
+    inset 0 1px 0 rgb(255 254 246 / 62%),
     inset 0 -2px 0 #ffd875,
-    0 10px 28px -6px rgb(255 208 106 / 46%);
-  text-shadow: 0 0 16px rgb(255 214 114 / 64%);
+    inset 0 0 0 1px rgb(255 234 168 / 38%),
+    0 12px 30px -6px rgb(255 208 106 / 54%),
+    0 0 22px -4px rgb(255 218 128 / 38%);
+  text-shadow: 0 0 18px rgb(255 218 126 / 72%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  .exs-opponent-options
+  button[aria-pressed="true"]::before {
+  box-shadow: 0 0 14px rgb(255 218 126 / 82%);
 }
 
 html[data-family="special"]
@@ -2225,10 +2241,12 @@ html[data-family="special"]
   > #performance
   .rxs-comparison
   > .rxs-comparison-formula {
-  border-left: 4px solid #ffe49c;
+  border-left: 4px solid #ffebb3;
   background:
-    linear-gradient(90deg, rgb(255 214 114 / 22%) 0%, rgb(54 166 255 / 12%) 56%, transparent 94%);
-  box-shadow: inset 0 1px 0 rgb(255 252 240 / 16%);
+    linear-gradient(90deg, rgb(255 216 122 / 24%) 0%, rgb(58 176 255 / 14%) 56%, transparent 94%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 244 / 22%),
+    inset 0 -1px 0 rgb(94 210 255 / 14%);
 }
 
 html[data-family="special"]
@@ -2237,22 +2255,21 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   > article {
-  border: 0;
-  border-top: 3px solid #ffebb3;
+  border: 1px solid rgb(255 222 140 / 62%);
+  border-top: 2px solid #fff0be;
   background-color: #120f0b;
   background-image:
-    radial-gradient(ellipse 90% 64% at 10% 0%, rgb(255 218 126 / 28%), transparent 60%),
-    radial-gradient(ellipse 60% 48% at 96% 100%, rgb(54 166 255 / 12%), transparent 62%),
-    linear-gradient(162deg, rgb(44 35 21 / 97%), rgb(12 11 10 / 99%));
+    radial-gradient(ellipse 92% 62% at 14% 0%, rgb(255 222 132 / 32%), transparent 60%),
+    radial-gradient(ellipse 64% 50% at 94% 100%, rgb(58 176 255 / 14%), transparent 62%),
+    linear-gradient(162deg, rgb(46 37 22 / 97%), rgb(12 11 10 / 99%));
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: 100% 100%;
   box-shadow:
     0 26px 58px -18px rgb(0 0 0 / 96%),
-    0 0 38px -10px rgb(255 208 106 / 34%),
-    inset 0 1px 0 rgb(255 253 244 / 46%),
-    inset 0 -1px 0 rgb(222 142 36 / 30%),
-    inset 0 0 0 1px rgb(255 218 134 / 58%);
+    0 0 42px -10px rgb(255 210 108 / 36%),
+    inset 0 1px 0 rgb(255 254 246 / 58%),
+    inset 0 -1px 0 rgb(222 142 36 / 34%);
 }
 
 html[data-family="special"]
@@ -2261,18 +2278,18 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   > article[data-exf-win="rival"] {
-  border-top-color: #bef5ff;
+  border-color: rgb(118 228 255 / 64%);
+  border-top-color: #d4f8ff;
   background-color: #08101c;
   background-image:
-    radial-gradient(ellipse 90% 64% at 10% 0%, rgb(96 220 255 / 28%), transparent 60%),
-    radial-gradient(ellipse 68% 54% at 94% 100%, rgb(34 128 246 / 22%), transparent 62%),
-    linear-gradient(162deg, rgb(16 34 62 / 97%), rgb(7 13 24 / 99%));
+    radial-gradient(ellipse 92% 62% at 14% 0%, rgb(104 224 255 / 32%), transparent 60%),
+    radial-gradient(ellipse 68% 54% at 94% 100%, rgb(38 136 252 / 24%), transparent 62%),
+    linear-gradient(162deg, rgb(17 36 66 / 97%), rgb(7 13 24 / 99%));
   box-shadow:
     0 26px 58px -18px rgb(0 0 0 / 96%),
-    0 0 38px -10px rgb(54 176 255 / 38%),
-    inset 0 1px 0 rgb(242 254 255 / 48%),
-    inset 0 -1px 0 rgb(34 136 244 / 34%),
-    inset 0 0 0 1px rgb(104 222 255 / 60%);
+    0 0 42px -10px rgb(54 176 255 / 40%),
+    inset 0 1px 0 rgb(244 254 255 / 58%),
+    inset 0 -1px 0 rgb(38 144 248 / 38%);
 }
 
 html[data-family="special"]
@@ -2281,13 +2298,14 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   .rxs-comparison-result {
-  border: 1px solid rgb(255 232 162 / 92%);
+  border: 1px solid rgb(255 236 172 / 94%);
   background:
-    linear-gradient(180deg, rgb(255 250 228 / 36%) 0%, rgb(255 210 108 / 16%) 48%, rgb(168 102 18 / 34%) 100%),
+    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(255 252 232 / 34%), transparent 66%),
+    linear-gradient(180deg, rgb(255 248 220 / 30%) 0%, rgb(255 210 108 / 16%) 48%, rgb(168 102 18 / 34%) 100%),
     rgb(26 19 10 / 96%);
   box-shadow:
-    inset 0 1px 0 rgb(255 254 246 / 62%),
-    0 12px 30px -6px rgb(255 208 106 / 62%);
+    inset 0 1px 0 rgb(255 254 248 / 70%),
+    0 12px 30px -6px rgb(255 208 106 / 64%);
 }
 
 html[data-family="special"]
@@ -2297,13 +2315,14 @@ html[data-family="special"]
   .rxs-comparison-metrics
   > article[data-exf-win="rival"]
   .rxs-comparison-result {
-  border-color: rgb(164 244 255 / 92%);
+  border-color: rgb(172 246 255 / 94%);
   background:
-    linear-gradient(180deg, rgb(238 254 255 / 36%) 0%, rgb(86 214 255 / 18%) 48%, rgb(22 104 202 / 36%) 100%),
+    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(240 254 255 / 34%), transparent 66%),
+    linear-gradient(180deg, rgb(232 253 255 / 30%) 0%, rgb(86 214 255 / 18%) 48%, rgb(22 104 202 / 36%) 100%),
     rgb(10 24 44 / 96%);
   box-shadow:
-    inset 0 1px 0 rgb(246 254 255 / 62%),
-    0 12px 30px -6px rgb(54 176 255 / 62%);
+    inset 0 1px 0 rgb(248 254 255 / 70%),
+    0 12px 30px -6px rgb(54 176 255 / 64%);
 }
 
 html[data-family="special"]
@@ -2313,9 +2332,13 @@ html[data-family="special"]
   .rxs-comparison
   .rxs-bars {
   height: 16px;
-  border: 1px solid rgb(255 218 134 / 38%);
+  border: 1px solid rgb(255 220 138 / 42%);
+  border-radius: 999px;
+  overflow: clip;
   background: rgb(6 8 14 / 94%);
-  box-shadow: inset 0 1px 5px rgb(0 0 0 / 90%);
+  box-shadow:
+    inset 0 1px 5px rgb(0 0 0 / 90%),
+    0 1px 0 rgb(255 252 240 / 10%);
 }
 
 html[data-family="special"]
@@ -2325,7 +2348,30 @@ html[data-family="special"]
   .rxs-comparison-metrics
   > article[data-exf-win="rival"]
   .rxs-bars {
-  border-color: rgb(104 222 255 / 44%);
+  border-color: rgb(114 226 255 / 48%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .exs-catalog-details
+  > summary {
+  padding-inline: 8px;
+  border-radius: 16px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .exs-catalog-details
+  > summary::after {
+  border-radius: 999px;
+  clip-path: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 72%),
+    0 6px 18px -4px rgb(255 208 106 / 46%);
 }
 
 html[data-family="special"]
@@ -2346,11 +2392,14 @@ html[data-family="special"]
   .rxs-processing-comparison
   > div
   > section {
-  border-top: 3px solid #9ef0ff;
-  background: var(--exe-surface-cyan);
+  border: 1px solid rgb(114 226 255 / 48%);
+  border-top: 2px solid #bef5ff;
+  background:
+    radial-gradient(ellipse 84% 50% at 14% 0%, rgb(96 220 255 / 22%), transparent 62%),
+    var(--exe-surface-cyan);
   box-shadow:
-    inset 0 1px 0 rgb(240 253 255 / 32%),
-    inset 0 0 0 1px rgb(104 222 255 / 42%);
+    inset 0 1px 0 rgb(242 254 255 / 42%),
+    0 18px 40px -16px rgb(0 0 0 / 88%);
 }
 
 html[data-family="special"]
@@ -2361,32 +2410,35 @@ html[data-family="special"]
   .rxs-processing-comparison
   > div
   > section:last-child {
-  border-top: 3px solid #ffebb3;
-  background: var(--exe-surface-gold);
+  border: 1px solid rgb(255 220 138 / 50%);
+  border-top: 2px solid #fff0be;
+  background:
+    radial-gradient(ellipse 84% 50% at 14% 0%, rgb(255 218 128 / 24%), transparent 62%),
+    var(--exe-surface-gold);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 240 / 32%),
-    inset 0 0 0 1px rgb(255 218 134 / 44%);
+    inset 0 1px 0 rgb(255 253 244 / 42%),
+    0 18px 40px -16px rgb(0 0 0 / 88%);
 }
 
-/* 02 P14 — Dual Reactor Core & Causal Conduit */
+/* 02 P14 — Dual Reactor Core, Optical Readouts & Causal Flow */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #p14
   .rxs-p14-overview {
-  border-top: 0;
+  border: 1px solid rgb(138 228 255 / 46%);
+  border-top: 2px solid rgb(255 236 178 / 74%);
   background:
-    linear-gradient(90deg, #fff0be 0%, #f8cf70 46%, #4cc2ff 54%, #b8f4ff 100%) 0 0 / 100% 4px
-      no-repeat,
-    radial-gradient(ellipse 62% 72% at 80% 48%, rgb(54 176 255 / 34%), transparent 64%),
-    radial-gradient(ellipse 56% 62% at 18% 18%, rgb(255 212 114 / 30%), transparent 64%),
+    radial-gradient(ellipse 66% 30% at 18% 0%, rgb(255 220 128 / 32%), transparent 66%),
+    radial-gradient(ellipse 68% 36% at 84% 12%, rgb(64 188 255 / 34%), transparent 66%),
+    radial-gradient(ellipse 56% 62% at 78% 58%, rgb(54 176 255 / 26%), transparent 66%),
     var(--exe-surface-1);
   box-shadow:
-    0 36px 86px -20px rgb(0 0 0 / 98%),
-    0 0 54px -12px rgb(54 176 255 / 32%),
-    0 0 54px -12px rgb(255 212 114 / 26%),
-    inset 0 1px 0 rgb(255 252 240 / 44%),
-    inset 0 0 0 1px rgb(114 220 255 / 36%);
+    0 38px 90px -20px rgb(0 0 0 / 98%),
+    0 0 58px -12px rgb(54 176 255 / 34%),
+    0 0 54px -12px rgb(255 212 114 / 28%),
+    inset 0 1px 0 rgb(255 254 246 / 54%),
+    inset 0 -1px 0 rgb(104 222 255 / 26%);
 }
 
 html[data-family="special"]
@@ -2395,11 +2447,13 @@ html[data-family="special"]
   > #p14
   .rxs-p14-overview
   figure {
+  border-radius: 20px;
   box-shadow:
     0 36px 80px rgb(0 0 0 / 92%),
-    0 0 76px rgb(54 176 255 / 46%),
-    0 0 48px rgb(255 212 114 / 32%),
-    inset 0 0 0 1px rgb(138 232 255 / 62%);
+    0 0 80px rgb(54 176 255 / 48%),
+    0 0 50px rgb(255 212 114 / 34%),
+    inset 0 1px 0 rgb(244 254 255 / 54%),
+    inset 0 0 0 1px rgb(138 232 255 / 66%);
 }
 
 html[data-family="special"]
@@ -2409,15 +2463,17 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div {
-  border: 1px solid rgb(255 218 134 / 72%);
-  border-left: 4px solid #ffebb3;
+  border: 1px solid rgb(255 220 136 / 74%);
+  border-left: 4px solid #fff0be;
   background:
-    radial-gradient(96% 76% at 0% 0%, rgb(255 218 126 / 32%), transparent 60%),
-    linear-gradient(150deg, rgb(42 32 18 / 97%), rgb(12 10 8 / 99%));
+    radial-gradient(96% 78% at 4% 0%, rgb(255 222 132 / 36%), transparent 60%),
+    radial-gradient(56% 52% at 96% 100%, rgb(232 148 36 / 16%), transparent 64%),
+    linear-gradient(150deg, rgb(46 35 19 / 97%), rgb(12 10 8 / 99%));
   box-shadow:
-    inset 0 1px 0 rgb(255 253 244 / 42%),
+    inset 0 1px 0 rgb(255 254 246 / 54%),
+    inset 0 -1px 0 rgb(222 142 36 / 28%),
     0 18px 42px -16px rgb(0 0 0 / 94%),
-    0 0 28px -10px rgb(255 210 108 / 34%);
+    0 0 32px -10px rgb(255 210 108 / 38%);
 }
 
 html[data-family="special"]
@@ -2427,15 +2483,17 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div:nth-child(2) {
-  border-color: rgb(104 222 255 / 72%);
-  border-left: 4px solid #bef5ff;
+  border-color: rgb(118 228 255 / 74%);
+  border-left: 4px solid #d4f8ff;
   background:
-    radial-gradient(96% 76% at 0% 0%, rgb(96 220 255 / 32%), transparent 60%),
-    linear-gradient(150deg, rgb(16 34 62 / 97%), rgb(8 14 26 / 99%));
+    radial-gradient(96% 78% at 4% 0%, rgb(104 224 255 / 36%), transparent 60%),
+    radial-gradient(56% 52% at 96% 100%, rgb(38 136 252 / 20%), transparent 64%),
+    linear-gradient(150deg, rgb(17 37 68 / 97%), rgb(8 14 26 / 99%));
   box-shadow:
-    inset 0 1px 0 rgb(242 254 255 / 42%),
+    inset 0 1px 0 rgb(244 254 255 / 54%),
+    inset 0 -1px 0 rgb(38 144 248 / 32%),
     0 18px 42px -16px rgb(0 0 0 / 94%),
-    0 0 28px -10px rgb(54 176 255 / 36%);
+    0 0 32px -10px rgb(54 176 255 / 40%);
 }
 
 html[data-family="special"]
@@ -2445,12 +2503,15 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div:last-child {
-  border-color: rgb(226 240 255 / 46%);
-  border-left: 4px solid #fff4d2;
+  border-color: rgb(232 242 255 / 50%);
+  border-left: 4px solid #fff5d4;
   background:
-    linear-gradient(96deg, rgb(255 214 114 / 20%) 0%, rgb(16 22 36 / 96%) 50%, rgb(58 176 255 / 22%) 100%);
+    radial-gradient(48% 80% at 8% 0%, rgb(255 218 128 / 22%), transparent 64%),
+    radial-gradient(48% 80% at 92% 100%, rgb(68 192 255 / 24%), transparent 64%),
+    linear-gradient(96deg, rgb(24 21 16 / 97%) 0%, rgb(14 20 34 / 97%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 34%),
+    inset 0 1px 0 rgb(255 254 248 / 46%),
+    inset 0 -1px 0 rgb(94 210 255 / 22%),
     0 16px 38px -16px rgb(0 0 0 / 92%);
 }
 
@@ -2459,14 +2520,37 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #p14
   .exs-core-flow {
-  border: 1px solid rgb(255 218 134 / 58%);
+  border: 1px solid rgb(255 220 138 / 56%);
   background:
-    linear-gradient(90deg, rgb(255 214 114 / 22%), rgb(54 168 255 / 22%) 50%, rgb(255 218 128 / 24%)),
-    #0b0e16;
+    radial-gradient(ellipse 36% 90% at 14% 50%, rgb(255 216 122 / 22%), transparent 70%),
+    radial-gradient(ellipse 36% 90% at 50% 50%, rgb(62 186 255 / 22%), transparent 70%),
+    radial-gradient(ellipse 36% 90% at 86% 50%, rgb(255 222 134 / 24%), transparent 70%),
+    linear-gradient(180deg, rgb(18 20 30 / 96%), rgb(9 11 18 / 99%));
   box-shadow:
-    0 24px 58px -16px rgb(0 0 0 / 94%),
-    0 0 38px -12px rgb(54 176 255 / 26%),
-    inset 0 1px 0 rgb(255 252 240 / 34%);
+    0 26px 62px -16px rgb(0 0 0 / 96%),
+    0 0 42px -12px rgb(54 176 255 / 28%),
+    0 0 38px -14px rgb(255 212 114 / 24%),
+    inset 0 1px 0 rgb(255 253 244 / 46%),
+    inset 0 -1px 0 rgb(94 210 255 / 24%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .exs-core-flow
+  > span {
+  border: 1px solid rgb(255 220 134 / 62%);
+  border-top: 2px solid #fff0be;
+  color: #fff9ec;
+  background:
+    radial-gradient(88% 78% at 22% 0%, rgb(255 222 134 / 26%), transparent 64%),
+    linear-gradient(180deg, rgb(42 33 18 / 94%), rgb(14 12 9 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 254 246 / 48%),
+    inset 0 -1px 0 rgb(222 142 36 / 26%),
+    0 10px 24px -10px rgb(0 0 0 / 88%),
+    0 0 20px -8px rgb(255 212 114 / 30%);
 }
 
 html[data-family="special"]
@@ -2475,9 +2559,52 @@ html[data-family="special"]
   > #p14
   .exs-core-flow
   > span:nth-of-type(2) {
-  border-color: rgb(104 222 255 / 54%);
-  border-top: 2px solid #9ef0ff;
-  background: rgb(10 20 38 / 90%);
+  border-color: rgb(118 228 255 / 68%);
+  border-top: 2px solid #d4f8ff;
+  color: #eefbff;
+  background:
+    radial-gradient(88% 78% at 50% 0%, rgb(96 220 255 / 28%), transparent 64%),
+    linear-gradient(180deg, rgb(16 36 66 / 94%), rgb(8 15 28 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(244 254 255 / 50%),
+    inset 0 -1px 0 rgb(44 152 252 / 28%),
+    0 10px 24px -10px rgb(0 0 0 / 88%),
+    0 0 22px -8px rgb(58 180 255 / 34%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .exs-core-flow
+  > span:nth-of-type(3) {
+  border-color: rgb(255 232 162 / 74%);
+  border-top: 2px solid #fff7dc;
+  color: #ffffff;
+  background:
+    radial-gradient(76% 80% at 18% 0%, rgb(255 224 138 / 30%), transparent 64%),
+    radial-gradient(72% 80% at 86% 100%, rgb(72 198 255 / 24%), transparent 64%),
+    linear-gradient(148deg, rgb(44 35 20 / 95%), rgb(12 19 34 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 254 248 / 56%),
+    inset 0 -1px 0 rgb(94 210 255 / 32%),
+    0 12px 26px -10px rgb(0 0 0 / 90%),
+    0 0 24px -6px rgb(255 214 114 / 36%),
+    0 0 24px -6px rgb(68 192 255 / 28%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .exs-core-flow
+  > i {
+  border-radius: 50%;
+  clip-path: none;
+  box-shadow:
+    0 0 0 4px rgb(255 214 114 / 18%),
+    0 0 18px rgb(255 214 114 / 52%),
+    inset 0 1px 0 rgb(255 255 255 / 72%);
 }
 
 html[data-family="special"]
@@ -2488,7 +2615,10 @@ html[data-family="special"]
   > i:nth-of-type(2) {
   color: #06111e;
   background: var(--exe-cyan-pill);
-  box-shadow: 0 0 16px rgb(58 176 255 / 44%);
+  box-shadow:
+    0 0 0 4px rgb(68 196 255 / 20%),
+    0 0 18px rgb(58 176 255 / 58%),
+    inset 0 1px 0 rgb(255 255 255 / 74%);
 }
 
 html[data-family="special"]
@@ -2497,12 +2627,17 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > article {
-  border-top: 4px solid #ffebb3;
+  border: 1px solid rgb(255 222 140 / 68%);
+  border-top: 2px solid #fff2c6;
+  background:
+    radial-gradient(ellipse 84% 62% at 10% 0%, rgb(255 220 128 / 32%), transparent 62%),
+    radial-gradient(ellipse 62% 54% at 92% 96%, rgb(232 148 36 / 18%), transparent 64%),
+    var(--exe-surface-gold);
   box-shadow:
     0 34px 80px -20px rgb(0 0 0 / 98%),
-    0 0 54px -10px rgb(255 208 106 / 40%),
-    inset 0 1px 0 rgb(255 253 244 / 54%),
-    inset 0 0 0 1px rgb(255 218 134 / 72%);
+    0 0 58px -10px rgb(255 210 108 / 42%),
+    inset 0 1px 0 rgb(255 254 246 / 60%),
+    inset 0 -1px 0 rgb(222 142 36 / 32%);
 }
 
 html[data-family="special"]
@@ -2511,12 +2646,17 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > article:last-of-type {
-  border-top: 4px solid #bef5ff;
+  border: 1px solid rgb(118 228 255 / 68%);
+  border-top: 2px solid #d6f8ff;
+  background:
+    radial-gradient(ellipse 76% 64% at 88% 50%, rgb(92 218 255 / 32%), transparent 60%),
+    radial-gradient(ellipse 72% 52% at 14% 0%, rgb(58 176 255 / 26%), transparent 62%),
+    var(--exe-surface-cyan);
   box-shadow:
     0 34px 80px -20px rgb(0 0 0 / 98%),
-    0 0 54px -10px rgb(54 176 255 / 42%),
-    inset 0 1px 0 rgb(242 254 255 / 54%),
-    inset 0 0 0 1px rgb(104 222 255 / 72%);
+    0 0 58px -10px rgb(54 176 255 / 44%),
+    inset 0 1px 0 rgb(244 254 255 / 60%),
+    inset 0 -1px 0 rgb(38 144 248 / 34%);
 }
 
 html[data-family="special"]
@@ -2525,11 +2665,12 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > .exo-arrow {
-  background: linear-gradient(135deg, #fffbe8 0%, #fad47a 46%, #58c8ff 100%);
+  background: linear-gradient(135deg, #fffdf0 0%, #fad47a 46%, #58c8ff 100%);
   box-shadow:
     0 0 0 6px rgb(255 214 114 / 22%),
-    0 0 28px rgb(58 176 255 / 46%),
-    0 14px 32px rgb(0 0 0 / 82%);
+    0 0 30px rgb(58 176 255 / 48%),
+    0 14px 32px rgb(0 0 0 / 82%),
+    inset 0 1px 0 rgb(255 255 255 / 82%);
 }
 
 /* 03 STAGES — Form-Reactive Championship Duel Arena (Gold Ultra / Electric Cobalt Middle) */
@@ -2579,17 +2720,18 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #stages
   #exs-stage-panel {
-  border-top: 4px solid #ffebb3;
+  border: 1px solid rgb(255 222 140 / 72%);
+  border-top: 2px solid #fff2c6;
   background:
-    radial-gradient(ellipse 64% 76% at 76% 42%, rgb(255 214 114 / 36%), transparent 64%),
-    radial-gradient(ellipse 54% 58% at 16% 18%, rgb(232 148 36 / 24%), transparent 64%),
+    radial-gradient(ellipse 66% 76% at 76% 42%, rgb(255 218 122 / 38%), transparent 64%),
+    radial-gradient(ellipse 56% 58% at 16% 18%, rgb(232 148 36 / 26%), transparent 64%),
     radial-gradient(ellipse 48% 44% at 88% 92%, rgb(54 176 255 / 18%), transparent 64%),
     var(--exe-surface-gold);
   box-shadow:
     0 36px 88px -18px rgb(0 0 0 / 98%),
-    0 0 64px -10px rgb(255 208 106 / 42%),
-    inset 0 1px 0 rgb(255 253 244 / 54%),
-    inset 0 0 0 1px rgb(255 218 134 / 72%);
+    0 0 66px -10px rgb(255 210 108 / 44%),
+    inset 0 1px 0 rgb(255 254 246 / 60%),
+    inset 0 -1px 0 rgb(222 142 36 / 32%);
 }
 
 html[data-family="special"]
@@ -2597,17 +2739,27 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #stages
   #exs-stage-panel:has(> figure[data-form="middle"]) {
-  border-top-color: #bef5ff;
+  border-color: rgb(118 228 255 / 72%);
+  border-top-color: #d6f8ff;
   background:
-    radial-gradient(ellipse 64% 76% at 76% 42%, rgb(78 206 255 / 38%), transparent 64%),
-    radial-gradient(ellipse 56% 62% at 16% 18%, rgb(34 128 246 / 30%), transparent 64%),
+    radial-gradient(ellipse 66% 76% at 76% 42%, rgb(84 210 255 / 40%), transparent 64%),
+    radial-gradient(ellipse 56% 62% at 16% 18%, rgb(38 136 252 / 32%), transparent 64%),
     radial-gradient(ellipse 48% 44% at 88% 92%, rgb(255 212 114 / 16%), transparent 64%),
     var(--exe-surface-cyan);
   box-shadow:
     0 36px 88px -18px rgb(0 0 0 / 98%),
-    0 0 64px -10px rgb(54 176 255 / 44%),
-    inset 0 1px 0 rgb(242 254 255 / 56%),
-    inset 0 0 0 1px rgb(104 222 255 / 72%);
+    0 0 66px -10px rgb(54 176 255 / 46%),
+    inset 0 1px 0 rgb(244 254 255 / 60%),
+    inset 0 -1px 0 rgb(38 144 248 / 34%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
+  > figure {
+  border-radius: 20px;
 }
 
 html[data-family="special"]
@@ -2617,13 +2769,14 @@ html[data-family="special"]
   #exs-stage-panel
   > figure[data-form="middle"] {
   background:
-    radial-gradient(circle at 50% 34%, rgb(96 220 255 / 42%), transparent 62%),
-    radial-gradient(circle at 50% 88%, rgb(34 128 246 / 24%), transparent 58%),
+    radial-gradient(circle at 50% 34%, rgb(96 220 255 / 44%), transparent 62%),
+    radial-gradient(circle at 50% 88%, rgb(34 128 246 / 26%), transparent 58%),
     rgb(7 13 24 / 94%);
   box-shadow:
     0 34px 76px rgb(0 0 0 / 90%),
-    0 0 68px -6px rgb(54 176 255 / 50%),
-    inset 0 0 0 1px rgb(114 228 255 / 78%);
+    0 0 70px -6px rgb(54 176 255 / 52%),
+    inset 0 1px 0 rgb(244 254 255 / 48%),
+    inset 0 0 0 1px rgb(118 228 255 / 78%);
 }
 
 html[data-family="special"]
@@ -2648,14 +2801,56 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #stages
   #exs-stage-panel
+  > div
+  > ul
+  > li {
+  border-radius: 999px;
+  clip-path: none;
+  border: 1px solid rgb(255 220 138 / 56%);
+  border-left: 3px solid #fff0be;
+  background:
+    radial-gradient(84% 80% at 12% 0%, rgb(255 220 132 / 20%), transparent 64%),
+    linear-gradient(90deg, rgb(42 34 20 / 96%), rgb(14 13 10 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 244 / 32%),
+    0 8px 18px -10px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
   > figure[data-form="middle"]
   + div
   > ul
   > li {
-  border-color: rgb(104 222 255 / 62%);
-  border-left-color: #bef5ff;
-  background: linear-gradient(90deg, rgb(16 38 68 / 96%), rgb(8 14 26 / 98%));
-  box-shadow: inset 0 1px 0 rgb(240 253 255 / 26%);
+  border-color: rgb(114 226 255 / 62%);
+  border-left-color: #d4f8ff;
+  background:
+    radial-gradient(84% 80% at 12% 0%, rgb(96 220 255 / 22%), transparent 64%),
+    linear-gradient(90deg, rgb(16 38 68 / 96%), rgb(8 14 26 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(242 254 255 / 34%),
+    0 8px 18px -10px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
+  > div
+  .exs-form-facts
+  > div {
+  border: 1px solid rgb(255 220 136 / 54%);
+  border-left: 3px solid #fff0be;
+  background:
+    radial-gradient(88% 72% at 0% 0%, rgb(255 218 128 / 20%), transparent 62%),
+    rgb(18 14 10 / 94%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 244 / 32%),
+    0 12px 26px -14px rgb(0 0 0 / 88%);
 }
 
 html[data-family="special"]
@@ -2667,12 +2862,14 @@ html[data-family="special"]
   + div
   .exs-form-facts
   > div {
-  border-color: rgb(104 222 255 / 52%);
-  border-left-color: #bef5ff;
+  border-color: rgb(114 226 255 / 56%);
+  border-left-color: #d4f8ff;
   background:
-    radial-gradient(88% 72% at 0% 0%, rgb(78 206 255 / 18%), transparent 62%),
-    rgb(8 16 30 / 92%);
-  box-shadow: inset 0 1px 0 rgb(240 253 255 / 22%);
+    radial-gradient(88% 72% at 0% 0%, rgb(84 212 255 / 22%), transparent 62%),
+    rgb(8 16 30 / 94%);
+  box-shadow:
+    inset 0 1px 0 rgb(242 254 255 / 32%),
+    0 12px 26px -14px rgb(0 0 0 / 88%);
 }
 
 /* 04 SYSTEM — Tri-Spectrum Armor Pillars (Gold / Electric Cobalt / Convergence) & Twin Reactor Decks */
@@ -2682,16 +2879,18 @@ html[data-family="special"]
   > #system
   .rxs-system-grid
   > article {
-  border: 0;
-  border-top: 4px solid #ffebb3;
+  border: 1px solid rgb(255 222 140 / 68%);
+  border-top: 2px solid #fff2c6;
   border-radius: 0;
-  background: var(--exe-surface-gold);
+  background:
+    radial-gradient(ellipse 84% 58% at 14% 0%, rgb(255 222 132 / 30%), transparent 62%),
+    var(--exe-surface-gold);
   clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
   box-shadow:
     0 32px 78px -18px rgb(0 0 0 / 96%),
-    0 0 48px -10px rgb(255 208 106 / 34%),
-    inset 0 1px 0 rgb(255 253 244 / 48%),
-    inset 0 0 0 1px rgb(255 218 134 / 68%);
+    0 0 50px -10px rgb(255 210 108 / 36%),
+    inset 0 1px 0 rgb(255 254 246 / 58%),
+    inset 0 -1px 0 rgb(222 142 36 / 30%);
 }
 
 html[data-family="special"]
@@ -2700,13 +2899,36 @@ html[data-family="special"]
   > #system
   .rxs-system-grid
   > article:nth-child(2) {
-  border-top: 4px solid #bef5ff;
-  background: var(--exe-surface-cyan);
+  border-color: rgb(118 228 255 / 68%);
+  border-top: 2px solid #d6f8ff;
+  background:
+    radial-gradient(ellipse 84% 58% at 14% 0%, rgb(96 220 255 / 30%), transparent 62%),
+    var(--exe-surface-cyan);
   box-shadow:
     0 32px 78px -18px rgb(0 0 0 / 96%),
-    0 0 48px -10px rgb(54 176 255 / 38%),
-    inset 0 1px 0 rgb(242 254 255 / 48%),
-    inset 0 0 0 1px rgb(104 222 255 / 68%);
+    0 0 50px -10px rgb(54 176 255 / 40%),
+    inset 0 1px 0 rgb(244 254 255 / 58%),
+    inset 0 -1px 0 rgb(38 144 248 / 32%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-system-grid
+  > article:nth-child(3) {
+  border-color: rgb(255 228 156 / 70%);
+  border-top: 2px solid #fff7dc;
+  background:
+    radial-gradient(ellipse 78% 58% at 12% 0%, rgb(255 222 132 / 30%), transparent 62%),
+    radial-gradient(ellipse 78% 58% at 92% 100%, rgb(68 194 255 / 26%), transparent 64%),
+    linear-gradient(156deg, rgb(42 33 19 / 97%) 0%, rgb(13 18 30 / 99%) 100%);
+  box-shadow:
+    0 32px 78px -18px rgb(0 0 0 / 96%),
+    0 0 46px -10px rgb(255 212 114 / 34%),
+    0 0 46px -10px rgb(58 180 255 / 30%),
+    inset 0 1px 0 rgb(255 254 248 / 60%),
+    inset 0 -1px 0 rgb(94 210 255 / 32%);
 }
 
 html[data-family="special"]
@@ -2748,16 +2970,19 @@ html[data-family="special"]
   > #system
   .rxs-specs
   > div {
-  border: 0;
-  border-top: 4px solid #ffebb3;
+  border: 1px solid rgb(255 222 140 / 74%);
+  border-top: 2px solid #fff3c8;
   border-radius: 0;
-  background: var(--exe-surface-gold);
+  background:
+    radial-gradient(ellipse 86% 62% at 14% 0%, rgb(255 224 134 / 36%), transparent 62%),
+    radial-gradient(ellipse 62% 54% at 92% 100%, rgb(232 148 36 / 20%), transparent 64%),
+    var(--exe-surface-gold);
   clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
   box-shadow:
     0 34px 84px -18px rgb(0 0 0 / 98%),
-    0 0 56px -10px rgb(255 208 106 / 40%),
-    inset 0 1px 0 rgb(255 253 244 / 56%),
-    inset 0 0 0 1px rgb(255 218 134 / 72%);
+    0 0 60px -10px rgb(255 210 108 / 44%),
+    inset 0 1px 0 rgb(255 254 248 / 64%),
+    inset 0 -1px 0 rgb(222 142 36 / 34%);
 }
 
 html[data-family="special"]
@@ -2766,13 +2991,72 @@ html[data-family="special"]
   > #system
   .rxs-specs
   > div:last-child {
-  border-top: 4px solid #bef5ff;
-  background: var(--exe-surface-cyan);
+  border-color: rgb(118 228 255 / 74%);
+  border-top: 2px solid #d6f8ff;
+  background:
+    radial-gradient(ellipse 86% 62% at 14% 0%, rgb(104 224 255 / 36%), transparent 62%),
+    radial-gradient(ellipse 64% 56% at 92% 100%, rgb(38 136 252 / 24%), transparent 64%),
+    var(--exe-surface-cyan);
   box-shadow:
     0 34px 84px -18px rgb(0 0 0 / 98%),
-    0 0 56px -10px rgb(54 176 255 / 44%),
-    inset 0 1px 0 rgb(242 254 255 / 56%),
-    inset 0 0 0 1px rgb(104 222 255 / 72%);
+    0 0 60px -10px rgb(54 176 255 / 46%),
+    inset 0 1px 0 rgb(246 254 255 / 64%),
+    inset 0 -1px 0 rgb(38 144 248 / 36%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-specs
+  > div
+  strong {
+  text-shadow:
+    0 2px 0 rgb(94 58 14 / 92%),
+    0 10px 28px rgb(0 0 0 / 86%),
+    0 0 36px rgb(255 214 114 / 38%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-specs
+  > div:last-child
+  strong {
+  text-shadow:
+    0 2px 0 rgb(14 68 106 / 92%),
+    0 10px 28px rgb(0 0 0 / 86%),
+    0 0 36px rgb(72 198 255 / 42%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-specs
+  > div
+  > p {
+  border-radius: 999px;
+  border-color: rgb(255 222 140 / 54%);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(255 222 134 / 18%), transparent 68%),
+    rgb(16 13 9 / 88%);
+  box-shadow: inset 0 1px 0 rgb(255 253 244 / 32%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-specs
+  > div:last-child
+  > p {
+  border-color: rgb(118 228 255 / 56%);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(96 220 255 / 20%), transparent 68%),
+    rgb(8 16 28 / 88%);
+  box-shadow: inset 0 1px 0 rgb(242 254 255 / 34%);
 }
 
 html[data-family="special"]
@@ -2782,8 +3066,8 @@ html[data-family="special"]
   .rxs-specs
   > .exo-joint {
   box-shadow:
-    0 0 36px rgb(255 212 114 / 68%),
-    0 0 54px rgb(54 176 255 / 58%);
+    0 0 22px rgb(255 220 132 / 78%),
+    0 0 42px rgb(58 184 255 / 66%);
 }
 
 /* Championship Stadium Finale Footer */
@@ -2826,18 +3110,275 @@ html[data-family="special"]
     inset 0 1px 0 rgb(240 253 255 / 32%);
 }
 
+/* Kinetic Spring Transitions & Optical Hover / Press Feedback */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .rxs-local-nav
+    nav
+    a {
+    transition:
+      color 180ms ease,
+      border-color 200ms ease,
+      box-shadow 220ms ease,
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-hero
+    .rxs-scroll-cue {
+    transition:
+      border-color 220ms ease,
+      box-shadow 260ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-bounce, 700ms) var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a {
+    transition:
+      box-shadow 240ms ease,
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a
+    i {
+    transition:
+      color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-bounce, 700ms) var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button {
+    transition:
+      color 200ms ease,
+      border-color 220ms ease,
+      box-shadow 260ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-bounce, 700ms) var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button::before {
+    transition: box-shadow 240ms ease;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article {
+    transition:
+      border-color 240ms ease,
+      box-shadow 280ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    .rxs-comparison-result {
+    transition:
+      border-color 220ms ease,
+      box-shadow 260ms ease,
+      scale var(--ring-dur-bounce, 700ms) var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    > summary {
+    transition:
+      color 180ms ease,
+      background-color 200ms ease;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    > summary::after {
+    transition:
+      box-shadow 220ms ease,
+      scale var(--ring-dur-bounce, 700ms) var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > div
+    > section,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > div
+    .exs-form-facts
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > div
+    > ul
+    > li,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-system-grid
+    > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div {
+    transition:
+      border-color 240ms ease,
+      box-shadow 280ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > i,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > .exo-arrow,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > .exo-joint {
+    transition:
+      box-shadow 260ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-bounce, 700ms) var(--ring-spring-bounce, cubic-bezier(0.3, 1.6, 0.42, 1));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel {
+    transition:
+      border-color 360ms ease,
+      box-shadow 420ms ease;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a {
+    transition:
+      border-color 220ms ease,
+      box-shadow 260ms ease,
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      scale var(--ring-dur-elastic, 880ms) var(--ring-spring-elastic, cubic-bezier(0.32, 1.9, 0.4, 0.96));
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .rxs-local-nav
+    nav
+    a:not([aria-current="location"]):hover {
+    color: #fffaf0;
+    border-color: rgb(255 224 142 / 64%);
+    background:
+      radial-gradient(84% 88% at 50% 0%, rgb(255 218 128 / 22%), transparent 70%),
+      linear-gradient(180deg, rgb(36 30 20 / 95%), rgb(14 16 26 / 98%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 253 244 / 30%),
+      0 0 16px -4px rgb(255 214 114 / 34%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-hero
+    .rxs-scroll-cue:hover {
+    border-color: #fff2c6;
+    box-shadow:
+      0 24px 52px rgb(0 0 0 / 88%),
+      0 0 42px -4px rgb(255 216 122 / 64%),
+      0 0 28px -6px rgb(72 198 255 / 34%),
+      inset 0 1px 0 rgb(255 255 255 / 72%);
+  }
+
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
     > .exs-chapter-index
     a:hover {
     background:
-      radial-gradient(94% 74% at 18% 0%, rgb(255 224 142 / 34%), transparent 66%),
-      linear-gradient(180deg, rgb(48 37 20 / 95%), rgb(16 14 10 / 98%));
+      radial-gradient(94% 74% at 18% 0%, rgb(255 224 142 / 36%), transparent 66%),
+      linear-gradient(180deg, rgb(50 38 20 / 95%), rgb(16 14 10 / 98%));
     box-shadow:
-      inset 0 1px 0 rgb(255 253 244 / 42%),
-      inset 0 -2px 0 rgb(255 214 114 / 82%);
+      inset 0 1px 0 rgb(255 254 246 / 48%),
+      inset 0 -2px 0 rgb(255 216 122 / 86%);
   }
 
   html[data-family="special"]
@@ -2846,11 +3387,11 @@ html[data-family="special"]
     > .exs-chapter-index
     a:nth-child(even):hover {
     background:
-      radial-gradient(94% 74% at 18% 0%, rgb(78 206 255 / 34%), transparent 66%),
-      linear-gradient(180deg, rgb(18 40 74 / 95%), rgb(9 15 28 / 98%));
+      radial-gradient(94% 74% at 18% 0%, rgb(84 212 255 / 36%), transparent 66%),
+      linear-gradient(180deg, rgb(18 42 78 / 95%), rgb(9 15 28 / 98%));
     box-shadow:
-      inset 0 1px 0 rgb(242 254 255 / 44%),
-      inset 0 -2px 0 rgb(104 222 255 / 86%);
+      inset 0 1px 0 rgb(244 254 255 / 48%),
+      inset 0 -2px 0 rgb(114 226 255 / 88%);
   }
 
   html[data-family="special"]
@@ -2860,9 +3401,50 @@ html[data-family="special"]
     a:nth-child(even):hover
     i {
     color: #06111e;
-    border-color: #bef5ff;
+    border-color: #d4f8ff;
     background: var(--exe-cyan-pill);
-    box-shadow: 0 0 16px rgb(58 176 255 / 54%);
+    box-shadow: 0 0 18px rgb(58 176 255 / 60%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button:not([aria-pressed="true"]):hover {
+    color: #fffaf0;
+    border-color: rgb(255 224 142 / 78%);
+    background:
+      radial-gradient(88% 76% at 16% 0%, rgb(255 218 128 / 24%), transparent 64%),
+      radial-gradient(72% 70% at 92% 100%, rgb(78 206 255 / 22%), transparent 64%),
+      linear-gradient(180deg, rgb(32 42 64 / 96%), rgb(14 19 32 / 98%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 253 244 / 44%),
+      inset 0 -1px 0 rgb(255 218 128 / 34%),
+      0 14px 28px -8px rgb(0 0 0 / 88%),
+      0 0 24px -4px rgb(255 214 114 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button:not([aria-pressed="true"]):hover::before {
+    background: linear-gradient(180deg, #fff8e2, #ffd875 45%, #8ae8ff);
+    box-shadow: 0 0 12px rgb(255 218 128 / 60%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button[aria-pressed="true"]:hover {
+    border-color: #fff4cc;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 72%),
+      inset 0 -2px 0 #ffe69c,
+      inset 0 0 0 1px rgb(255 240 186 / 48%),
+      0 14px 34px -6px rgb(255 210 108 / 64%),
+      0 0 28px -2px rgb(255 220 132 / 48%);
   }
 
   html[data-family="special"]
@@ -2871,11 +3453,25 @@ html[data-family="special"]
     > #performance
     .rxs-comparison-metrics
     > article:hover {
+    border-color: rgb(255 234 168 / 88%);
     box-shadow:
-      0 30px 64px -18px rgb(0 0 0 / 98%),
-      0 0 46px -8px rgb(255 210 106 / 48%),
-      inset 0 1px 0 rgb(255 254 246 / 56%),
-      inset 0 0 0 1px rgb(255 228 152 / 84%);
+      0 34px 70px -18px rgb(0 0 0 / 98%),
+      0 0 54px -8px rgb(255 214 114 / 52%),
+      inset 0 1px 0 rgb(255 255 250 / 70%),
+      inset 0 -1px 0 rgb(244 176 58 / 46%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article:hover
+    .rxs-comparison-result {
+    border-color: #fff4cc;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 78%),
+      0 14px 34px -4px rgb(255 214 114 / 76%);
   }
 
   html[data-family="special"]
@@ -2884,11 +3480,232 @@ html[data-family="special"]
     > #performance
     .rxs-comparison-metrics
     > article[data-exf-win="rival"]:hover {
+    border-color: rgb(164 244 255 / 88%);
     box-shadow:
-      0 30px 64px -18px rgb(0 0 0 / 98%),
-      0 0 46px -8px rgb(54 176 255 / 50%),
-      inset 0 1px 0 rgb(244 254 255 / 56%),
-      inset 0 0 0 1px rgb(156 242 255 / 86%);
+      0 34px 70px -18px rgb(0 0 0 / 98%),
+      0 0 54px -8px rgb(58 184 255 / 54%),
+      inset 0 1px 0 rgb(248 254 255 / 70%),
+      inset 0 -1px 0 rgb(54 176 255 / 48%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article[data-exf-win="rival"]:hover
+    .rxs-comparison-result {
+    border-color: #e4fbff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 78%),
+      0 14px 34px -4px rgb(58 184 255 / 76%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    > summary:hover {
+    color: #fffaf0;
+    background-color: rgb(255 220 134 / 7%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    > summary:hover::after {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 80%),
+      0 0 0 5px rgb(255 216 122 / 26%),
+      0 8px 22px -4px rgb(255 210 108 / 64%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > div
+    > section:hover {
+    border-color: rgb(148 238 255 / 76%);
+    box-shadow:
+      inset 0 1px 0 rgb(246 254 255 / 58%),
+      0 22px 46px -14px rgb(0 0 0 / 92%),
+      0 0 32px -8px rgb(58 184 255 / 40%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > div
+    > section:last-child:hover {
+    border-color: rgb(255 232 162 / 78%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 58%),
+      0 22px 46px -14px rgb(0 0 0 / 92%),
+      0 0 32px -8px rgb(255 212 114 / 42%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div:hover {
+    border-color: rgb(255 236 172 / 90%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 250 / 68%),
+      0 24px 48px -16px rgb(0 0 0 / 96%),
+      0 0 40px -8px rgb(255 214 114 / 52%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div:nth-child(2):hover {
+    border-color: rgb(164 244 255 / 90%);
+    box-shadow:
+      inset 0 1px 0 rgb(248 254 255 / 68%),
+      0 24px 48px -16px rgb(0 0 0 / 96%),
+      0 0 40px -8px rgb(58 184 255 / 54%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div:last-child:hover {
+    border-color: rgb(255 236 178 / 78%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 60%),
+      0 22px 44px -16px rgb(0 0 0 / 94%),
+      0 0 34px -8px rgb(94 210 255 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:hover {
+    border-color: #fff2c6;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 250 / 66%),
+      0 16px 32px -10px rgb(0 0 0 / 92%),
+      0 0 30px -4px rgb(255 216 122 / 52%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:nth-of-type(2):hover {
+    border-color: #defaff;
+    box-shadow:
+      inset 0 1px 0 rgb(250 254 255 / 68%),
+      0 16px 32px -10px rgb(0 0 0 / 92%),
+      0 0 32px -4px rgb(68 196 255 / 56%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:nth-of-type(3):hover {
+    border-color: #fff9e4;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 72%),
+      0 16px 34px -10px rgb(0 0 0 / 94%),
+      0 0 32px -4px rgb(255 216 122 / 52%),
+      0 0 32px -4px rgb(68 196 255 / 44%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article:hover {
+    border-color: rgb(255 236 172 / 90%);
+    box-shadow:
+      0 40px 88px -20px rgb(0 0 0 / 98%),
+      0 0 68px -8px rgb(255 214 114 / 56%),
+      inset 0 1px 0 rgb(255 255 250 / 72%),
+      inset 0 -1px 0 rgb(244 176 58 / 46%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article:last-of-type:hover {
+    border-color: rgb(168 244 255 / 90%);
+    box-shadow:
+      0 40px 88px -20px rgb(0 0 0 / 98%),
+      0 0 68px -8px rgb(58 184 255 / 58%),
+      inset 0 1px 0 rgb(248 254 255 / 72%),
+      inset 0 -1px 0 rgb(54 176 255 / 48%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article:first-of-type:hover
+    + .exo-arrow {
+    box-shadow:
+      0 0 0 8px rgb(255 216 122 / 30%),
+      0 0 40px rgb(58 184 255 / 62%),
+      0 16px 36px rgb(0 0 0 / 86%),
+      inset 0 1px 0 rgb(255 255 255 / 92%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > div
+    .exs-form-facts
+    > div:hover {
+    border-color: rgb(255 234 168 / 82%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 48%),
+      0 16px 34px -12px rgb(0 0 0 / 92%),
+      0 0 28px -8px rgb(255 214 114 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > figure[data-form="middle"]
+    + div
+    .exs-form-facts
+    > div:hover {
+    border-color: rgb(156 242 255 / 84%);
+    box-shadow:
+      inset 0 1px 0 rgb(246 254 255 / 48%),
+      0 16px 34px -12px rgb(0 0 0 / 92%),
+      0 0 28px -8px rgb(58 184 255 / 42%);
   }
 
   html[data-family="special"]
@@ -2897,11 +3714,12 @@ html[data-family="special"]
     > #system
     .rxs-system-grid
     > article:hover {
+    border-color: rgb(255 234 168 / 90%);
     box-shadow:
-      0 40px 84px -20px rgb(0 0 0 / 98%),
-      0 0 50px -8px rgb(255 210 106 / 44%),
-      inset 0 1px 0 rgb(255 253 244 / 56%),
-      inset 0 0 0 1px rgb(255 228 152 / 84%);
+      0 42px 88px -20px rgb(0 0 0 / 98%),
+      0 0 58px -8px rgb(255 214 114 / 52%),
+      inset 0 1px 0 rgb(255 255 250 / 70%),
+      inset 0 -1px 0 rgb(244 176 58 / 44%);
   }
 
   html[data-family="special"]
@@ -2910,11 +3728,387 @@ html[data-family="special"]
     > #system
     .rxs-system-grid
     > article:nth-child(2):hover {
+    border-color: rgb(164 244 255 / 90%);
     box-shadow:
-      0 40px 84px -20px rgb(0 0 0 / 98%),
-      0 0 50px -8px rgb(54 176 255 / 48%),
-      inset 0 1px 0 rgb(244 254 255 / 56%),
-      inset 0 0 0 1px rgb(156 242 255 / 84%);
+      0 42px 88px -20px rgb(0 0 0 / 98%),
+      0 0 58px -8px rgb(58 184 255 / 54%),
+      inset 0 1px 0 rgb(248 254 255 / 70%),
+      inset 0 -1px 0 rgb(54 176 255 / 46%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-system-grid
+    > article:nth-child(3):hover {
+    border-color: rgb(255 242 192 / 92%);
+    box-shadow:
+      0 42px 88px -20px rgb(0 0 0 / 98%),
+      0 0 54px -8px rgb(255 214 114 / 48%),
+      0 0 54px -8px rgb(58 184 255 / 44%),
+      inset 0 1px 0 rgb(255 255 252 / 72%),
+      inset 0 -1px 0 rgb(118 228 255 / 48%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div:hover {
+    border-color: rgb(255 238 178 / 92%);
+    box-shadow:
+      0 42px 92px -18px rgb(0 0 0 / 98%),
+      0 0 72px -8px rgb(255 214 114 / 58%),
+      inset 0 1px 0 rgb(255 255 252 / 76%),
+      inset 0 -1px 0 rgb(244 176 58 / 50%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div:last-child:hover {
+    border-color: rgb(172 246 255 / 92%);
+    box-shadow:
+      0 42px 92px -18px rgb(0 0 0 / 98%),
+      0 0 72px -8px rgb(58 184 255 / 60%),
+      inset 0 1px 0 rgb(250 254 255 / 76%),
+      inset 0 -1px 0 rgb(54 176 255 / 52%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs:has(> div:hover)
+    > .exo-joint {
+    box-shadow:
+      0 0 32px rgb(255 224 138 / 92%),
+      0 0 56px rgb(72 198 255 / 84%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a:first-of-type:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 86%),
+      0 20px 44px -4px rgb(255 214 114 / 62%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a.exo-door:not(:first-of-type):hover {
+    border-color: rgb(255 228 152 / 86%);
+    box-shadow:
+      0 22px 44px rgb(0 0 0 / 82%),
+      0 0 30px -6px rgb(255 214 114 / 42%),
+      inset 0 1px 0 rgb(255 254 246 / 46%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a.rxs-footer-return:hover {
+    border-color: rgb(148 238 255 / 88%);
+    box-shadow:
+      0 22px 44px rgb(0 0 0 / 82%),
+      0 0 32px -6px rgb(58 184 255 / 48%),
+      inset 0 1px 0 rgb(244 254 255 / 50%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-hero
+    .rxs-scroll-cue:hover {
+    translate: 0 -3px;
+    scale: 1.028;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a:hover
+    i {
+    translate: 3px -3px;
+    scale: 1.08;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button:hover {
+    translate: 0 -2px;
+    scale: 1.018;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article:hover {
+    translate: 0 -4px;
+    scale: 1.01;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article:hover
+    .rxs-comparison-result {
+    scale: 1.035;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    > summary:hover::after {
+    scale: 1.08;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    .rxs-processing-comparison
+    > div
+    > section:hover {
+    translate: 0 -3px;
+    scale: 1.01;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div:hover {
+    translate: 0 -3px;
+    scale: 1.014;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:hover {
+    translate: 0 -3px;
+    scale: 1.026;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:hover
+    + i {
+    translate: 3px 0;
+    scale: 1.12;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article:hover {
+    translate: 0 -5px;
+    scale: 1.012;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article:first-of-type:hover
+    + .exo-arrow {
+    translate: 3px 0;
+    scale: 1.12;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > div
+    .exs-form-facts
+    > div:hover {
+    translate: 0 -2px;
+    scale: 1.014;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > div
+    > ul
+    > li:hover {
+    translate: 0 -2px;
+    scale: 1.02;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-system-grid
+    > article:hover {
+    translate: 0 -5px;
+    scale: 1.014;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div:hover {
+    translate: 0 -5px;
+    scale: 1.015;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs:has(> div:hover)
+    > .exo-joint {
+    scale: 1.12;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a:hover {
+    translate: 0 -3px;
+    scale: 1.016;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button:active {
+    translate: 0 1px;
+    scale: 0.965;
+    transition:
+      translate 80ms ease-out,
+      scale 80ms ease-out,
+      box-shadow 80ms ease-out;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-hero
+    .rxs-scroll-cue:active {
+    translate: 0 1px;
+    scale: 0.955;
+    transition:
+      translate 80ms ease-out,
+      scale 80ms ease-out;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .rxs-local-nav
+    nav
+    a:active {
+    scale: 0.95;
+    transition: scale 80ms ease-out;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a:active {
+    scale: 0.975;
+    transition: scale 80ms ease-out;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .exs-catalog-details
+    > summary:active::after {
+    scale: 0.92;
+    transition: scale 80ms ease-out;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a:active {
+    translate: 0 1px;
+    scale: 0.95;
+    transition:
+      translate 80ms ease-out,
+      scale 80ms ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .rxs-local-nav nav a,
+      .rxs-scroll-cue,
+      .exs-chapter-index a,
+      .exs-chapter-index a i,
+      .exs-opponent-options button,
+      .exs-opponent-options button::before,
+      .rxs-comparison-metrics > article,
+      .rxs-comparison-result,
+      .exs-catalog-details > summary,
+      .exs-catalog-details > summary::after,
+      .rxs-processing-comparison > div > section,
+      .rxs-p14-copy dl > div,
+      .exs-core-flow > span,
+      .exs-core-flow > i,
+      .exs-p14-comparison > article,
+      .exs-p14-comparison > .exo-arrow,
+      #exs-stage-panel,
+      .exs-form-facts > div,
+      #exs-stage-panel > div > ul > li,
+      .rxs-system-grid > article,
+      .rxs-specs > div,
+      .rxs-specs > .exo-joint,
+      .rxs-footer > a
+    ) {
+    transition: none;
   }
 }
 
@@ -3161,13 +4355,37 @@ html[data-family="special"]
     .rxs-page.rxs-page.exs-page#top[data-command-special]
     > #p14
     .exs-core-flow
+    > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
     > span:nth-of-type(2),
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:nth-of-type(3),
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > i,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
     > #p14
     .exs-p14-comparison
     > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article:last-of-type,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -3195,10 +4413,26 @@ html[data-family="special"]
     .rxs-page.rxs-page.exs-page#top[data-command-special]
     > #stages
     #exs-stage-panel
+    > div
+    > ul
+    > li,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
     > figure[data-form="middle"]
     + div
     > ul
     > li,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > div
+    .exs-form-facts
+    > div,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -3224,6 +4458,12 @@ html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
     > #system
+    .rxs-system-grid
+    > article:nth-child(3),
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
     .rxs-specs
     > div,
   html[data-family="special"]
@@ -3232,6 +4472,20 @@ html[data-family="special"]
     > #system
     .rxs-specs
     > div:last-child,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div
+    > p,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div:last-child
+    > p,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -3247,6 +4501,23 @@ html[data-family="special"]
     border-color: CanvasText;
     box-shadow: none;
     clip-path: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div
+    strong,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div:last-child
+    strong {
+    text-shadow: none;
   }
 
   html[data-family="special"]

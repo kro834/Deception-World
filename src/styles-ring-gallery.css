@@ -26,9 +26,16 @@
    Motion gates as in styles-ring.css.
    ================================================================ */
 
+@property --ring-g-p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 html[data-family="gallery"] {
   /* The gallery's own gilt joins the ring's prism. */
   --ring-g-gold: 240 207 134;
+  --ring-g-ivory: 255 250 238;
 }
 
 /* ---------------------------------------------------------------
@@ -146,6 +153,23 @@ html[data-family="gallery"] body
 
 html[data-family="gallery"] body .gallery-stage-candidates > button:not(#ring-x#ring-x) {
   border-radius: 14px !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.28),
+    inset 0 0 0 1px rgb(var(--ring-g-gold) / 0.24),
+    0 10px 22px -12px rgb(0 0 0 / 0.72);
+}
+
+html[data-family="gallery"]
+  body
+  .gallery-stage-candidates
+  > button:is([aria-pressed="true"], [aria-current="true"]):not(#ring-x#ring-x) {
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.56),
+    inset 0 0 0 1.5px rgb(var(--ring-g-gold) / 0.78),
+    0 0 0 2px rgb(6 10 18 / 0.75),
+    0 0 0 3px rgb(var(--ring-key-rgb) / 0.36),
+    0 12px 26px -10px rgb(0 0 0 / 0.8),
+    0 0 22px -6px rgb(var(--ring-g-gold) / 0.42);
 }
 
 /* The shared artwork stage, on this page only: its outer plate takes the
@@ -158,6 +182,41 @@ html[data-family="gallery"] body .artwork-stage--gallery:not(#ring-x#ring-x) {
 /* The pill track of filters keeps its measured marker; both are pills. */
 html[data-family="gallery"] body .gallery-filters:not(#ring-x#ring-x) {
   border-radius: var(--ring-radius-pill);
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.14),
+    inset 0 0 0 1px rgb(var(--ring-g-gold) / 0.22),
+    0 12px 28px -16px rgb(0 0 0 / 0.72);
+}
+
+/* Museum-grade champagne × prism specular edge on primary action pills. */
+html[data-family="gallery"] body
+  :is(
+    .gallery-refresh,
+    .gallery-topbar-actions > a,
+    .gallery-screening-nav > a,
+    .gallery-feature-save,
+    .gallery-feature-settings > a,
+    .gallery-favorites-filter,
+    .gallery-shuffle-start,
+    .gallery-viewer-close,
+    .gallery-viewer-footer > button,
+    .gallery-tour-action,
+    .gallery-tour-course-actions > :is(a, button),
+    .gallery-tour-theatre-button,
+    .gallery-tour-next-tour,
+    .quote-leaf-actions > :is(a, button),
+    .exhibition-room-entrances > a,
+    .exhibition-studio-tools button,
+    .exhibition-room-choose > a,
+    .exhibition-room-adjacent > button,
+    .exhibition-shelf-return,
+    .exhibition-shelf-current,
+    .exhibition-shelf-pagination > button
+  ):not(#ring-x#ring-x) {
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.26),
+    inset 0 -1px 0 rgb(var(--ring-key-rgb) / 0.12),
+    0 10px 24px -14px rgb(0 0 0 / 0.66);
 }
 
 html[data-family="gallery"] body .ring-divider {
@@ -167,7 +226,8 @@ html[data-family="gallery"] body .ring-divider {
 
 /* ---------------------------------------------------------------
    2. Ring numbers: a place in a set, drawn as a lit arc around the
-   number that already says it.
+   number that already says it — now framed by a delicate concentric
+   double halo and spring-driven arc progress (--ring-g-p).
    --------------------------------------------------------------- */
 
 html[data-family="gallery"] body
@@ -178,6 +238,7 @@ html[data-family="gallery"] body
     .exhibition-ring-number
   ):not(#ring-x#ring-x) {
   --ring-p: 0;
+  --ring-g-p: var(--ring-p, 0);
   position: relative !important;
   display: inline-grid !important;
   box-sizing: border-box;
@@ -191,8 +252,19 @@ html[data-family="gallery"] body
   border: 0 !important;
   border-radius: 50% !important;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-gold) / 0.2), transparent 62%), #0a0d14 !important;
-  box-shadow: none !important;
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-g-ivory) / 0.16), transparent 44%),
+    radial-gradient(circle at 34% 26%, rgb(var(--ring-g-gold) / 0.24), transparent 64%),
+    radial-gradient(circle at 72% 78%, rgb(var(--ring-key-rgb) / 0.14), transparent 60%),
+    #080b12 !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.34),
+    inset 0 0 0 5px rgb(6 10 18 / 0.84),
+    inset 0 0 0 6px rgb(var(--ring-g-gold) / 0.3),
+    0 0 0 3px rgb(5 8 15 / 0.66),
+    0 0 0 4px rgb(var(--ring-key-rgb) / 0.26),
+    0 10px 24px -6px rgb(0 0 0 / 0.7),
+    0 0 22px -5px rgb(var(--ring-g-gold) / 0.34) !important;
+  font-variant-numeric: tabular-nums;
   text-align: center;
   white-space: nowrap;
 }
@@ -236,7 +308,12 @@ html[data-family="gallery"] body
     .exhibition-ring-page,
     .exhibition-ring-number
   ):not(#ring-x#ring-x)::before {
-  background: rgb(var(--ring-g-gold) / 0.22) !important;
+  background: conic-gradient(
+    from 180deg,
+    rgb(var(--ring-g-gold) / 0.28),
+    rgb(var(--ring-key-rgb) / 0.2) 0.5turn,
+    rgb(var(--ring-g-gold) / 0.28) 1turn
+  ) !important;
 }
 
 html[data-family="gallery"] body
@@ -249,9 +326,10 @@ html[data-family="gallery"] body
   background: conic-gradient(
     from 0deg,
     var(--ring-key) 0turn,
-    var(--ring-pink) calc(var(--ring-p) * 0.6turn),
-    var(--ring-gold) calc(var(--ring-p) * 1turn),
-    transparent calc(var(--ring-p) * 1turn)
+    var(--ring-pink) calc(var(--ring-g-p) * 0.56turn),
+    var(--ring-gold) calc(var(--ring-g-p) * 0.94turn),
+    rgb(var(--ring-g-ivory)) calc(var(--ring-g-p) * 1turn),
+    transparent calc(var(--ring-g-p) * 1turn)
   ) !important;
 }
 
@@ -268,32 +346,53 @@ html[data-family="gallery"] body .gallery-ring-number:not(#ring-x#ring-x) {
   --ring-size: 68px;
   flex: none;
   margin: 0 !important;
+  color: rgb(var(--ring-g-ivory));
   font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 10px rgb(var(--ring-g-gold) / 0.36);
 }
 
 html[data-family="gallery"] body .gallery-ring-position:not(#ring-x#ring-x) {
   --ring-size: 68px;
+  color: rgb(var(--ring-g-ivory));
   font-size: 12px;
+  font-weight: 600;
 }
 
 html[data-family="gallery"] body .exhibition-ring-page:not(#ring-x#ring-x) {
-  --ring-size: 60px;
+  --ring-size: 64px;
+  color: rgb(var(--ring-g-ivory));
   font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 /* The exhibition's number is the panel's heading mark: a large ring. */
 html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) {
   --ring-size: clamp(120px, 11vw, 156px);
   grid-template-columns: auto;
-  gap: 0;
+  gap: 2px;
+  color: rgb(var(--ring-g-ivory) / 0.82);
   font-size: 12px;
   line-height: 1.1;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.4),
+    inset 0 0 0 8px rgb(6 10 18 / 0.86),
+    inset 0 0 0 9px rgb(var(--ring-g-gold) / 0.34),
+    0 0 0 5px rgb(5 8 15 / 0.68),
+    0 0 0 6px rgb(var(--ring-key-rgb) / 0.28),
+    0 18px 36px -10px rgb(0 0 0 / 0.78),
+    0 0 32px -6px rgb(var(--ring-g-gold) / 0.38) !important;
 }
 
 html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) > span {
   display: block;
+  color: rgb(var(--ring-g-ivory));
   font-size: clamp(34px, 3.2vw, 46px);
+  font-weight: 600;
   line-height: 1;
+  text-shadow: 0 2px 18px rgb(var(--ring-g-gold) / 0.4);
 }
 
 /* ---------------------------------------------------------------
@@ -416,9 +515,13 @@ html[data-family="gallery"] body .gallery-tour-ring-orbit {
 }
 
 html[data-family="gallery"] body .gallery-tour-ring-orbit > .ring-orbit-track {
-  border-color: rgb(var(--ring-g-gold) / 0.4);
-  outline: 1px solid rgb(var(--ring-key-rgb) / 0.18);
+  border-color: rgb(var(--ring-g-gold) / 0.46);
+  outline: 1px solid rgb(var(--ring-key-rgb) / 0.24);
   outline-offset: calc(var(--ring-item) * -0.5 - 12px);
+  box-shadow:
+    inset 0 0 28px rgb(var(--ring-g-gold) / 0.1),
+    0 0 0 8px rgb(var(--ring-g-gold) / 0.06),
+    0 0 32px -8px rgb(var(--ring-key-rgb) / 0.22);
 }
 
 html[data-family="gallery"] body .gallery-tour-ring-node {
@@ -431,12 +534,22 @@ html[data-family="gallery"] body .gallery-tour-ring-node {
   height: 100%;
   border-radius: 50%;
   background:
+    radial-gradient(circle at 28% 20%, rgb(var(--ring-g-ivory) / 0.2), transparent 40%),
     radial-gradient(
-      circle at 30% 24%,
-      color-mix(in srgb, var(--gallery-tour-course-accent, var(--ring-gold)) 34%, transparent),
-      transparent 64%
+      circle at 32% 26%,
+      color-mix(in srgb, var(--gallery-tour-course-accent, var(--ring-gold)) 42%, transparent),
+      transparent 66%
     ),
-    #0b0d13;
+    #090c13;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.34),
+    inset 0 0 0 5px rgb(6 9 16 / 0.8),
+    0 0 0 3px rgb(5 8 15 / 0.62),
+    0 0 0 4px
+      color-mix(in srgb, var(--gallery-tour-course-accent, var(--ring-gold)) 28%, transparent),
+    0 12px 26px -8px rgb(0 0 0 / 0.76),
+    0 0 22px -6px
+      color-mix(in srgb, var(--gallery-tour-course-accent, var(--ring-gold)) 44%, transparent);
   color: #fff8e8;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -457,9 +570,10 @@ html[data-family="gallery"] body .gallery-tour-ring-node::before {
   background: conic-gradient(
     from 210deg,
     var(--gallery-tour-course-accent, var(--ring-gold)) 0turn,
-    #fff6dc 0.18turn,
+    #fff9e6 0.18turn,
     var(--gallery-tour-course-accent, var(--ring-gold)) 0.44turn,
-    rgb(255 255 255 / 0.16) 0.72turn,
+    rgb(var(--ring-key-rgb) / 0.42) 0.68turn,
+    rgb(255 255 255 / 0.2) 0.82turn,
     var(--gallery-tour-course-accent, var(--ring-gold)) 1turn
   );
   -webkit-mask:
@@ -473,23 +587,28 @@ html[data-family="gallery"] body .gallery-tour-ring-node::before {
 }
 
 html[data-family="gallery"] body .gallery-tour-ring-node > span {
+  font-variant-numeric: tabular-nums;
   font-size: clamp(18px, 2vw, 28px);
   font-weight: 600;
   letter-spacing: 0.04em;
   line-height: 1;
+  text-shadow: 0 1px 10px rgb(var(--ring-g-gold) / 0.35);
 }
 
 html[data-family="gallery"] body .gallery-tour-ring-node > b {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 9px);
   left: 50%;
   width: max-content;
-  max-width: calc(var(--ring-item) + 28px);
+  max-width: calc(var(--ring-item) + 30px);
   translate: -50% 0;
-  font-size: clamp(11px, 1vw, 14px);
+  font-size: clamp(12px, 1vw, 14px);
   font-weight: 600;
   line-height: 1.3;
   text-align: center;
+  text-shadow:
+    0 1px 4px rgb(0 0 0 / 0.94),
+    0 2px 10px rgb(0 0 0 / 0.82);
 }
 
 /* A saved place in a course. */
@@ -510,6 +629,11 @@ html[data-family="gallery"] body
   padding: 0 !important;
   border-radius: 50% !important;
   clip-path: none !important;
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.3),
+    inset 0 0 0 1px rgb(var(--ring-g-gold) / 0.36),
+    0 8px 18px -10px rgb(0 0 0 / 0.7);
 }
 
 /* The theatre: the stops are marks on one ring around the position. */
@@ -527,13 +651,23 @@ html[data-family="gallery"] body .gallery-tour-ring-stops:not(#ring-x#ring-x) {
   border: 0 !important;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-gold) / 0.18), transparent 62%), #0a0d14 !important;
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-ivory) / 0.14), transparent 42%),
+    radial-gradient(circle at 34% 28%, rgb(var(--ring-g-gold) / 0.22), transparent 64%),
+    radial-gradient(circle at 72% 76%, rgb(var(--ring-key-rgb) / 0.12), transparent 60%),
+    #090c14 !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.26),
+    inset 0 0 0 8px rgb(6 9 16 / 0.72),
+    inset 0 0 0 9px rgb(var(--ring-g-gold) / 0.18),
+    0 12px 26px -10px rgb(0 0 0 / 0.72);
 }
 
 html[data-family="gallery"] body .gallery-tour-ring-stops:not(#ring-x#ring-x) > .gallery-tour-position {
   margin: 0 !important;
+  font-variant-numeric: tabular-nums;
   text-align: center;
   white-space: nowrap;
+  text-shadow: 0 1px 10px rgb(var(--ring-g-gold) / 0.28);
 }
 
 html[data-family="gallery"] body
@@ -545,9 +679,10 @@ html[data-family="gallery"] body
   width: auto !important;
   height: auto !important;
   margin: 0 !important;
-  border: 1px solid rgb(var(--ring-g-gold) / 0.24);
+  border: 1px solid rgb(var(--ring-g-gold) / 0.34);
   border-radius: 50%;
   background: none !important;
+  box-shadow: 0 0 0 4px rgb(var(--ring-key-rgb) / 0.1);
 }
 
 html[data-family="gallery"] body
@@ -562,9 +697,10 @@ html[data-family="gallery"] body
   height: 9px !important;
   margin: -4.5px 0 0 -4.5px !important;
   flex: none !important;
-  border: 1px solid rgb(var(--ring-g-gold) / 0.5) !important;
+  border: 1px solid rgb(var(--ring-g-gold) / 0.56) !important;
   border-radius: 50% !important;
-  background: #0a0d14 !important;
+  background: #090c14 !important;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.65);
   transform: rotate(var(--ring-a)) translateX(calc(var(--ring-stop-r) + 5px)) !important;
 }
 
@@ -572,8 +708,9 @@ html[data-family="gallery"] body
   .gallery-tour-ring-stops:not(#ring-x#ring-x)
   > .gallery-tour-progress-marks
   > span[data-visited] {
-  border-color: var(--ring-gold) !important;
+  border-color: rgb(var(--ring-g-ivory) / 0.72) !important;
   background: var(--ring-gold) !important;
+  box-shadow: 0 0 8px rgb(var(--ring-g-gold) / 0.45);
 }
 
 html[data-family="gallery"] body
@@ -581,8 +718,12 @@ html[data-family="gallery"] body
   > .gallery-tour-progress-marks
   > span[data-current] {
   border-color: #ffffff !important;
-  background: var(--ring-key) !important;
-  scale: 1.5;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--ring-key) 68%) !important;
+  box-shadow:
+    0 0 0 3px rgb(var(--ring-key-rgb) / 0.28),
+    0 0 12px 2px rgb(var(--ring-key-rgb) / 0.76),
+    0 0 22px 4px rgb(var(--ring-g-gold) / 0.42) !important;
+  scale: 1.65;
 }
 
 /* ---------------------------------------------------------------
@@ -592,16 +733,42 @@ html[data-family="gallery"] body
 html[data-family="gallery"] body .exhibition-room-adjacent-number:not(#ring-x#ring-x) {
   display: grid !important;
   place-items: center;
-  width: 60px !important;
-  min-width: 60px;
-  height: 60px !important;
+  width: 64px !important;
+  min-width: 64px;
+  height: 64px !important;
   padding: 0 !important;
   border-radius: 50% !important;
   clip-path: none !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-gold) / 0.24), transparent 62%),
+    #090c14 !important;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.32),
+    inset 0 0 0 4px rgb(6 10 18 / 0.8),
+    inset 0 0 0 5px rgb(var(--ring-g-gold) / 0.3),
+    0 0 0 3px rgb(var(--ring-key-rgb) / 0.18),
+    0 10px 22px -8px rgb(0 0 0 / 0.72) !important;
+  color: rgb(var(--ring-g-ivory));
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x) {
   align-items: center;
+  gap: 14px;
+}
+
+html[data-family="gallery"] body .exhibition-shelf-pagination > button:not(#ring-x#ring-x) {
+  min-height: 46px;
+  padding-inline: 20px;
+  border-color: rgb(var(--ring-g-gold) / 0.36);
+  background:
+    radial-gradient(circle at 28% 18%, rgb(var(--ring-g-gold) / 0.18), transparent 62%),
+    linear-gradient(180deg, rgb(22 27 38 / 0.94), rgb(10 13 21 / 0.96));
+  box-shadow:
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.3),
+    0 0 0 1px rgb(var(--ring-key-rgb) / 0.14),
+    0 12px 24px -12px rgb(0 0 0 / 0.74);
 }
 
 /* ---------------------------------------------------------------
@@ -626,6 +793,7 @@ html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x
   from {
     opacity: 0;
     scale: 0.6;
+    rotate: -14deg;
   }
 }
 
@@ -647,14 +815,14 @@ html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x
     body
     .gallery-viewer[open]
     .gallery-viewer-footer {
-    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) 120ms backwards;
+    animation: ring-gallery-unfold var(--ring-dur-bounce) var(--ring-spring-bounce) 110ms backwards;
   }
 
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
     .gallery-viewer[open]
     .gallery-ring-position {
-    animation: ring-gallery-pop var(--ring-dur-elastic) var(--ring-spring-elastic) 220ms backwards;
+    animation: ring-gallery-pop var(--ring-dur-elastic) var(--ring-spring-elastic) 200ms backwards;
   }
 
   /* Disclosures: the display settings, search tips, the
@@ -695,13 +863,163 @@ html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x
     animation-delay: 130ms;
   }
 
-  /* The theatre's current stop pops on the elastic spring (a 9px mark). */
+  /* Ring numbers & page dials: spring-driven arc progress on work/page change
+     plus elastic response on tap or hover across all devices. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .gallery-ring-number,
+      .gallery-ring-position,
+      .exhibition-ring-page,
+      .exhibition-ring-number
+    ) {
+    transition:
+      --ring-g-p var(--ring-dur-bounce) var(--ring-spring-bounce),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      rotate var(--ring-dur-spring) var(--ring-spring),
+      box-shadow 260ms ease;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-feature
+    > figcaption:active
+    .gallery-ring-number {
+    scale: 0.94;
+    rotate: -6deg;
+  }
+
+  /* Course orbit nodes: elastic press bounce + prism ring rotation on every pointer. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-node {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      box-shadow 240ms ease;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-node::before {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-node:active {
+    scale: 0.92;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-node:active::before {
+    rotate: 32deg;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring-orbit
+    > .ring-orbit-track {
+    transition:
+      border-color 260ms ease,
+      box-shadow 260ms ease;
+  }
+
+  /* Action pills, filter buttons, 5-up candidates, shelf cards and round pagers:
+     unified elastic spring release on touch tap and pointer press. */
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .gallery-refresh,
+      .gallery-topbar-actions > a,
+      .gallery-screening-nav > a,
+      .gallery-feature-save,
+      .gallery-feature-settings > a,
+      .gallery-favorites-filter,
+      .gallery-filters > button,
+      .gallery-shuffle-start,
+      .gallery-favorite-toggle,
+      .gallery-viewer-close,
+      .gallery-viewer-footer > button,
+      .gallery-stage-candidates > button,
+      .gallery-tour-action,
+      .gallery-tour-course-actions > :is(a, button),
+      .gallery-tour-theatre-button,
+      .gallery-tour-next-tour,
+      .quote-leaf-actions > :is(a, button),
+      .exhibition-room-entrances > a,
+      .exhibition-studio-tools button,
+      .exhibition-room-choose > a,
+      .exhibition-room-adjacent > button,
+      .exhibition-shelf-return,
+      .exhibition-shelf-current,
+      .exhibition-shelf-pagination > button,
+      .exhibition-shelf-work,
+      .gallery-tour-course-preview,
+      .gallery-tour-thumbnail
+    ) {
+    transition:
+      translate var(--ring-dur-spring) var(--ring-spring),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      box-shadow 220ms ease,
+      border-color 220ms ease;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .gallery-refresh,
+      .gallery-topbar-actions > a,
+      .gallery-screening-nav > a,
+      .gallery-feature-save,
+      .gallery-feature-settings > a,
+      .gallery-favorites-filter,
+      .gallery-filters > button,
+      .gallery-shuffle-start,
+      .gallery-favorite-toggle,
+      .gallery-viewer-close,
+      .gallery-viewer-footer > button,
+      .gallery-tour-action,
+      .gallery-tour-course-actions > :is(a, button),
+      .gallery-tour-theatre-button,
+      .gallery-tour-next-tour,
+      .quote-leaf-actions > :is(a, button),
+      .exhibition-room-entrances > a,
+      .exhibition-studio-tools button,
+      .exhibition-room-choose > a,
+      .exhibition-room-adjacent > button,
+      .exhibition-shelf-return,
+      .exhibition-shelf-current,
+      .exhibition-shelf-pagination > button
+    ):not(:disabled):not([aria-disabled="true"]):active {
+    scale: 0.96;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-stage-candidates
+    > button:not(:disabled):active {
+    scale: 0.93;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(.exhibition-shelf-work, .gallery-tour-course-preview, .gallery-tour-thumbnail):active {
+    scale: 0.98;
+  }
+
+  /* The theatre's current stop pops on the elastic spring with starlight halo. */
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
     .gallery-tour-ring-stops
     > .gallery-tour-progress-marks
     > span {
-    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      background-color 220ms ease,
+      border-color 220ms ease,
+      box-shadow 260ms ease;
   }
 
   /* The messages that appear in place arrive by unfolding. */
@@ -715,22 +1033,89 @@ html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
-    :is(.gallery-tour-ring-node, .exhibition-shelf-work, .gallery-tour-course-preview) {
-    transition:
-      translate var(--ring-dur-spring) var(--ring-spring),
-      scale var(--ring-dur-spring) var(--ring-spring);
+    .gallery-feature
+    > figcaption:hover
+    .gallery-ring-number {
+    scale: 1.06;
+    rotate: 8deg;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .exhibition-room-work-heading:hover
+    .exhibition-ring-number {
+    scale: 1.045;
+    rotate: 6deg;
   }
 
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
     .gallery-tour-ring-node:hover {
-    scale: 1.1;
+    translate: 0 -3px;
+    scale: 1.13;
   }
 
   html[data-family="gallery"]:not([data-world-effects="economy"])
     body
-    :is(.exhibition-shelf-work, .gallery-tour-course-preview):hover {
-    translate: 0 -4px;
+    .gallery-tour-ring-node:hover::before {
+    rotate: 54deg;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-tour-ring:has(.gallery-tour-ring-node:hover)
+    .gallery-tour-ring-orbit
+    > .ring-orbit-track {
+    border-color: rgb(var(--ring-g-gold) / 0.64);
+    box-shadow:
+      inset 0 0 32px rgb(var(--ring-g-gold) / 0.16),
+      0 0 0 8px rgb(var(--ring-g-gold) / 0.1),
+      0 0 36px -6px rgb(var(--ring-key-rgb) / 0.34);
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(
+      .gallery-refresh,
+      .gallery-topbar-actions > a,
+      .gallery-screening-nav > a,
+      .gallery-feature-save,
+      .gallery-feature-settings > a,
+      .gallery-favorites-filter,
+      .gallery-filters > button,
+      .gallery-shuffle-start,
+      .gallery-viewer-close,
+      .gallery-viewer-footer > button,
+      .gallery-tour-action,
+      .gallery-tour-course-actions > :is(a, button),
+      .gallery-tour-theatre-button,
+      .gallery-tour-next-tour,
+      .quote-leaf-actions > :is(a, button),
+      .exhibition-room-entrances > a,
+      .exhibition-studio-tools button,
+      .exhibition-room-choose > a,
+      .exhibition-room-adjacent > button,
+      .exhibition-shelf-return,
+      .exhibition-shelf-current,
+      .exhibition-shelf-pagination > button
+    ):not(:disabled):not([aria-disabled="true"]):hover {
+    translate: 0 -2px;
+    scale: 1.025;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-stage-candidates
+    > button:not(:disabled):hover {
+    translate: 0 -3px;
+    scale: 1.04;
+  }
+
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    :is(.exhibition-shelf-work, .gallery-tour-course-preview, .gallery-tour-thumbnail):hover {
+    translate: 0 -5px;
+    scale: 1.018;
   }
 }
 
@@ -779,19 +1164,19 @@ html[data-family="gallery"] body
     radial-gradient(
       closest-side,
       transparent calc(100% - 1.5px),
-      rgb(var(--ring-g-gold) / 0.62) calc(100% - 1.5px) 100%,
+      rgb(var(--ring-g-gold) / 0.68) calc(100% - 1.5px) 100%,
       transparent 100%
     ),
     radial-gradient(
       closest-side,
       transparent calc(80% - 1.5px),
-      rgb(var(--ring-key-rgb) / 0.46) calc(80% - 1.5px) 80%,
+      rgb(var(--ring-key-rgb) / 0.5) calc(80% - 1.5px) 80%,
       transparent 80%
     ),
     radial-gradient(
       closest-side,
       transparent calc(60% - 1px),
-      rgb(var(--ring-pink-rgb) / 0.34) calc(60% - 1px) 60%,
+      rgb(var(--ring-pink-rgb) / 0.38) calc(60% - 1px) 60%,
       transparent 60%
     );
 }
@@ -812,5 +1197,22 @@ html[data-family="gallery"] body .gallery-topbar-actions > :is(a, button):not(#r
 
   html[data-family="gallery"] body .gallery-tour-ring h2:not(#ring-x#ring-x) {
     font-size: 13.5px !important;
+  }
+}
+
+/* High-contrast / forced-colors preservation for ring dials & stops. */
+@media (forced-colors: active) {
+  html[data-family="gallery"] body
+    :is(
+      .gallery-ring-number,
+      .gallery-ring-position,
+      .exhibition-ring-page,
+      .exhibition-ring-number,
+      .gallery-tour-ring-node,
+      .gallery-tour-ring-stops,
+      .exhibition-room-adjacent-number
+    ):not(#ring-x#ring-x) {
+    box-shadow: none !important;
+    outline: 1px solid CanvasText;
   }
 }

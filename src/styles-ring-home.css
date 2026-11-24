@@ -84,15 +84,21 @@
 /* ---- The work switch: one pill track, the current work a lit pill ----- */
 
 .command-deck-scene-buttons {
-  gap: 0;
+  gap: 2px;
   padding: 4px;
   border: 0;
   border-radius: 34px;
-  background: rgb(8 16 28 / 0.72);
-  box-shadow: inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.22);
+  background:
+    radial-gradient(80% 120% at 50% 0%, rgb(var(--ring-key-rgb) / 0.14), transparent 72%),
+    rgb(7 14 26 / 0.82);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.28),
+    0 14px 32px -16px rgb(0 0 0 / 0.75);
 }
 
 .command-deck-scene-buttons > a {
+  position: relative;
   border: 0;
   border-radius: 30px;
 }
@@ -100,11 +106,36 @@
 .command-deck-scene-buttons > a.is-selected {
   border: 0;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.16), transparent 60%),
-    color-mix(in srgb, var(--deck-accent) 26%, #0a1626);
+    linear-gradient(180deg, rgb(255 255 255 / 0.22), transparent 58%),
+    radial-gradient(
+      90% 100% at 50% 0%,
+      color-mix(in srgb, var(--deck-accent) 36%, transparent),
+      transparent 72%
+    ),
+    color-mix(in srgb, var(--deck-accent) 28%, #0a1626);
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 70%, transparent),
-    0 10px 24px -14px var(--deck-accent);
+    inset 0 1px 0 rgb(255 255 255 / 0.42),
+    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 76%, #fff),
+    0 0 22px -6px color-mix(in srgb, var(--deck-accent) 62%, transparent),
+    0 10px 24px -12px var(--deck-accent);
+}
+
+.command-deck-scene-buttons > a.is-selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: var(--ring-prism);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0.72;
+  pointer-events: none;
 }
 
 /* ---- The door: a pill whose arrow rides in its own ring --------------- */
@@ -119,7 +150,13 @@
   flex: none;
   padding: 9px;
   border-radius: 50%;
-  background: #081520;
+  background:
+    radial-gradient(circle at 32% 28%, rgb(var(--ring-key-rgb) / 0.24), transparent 64%),
+    #081520;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 46%, transparent),
+    0 4px 12px rgb(0 0 0 / 0.48);
   color: var(--deck-accent-ink);
 }
 
@@ -294,11 +331,17 @@
 
 .command-deck-rider strong {
   position: absolute;
-  top: calc(100% + 2px);
+  top: calc(100% + 3px);
   /* The name may sit over a glass ring: a small ink plate keeps it legible. */
-  padding: 1px 8px;
+  padding: 2px 10px;
   border-radius: var(--ring-radius-pill);
-  background: rgb(7 14 24 / 0.84);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 64%),
+    rgb(7 14 24 / 0.88);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.28),
+    0 6px 16px -6px rgb(0 0 0 / 0.78);
   left: 50%;
   display: block;
   width: max-content;
@@ -312,6 +355,34 @@
 
 .command-deck-rider strong > span {
   display: inline-block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .command-deck-scene-buttons > a:not(.is-selected):hover {
+    background:
+      radial-gradient(85% 100% at 50% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 72%),
+      rgb(255 255 255 / 0.04);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.42),
+      0 8px 20px -10px rgb(var(--ring-key-rgb) / 0.42);
+  }
+
+  .command-deck .command-deck-enter:hover > svg {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.48),
+      inset 0 0 0 1px var(--deck-accent),
+      0 0 16px -2px var(--deck-accent);
+  }
+
+  .command-deck-rider:hover strong {
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.42),
+      inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 82%, #fff),
+      0 0 18px -3px color-mix(in srgb, var(--deck-accent) 68%, transparent),
+      0 10px 22px -8px rgb(0 0 0 / 0.88);
+  }
 }
 
 /* ---- Footer: pill links -------------------------------------------------- */
@@ -425,6 +496,42 @@
     transition: scale var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
+  html:not([data-world-effects="economy"]) .command-deck .command-deck-enter > svg {
+    transition:
+      translate var(--ring-dur-bounce) var(--ring-spring-bounce),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck .command-deck-enter:active > svg {
+    translate: 2px 0;
+    scale: 0.92;
+    rotate: 0deg;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider .command-deck-rider-portrait {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider strong {
+    transition:
+      translate var(--ring-dur-bounce) var(--ring-spring-bounce),
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      box-shadow 220ms ease,
+      color 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider:active .command-deck-rider-portrait {
+    scale: 0.94;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider:active strong {
+    translate: -50% 1px;
+    scale: 0.96;
+  }
+
   /* The orbit's centre pops once the ring has turned in. */
   html[data-ring-ready]:not([data-world-effects="economy"])
     .command-deck-riders:has(.ring-orbit[data-ring-in])
@@ -443,6 +550,18 @@
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html:not([data-world-effects="economy"]) .command-deck-rider:hover {
     scale: 1.1;
+  }
+
+  html:not([data-world-effects="economy"])
+    .command-deck-rider:hover
+    .command-deck-rider-portrait {
+    scale: 1.04;
+    rotate: 4deg;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider:hover strong {
+    translate: -50% -3px;
+    scale: 1.06;
   }
 
   html:not([data-world-effects="economy"])
@@ -470,8 +589,21 @@
     translate: 0 -2px;
   }
 
+  html:not([data-world-effects="economy"])
+    .command-deck-scene-buttons
+    > a:not(.is-selected):hover {
+    translate: 0 -1.5px;
+    scale: 1.02;
+  }
+
   html:not([data-world-effects="economy"]) .command-deck .command-deck-enter:hover {
     scale: 1.04;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck .command-deck-enter:hover > svg {
+    translate: 4px 0;
+    scale: 1.12;
+    rotate: -12deg;
   }
 }
 
@@ -521,6 +653,43 @@
 
   .command-deck-riders {
     padding-block-end: 44px;
+  }
+}
+
+/* Landscape phones (e.g. 667x375): size the 8-rider orbit against the short
+   viewport height so the bottom riders and their name plates stay comfortably
+   inside the frame without touching the bottom edge. */
+@media (max-height: 440px) {
+  .command-deck-riders,
+  .command-deck-riders .command-deck-rider-orbit {
+    --ring-item: clamp(58px, 16.5svh, 68px);
+    --ring-r: min(112px, calc(50svh - var(--ring-item) / 2 - 28px), calc(50vw - var(--ring-item) / 2 - 22px));
+    --ring-start: -112.5deg;
+  }
+
+  .command-deck-riders {
+    padding-block: 6px 28px;
+  }
+
+  .command-deck-riders .command-deck-rider-core {
+    gap: 2px;
+  }
+
+  .command-deck-riders .command-deck-rider-core h2 {
+    font-size: 17px;
+  }
+
+  .command-deck-riders .command-deck-rider-core > a {
+    min-height: 44px;
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+
+  .command-deck-rider strong {
+    top: calc(100% + 1px);
+    padding: 1px 7px;
+    font-size: 12px;
+    line-height: 1.15;
   }
 }
 

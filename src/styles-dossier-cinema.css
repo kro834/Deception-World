@@ -26,7 +26,7 @@ main.manager-page:not(.is-sovereign) {
      is thinning, not under the opaque plate. */
   --dm-arrive-delay: 100ms;
   --dm-arrive-ease: cubic-bezier(0.77, 0, 0.18, 1);
-  --dm-arrive-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dm-arrive-out: var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1));
   --dm-key: var(--manager-accent, #7ae8ff);
   --dm-rim: var(--dm-lock, #7ae8ff);
 }

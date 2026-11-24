@@ -227,24 +227,29 @@ main.exhibition-room-curated {
 .exhibition-room-work-heading {
   min-width: 0;
   align-self: center;
-  padding: clamp(20px, 2.4vw, 30px);
-  border: 1px solid rgb(240 214 164 / 46%);
-  border-top: 2px solid #f2d8a4;
+  padding: clamp(22px, 2.5vw, 32px);
+  border: 1px solid rgb(244 218 166 / 54%);
+  border-top: 2px solid #f7e1b4;
   border-left: 3px solid #f0d59f;
-  border-radius: 3px;
+  border-radius: 28px;
   background-color: #0b121e;
   background-image:
-    linear-gradient(90deg, rgb(246 220 170 / 68%) 0 20px, transparent 20px) 10px 10px / 100% 1px no-repeat,
-    linear-gradient(180deg, rgb(246 220 170 / 68%) 0 20px, transparent 20px) 10px 10px / 1px 100% no-repeat,
-    radial-gradient(ellipse 84% 62% at 24% 0%, rgb(250 224 174 / 22%), transparent 70%),
-    radial-gradient(ellipse 68% 52% at 88% 100%, rgb(158 232 250 / 12%), transparent 72%),
-    linear-gradient(162deg, #1c293d 0%, #101826 56%, #080d16 100%);
+    radial-gradient(ellipse 86% 64% at 24% -4%, rgb(252 228 178 / 28%), transparent 70%),
+    radial-gradient(ellipse 68% 52% at 88% 100%, rgb(158 232 250 / 16%), transparent 72%),
+    linear-gradient(162deg, #1f2d42 0%, #111a29 56%, #080d16 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 245 / 36%),
-    0 0 0 3px #060911,
-    0 0 0 4px rgb(238 212 162 / 20%),
-    0 26px 60px -8px rgb(0 0 0 / 72%),
-    0 0 42px -12px rgb(242 212 154 / 26%);
+    inset 0 1.5px 0 rgb(255 254 248 / 44%),
+    inset 0 -1px 0 rgb(158 232 250 / 16%),
+    0 0 0 4px #060911,
+    0 0 0 5px rgb(240 214 164 / 26%),
+    0 28px 64px -8px rgb(0 0 0 / 74%),
+    0 0 48px -10px rgb(242 212 154 / 30%);
+}
+
+.exhibition-room-work-title {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
 }
 
 .exhibition-room-work-number {

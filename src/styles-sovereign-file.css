@@ -874,7 +874,7 @@ main.manager-page.is-sovereign #dossier-profile .sovereign-status::before {
   content: none;
 }
 
-/* Fine recessed gold filigree rim (replaces repetitive 4-corner brackets). */
+/* Fine recessed gold filigree rim (follows the 18px sovereign curve seamlessly). */
 main.manager-page.is-sovereign #dossier-profile .sovereign-status::after {
   content: "";
   position: absolute;
@@ -882,12 +882,10 @@ main.manager-page.is-sovereign #dossier-profile .sovereign-status::after {
   inset: 5px;
   width: auto;
   height: auto;
-  border: 1px solid rgb(240 207 134 / 13%);
-  border-radius: 1px;
-  background:
-    linear-gradient(90deg, var(--sv-ivory), var(--sv-gold-hi) 42%, transparent 100%) 0 0 / 88px 1px
-      no-repeat,
-    linear-gradient(270deg, var(--sv-gold), transparent 100%) 100% 100% / 88px 1px no-repeat;
+  border: 1px solid rgb(240 207 134 / 15%);
+  border-radius: 13px;
+  background: none;
+  box-shadow: inset 0 1px 0 rgb(255 248 232 / 14%);
   opacity: 1;
   filter: none;
   transform: none;
@@ -1116,14 +1114,14 @@ main.manager-page.is-sovereign #dossier-profile .manager-facts {
     inset 0 -1px 0 rgb(240 207 134 / 14%);
 }
 
-/* Museum double-fillet inner perimeter frame (replaces repetitive 4-corner brackets). */
+/* Museum double-fillet inner perimeter frame (tracks the 28px ring-cut card radius). */
 main.manager-page.is-sovereign #dossier-profile .manager-facts::after {
   content: "";
   position: absolute;
   z-index: 2;
-  inset: 4px;
-  border: 1px solid rgb(240 207 134 / 11%);
-  border-radius: 1px;
+  inset: 5px;
+  border: 1px solid rgb(240 207 134 / 13%);
+  border-radius: calc(var(--ring-radius-card, 28px) - 5px);
   background: none;
   pointer-events: none;
 }
@@ -1767,26 +1765,39 @@ html[data-family="dossier"]
     0 100% / 100% 1.5px no-repeat;
 }
 
-/* Open-right imperial gilded ribbon tag (no heavy box or corner L-bracket). */
+/* Imperial 24K gold-trimmed obsidian jewel capsule (harmonized with Ring System pills). */
 html[data-family="dossier"]
   main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
   #dossier-profile
   .dossier-identity
   :is(.manager-title, #sv-stage-boost) {
+  display: inline-flex;
+  align-items: center;
   width: fit-content;
   max-width: 100%;
   margin: 14px 0 0;
-  padding: 6px 18px 6px 14px;
-  border: 0;
-  border-left: 2px solid var(--sv-gold-hi);
-  border-radius: 0;
-  color: #fff7e6;
+  padding: 5px 18px;
+  border: 1px solid rgb(247 223 162 / 46%);
+  border-radius: var(--ring-radius-pill, 999px);
+  color: #fff8ea;
   background:
-    linear-gradient(90deg, rgb(255 248 232 / 54%) 0%, rgb(247 223 162 / 34%) 54%, transparent 94%)
-      0 0 / 100% 1px no-repeat,
-    linear-gradient(90deg, rgb(240 207 134 / 18%) 0%, rgb(240 207 134 / 5%) 56%, transparent 100%);
-  box-shadow: inset 1px 0 0 rgb(255 248 232 / 26%);
-  letter-spacing: 0.12em;
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        #ffffff 32%,
+        var(--sv-gold-hi) 60%,
+        var(--sv-gold) 84%,
+        transparent 96%
+      )
+      50% 0 / 100% 1px no-repeat,
+    radial-gradient(88% 140% at 16% 50%, rgb(247 223 162 / 26%), transparent 70%),
+    linear-gradient(96deg, rgb(42 31 12 / 92%) 0%, rgb(15 14 14 / 94%) 62%, #06070c 100%);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 50%),
+    0 0 24px -5px rgb(240 207 134 / 30%),
+    inset 0 1px 0 rgb(255 250 238 / 32%),
+    inset 0 -1px 0 rgb(240 207 134 / 26%);
+  letter-spacing: 0.1em;
 }
 
 html[data-family="dossier"]
@@ -1795,28 +1806,20 @@ html[data-family="dossier"]
   :is(.sovereign-status, #sv-stage-boost) {
   margin-top: clamp(18px, 2.2svh, 24px);
   padding: 18px 22px 17px;
-  border: 1px solid rgb(240 207 134 / 32%);
-  border-top: 1px solid rgb(255 248 232 / 72%);
-  border-radius: 3px;
+  border: 1px solid rgb(240 207 134 / 34%);
+  border-top: 1px solid rgb(255 248 232 / 64%);
+  border-radius: 18px;
   outline: 0;
   background:
-    linear-gradient(
-        90deg,
-        #ffffff 0%,
-        var(--sv-ivory) 14%,
-        var(--sv-gold-hi) 38%,
-        var(--sv-gold) 70%,
-        transparent 100%
-      )
-      top / 100% 2px no-repeat,
-    radial-gradient(ellipse 260px 150% at 52px 50%, rgb(247 223 162 / 24%), transparent 72%),
-    radial-gradient(ellipse 56% 110px at 88% 100%, rgb(240 207 134 / 14%), transparent 72%),
-    linear-gradient(108deg, rgb(32 24 11 / 94%) 0%, rgb(9 11 18 / 96%) 54%, rgb(4 6 11 / 98%) 100%);
+    radial-gradient(ellipse 260px 150% at 52px 50%, rgb(247 223 162 / 26%), transparent 72%),
+    radial-gradient(ellipse 56% 110px at 88% 100%, rgb(240 207 134 / 16%), transparent 72%),
+    linear-gradient(180deg, rgb(255 248 232 / 6%) 0%, transparent 48px),
+    linear-gradient(108deg, rgb(34 25 11 / 95%) 0%, rgb(10 12 19 / 97%) 54%, rgb(4 6 11 / 98%) 100%);
   box-shadow:
-    0 24px 58px rgb(0 0 0 / 58%),
-    0 0 38px rgb(240 207 134 / 14%),
-    inset 0 1px 0 rgb(255 250 238 / 30%),
-    inset 0 -1px 0 rgb(240 207 134 / 24%);
+    0 24px 58px rgb(0 0 0 / 60%),
+    0 0 40px rgb(240 207 134 / 16%),
+    inset 0 1px 0 rgb(255 250 238 / 36%),
+    inset 0 -1px 0 rgb(240 207 134 / 26%);
 }
 
 html[data-family="dossier"]
@@ -1826,51 +1829,54 @@ html[data-family="dossier"]
   > span:nth-child(6)
   i {
   box-shadow:
-    0 0 26px rgb(247 223 162 / 40%),
+    0 0 28px rgb(247 223 162 / 46%),
     inset 0 1px 0 #ffffff;
 }
 
-/* Tier 2: open-sided editorial quotation with glowing left 24K gold light-beam. */
+/* Tier 2: Optical obsidian-gold editorial quotation with glowing left 24K gold beam. */
 html[data-family="dossier"]
   main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
   #dossier-profile
   :is(.manager-quotes, #sv-stage-boost) {
   margin: 22px 0 20px;
-  padding: 14px 6px 14px 24px;
+  padding: 14px 18px 14px 24px;
   border: 0;
-  border-radius: 0;
+  border-radius: 0 22px 22px 0;
   background:
-    radial-gradient(ellipse 68% 120% at 0% 30%, rgb(247 223 162 / 15%), transparent 74%),
-    linear-gradient(90deg, rgb(240 207 134 / 10%) 0%, rgb(240 207 134 / 2.5%) 44%, transparent 94%);
-  box-shadow: none;
+    linear-gradient(90deg, rgb(255 244 214 / 44%) 0%, rgb(240 207 134 / 20%) 44%, transparent 88%)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(240 207 134 / 24%) 0%, transparent 74%) 0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 68% 120% at 0% 30%, rgb(247 223 162 / 19%), transparent 74%),
+    linear-gradient(
+      90deg,
+      rgb(28 22 12 / 84%) 0%,
+      rgb(12 13 20 / 54%) 56%,
+      rgb(6 8 14 / 16%) 100%
+    );
+  box-shadow:
+    -3px 0 22px -4px rgb(240 207 134 / 36%),
+    inset 1px 0 0 rgb(255 248 232 / 18%);
 }
 
-/* Tier 3: architectural 24K-gold-framed obsidian spec ledger (outer frame only). */
+/* Tier 3: Optical 24K-gold-framed obsidian spec ledger (curved 28px Ring System glass). */
 html[data-family="dossier"]
   main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
   #dossier-profile
   :is(.manager-facts, #sv-stage-boost) {
-  border: 1px solid rgb(240 207 134 / 34%);
-  border-top: 2px solid rgb(247 223 162 / 84%);
-  border-radius: 3px;
+  border: 1px solid rgb(240 207 134 / 36%);
+  border-top: 1px solid rgb(255 244 214 / 58%);
+  border-radius: var(--ring-radius-card, 28px);
+  overflow: clip;
   background:
-    linear-gradient(
-        90deg,
-        #ffffff 0%,
-        var(--sv-ivory) 16%,
-        var(--sv-gold-hi) 42%,
-        var(--sv-gold) 74%,
-        rgb(185 139 64 / 38%) 100%
-      )
-      top / 100% 1px no-repeat,
-    radial-gradient(ellipse 64% 120px at 14% 0%, rgb(247 223 162 / 14%), transparent 74%),
-    radial-gradient(ellipse 46% 96px at 92% 100%, rgb(240 207 134 / 8%), transparent 72%),
-    linear-gradient(170deg, #0d101a 0%, #05070e 100%);
+    radial-gradient(ellipse 66% 124px at 14% 0%, rgb(247 223 162 / 18%), transparent 74%),
+    radial-gradient(ellipse 48% 102px at 92% 100%, rgb(240 207 134 / 11%), transparent 72%),
+    linear-gradient(180deg, rgb(255 248 232 / 5.5%) 0%, transparent 56px),
+    linear-gradient(170deg, #0f131f 0%, #05070e 100%);
   box-shadow:
-    0 24px 56px rgb(0 0 0 / 56%),
-    0 0 30px rgb(240 207 134 / 9%),
-    inset 0 1px 0 rgb(255 250 238 / 24%),
-    inset 0 -1px 0 rgb(240 207 134 / 18%);
+    0 26px 60px rgb(0 0 0 / 60%),
+    0 0 34px rgb(240 207 134 / 12%),
+    inset 0 1px 0 rgb(255 250 238 / 34%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%);
 }
 
 html[data-family="dossier"]
@@ -1882,13 +1888,30 @@ html[data-family="dossier"]
   transition: background-color 180ms ease;
 }
 
+html[data-family="dossier"]
+  main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
+  #dossier-profile
+  .manager-facts
+  dt {
+  transition: color 180ms ease;
+}
+
 @media (hover: hover) and (pointer: fine) {
   html[data-family="dossier"]
     main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
     #dossier-profile
     .manager-facts
     > div:hover {
-    background-color: rgb(240 207 134 / 6%);
+    background-color: rgb(240 207 134 / 9%);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
+    #dossier-profile
+    .manager-facts
+    > div:hover
+    dt {
+    color: #fff2cc;
   }
 }
 
@@ -1925,14 +1948,23 @@ html[data-family="dossier"]
   }
 }
 
-/* Unified opaque obsidian-gold glass reader dock (zero boxed tab frames). */
-html[data-family="dossier"]
-  main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
+/* Imperial 24K Gold Optical Pill-Track Reader Dock (harmonized with Ring System
+   pill tracks + gated all-pointer spring hover & press bounce). */
+html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+  main.manager-page.is-sovereign
   > :is(.dossier-reader, #sv-stage-boost) {
   border-radius: 0;
-  border-top: 1px solid rgb(255 248 232 / 18%);
-  border-bottom: 1px solid rgb(247 223 162 / 48%);
+  border-top: 1px solid rgb(247 223 162 / 34%);
+  border-bottom: 1px solid rgb(247 223 162 / 46%);
   background:
+    linear-gradient(
+        90deg,
+        transparent 4%,
+        rgb(255 248 232 / 48%) 26%,
+        rgb(247 223 162 / 44%) 66%,
+        transparent 96%
+      )
+      50% 0 / 100% 1px no-repeat,
     linear-gradient(
       90deg,
       rgb(240 207 134 / 16%) 0%,
@@ -1940,58 +1972,177 @@ html[data-family="dossier"]
       transparent 70%,
       rgb(255 248 232 / 9%) 100%
     ),
+    linear-gradient(180deg, rgb(255 248 232 / 4.5%) 0%, transparent 56%),
     #05070e;
   background-color: #05070e;
   box-shadow:
-    0 20px 48px rgb(0 0 0 / 66%),
-    0 2px 20px rgb(240 207 134 / 12%),
-    inset 0 1px 0 rgb(255 250 238 / 22%),
-    inset 0 -1px 0 rgb(240 207 134 / 38%);
+    0 20px 48px rgb(0 0 0 / 68%),
+    0 2px 22px rgb(240 207 134 / 14%),
+    inset 0 1px 0 rgb(255 250 238 / 24%);
 }
 
-html[data-family="dossier"]
-  main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
+html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+  main.manager-page.is-sovereign
   > .dossier-reader
-  .dossier-reader-links
-  :is(a, #sv-stage-boost) {
-  border: 0;
-  border-radius: 0;
-  color: rgb(238 230 212 / 66%);
-  background: transparent;
-  box-shadow: none;
-  transition: color 180ms ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  html[data-family="dossier"]
-    main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
-    > .dossier-reader
-    .dossier-reader-links
-    :is(a, #sv-stage-boost):hover {
-    color: #fff8e8;
-  }
-}
-
-html[data-family="dossier"]
-  main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
-  > .dossier-reader
-  .dossier-reader-links
-  :is(a[aria-current], #sv-stage-boost) {
-  border: 0;
-  color: #ffffff;
+  .dossier-reader-links {
+  gap: 4px;
+  margin-block: 5px;
+  padding: 3px;
+  border: 1px solid rgb(240 207 134 / 36%);
+  border-radius: var(--ring-radius-pill, 999px);
   background:
     linear-gradient(
         90deg,
-        transparent 4%,
-        var(--sv-gold-hi) 24%,
-        #ffffff 50%,
-        var(--sv-gold-hi) 76%,
-        transparent 96%
+        transparent 6%,
+        rgb(255 250 238 / 38%) 24%,
+        rgb(247 223 162 / 54%) 54%,
+        rgb(240 207 134 / 32%) 80%,
+        transparent 94%
       )
-      50% 100% / 100% 2px no-repeat,
-    radial-gradient(ellipse 84% 72% at 50% 100%, rgb(247 223 162 / 28%), transparent 78%);
+      50% 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #04060c 0%, #100d08 100%);
+  box-shadow:
+    inset 0 1px 4px rgb(0 0 0 / 78%),
+    inset 0 -1px 0 rgb(240 207 134 / 18%),
+    0 2px 14px rgb(0 0 0 / 42%);
+}
+
+html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+  main.manager-page.is-sovereign
+  > .dossier-reader
+  .dossier-reader-links
+  :is(a, #sv-stage-boost) {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-pill, 999px);
+  color: rgb(242 232 210 / 74%);
+  background: transparent;
   box-shadow: none;
-  text-shadow: 0 0 16px rgb(247 223 162 / 52%);
+}
+
+html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+  main.manager-page.is-sovereign
+  > .dossier-reader
+  .dossier-reader-links
+  :is(a[aria-current], a[aria-current="location"], a[aria-current="page"], a[aria-current="true"], #sv-stage-boost) {
+  border: 1px solid rgb(255 244 214 / 62%);
+  border-radius: var(--ring-radius-pill, 999px);
+  color: #ffffff;
+  background:
+    radial-gradient(72% 66% at 50% 0%, rgb(255 250 238 / 30%), transparent 70%),
+    radial-gradient(88% 120% at 50% 100%, rgb(247 223 162 / 48%), transparent 78%),
+    linear-gradient(180deg, #3c2c11 0%, #1a1308 58%, #0e0b06 100%);
+  box-shadow:
+    0 8px 22px rgb(0 0 0 / 58%),
+    0 0 26px -4px rgb(240 207 134 / 52%),
+    inset 0 1px 0 rgb(255 250 238 / 50%),
+    inset 0 -2px 0 rgb(247 223 162 / 78%);
+  text-shadow: 0 0 16px rgb(247 223 162 / 64%);
+}
+
+@media (min-width: 761px) {
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links {
+    gap: 5px;
+    margin-block: 5px;
+    padding: 4px;
+  }
+
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    :is(a, #sv-stage-boost) {
+    min-height: 44px;
+    padding: 0 20px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#sv-r):not(#sv-r):not(
+      #sv-r
+    ):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    a {
+    transition:
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      translate var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#sv-r):not(#sv-r):not(
+      #sv-r
+    ):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    a:active {
+    scale: 0.94;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"])
+    main.manager-page.is-sovereign
+    :is(#dossier-index .dossier-contents > a, > .manager-pagination > a) {
+    transition:
+      scale var(--ring-dur-spring, 620ms) var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+      background-color 180ms ease,
+      border-color 180ms ease;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"])
+    main.manager-page.is-sovereign
+    :is(#dossier-index .dossier-contents > a, > .manager-pagination > a):active {
+    scale: 0.985;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    a:not([aria-current]):hover {
+    color: #fffbf0;
+    border-color: rgb(240 207 134 / 46%);
+    background-color: rgb(240 207 134 / 15%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 232 / 32%),
+      0 8px 18px rgb(0 0 0 / 40%),
+      0 0 16px -4px rgb(240 207 134 / 32%);
+  }
+
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    a[aria-current]:hover {
+    border-color: rgb(255 250 238 / 78%);
+    box-shadow:
+      0 10px 26px rgb(0 0 0 / 60%),
+      0 0 32px -3px rgb(240 207 134 / 64%),
+      inset 0 1px 0 rgb(255 252 244 / 58%),
+      inset 0 -2px 0 rgb(255 234 176 / 86%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#sv-r):not(#sv-r):not(
+      #sv-r
+    ):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    a:hover {
+    translate: 0 -1.5px;
+  }
 }
 
 /* Imperial monograph chapter spreads (double gold crown fillet + left bookbinding spine). */
@@ -2149,7 +2300,7 @@ html[data-family="dossier"]
       .dossier-identity
       :is(.manager-title, #sv-stage-boost) {
       margin-top: 8px;
-      padding: 4px 16px 4px 13px;
+      padding: 4px 16px;
       font-size: 14px;
       line-height: 1.42;
     }
@@ -2282,7 +2433,7 @@ html[data-family="dossier"]
       display: grid;
       gap: 6px;
       margin: 12px 0;
-      padding: 9px 6px 9px 20px;
+      padding: 10px 16px 10px 20px;
     }
 
     html[data-family="dossier"]
@@ -2481,6 +2632,9 @@ html[data-world-effects="economy"]
     box-shadow: none;
   }
 
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > :is(.dossier-reader, #sv-stage-boost),
   html[data-family="dossier"]
     main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
     > :is(.dossier-reader, #sv-stage-boost) {
@@ -2489,6 +2643,26 @@ html[data-world-effects="economy"]
     box-shadow: none;
   }
 
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]:not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r):not(#sv-r)
+    main.manager-page.is-sovereign
+    > .dossier-reader
+    .dossier-reader-links
+    :is(
+      a[aria-current],
+      a[aria-current="location"],
+      a[aria-current="page"],
+      a[aria-current="true"],
+      #sv-stage-boost
+    ),
   html[data-family="dossier"]
     main.manager-page.is-sovereign.is-sovereign.is-sovereign.is-sovereign.is-sovereign
     > .dossier-reader

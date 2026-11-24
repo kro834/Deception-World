@@ -105,20 +105,23 @@ main.manager-page:not(.is-sovereign) .manager-topbar .brand-sigil {
 }
 
 main.manager-page:not(.is-sovereign) .manager-topbar .manager-back {
-  border-color: color-mix(in srgb, var(--dm-lock) 46%, rgb(240 207 134 / 30%));
-  border-radius: 6px;
+  border-color: color-mix(in srgb, var(--dm-lock) 52%, rgb(240 207 134 / 32%));
+  border-radius: 999px;
   background:
-    linear-gradient(90deg, transparent 8%, var(--dm-lock) 44%, var(--dm-gold) 76%, transparent 94%)
-      50% 0 / 100% 1px no-repeat,
+    radial-gradient(
+      85% 120% at 30% 0%,
+      rgb(255 255 255 / 14%),
+      transparent 68%
+    ),
     linear-gradient(
       145deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, #0e192c),
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 22%, #101d32),
       #060c17 84%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(240 207 134 / 16%),
-    0 8px 22px rgb(0 0 0 / 46%);
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(240 207 134 / 18%),
+    0 10px 24px rgb(0 0 0 / 48%);
 }
 
 /* The brand reads at 12px or larger, as on the sovereign file: the sigil,
@@ -343,36 +346,43 @@ main.manager-page:not(.is-sovereign)
 }
 
 main.manager-page:not(.is-sovereign) :is(.dossier-read-link, .rider-special-site-link) {
-  border-color: color-mix(in srgb, var(--dm-lock) 50%, rgb(240 207 134 / 30%));
-  border-radius: 6px;
+  border-color: color-mix(in srgb, var(--dm-lock) 54%, rgb(240 207 134 / 32%));
+  border-radius: 999px;
   background:
-    linear-gradient(90deg, var(--dm-lock) 0%, var(--dm-gold) 58%, transparent 96%) 0 0 / 100%
-      1.5px no-repeat,
+    radial-gradient(
+      85% 120% at 32% 0%,
+      rgb(255 255 255 / 15%),
+      transparent 68%
+    ),
     linear-gradient(
       140deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, #101d32),
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, #112038),
       #08101d 80%
     );
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 46%),
-    0 0 20px -6px color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(240 207 134 / 18%);
+    0 12px 28px rgb(0 0 0 / 48%),
+    0 0 22px -6px color-mix(in srgb, var(--manager-accent, #7ae8ff) 28%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(240 207 134 / 20%);
 }
 
 @media (hover: hover) and (pointer: fine) {
   main.manager-page:not(.is-sovereign) :is(.dossier-read-link, .rider-special-site-link):hover {
-    border-color: color-mix(in srgb, var(--dm-lock) 76%, var(--dm-gold));
-    background-color: color-mix(in srgb, var(--manager-accent, #7ae8ff) 28%, #0c1728);
+    border-color: color-mix(in srgb, var(--dm-lock) 80%, var(--dm-gold));
+    background-color: color-mix(in srgb, var(--manager-accent, #7ae8ff) 30%, #0d1a2e);
     box-shadow:
-      0 14px 32px rgb(0 0 0 / 48%),
-      0 0 20px color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, transparent),
-      inset 0 1px 0 rgb(255 255 255 / 24%);
+      0 14px 32px rgb(0 0 0 / 52%),
+      0 0 24px color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 34%);
   }
 
   main.manager-page:not(.is-sovereign) .manager-topbar .manager-back:hover {
-    border-color: color-mix(in srgb, var(--dm-lock) 72%, var(--dm-gold));
-    background-color: color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, #0b1424);
+    border-color: color-mix(in srgb, var(--dm-lock) 76%, var(--dm-gold));
+    background-color: color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, #0d182b);
+    box-shadow:
+      0 12px 28px rgb(0 0 0 / 52%),
+      0 0 18px color-mix(in srgb, var(--manager-accent, #7ae8ff) 22%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 34%);
   }
 }
 
