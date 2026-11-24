@@ -167,7 +167,7 @@
         calls: ["マイティジャンプ！", "マイティシーフ！", "マイティマイティコレクト！", "X！"],
         stats: [
           { dt: "HEIGHT", dd: "203.0cm" },
-          { dt: "WEIGHT", dd: "100.5Kg" },
+          { dt: "WEIGHT", dd: "100.5kg" },
           { dt: "PUNCH", dd: "92.1t" },
           { dt: "KICK", dd: "130.5t" },
           { dt: "JUMP", dd: "67.5m (ひと跳び)" },
