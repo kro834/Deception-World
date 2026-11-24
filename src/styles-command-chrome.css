@@ -2685,3 +2685,58 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
     forced-color-adjust: none;
   }
 }
+
+/* Phone orbit labels keep their full text inside each disc. */
+@media (orientation: portrait) and (max-width: 600px),
+       (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > .side-panel-quick-search {
+    gap: 5px;
+    padding-inline: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > .side-panel-quick-search
+    > svg {
+    flex: 0 0 15px;
+    width: 15px;
+    height: 15px;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button
+    > span {
+    font-size: 12px;
+    line-height: 1.15;
+    word-break: normal;
+    text-wrap: balance;
+  }
+}
+
+@media (forced-colors: none) and (orientation: portrait) and (max-width: 600px),
+       (forced-colors: none) and (orientation: landscape) and (max-height: 500px)
+         and (max-width: 980px) and (pointer: coarse) {
+  /* The inset stroke stays legible between adjacent rows and leaves room
+     for the keyboard focus outline. */
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > a:is([aria-current="page"], [aria-current="location"]) {
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.74),
+      inset 0 1px 0 rgb(255 255 255 / 0.48),
+      0 6px 18px -12px rgb(var(--ring-key-rgb) / 0.64);
+  }
+}

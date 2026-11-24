@@ -748,12 +748,14 @@ dialog.quick-search :is(button, a):focus-visible {
 }
 @media (max-width: 640px) {
   dialog.quick-search {
+    --qs-top: max(12px, env(safe-area-inset-top, 0px));
+    --qs-bottom: max(12px, env(safe-area-inset-bottom, 0px));
     width: calc(100vw - 24px);
-    margin-top: 12px;
-    max-height: calc(100dvh - 24px);
+    margin-top: var(--qs-top);
+    max-height: calc(100dvh - var(--qs-top) - var(--qs-bottom));
   }
   .quick-search-panel {
-    max-height: calc(100dvh - 24px);
+    max-height: calc(100dvh - var(--qs-top) - var(--qs-bottom));
   }
   .quick-search-field {
     margin: 12px;

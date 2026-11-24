@@ -11,9 +11,16 @@ const maximum = panel.match(/max-height:\s*([^;]+);/)[1];
 // Evaluate these authored CSS lengths against a short landscape/split viewport.
 // This catches a sheet whose scroll area fits its own max-height but whose
 // top margin pushes its footer below the locked document's viewport.
-function length(value, height) {
+function length(
+  value,
+  height,
+  { topInset = 0, bottomInset = 0, topOffset = top, bottomOffset = "0px" } = {},
+) {
   const expression = value
-    .replaceAll("var(--qs-top)", top)
+    .replaceAll("var(--qs-top)", topOffset)
+    .replaceAll("var(--qs-bottom)", bottomOffset)
+    .replaceAll("env(safe-area-inset-top, 0px)", `${topInset}px`)
+    .replaceAll("env(safe-area-inset-bottom, 0px)", `${bottomInset}px`)
     .replace(/([0-9.]+)d?vh/g, (_, n) => String((Number(n) * height) / 100))
     .replace(/([0-9.]+)px/g, "$1")
     .replace(/\b(min|max)\(/g, "Math.$1(")
@@ -34,9 +41,23 @@ for (const height of [320, 600, 700, 834, 1194]) {
   });
 }
 
-test("phone layout reserves its own 12px top and bottom margins", () => {
-  assert.match(
-    css,
-    /@media \(max-width: 640px\) \{\s*dialog\.quick-search \{[^}]*margin-top: 12px;[^}]*max-height: calc\(100dvh - 24px\);/,
+test("phone sheet and scroll panel fit above the home indicator and below the top inset", () => {
+  const [, phone, phonePanel] = css.match(
+    /@media \(max-width: 640px\) \{\s*dialog\.quick-search \{([^}]+)\}\s*\.quick-search-panel \{([^}]+)\}/,
   );
+  const topOffset = phone.match(/--qs-top:\s*([^;]+);/)[1];
+  const bottomOffset = phone.match(/--qs-bottom:\s*([^;]+);/)[1];
+  for (const [topInset, bottomInset] of [
+    [0, 0],
+    [59, 34],
+  ]) {
+    const height = 667;
+    const dimensions = { topInset, bottomInset, topOffset, bottomOffset };
+    const y = length(phone.match(/margin-top:\s*([^;]+);/)[1], height, dimensions);
+    assert.equal(y, Math.max(12, topInset));
+    for (const sheet of [phone, phonePanel]) {
+      const available = length(sheet.match(/max-height:\s*([^;]+);/)[1], height, dimensions);
+      assert.equal(y + available, height - Math.max(12, bottomInset));
+    }
+  }
 });
