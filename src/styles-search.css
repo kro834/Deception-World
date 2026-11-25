@@ -1974,6 +1974,10 @@
     opacity: 0.52;
   }
 
+  :root body .world.search-page.search-observatory[data-search-page][data-search-mode="find"] .search-results {
+    padding-block-start: 10px;
+  }
+
   :is(
     .world.search-page,
     html body .world.search-page.search-observatory[data-search-page][data-search-mode]
