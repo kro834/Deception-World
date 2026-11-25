@@ -47,7 +47,7 @@ test("fullscreen route effects are limited to gallery, archive, Zeus, and rider 
   // Saga is another deliberate full-screen cover; only the listed exceptions may route directly.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await preloadRouteWithDeadline\(\s*\(\) =>\s*navigate/,
   );
   assert.match(gate, /"\/riders\/saga": "saga"/);
   assert.match(gate, /"\/riders\/realm": "realm"/);

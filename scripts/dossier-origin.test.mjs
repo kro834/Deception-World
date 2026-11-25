@@ -76,8 +76,9 @@ test("guarded navigation keeps the origin in native links, retry links and every
   assert.match(gate, /const navigationSearch = search \? \(\) => search : undefined/);
   assert.equal(
     (gate.match(/navigate\(\{ to, hash, search: navigationSearch \}\)/g) ?? []).length,
-    5,
+    2,
   );
+  assert.equal((gate.match(/await commitCoveredDestination\(\)/g) ?? []).length, 4);
   assert.match(gate, /search: navigationSearch \?\? \(changesDocument \? undefined : true\)/);
   assert.match(
     gate,

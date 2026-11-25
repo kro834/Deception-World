@@ -66,7 +66,7 @@ test("a keyboard activation focuses the destination in every navigation branch",
   );
   assert.match(
     loadGate,
-    /await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\);\s*if \(!isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*if \(hash\) await settleRouteHash\(hash\);/,
+    /await preloadRouteWithDeadline\(\s*\(\) =>\s*navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\),\s*requestSignal,\s*\{ proceedOnError: false \},\s*\);\s*if \(!isCurrent\(\)\) return;\s*if \(!ready\) \{\s*reportDelay\(\);\s*return;\s*\}\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*if \(hash\) await settleRouteHash\(hash\);/,
   );
   assert.match(loadGate, /target\.focus\(\{ preventScroll: true \}\);/);
   assert.match(transitions, /\[data-route-focus="true"\]:focus \{\s*outline: none;\s*\}/);

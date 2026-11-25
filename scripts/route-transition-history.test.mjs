@@ -119,7 +119,7 @@ for (const action of ["BACK", "hidden", "unmount"]) {
 
 function mount(
   pathname = "/world",
-  { preload, prepareCalls, suitReady = false, warmSuit, preparePlan, loadPlan } = {},
+  { preload, prepareCalls, suitReady = false, warmSuit, preparePlan, loadPlan, navigate, warmAssets } = {},
 ) {
   class KeyboardEvent extends Event {
     constructor(type, options = {}) {
@@ -224,6 +224,7 @@ function mount(
     exports,
     window: win,
     document: doc,
+    AbortController,
     Event,
     CustomEvent,
     KeyboardEvent,
@@ -272,9 +273,11 @@ function mount(
           useRouterState: () => pathname,
           useNavigate: () => async (destination) => {
             navigations.push(destination);
+            await navigate?.(destination);
           },
         };
-      if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
+      if (name === "@/lib/asset-loader")
+        return { preloadAssets: warmAssets ?? (async () => undefined) };
       if (name === "@/lib/chunk-retry.js") return { failedChunkUrl, loaderChunkUrl };
       if (name === "@/lib/guarded-href") return { guardedHref };
       if (name === "@/lib/transition-decoration-clock") return { createTransitionDecorationClock };
@@ -1133,7 +1136,11 @@ test("rx17: stalled cold decoding reaches whole fallback after its preparation d
     },
   });
   const pending = ui.go({ to: "/rexonance-saga" });
-  await flushUntil(ui, () => ui.pendingTimers() > 0, "cold preparation must have a deadline");
+  await flushUntil(
+    ui,
+    () => ui.pendingTimerDelays().includes(1800),
+    "cold preparation must have a deadline after the opening paint",
+  );
   assert.equal(ui.gates.filter((gate) => gate.active).length, 0);
   await ui.flushTimers();
   ui.releaseWarmup();
@@ -1304,5 +1311,58 @@ test("repeated selection of the same pending destination keeps one route request
     ui.navigations.map(({ to }) => to),
     ["/gallery"],
   );
+  ui.cleanup();
+});
+
+test("a stalled commit releases its cover and exposes retry", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const ui = mount("/world", {
+    navigate: () => new Promise(() => {}),
+  });
+  ui.releaseWarmup();
+  const pending = ui.go({ to: "/gallery", hash: "artworks" });
+  await flushUntil(ui, () => ui.navigations.length === 1, "the router must start the commit", {
+    timers: true,
+  });
+  assert.equal(ui.root.dataset.loading, "true");
+  t.mock.timers.tick(ROUTE_WARMUP_DEADLINE_MS);
+  await settleGo(ui, pending);
+  assert.equal(ui.root.dataset.loading, undefined);
+  assert.equal(ui.gates.at(-1).active, false);
+  assert.equal(ui.fallbacks.at(-1).href, "/gallery#artworks");
+  ui.cleanup();
+});
+
+test("another direct destination supersedes a pending same-link duplicate", async () => {
+  let finish;
+  const ui = mount("/world", {
+    navigate: ({ to }) => to === "/search" ? new Promise((resolve) => { finish = resolve; }) : undefined,
+  });
+  const previous = ui.go({ to: "/search" });
+  await flushUntil(ui, () => ui.navigations.length === 1, "the first direct route has started");
+  await ui.go({ to: "/search" });
+  const latest = ui.go({ to: "/library" });
+  await settleGo(ui, Promise.all([previous, latest]));
+  finish();
+  assert.deepEqual(ui.navigations.map(({ to }) => to), ["/search", "/library"]);
+  ui.cleanup();
+});
+
+test("the film can navigate while the optional curtain art stays pending", async () => {
+  let assetAttempts = 0;
+  const ui = mount("/world", {
+    warmAssets: () => {
+      assetAttempts++;
+      return new Promise(() => {});
+    },
+  });
+  const pending = ui.go({ to: "/saga-cinema", assets: ["/cinema.webp"] });
+  await flushUntil(ui, () => assetAttempts === 1, "the film art must start warming");
+  assert.equal(ui.navigations.length, 0);
+  ui.skipDecoration();
+  ui.releaseWarmup();
+  await flushUntil(ui, () => ui.navigations.length === 1, "film must commit without waiting for art");
+  await settleGo(ui, pending);
+  assert.equal(ui.root.dataset.loading, undefined);
   ui.cleanup();
 });

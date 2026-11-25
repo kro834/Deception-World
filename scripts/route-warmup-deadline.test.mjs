@@ -41,3 +41,40 @@ for (const failure of ["reject", "throw"]) {
     );
   });
 }
+
+test("cancellation stops waiting for an unsettled preload immediately", async () => {
+  const request = new AbortController();
+  let release;
+  const held = new Promise((resolve) => {
+    release = resolve;
+  });
+  const pending = preloadRouteWithDeadline(() => held, request.signal);
+  await Promise.resolve();
+  request.abort();
+  assert.equal(await pending, false);
+  release();
+});
+
+test("a cancelled request never starts work queued for the next microtask", async () => {
+  const request = new AbortController();
+  let started = false;
+  const pending = preloadRouteWithDeadline(async () => {
+    started = true;
+  }, request.signal);
+  request.abort();
+  assert.equal(await pending, false);
+  assert.equal(started, false);
+});
+
+test("a rejected navigation is distinct from a rejected preload", async () => {
+  assert.equal(
+    await preloadRouteWithDeadline(
+      async () => {
+        throw new Error("commit failed before rendering");
+      },
+      undefined,
+      { proceedOnError: false },
+    ),
+    false,
+  );
+});

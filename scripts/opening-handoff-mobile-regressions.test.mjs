@@ -194,7 +194,7 @@ test("the arriving handoff releases the destination scroll surface", () => {
   // The wrapper releases the global scroll lock and local marker before arrival paints.
   assert.match(
     loadGateSource,
-    /phase:\s*"arriving",[\s\S]{0,600}?setDocumentLoading\(false\);[\s\S]{0,260}?await nextFrame\(\)/,
+    /phase:\s*"arriving",[\s\S]{0,600}?setDocumentLoading\(false\);[\s\S]{0,260}?await settleUnderCover\(requestSignal\)/,
     "The global scroll lock must be removed when arrival starts, before the arrival animation wait.",
   );
 });

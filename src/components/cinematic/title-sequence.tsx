@@ -628,6 +628,7 @@ export function TitleSequence() {
   }, [audit, economyOpening, startBurn]);
 
   const finish = useCallback(() => {
+    if (phaseRef.current !== "idle" && phaseRef.current !== "playing") return;
     phaseRef.current = "complete";
     setPhase("complete");
     completedAtRef.current = performance.now();
@@ -679,6 +680,8 @@ export function TitleSequence() {
   }, [finish]);
 
   const replay = useCallback(() => {
+    if (phaseRef.current !== "complete") return;
+    phaseRef.current = "idle";
     stopBurn();
     burnModuleRef.current?.releaseOpeningBurn();
     const video = videoRef.current;
@@ -687,8 +690,6 @@ export function TitleSequence() {
       videoStartTimerRef.current = null;
     }
     video?.pause();
-    if (video) video.currentTime = 0;
-    phaseRef.current = "idle";
     setPhase("idle");
     setReplayKey((k) => k + 1);
   }, [stopBurn]);
@@ -784,6 +785,14 @@ export function TitleSequence() {
     if (divePrimeTimerRef.current) primeDiveNow();
   };
 
+  const restoreTitleAfterEntry = useCallback(() => {
+    if (!mountedRef.current || phaseRef.current !== "diving" || window.location.pathname !== "/") {
+      return;
+    }
+    phaseRef.current = "complete";
+    setPhase("complete");
+  }, []);
+
   const enterWorld = useCallback(async () => {
     if (phaseRef.current !== "complete") return;
 
@@ -814,8 +823,10 @@ export function TitleSequence() {
     if (!started) return;
 
     entryPendingRef.current = true;
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
+    const focused = document.activeElement;
+    if (focused instanceof HTMLElement) {
+      keyboardFocusRef.current = focused === enterRef.current && focused.matches(":focus-visible");
+      focused.blur();
     }
     phaseRef.current = "diving";
     setPhase("diving");
@@ -830,31 +841,17 @@ export function TitleSequence() {
       // The covered route contract deliberately resolves cancellation and
       // timeout paths without throwing. If the title is still mounted, restore
       // its controls instead of leaving an inert `diving` frame behind.
-      if (mountedRef.current && phaseRef.current === "diving" && window.location.pathname === "/") {
-        phaseRef.current = "complete";
-        setPhase("complete");
-      }
+      restoreTitleAfterEntry();
     } catch {
-      if (mountedRef.current) {
-        phaseRef.current = "complete";
-        setPhase("complete");
-      }
+      restoreTitleAfterEntry();
     } finally {
       entryPendingRef.current = false;
     }
-  }, [beginOpeningHandoff, economyOpening, go]);
+  }, [beginOpeningHandoff, economyOpening, go, restoreTitleAfterEntry]);
 
   useEffect(() => {
     const restoreTitleIfNeeded = () => {
-      if (
-        mountedRef.current &&
-        !entryPendingRef.current &&
-        phaseRef.current === "diving" &&
-        window.location.pathname === "/"
-      ) {
-        phaseRef.current = "complete";
-        setPhase("complete");
-      }
+      if (!entryPendingRef.current) restoreTitleAfterEntry();
     };
     const handleVisibilityChange = () => {
       const video = videoRef.current;
@@ -885,7 +882,7 @@ export function TitleSequence() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pageshow", handlePageShow);
     };
-  }, [audit, economyOpening]);
+  }, [audit, economyOpening, restoreTitleAfterEntry]);
 
   // ?opening-audit: a frame-exact clock for the flash audit and the contact
   // sheets (scripts/verify-opening-cinematic.mjs). Nothing runs on timers.
