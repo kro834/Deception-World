@@ -56,7 +56,37 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   const dialBlock = homeView.match(ringDial)[0];
   assert.match(dialBlock, /className="rider-ring-dial" aria-hidden="true"/);
   assert.doesNotMatch(dialBlock.replace(/\{\/\*[\s\S]*?\*\/\}/, ""), />[^<>{}\s][^<>{}]*</, "the ring carries no text");
+  const storyNavigation =
+    / {8}<div className="world-story-navigation">\n([\s\S]*?)\n {8}<\/div>\n\n/;
+  const navigation = homeView.match(storyNavigation);
+  assert.ok(navigation, "the navigation block follows the narrative opening");
+  assert.match(homeView, /<\/section>\s*<section className="story-section" id="story">/);
+  assert.match(
+    navigation[1],
+    /<MirageTicker variant="open" records=\{EPISODES.length\} \/>\s*<WorldContents \/>\s*<WorldExploration \/>/,
+  );
+  assert.ok(homeView.indexOf('className="story-copy"') < navigation.index);
+  assert.ok(navigation.index < homeView.indexOf('id="manager-archive"'));
+  // Restore the approved changes before applying the historical markup pins.
   const preservedHomeView = homeView
+    .replace('                {/* Keep the decoded image node when a print moves to the outgoing layer. */}\n', '')
+    .replace('key={`poster-${prevPoster}`}', 'key={`poster-prev-${prevPoster}`}')
+    .replace(storyNavigation, "")
+    .replace(
+      '      <section className="story-section" id="story">',
+      '      <MirageTicker variant="open" records={EPISODES.length} />\n\n' +
+        '      <WorldContents />\n      <WorldExploration />\n\n' +
+        '      <section className="story-section" id="story">',
+    )
+    .replace('className="world-section-nav" aria-label="世界の章"', 'aria-label="メインメニュー"')
+    .replace(
+      /<b className="world-stage-state-label" aria-hidden="true">\s*<span data-inactive=\{shuffling \|\| undefined\}>SHUFFLE POSTER<\/span>\s*<span data-inactive=\{!shuffling \|\| undefined\}>SHUFFLING\.\.\.<\/span>\s*<\/b>/,
+      '<b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>',
+    )
+    .replace(
+      /<b className="world-stage-state-label" aria-hidden="true">\s*<span data-inactive=\{locked \|\| undefined\}>自動切替<\/span>\s*<span data-inactive=\{!locked \|\| undefined\}>固定中<\/span>\s*<\/b>/,
+      '<b>{locked ? "固定中" : "自動切替"}</b>',
+    )
     .replace(ringDial, "")
     .replace("      <WorldExploration />\n", "")
     .replace(

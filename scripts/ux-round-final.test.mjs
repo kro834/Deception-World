@@ -33,7 +33,7 @@ test("only the latest hash landing keeps aligning", () => {
   );
   assert.match(
     loadGate,
-    /const align = \(\) => \{\s*if \(settle !== routeHashSettle\) userInteracted = true;\s*if \(!userInteracted\) \{/,
+    /const align = \(\) => \{\s*if \(settle !== routeHashSettle \|\| window\.location\.href !== arrivalHref\) userInteracted = true;\s*if \(!userInteracted\) \{/,
   );
 });
 

@@ -12,7 +12,7 @@ import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { captureRiderReturn, readRiderReturn, restoreRiderControl } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import { RevealText } from "./reveal-text";
@@ -509,3 +509,9 @@ const EPISODES: EpisodeRecord[] = [
       },
       {
         label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーサイファー",
+        width: 1024,
+        height: 1280,
+        to: "/riders/cipher",

@@ -1,3 +1,4 @@
+          {
             name: "ゼッツドライバー",
             body: "仮面ライダーオーバーゼッツのドライバー。カスタメアカプセムを使用することで、仮面ライダーオーバーゼッツ カスタムへの変身を可能とする他、従来型カプセムの壁を超えた四つの属性の固有能力を引き出すことが可能。",
           },
@@ -286,9 +287,6 @@ export function RiderPage({ id }: { id: string }) {
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
   const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
-  useEffect(() => {
-    rememberRiderReturn(rider.id);
-  }, [rider.id]);
   useEffect(
     () => () => {
       cancelNightmareScrollReset.current?.();
@@ -400,3 +398,4 @@ export function RiderPage({ id }: { id: string }) {
               {rider.no}
             </span>
             <h1>
+              <span

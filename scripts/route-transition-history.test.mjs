@@ -20,6 +20,10 @@ const source = readFileSync(new URL("../src/components/load-gate.tsx", import.me
 const code = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
 }).outputText;
+const riderReturnCode = ts.transpileModule(
+  readFileSync(new URL("../src/components/world/rider-return-state.ts", import.meta.url), "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS } },
+).outputText;
 const entryPreparationCode = ts.transpileModule(
   readFileSync(new URL("../src/lib/rexonance-entry-preparation.ts", import.meta.url), "utf8"),
   { compilerOptions: { module: ts.ModuleKind.CommonJS } },
@@ -185,7 +189,8 @@ function mount(
   });
   const win = new EventTarget();
   Object.assign(win, {
-    location: { pathname, hash: "" },
+    location: new URL(pathname, "https://world.example"),
+    history: { state: { __TSR_key: "origin", __TSR_index: 0 } },
     matchMedia: () => motion,
     requestAnimationFrame: (callback) => {
       frames.set(++serial, callback);
@@ -219,6 +224,8 @@ function mount(
   };
   const exports = {};
   const entryPreparation = {};
+  const riderReturn = {};
+  runInNewContext(riderReturnCode, { exports: riderReturn, window: win, URL });
   runInNewContext(entryPreparationCode, { exports: entryPreparation, window: win });
   runInNewContext(code, {
     exports,
@@ -231,6 +238,7 @@ function mount(
     MutationObserver,
     performance: { now: () => 1000 },
     require(name) {
+      if (name === "./world/rider-return-state") return riderReturn;
       if (name === "react")
         return {
           createContext: () => ({ Provider: "provider" }),

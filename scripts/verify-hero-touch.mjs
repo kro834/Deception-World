@@ -9,11 +9,11 @@ const browser = await (engine === "webkit" ? webkit : chromium).launch(
   engine === "webkit" ? {} : { channel: "chrome" },
 );
 const surfaces = [
-  ".hero h1", ".hero-lead", ".hero .primary-action", ".hero .text-action",
+  ".world-artwork-hero h1", ".world-stage-lead", ".world-stage-actions .primary-action", ".world-stage-actions .text-action",
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the metadata strip and
   // the KEY VISUAL caption are gone from the title stage.
-  ".poster-frame", ".poster-shuffle",
-  ".poster-controls button:last-child", ".hero-copy", ".brand",
+  ".world-poster-media", ".poster-shuffle",
+  ".poster-lock", ".world-stage-copy", ".topbar .brand",
   ".side-panel-trigger", ".zeus-button",
 ];
 
@@ -85,9 +85,6 @@ try {
     let checkedSurfaces = 0;
     for (const selector of surfaces) {
       const target = page.locator(selector).first();
-      // The compact cinematic hero intentionally removes its duplicate
-      // POSTER link. Do not confuse a hidden link with a covered touch target.
-      if (selector === ".hero .text-action" && width <= 767 && !(await target.isVisible())) continue;
       await target.evaluate(e => e.scrollIntoView({ block: "center", behavior: "instant" }));
       await page.waitForTimeout(160);
       // Phone reading scrolls deliberately hide Zeus until scrolling settles.

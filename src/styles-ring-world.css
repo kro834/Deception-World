@@ -149,8 +149,9 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.site-shell
+  .world-story-navigation
   > .ws-contents {
-  --ws-ring-size: min(740px, 100vw - 32px);
+  --ws-ring-size: min(740px, 100vw - 2 * var(--sw-gutter, 20px) - 32px);
   --ws-ring-item: calc(var(--ws-ring-size) * 0.225);
   --ws-ring-r: 38%;
   display: grid;
@@ -1895,6 +1896,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     body
     main.site-shell
+    .world-story-navigation
     > .ws-contents {
     --ws-ring-item: calc(var(--ws-ring-size) * 0.2);
     --ws-ring-r: 40%;

@@ -1,5 +1,3 @@
-      grid.removeEventListener("touchstart", startTouch);
-      grid.removeEventListener("touchend", endTouch);
       grid.removeEventListener("touchcancel", endTouch);
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
@@ -356,10 +354,11 @@
               aria-busy={shuffling}
             >
               <div className="world-stage-media">
+                {/* Keep the decoded image node when a print moves to the outgoing layer. */}
                 {previous ? (
                   <img
                     className="world-stage-image world-stage-image-previous"
-                    key={`poster-prev-${prevPoster}`}
+                    key={`poster-${prevPoster}`}
                     src={previous.src}
                     width={previous.width}
                     height={previous.height}
@@ -421,7 +420,10 @@
                   <span aria-hidden="true">
                     <UiVectorIcon kind="shuffle" size={18} />
                   </span>
-                  <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={shuffling || undefined}>SHUFFLE POSTER</span>
+                    <span data-inactive={!shuffling || undefined}>SHUFFLING...</span>
+                  </b>
                 </button>
                 <button
                   type="button"
@@ -501,7 +503,10 @@
                       </svg>
                     )}
                   </span>
-                  <b>{locked ? "固定中" : "自動切替"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={locked || undefined}>自動切替</span>
+                    <span data-inactive={!locked || undefined}>固定中</span>
+                  </b>
                 </button>
               </div>
               <output
@@ -509,3 +514,4 @@
                 aria-live={locked || posterControlsFocused ? "polite" : "off"}
                 aria-atomic="true"
                 aria-busy={shuffling}
+              >

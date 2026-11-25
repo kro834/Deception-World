@@ -32,7 +32,8 @@ export function useMirageBoot(shellRef: RefObject<HTMLElement | null>) {
 
     // A boot that is already playing came from the server-rendered paint.
     const sentinel = shell
-      .getAnimations?.({ subtree: true })
+      .querySelector(".mr-hero-hud")
+      ?.getAnimations?.()
       .find(
         (animation) =>
           animation instanceof CSSAnimation && animation.animationName === MIRAGE_BOOT_SENTINEL,
@@ -54,10 +55,9 @@ export function useMirageBoot(shellRef: RefObject<HTMLElement | null>) {
       document.documentElement.hasAttribute("data-mirage-quiet") ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       prefersLightweightRendering(navigator);
-    const restoring =
-      seen || Boolean(window.location.hash) || window.scrollY > 40 || readRiderReturn() != null;
+    const restoring = seen || window.scrollY > 40 || readRiderReturn() != null;
 
-    if (quiet || (!alreadyPlaying && restoring)) {
+    if (quiet || window.location.hash || (!alreadyPlaying && restoring)) {
       shell.dataset.mirageBoot = "done";
       return;
     }
@@ -68,10 +68,17 @@ export function useMirageBoot(shellRef: RefObject<HTMLElement | null>) {
     const onEnd = (event: AnimationEvent) => {
       if (event.animationName === MIRAGE_BOOT_SENTINEL) finish();
     };
+    // A chapter can be chosen from the server-rendered header before the
+    // opening has finished. Release its visual state on that native jump.
+    const onChapter = () => {
+      if (window.location.hash) finish();
+    };
+    window.addEventListener("hashchange", onChapter);
     shell.addEventListener("animationend", onEnd);
     void sentinel?.finished.then(finish, () => undefined);
     const fallback = window.setTimeout(finish, MIRAGE_BOOT_FALLBACK_MS);
     return () => {
+      window.removeEventListener("hashchange", onChapter);
       shell.removeEventListener("animationend", onEnd);
       window.clearTimeout(fallback);
     };

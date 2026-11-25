@@ -1,15 +1,3 @@
-  // Read by the poster timer at once; the state follows when scrolling settles.
-  const heroInViewRef = useRef(true);
-  const [motionReduced, setMotionReduced] = useState(false);
-  const managerRail = useRef<HTMLDivElement>(null);
-  const columnRail = useRef<HTMLDivElement>(null);
-  const riderRail = useRef<HTMLDivElement>(null);
-  const episodeGridRef = useRef<HTMLDivElement>(null);
-  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
-  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const episodePickupOpenedByKeyboard = useRef(false);
-  const episodePointerFocusTimer = useRef<number | null>(null);
-  const episodeScrollTimer = useRef<number | null>(null);
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
   const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
@@ -59,13 +47,33 @@
   );
 
   useLayoutEffect(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    if (returnIndex < 0) return;
-    riderTabRef.current = returnIndex;
-    setInitialRiderTab(returnIndex);
-    setRiderTab(returnIndex);
-  }, []);
+    let stopAlign: (() => void) | undefined;
+    const restore = () => {
+      const ticket = readRiderReturn();
+      if (!ticket) return;
+      const returnIndex = RIDERS.findIndex((rider) => rider.id === ticket.id);
+      if (returnIndex < 0) return;
+      riderTabRef.current = returnIndex;
+      setInitialRiderTab(returnIndex);
+      setRiderTab(returnIndex);
+      if (ticket.poster != null && POSTERS[ticket.poster]) setPoster(ticket.poster);
+      if (ticket.locked != null) setLocked(ticket.locked);
+      const control = shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+      if (control) {
+        stopAlign?.();
+        stopAlign = restoreRiderControl(ticket, control);
+      }
+    };
+    restore();
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restore();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      stopAlign?.();
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-other") return;
@@ -176,10 +184,6 @@
     syncMotionPreference();
     media.addEventListener?.("change", syncMotionPreference);
     return () => media.removeEventListener?.("change", syncMotionPreference);
-  }, []);
-
-  useEffect(() => {
-    clearRiderReturn();
   }, []);
 
   const selectRider = useCallback((next: number) => {
@@ -509,3 +513,5 @@
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);

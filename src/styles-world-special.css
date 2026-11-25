@@ -53,7 +53,7 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
 }
 
 /* 1. The story chapters use art cards; the archive remains a short index. */
-html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-contents {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition .world-story-navigation > .ws-contents {
   --ws-map-line: rgb(166 206 232 / 34%);
   --ws-map-ink: #f4f6fb;
   --ws-map-accent: #f0cf86;

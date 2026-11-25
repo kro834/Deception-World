@@ -195,10 +195,10 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   assert.doesNotMatch(home, /new Image\(/);
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
   // The stage uses only the selected print and its outgoing decoded image.
-  // Key each image so rapid WebKit transitions keep their warmed resources.
+  // Key by poster identity so React keeps a decoded image when its layer changes.
   assert.doesNotMatch(home, /className="poster-back-card/);
   assert.match(home, /key=\{`poster-\$\{poster\}`\}/);
-  assert.match(home, /key=\{`poster-prev-\$\{prevPoster\}`\}/);
+  assert.match(home, /key=\{`poster-\$\{prevPoster\}`\}/);
 });
 
 test("the Dream Chapter's poster console asks for the same WebP copies", async () => {

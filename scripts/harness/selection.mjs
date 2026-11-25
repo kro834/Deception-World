@@ -79,6 +79,11 @@ const browserSuites = [
     areas: ["world"],
   },
   {
+    id: "world-reader-journey",
+    match: /(?:world-home|rider-return-state|world-artwork-stage|world-reader-journey)/,
+    artifactDirEnv: "OUT_DIR",
+  },
+  {
     id: "archive-history-navigation",
     areas: ["archive"],
     env: { IFRAME: "false" },

@@ -1,3 +1,4 @@
+import { readRiderReturn, riderNavigationState } from "./world/rider-return-state";
 import {
   createContext,
   useCallback,
@@ -971,11 +972,20 @@ function holdRouteScrollMotion() {
   };
 }
 
+// The dossier button is a more precise landmark than the top of the roster.
+function returningToRiderControl(hash?: string) {
+  return (
+    (hash === "riders" || hash === "riders-return") && readRiderReturn()?.viewportFraction != null
+  );
+}
+
 async function settleRouteHash(hash: string) {
   // TanStack restores the previous document position after the destination
   // route commits, and mobile WebKit can repeat that restoration after layout.
   // Keep aligning briefly, but stop the moment the user starts scrolling.
   const settle = ++routeHashSettle;
+  if (returningToRiderControl(hash)) return;
+  const arrivalHref = window.location.href;
   let userInteracted = false;
   let stopWaiting: () => void = () => undefined;
   const userScrollIntent = new Promise<void>((resolve) => {
@@ -990,7 +1000,7 @@ async function settleRouteHash(hash: string) {
     stopWaiting();
   };
   const align = () => {
-    if (settle !== routeHashSettle) userInteracted = true;
+    if (settle !== routeHashSettle || window.location.href !== arrivalHref) userInteracted = true;
     if (!userInteracted) {
       document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "auto" });
     }
@@ -1033,6 +1043,7 @@ async function settleRouteHash(hash: string) {
 // the page's heading. Otherwise focus stays with the menu trigger (or falls
 // to <body>) and the next Tab jumps back to the top of the page.
 function focusRouteDestination(hash?: string) {
+  if (returningToRiderControl(hash)) return;
   let target =
     (hash && hash !== "top" ? document.getElementById(hash) : null) ??
     document.querySelector<HTMLElement>("main h1") ??
@@ -1318,6 +1329,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (
             transitionId.current === token &&
             pathnameRef.current === "/world" &&
+            !window.location.hash &&
+            (document.activeElement === document.body ||
+              document.activeElement === document.documentElement) &&
             focusTarget.isConnected &&
             document.visibilityState === "visible"
           ) {
@@ -2150,9 +2164,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               } else await clock.delay(coverTimeLeft);
             }
             if (!isCurrent()) return;
+            const riderState = riderNavigationState(to, hash, focusDestination);
             await navigateUnderCover(
               router,
-              () => navigate({ to, hash, search: navigationSearch }),
+              () => navigate({ to, hash, search: navigationSearch, state: riderState }),
               to,
             );
             if (!isCurrent()) return;
@@ -3435,6 +3450,11 @@ export function AppGuards() {
     // A reloaded document's first route keeps the reader's place: it is not a
     // fresh entry, so it is restored like a history arrival
     // (restoreReloadPosition), not sent to the top.
+    const firstWorldAlreadyRead =
+      previousPathname.current === null &&
+      pathname === "/world" &&
+      !locationHash &&
+      window.scrollY > 0;
     const reloaded = previousPathname.current === null && reloadArrival.current;
     const pathnameChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
@@ -3472,7 +3492,11 @@ export function AppGuards() {
       );
     const resetRouteTop =
       (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash && !fromHistory) ||
-      (pathname === "/world" && (!locationHash || locationHash === "top") && !fromHistory);
+      (pathname === "/world" &&
+        (!locationHash || locationHash === "top") &&
+        !fromHistory &&
+        !firstWorldAlreadyRead &&
+        readRiderReturn()?.viewportFraction == null);
     if (!resetRouteTop) {
       if (!historyDossier) return releaseRestoring;
       // A dossier reached by Back/Forward is left like any other: its exit is
@@ -3491,8 +3515,9 @@ export function AppGuards() {
     let userInteracted = false;
     let stopped = false;
 
+    const arrivalHref = window.location.href;
     const resetDetailScroll = () => {
-      if (stopped || userInteracted) return;
+      if (stopped || userInteracted || window.location.href !== arrivalHref) return;
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     };
     const stopResetting = () => {

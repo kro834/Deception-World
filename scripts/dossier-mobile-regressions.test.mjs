@@ -33,10 +33,6 @@ const worldPolishStyles = readFileSync(
   new URL("../src/styles-world/21.css", import.meta.url),
   "utf8",
 );
-const riderReturnState = readFileSync(
-  new URL("../src/components/world/rider-return-state.ts", import.meta.url),
-  "utf8",
-);
 const reconstructedStyles = readFileSync(
   new URL("../source-parts/src/styles-world-addon.css/02.part", import.meta.url),
   "utf8",
@@ -81,7 +77,7 @@ test("detail routes use per-location restoration without overwriting the world s
     /window\.visualViewport\?\.addEventListener\("resize", alignAfterViewportChange\)/,
   );
   assert.match(loadGate, /window\.setTimeout\(stopResetting, 1800\)/);
-  assert.match(loadGate, /pathname === "\/world" && \(!locationHash \|\| locationHash === "top"\)/);
+  assert.match(loadGate, /pathname === "\/world" &&\s*\(!locationHash \|\| locationHash === "top"\)/);
   assert.doesNotMatch(loadGate, /attributeFilter: \["data-loading"\]/);
   assert.doesNotMatch(loadGate, /document\.scrollingElement\?\.scrollTo/);
   assert.match(
@@ -103,22 +99,11 @@ test("all rider dossiers return deeper without a doubled fixed-header inset", ()
   );
 });
 
-test("the rider selected before opening a dossier is restored once on return", () => {
-  assert.match(riderPage, /rememberRiderReturn\(rider\.id\)/);
-  assert.match(worldHome, /const returnId = readRiderReturn\(\)/);
-  assert.match(worldHome, /RIDERS\.findIndex\(\(rider\) => rider\.id === returnId\)/);
-  assert.match(worldHome, /const \[initialRiderTab, setInitialRiderTab\] = useState\(0\)/);
-  assert.match(
-    worldHome,
-    /useLayoutEffect\(\(\) => \{[\s\S]*?setInitialRiderTab\(returnIndex\)[\s\S]*?setRiderTab\(returnIndex\)/,
-  );
-  assert.match(worldHome, /const \[riderTab, setRiderTab\] = useState\(0\)/);
-  assert.match(worldHome, /useRef\(riderTab\)/);
+test("the rider selected before opening a dossier is restored on return", () => {
+  assert.match(worldHome, /captureRiderReturn\(\{[\s\S]*?keyboard: source === "keyboard"/);
+  assert.match(worldHome, /restoreRiderControl\(ticket, control\)/);
   assert.match(worldHome, /<RiderRail ref=\{riderRail\} initialIndex=\{initialRiderTab\} \/>/);
   assert.match(worldHome, /aria-selected=\{i === initialIndex\}/);
-  assert.match(riderReturnState, /sessionStorage\.setItem\(RIDER_RETURN_KEY, id\)/);
-  assert.match(worldHome, /useEffect\(\(\) => \{\s*clearRiderReturn\(\);\s*\}, \[\]\)/);
-  assert.match(riderReturnState, /sessionStorage\.removeItem\(RIDER_RETURN_KEY\)/);
 });
 
 test("the compact mobile return control keeps an accessible name", () => {
