@@ -505,21 +505,7 @@ html[data-family="world"]:root
 @container world-poster-controls (max-width: 370px) {
   #top.world-artwork-hero .world-stage-control-cluster {
     flex: 1 1 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.8fr) minmax(0, 1fr);
-  }
-
-  #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding-inline: 4px;
-    gap: 4px;
-  }
-
-  #top.world-artwork-hero .world-stage-controls .world-stage-state-label {
-    min-width: 0;
+    justify-content: space-between;
   }
 
   #top.world-artwork-hero .world-stage-controls output {
@@ -914,7 +900,7 @@ html[data-family="world"]
   }
 
   #top.world-artwork-hero .artwork-stage.world-poster-stage {
-    --stage-art-height: clamp(248px, 39svh, 400px);
+    --stage-art-height: clamp(224px, calc(39svh - 42px), 358px);
     gap: 10px;
   }
 
