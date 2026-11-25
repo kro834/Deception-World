@@ -1007,6 +1007,29 @@
   font-weight: 600;
 }
 
+.search-page .search-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-block-size: 44px;
+  padding-inline: 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: inherit;
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+@media (max-width: 420px) {
+  .search-page[data-search-mode="find"] .search-results-heading > p > span {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
 :is(
   .world.search-page,
   html body .world.search-page.search-observatory[data-search-page][data-search-mode]

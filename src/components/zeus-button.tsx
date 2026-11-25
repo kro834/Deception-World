@@ -206,6 +206,8 @@ const ZEUS_AVOID_SELECTOR = [
   ".wm-detail",
   ".exhibition-shelf-work",
   ".search-results-heading p",
+  ".search-map-link",
+  ".library-jump-links > a",
   ".rxs-assembly-controls a",
   ".gallery-work-open",
   ".gallery-feature-open",
@@ -219,9 +221,12 @@ const ZEUS_AVOID_SELECTOR = [
   ".mus-table-wrap",
   ".lab-transport button",
   ".lab-seek",
+  ".fst-page .rxs-local-nav nav a",
   ".wm-index-heading a",
   ".wm-detail :is(a, button)",
   ".wm-view-controls button",
+  ".wm-display-mode > button",
+  ".wm-detail-jump",
   ".wm-node",
 ].join(",");
 // A control taller than this share of the screen would block every spot and

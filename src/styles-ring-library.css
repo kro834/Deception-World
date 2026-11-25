@@ -1327,6 +1327,114 @@ html[data-family="library"] body .search-ring button[aria-pressed="true"] > span
   }
 }
 
+@media (max-width: 570px) {
+  /* Once a query is active, keep its categories beside the results as a
+     short scrollable row so the first record stays within reach. */
+  html[data-family="library"] body .search-ring.is-compact {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: auto;
+    min-block-size: 0;
+    max-inline-size: 100%;
+    margin: 0;
+    padding: 5px 4px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 4px;
+  }
+
+  html[data-family="library"] body .search-ring.is-compact > :is(.ring-orbit-track, .search-ring-lens) {
+    display: none;
+  }
+
+  html[data-family="library"] body .search-ring.is-compact > .ring-orbit-item {
+    position: static;
+    flex: none;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+    transform: none;
+    translate: none;
+  }
+
+  html[data-family="library"] body .search-ring.is-compact button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    padding-inline: 10px;
+    border-radius: var(--ring-radius-pill);
+    font-size: 12px;
+    white-space: nowrap;
+    scale: none;
+  }
+
+  html[data-family="library"] body .search-ring.is-compact button::before {
+    border-radius: inherit;
+  }
+
+  html[data-family="library"] body .search-ring.is-compact button:focus-visible {
+    outline-offset: -2px;
+  }
+
+  html[data-family="library"] body .search-ring.is-compact button > span {
+    position: static;
+    padding-inline: 3px;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-results-heading {
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px 8px;
+    margin-block-end: 8px;
+    padding-block-end: 8px;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-results-heading > p {
+    padding-inline: 8px;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-map-link {
+    margin-inline-start: auto;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-section-nav {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    padding-block: 4px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-section-nav a {
+    flex: none;
+    min-block-size: 44px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-results-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] .search-results-heading > p {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  html[data-family="library"] body .search-page.search-observatory[data-search-mode="find"] #record-results-heading {
+    font-size: clamp(18px, 6vw, 24px);
+  }
+}
+
 @media (forced-colors: active) {
   html[data-family="library"] body .library-page > header.library-topbar > a:not(#ring-x#ring-x)::before,
   html[data-family="library"]

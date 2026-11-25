@@ -1450,7 +1450,15 @@ void main() {
   // reflection sliding over it.
   float bead = cos(clamp(deposit, 0.0, 1.0) * 3.14159);
   float facing = 0.5 + 0.5 * bead * dot(flow, normalize(vec2(-0.5, -0.8)));
+#ifdef SEAT
   float room = 0.5 + 0.5 * sin(p.y * 0.11 + p.x * 0.05 + uTime * 2.6 + fld.r * 40.0);
+#else
+  // Two soft reflections wrap over the wet scroll shell. Their position
+  // belongs to the playhead, including when a reader retraces the build.
+  float reflection = dot(p, vec2(0.018, 0.031)) + 3.4 * dot(flow, vec2(0.76, -0.65))
+    + fld.r * 12.0 - front * 15.0;
+  float room = smoothstep(-0.76, 0.82, sin(reflection));
+#endif
   // Capillary ripples parallel to the lip, locked to the distance behind it
   // (closed-form: they ride with the front forward and back), dying out as
   // the sheet thickens and wherever they would be finer than a pixel.
@@ -1463,6 +1471,13 @@ void main() {
   float ripple = (wave - 0.5) * (1.0 - smoothstep(0.2, 1.4, a)) * smoothstep(0.0, 0.25, a) * rippleAa;
   facing = clamp(facing + 0.42 * ripple, 0.0, 1.0);
   vec3 chrome = mix(vec3(0.085, 0.095, 0.115), vec3(0.6, 0.64, 0.68), facing * (0.55 + 0.45 * room));
+#ifndef SEAT
+  // A cool outer lip and bronze underside separate liquid matter from the
+  // paint it is about to become. Leave the protected lights on their clock.
+  float shellMaterial = (1.0 - disc) * (1.0 - eyes) * (1.0 - glowing);
+  vec3 reflectionTint = mix(vec3(0.62, 0.78, 0.96), vec3(1.16, 0.95, 0.72), room);
+  chrome = mix(chrome, chrome * reflectionTint, shellMaterial);
+#endif
   chrome = mix(chrome, chrome * (0.6 + 0.9 * light), 0.5);
   // The sheen: the swarm's own grain, a pixel across and streaked along
   // the flow (the three orientations' samples, each weighted by how close
@@ -1505,7 +1520,19 @@ void main() {
     float lx = luma(texture2D(uArt, vUv + vec2(e.x, 0.0)).rgb) - luma(texture2D(uArt, vUv - vec2(e.x, 0.0)).rgb);
     float ly = luma(texture2D(uArt, vUv + vec2(0.0, e.y)).rgb) - luma(texture2D(uArt, vUv - vec2(0.0, e.y)).rgb);
     float line = smoothstep(0.1, 0.42, length(vec2(lx, ly)));
+#ifndef SEAT
+    // A moving bevel picks up the actual folds of each scroll plate. One
+    // side of the fold catches the flow, the recessed side stays gunmetal.
+    // Keep the core and both emitters under their own lighting timeline.
+    float bevel = dot(vec2(lx, ly), vec2(-0.56, -0.83));
+    float seating = glow * (1.0 - disc) * (1.0 - eyes) * (1.0 - glowing);
+    outc *= 1.0 - 0.52 * seating * smoothstep(0.02, 0.29, -bevel);
+    outc += mix(vec3(0.57, 0.72, 0.82), colour, 0.38)
+      * seating * smoothstep(0.02, 0.34, bevel) * 0.78;
+    outc += ICE * line * glow * 0.36;
+#else
     outc += mix(ICE, vec3(1.0), 0.35) * line * glow * 0.75;
+#endif
   }
   // The lip: white-hot at the very edge.
   float lip = 1.0 - smoothstep(0.0, 0.18 + dw, deposit);

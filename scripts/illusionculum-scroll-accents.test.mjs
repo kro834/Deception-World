@@ -57,12 +57,13 @@ function recorder() {
   return { context, log };
 }
 
-const make = (motes = 400) =>
+const make = (motes = 400, floatingSeams = true) =>
   createIllusionculumAccents({
     size: ILLUSIONCULUM_SUIT_SIZE,
     pieces: ILLUSIONCULUM_SUIT_PIECES,
     core: ILLUSIONCULUM_SUIT_MARKS.core,
     seams: ILLUSIONCULUM_SUIT_SEAMS,
+    floatingSeams,
     budget: { motes, sparks: 12 },
   });
 
@@ -138,6 +139,14 @@ test("the budget scales with the device", () => {
   );
   assert.ok(phone.motes <= 500 && desktop.motes <= 1200);
   assert.ok(phone.sparks < desktop.sparks);
+});
+
+test("floating facets rejoin the real outline at lock and leave the original ending", () => {
+  const withFacets = make(0);
+  const withoutFacets = make(0, false);
+  const lock = ILLUSIONCULUM_ACCENT_GROUPS[0].window[1];
+  assert.notDeepEqual(frame(withFacets, lock - 0.035), frame(withoutFacets, lock - 0.035));
+  assert.deepEqual(frame(withFacets, lock), frame(withoutFacets, lock));
 });
 
 test("closed-form in the progress: the same frame however it was reached", () => {

@@ -13,6 +13,8 @@ import {
 } from "@/lib/world-map-data";
 
 type State = { q: string; kind: MapKind | "all"; node: string };
+type MapView = { x: number; y: number; zoom: number };
+const CENTER: MapView = { x: 0, y: 0, zoom: 1 };
 
 const KIND_OPTICS: Record<MapKind, { stroke: string; hi: string }> = {
   person: { stroke: "#7ae8ff", hi: "#d8f8ff" },
@@ -74,8 +76,9 @@ export function WorldMap({
   q,
   kind,
   node,
+  listView,
   onChange,
-}: State & { onChange: (patch: Partial<State>) => void }) {
+}: State & { listView: boolean; onChange: (patch: Partial<State> & { view?: "list" }) => void }) {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -88,7 +91,15 @@ export function WorldMap({
     if (value != null && value !== q) onChange({ q: value });
   }, [onChange, q]);
   const svgRef = useRef<SVGSVGElement>(null);
+  const plot = useRef<SVGGElement>(null);
+  const detail = useRef<HTMLElement>(null);
+  const requestedFocus = useRef<string | null>(null);
   const selected = WORLD_MAP_NODES.find((n) => n.id === node) ?? WORLD_MAP_NODES[0];
+  useEffect(() => {
+    const pending = requestedFocus.current;
+    requestedFocus.current = null;
+    if (pending === selected.id) detail.current?.focus();
+  }, [selected.id]);
   const neighbors = useMemo(() => mapNeighbors(selected.id), [selected.id]);
   const results = useMemo(() => filterMapNodes(q, kind), [q, kind]);
   const queryMatches = useMemo(() => filterMapNodes(q, "all"), [q]);
@@ -102,13 +113,13 @@ export function WorldMap({
     (n) => neighbors.has(n.id) && results.some((r) => r.id === n.id),
   );
   const nodes = [selected, ...neighborhood];
-  const [view, setView] = useState({ x: 0, y: 0, zoom: 1 });
+  const [camera, setCamera] = useState({ node: selected.id, view: CENTER });
+  const view = camera.node === selected.id ? camera.view : CENTER;
   const drag = useRef<{
     pointerId: number;
-    x: number;
-    y: number;
-    originX: number;
-    originY: number;
+    start: DOMPoint;
+    origin: MapView;
+    next: MapView;
     inverse: DOMMatrix;
   } | null>(null);
 
@@ -156,15 +167,22 @@ export function WorldMap({
   );
 
   const connections = WORLD_MAP_EDGES.filter((e) => e.from === selected.id || e.to === selected.id);
-  const choose = (id: string) => {
+  const choose = (id: string, focusDetail = false) => {
+    if (focusDetail) {
+      if (id === selected.id) detail.current?.focus();
+      else requestedFocus.current = id;
+    }
+    setCamera({ node: id, view: CENTER });
     onChange({ node: id });
-    setView({ x: 0, y: 0, zoom: 1 });
   };
   const zoom = (by: number) =>
-    setView((v) => ({
-      ...v,
-      zoom: Math.max(0.45, Math.min(2, Math.round((v.zoom + by) * 100) / 100)),
-    }));
+    setCamera({
+      node: selected.id,
+      view: {
+        ...view,
+        zoom: Math.max(0.45, Math.min(2, Math.round((view.zoom + by) * 100) / 100)),
+      },
+    });
   const moveNodeFocus = (index: number) => {
     const list = svgRef.current?.querySelectorAll<SVGGElement>(".wm-node");
     if (!list?.length) return;
@@ -187,7 +205,7 @@ export function WorldMap({
             type="button"
             data-kind={n.kind}
             aria-pressed={n.id === selected.id}
-            onClick={() => choose(n.id)}
+            onClick={() => choose(n.id, true)}
           >
             <small>{MAP_KINDS[n.kind]}</small>
             {/* Names break at their own seams (仮面ライダー／サイファー), not
@@ -273,218 +291,267 @@ export function WorldMap({
               ),
             )}
           </div>
-        </div>
-        {isFiltering && directory}
-        <div className="wm-workspace">
-          <section
-            className="wm-canvas"
-            data-selected-kind={selected.kind}
-            aria-label={`${selected.title}を中心とした相関図`}
-          >
-            <svg
-              ref={svgRef}
-              viewBox="-500 -360 1000 720"
-              role="group"
-              aria-label="選択した項目の直接の接続。下の一覧でも同じ項目を選択できます。"
-              onPointerDown={(e) => {
-                if (!e.isPrimary || e.button !== 0 || drag.current) return;
-                if ((e.target as Element).closest("[data-node]")) return;
-                const matrix = e.currentTarget.getScreenCTM();
-                if (!matrix) return;
-                const inverse = matrix.inverse();
-                const start = new DOMPoint(e.clientX, e.clientY).matrixTransform(inverse);
-                e.currentTarget.setPointerCapture(e.pointerId);
-                drag.current = {
-                  pointerId: e.pointerId,
-                  x: start.x,
-                  y: start.y,
-                  originX: view.x,
-                  originY: view.y,
-                  inverse,
-                };
-              }}
-              onPointerMove={(e) => {
-                const active = drag.current;
-                if (!active || active.pointerId !== e.pointerId) return;
-                const current = new DOMPoint(e.clientX, e.clientY).matrixTransform(active.inverse);
-                setView((v) => ({
-                  ...v,
-                  x: active.originX + current.x - active.x,
-                  y: active.originY + current.y - active.y,
-                }));
-              }}
-              onPointerUp={(e) => {
-                if (drag.current?.pointerId === e.pointerId) drag.current = null;
-              }}
-              onPointerCancel={(e) => {
-                if (drag.current?.pointerId === e.pointerId) drag.current = null;
-              }}
-              onLostPointerCapture={(e) => {
-                if (drag.current?.pointerId === e.pointerId) drag.current = null;
-              }}
+          <div className="wm-display-mode" role="group" aria-label="表示形式">
+            <button
+              type="button"
+              aria-pressed={!listView}
+              onClick={() => onChange({ view: undefined })}
             >
-              <defs>
-                <radialGradient id="wm-core">
-                  <stop offset="0%" stopColor={selectedOptic.stroke} stopOpacity=".22" />
-                  <stop offset="45%" stopColor="#7ae8ff" stopOpacity=".07" />
-                  <stop offset="100%" stopColor="#7ae8ff" stopOpacity="0" />
-                </radialGradient>
-                <radialGradient id="wm-inner-corona">
-                  <stop offset="0%" stopColor={selectedOptic.hi} stopOpacity=".18" />
-                  <stop offset="68%" stopColor={selectedOptic.stroke} stopOpacity=".04" />
-                  <stop offset="100%" stopColor={selectedOptic.stroke} stopOpacity="0" />
-                </radialGradient>
-                {points.slice(1).map((p, idx) => {
-                  const targetOptic = KIND_OPTICS[p.kind];
-                  return (
-                    <linearGradient
-                      key={p.id}
-                      id={`wm-edge-grad-${idx}`}
-                      gradientUnits="userSpaceOnUse"
-                      x1="0"
-                      y1="0"
-                      x2={p.x}
-                      y2={p.y}
-                    >
-                      <stop offset="0%" stopColor={selectedOptic.hi} stopOpacity="0.92" />
-                      <stop offset="48%" stopColor="#7ae8ff" stopOpacity="0.58" />
-                      <stop offset="100%" stopColor={targetOptic.stroke} stopOpacity="0.94" />
-                    </linearGradient>
+              関係図
+            </button>
+            <button
+              type="button"
+              aria-pressed={listView}
+              onClick={() => onChange({ view: "list" })}
+            >
+              接続一覧
+            </button>
+          </div>
+        </div>
+        {isFiltering && !listView && directory}
+        <div className="wm-workspace" data-view={listView ? "list" : "map"}>
+          {listView ? (
+            directory
+          ) : (
+            <section
+              className="wm-canvas"
+              data-selected-kind={selected.kind}
+              aria-label={`${selected.title}を中心とした相関図`}
+            >
+              <svg
+                ref={svgRef}
+                viewBox="-500 -360 1000 720"
+                role="group"
+                aria-label="選択した項目の直接の接続。下の一覧でも同じ項目を選択できます。"
+                onPointerDown={(e) => {
+                  if (!e.isPrimary || e.button !== 0 || drag.current) return;
+                  if ((e.target as Element).closest("[data-node]")) return;
+                  const matrix = e.currentTarget.getScreenCTM();
+                  if (!matrix) return;
+                  const inverse = matrix.inverse();
+                  const start = new DOMPoint(e.clientX, e.clientY).matrixTransform(inverse);
+                  if (!Number.isFinite(start.x + start.y)) return;
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  drag.current = {
+                    pointerId: e.pointerId,
+                    start,
+                    origin: view,
+                    next: view,
+                    inverse,
+                  };
+                }}
+                onPointerMove={(e) => {
+                  const active = drag.current;
+                  if (!active || active.pointerId !== e.pointerId) return;
+                  const current = new DOMPoint(e.clientX, e.clientY).matrixTransform(
+                    active.inverse,
                   );
-                })}
-              </defs>
-              <g transform={`translate(${view.x} ${view.y}) scale(${view.zoom})`}>
-                <g className="wm-astrolabe" aria-hidden="true">
-                  <ellipse rx="430" ry="300" fill="url(#wm-core)" />
-                  <circle r="120" fill="url(#wm-inner-corona)" />
-                  <path className="wm-sighting-axis" d="M-440 0H-48M48 0H440M0 -308V-48M0 48V308" />
-                  <ellipse rx="105" ry="78" className="wm-rangefinder-ring" />
-                  {orbitTracks.map(([rx, ry], idx) => (
-                    <ellipse
-                      key={`${rx}-${ry}`}
-                      rx={rx}
-                      ry={ry}
-                      className={idx % 2 === 0 ? "wm-orbit" : "wm-orbit is-outer-track"}
-                    />
-                  ))}
-                </g>
-
-                <g className="wm-constellation" aria-hidden="true">
-                  {crossEdges.map((edge) => {
-                    const a = pointById.get(edge.from);
-                    const b = pointById.get(edge.to);
-                    if (!a || !b) return null;
+                  const { origin, start } = active;
+                  const x = Math.max(-800, Math.min(800, origin.x + current.x - start.x));
+                  const y = Math.max(-520, Math.min(520, origin.y + current.y - start.y));
+                  active.next = { ...origin, x, y };
+                  plot.current?.setAttribute(
+                    "transform",
+                    `translate(${x} ${y}) scale(${origin.zoom})`,
+                  );
+                }}
+                onPointerUp={(e) => {
+                  const active = drag.current;
+                  if (active?.pointerId !== e.pointerId) return;
+                  drag.current = null;
+                  setCamera({ node: selected.id, view: active.next });
+                }}
+                onPointerCancel={(e) => {
+                  if (drag.current?.pointerId !== e.pointerId) return;
+                  drag.current = null;
+                  plot.current?.setAttribute(
+                    "transform",
+                    `translate(${view.x} ${view.y}) scale(${view.zoom})`,
+                  );
+                }}
+                onLostPointerCapture={(e) => {
+                  if (drag.current?.pointerId !== e.pointerId) return;
+                  drag.current = null;
+                  plot.current?.setAttribute(
+                    "transform",
+                    `translate(${view.x} ${view.y}) scale(${view.zoom})`,
+                  );
+                }}
+              >
+                <defs>
+                  <radialGradient id="wm-core">
+                    <stop offset="0%" stopColor={selectedOptic.stroke} stopOpacity=".22" />
+                    <stop offset="45%" stopColor="#7ae8ff" stopOpacity=".07" />
+                    <stop offset="100%" stopColor="#7ae8ff" stopOpacity="0" />
+                  </radialGradient>
+                  <radialGradient id="wm-inner-corona">
+                    <stop offset="0%" stopColor={selectedOptic.hi} stopOpacity=".18" />
+                    <stop offset="68%" stopColor={selectedOptic.stroke} stopOpacity=".04" />
+                    <stop offset="100%" stopColor={selectedOptic.stroke} stopOpacity="0" />
+                  </radialGradient>
+                  {points.slice(1).map((p, idx) => {
+                    const targetOptic = KIND_OPTICS[p.kind];
                     return (
-                      <line
-                        key={`cross-${edge.from}-${edge.to}`}
-                        x1={a.x}
-                        y1={a.y}
-                        x2={b.x}
-                        y2={b.y}
-                        className="wm-line is-secondary-edge"
-                      />
+                      <linearGradient
+                        key={p.id}
+                        id={`wm-edge-grad-${idx}`}
+                        gradientUnits="userSpaceOnUse"
+                        x1="0"
+                        y1="0"
+                        x2={p.x}
+                        y2={p.y}
+                      >
+                        <stop offset="0%" stopColor={selectedOptic.hi} stopOpacity="0.92" />
+                        <stop offset="48%" stopColor="#7ae8ff" stopOpacity="0.58" />
+                        <stop offset="100%" stopColor={targetOptic.stroke} stopOpacity="0.94" />
+                      </linearGradient>
                     );
                   })}
+                </defs>
+                <g ref={plot} transform={`translate(${view.x} ${view.y}) scale(${view.zoom})`}>
+                  <g className="wm-astrolabe" aria-hidden="true">
+                    <ellipse rx="430" ry="300" fill="url(#wm-core)" />
+                    <circle r="120" fill="url(#wm-inner-corona)" />
+                    <path
+                      className="wm-sighting-axis"
+                      d="M-440 0H-48M48 0H440M0 -308V-48M0 48V308"
+                    />
+                    <ellipse rx="105" ry="78" className="wm-rangefinder-ring" />
+                    {orbitTracks.map(([rx, ry], idx) => (
+                      <ellipse
+                        key={`${rx}-${ry}`}
+                        rx={rx}
+                        ry={ry}
+                        className={idx % 2 === 0 ? "wm-orbit" : "wm-orbit is-outer-track"}
+                      />
+                    ))}
+                  </g>
+
+                  <g className="wm-constellation" aria-hidden="true">
+                    {crossEdges.map((edge) => {
+                      const a = pointById.get(edge.from);
+                      const b = pointById.get(edge.to);
+                      if (!a || !b) return null;
+                      return (
+                        <line
+                          key={`cross-${edge.from}-${edge.to}`}
+                          x1={a.x}
+                          y1={a.y}
+                          x2={b.x}
+                          y2={b.y}
+                          className="wm-line is-secondary-edge"
+                        />
+                      );
+                    })}
+                  </g>
+
+                  {points.slice(1).map((p, idx) => (
+                    <g key={`edge-${p.id}`} className="wm-edge-group" aria-hidden="true">
+                      <line
+                        x1="0"
+                        y1="0"
+                        x2={p.x}
+                        y2={p.y}
+                        className={`wm-line-glow wm-kind-${p.kind}`}
+                      />
+                      <line
+                        x1="0"
+                        y1="0"
+                        x2={p.x}
+                        y2={p.y}
+                        stroke={`url(#wm-edge-grad-${idx})`}
+                        className={`wm-line is-active-edge wm-kind-${p.kind}`}
+                      />
+                    </g>
+                  ))}
+
+                  {points.map((p, i) => (
+                    <g
+                      key={p.id}
+                      data-node="true"
+                      data-kind={p.kind}
+                      className={`wm-node wm-kind-${p.kind} ${i === 0 ? "is-selected" : ""}`}
+                      transform={`translate(${p.x} ${p.y})`}
+                      role="button"
+                      tabIndex={i === 0 ? 0 : -1}
+                      aria-label={`${p.title}、${MAP_KINDS[p.kind]}`}
+                      aria-pressed={i === 0}
+                      onClick={() => choose(p.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          choose(p.id);
+                        } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                          e.preventDefault();
+                          moveNodeFocus(i + 1);
+                        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                          e.preventDefault();
+                          moveNodeFocus(i - 1);
+                        } else if (e.key === "Home") {
+                          e.preventDefault();
+                          moveNodeFocus(0);
+                        } else if (e.key === "End") {
+                          e.preventDefault();
+                          moveNodeFocus(points.length - 1);
+                        }
+                      }}
+                    >
+                      <circle className="wm-node-hit" r={i === 0 ? 36 : 22} />
+                      <circle className="wm-node-disc" r={i === 0 ? 28 : 10} />
+                      {renderNodeGlyph(p.kind, i === 0)}
+                      <text y={i === 0 ? 50 : 26} textAnchor="middle">
+                        {p.title.match(/.{1,8}/gu)?.map((line, index) => (
+                          <tspan key={index} x="0" dy={index === 0 ? 0 : 15}>
+                            {line}
+                          </tspan>
+                        ))}
+                      </text>
+                    </g>
+                  ))}
                 </g>
-
-                {points.slice(1).map((p, idx) => (
-                  <g key={`edge-${p.id}`} className="wm-edge-group" aria-hidden="true">
-                    <line
-                      x1="0"
-                      y1="0"
-                      x2={p.x}
-                      y2={p.y}
-                      className={`wm-line-glow wm-kind-${p.kind}`}
-                    />
-                    <line
-                      x1="0"
-                      y1="0"
-                      x2={p.x}
-                      y2={p.y}
-                      stroke={`url(#wm-edge-grad-${idx})`}
-                      className={`wm-line is-active-edge wm-kind-${p.kind}`}
-                    />
-                  </g>
-                ))}
-
-                {points.map((p, i) => (
-                  <g
-                    key={p.id}
-                    data-node="true"
-                    data-kind={p.kind}
-                    className={`wm-node wm-kind-${p.kind} ${i === 0 ? "is-selected" : ""}`}
-                    transform={`translate(${p.x} ${p.y})`}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`${p.title}、${MAP_KINDS[p.kind]}`}
-                    onClick={() => choose(p.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        choose(p.id);
-                      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-                        e.preventDefault();
-                        moveNodeFocus(i + 1);
-                      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-                        e.preventDefault();
-                        moveNodeFocus(i - 1);
-                      } else if (e.key === "Home") {
-                        e.preventDefault();
-                        moveNodeFocus(0);
-                      } else if (e.key === "End") {
-                        e.preventDefault();
-                        moveNodeFocus(points.length - 1);
-                      }
-                    }}
+              </svg>
+              <div className="wm-map-toolbar">
+                <div className="wm-legend" aria-hidden="true">
+                  {(Object.entries(MAP_KINDS) as [MapKind, string][]).map(([k, label]) => (
+                    <span key={k} data-kind={k}>
+                      <i />
+                      {label}
+                    </span>
+                  ))}
+                </div>
+                <div className="wm-view-controls">
+                  <button
+                    type="button"
+                    aria-label="縮小"
+                    disabled={view.zoom <= 0.45}
+                    onClick={() => zoom(-0.15)}
                   >
-                    <circle className="wm-node-hit" r={i === 0 ? 36 : 22} />
-                    <circle className="wm-node-disc" r={i === 0 ? 28 : 10} />
-                    {renderNodeGlyph(p.kind, i === 0)}
-                    <text y={i === 0 ? 50 : 26} textAnchor="middle">
-                      {p.title.match(/.{1,8}/gu)?.map((line, index) => (
-                        <tspan key={index} x="0" dy={index === 0 ? 0 : 15}>
-                          {line}
-                        </tspan>
-                      ))}
-                    </text>
-                  </g>
-                ))}
-              </g>
-            </svg>
-            <div className="wm-map-toolbar">
-              <div className="wm-legend" aria-hidden="true">
-                {(Object.entries(MAP_KINDS) as [MapKind, string][]).map(([k, label]) => (
-                  <span key={k} data-kind={k}>
-                    <i />
-                    {label}
-                  </span>
-                ))}
+                    −
+                  </button>
+                  <output>{Math.round(view.zoom * 100)}%</output>
+                  <button
+                    type="button"
+                    aria-label="拡大"
+                    disabled={view.zoom >= 2}
+                    onClick={() => zoom(0.15)}
+                  >
+                    ＋
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCamera({ node: selected.id, view: CENTER })}
+                  >
+                    中央へ
+                  </button>
+                </div>
               </div>
-              <div className="wm-view-controls">
-                <button
-                  type="button"
-                  aria-label="縮小"
-                  disabled={view.zoom <= 0.45}
-                  onClick={() => zoom(-0.15)}
-                >
-                  −
-                </button>
-                <output>{Math.round(view.zoom * 100)}%</output>
-                <button
-                  type="button"
-                  aria-label="拡大"
-                  disabled={view.zoom >= 2}
-                  onClick={() => zoom(0.15)}
-                >
-                  ＋
-                </button>
-                <button type="button" onClick={() => setView({ x: 0, y: 0, zoom: 1 })}>
-                  中央へ
-                </button>
-              </div>
-            </div>
-          </section>
+              <a className="wm-detail-jump" href="#wm-selected-record">
+                選択中の資料と接続へ <span aria-hidden="true">↓</span>
+              </a>
+            </section>
+          )}
           <aside
+            ref={detail}
             className="wm-detail"
             id="wm-selected-record"
             tabIndex={-1}
@@ -522,7 +589,7 @@ export function WorldMap({
                 );
                 return other ? (
                   <li key={`${e.from}-${e.to}`} data-kind={other.kind}>
-                    <button type="button" onClick={() => choose(other.id)}>
+                    <button type="button" onClick={() => choose(other.id, true)}>
                       <small>
                         {e.label} / {MAP_KINDS[other.kind]}
                       </small>
@@ -540,7 +607,7 @@ export function WorldMap({
             {!connections.length && <p>公開記録から確定できる接続はありません。</p>}
           </aside>
         </div>
-        {!isFiltering && directory}
+        {!isFiltering && !listView && directory}
         <footer className="wm-footer">
           <p>
             接続は公開資料で確認できるもののみを掲載。登場記録は所属・敵対・因果関係を意味しません。

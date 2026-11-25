@@ -118,7 +118,9 @@ test("the archive's own text is shown unchanged and 演算 stays text", () => {
 test("the panel is a labelled table placed before the cards, with new copy only", () => {
   assert.match(js, /<h3 class="compare-diff-title" id="\$\{titleId\}">スペック差分<\/h3>/);
   assert.match(js, /<div class="compare-diff-table" role="table" aria-labelledby="\$\{titleId\}">/);
-  assert.match(js, /<span role="columnheader">FORM A<\/span>/);
+  // The named forms are used as table column headers.
+  assert.match(js, /<span role="columnheader" data-compare-form="a">フォームA<\/span>/);
+  assert.match(js, /setText\(panel\.querySelector\('\[data-compare-form="a"\]'\), nameA/);
   // Divs: both archives force table layout on every table, tr and td.
   assert.doesNotMatch(
     js.slice(js.indexOf("const diffCell")),

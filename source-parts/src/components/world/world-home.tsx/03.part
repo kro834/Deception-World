@@ -1,3 +1,9 @@
+  const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
+  const [episode, setEpisode] = useState(0);
+  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
+  const [pickupOpen, setPickupOpen] = useState(false);
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
   // Read by the poster timer at once; the state follows when scrolling settles.
   const heroInViewRef = useRef(true);
   const [motionReduced, setMotionReduced] = useState(false);
@@ -26,23 +32,22 @@
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
-  const loadPoster = useCallback(
-    (index: number, priority: "high" | "low" = "high") => {
-      posterLoader.current ??= createReadyPosterLoader((image, source) =>
-        preparePosterImage(image, source),
-      );
-      return posterLoader.current.load(POSTERS[index].src, priority);
-    },
-    [],
-  );
+  const loadPoster = useCallback((index: number, priority: "high" | "low" = "high") => {
+    posterLoader.current ??= createReadyPosterLoader((image, source) =>
+      preparePosterImage(image, source),
+    );
+    return posterLoader.current.load(POSTERS[index].src, priority);
+  }, []);
 
   const cancelPosterShuffle = useCallback(() => {
     shuffleRunId.current += 1;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
+    cancelPosterFrame();
     setShuffling(false);
-  }, []);
+    setPosterResetting(false);
+  }, [cancelPosterFrame]);
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
   useMirageBoot(shellRef);
@@ -259,33 +264,52 @@
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    if (posterControlsFocused) return;
+    if (posterControlsFocused || posterResetting || posterFailure !== null) return;
     if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+
     let cancelled = false;
     let decoding = false;
     const nextIndex = (poster + 1) % POSTERS.length;
-    const t = window.setInterval(async () => {
-      if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
+    const canAdvance = () =>
+      !cancelled &&
+      !shuffleActive.current &&
+      !posterControlsFocusedRef.current &&
+      !document.hidden &&
+      heroInViewRef.current &&
+      !document.querySelector("dialog[open]");
+
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    const shouldPrefetch =
+      !connection?.saveData && !["slow-2g", "2g"].includes(connection?.effectiveType ?? "");
+    let warm: Promise<boolean> | undefined;
+    const preload = shouldPrefetch
+      ? window.setTimeout(() => {
+          if (canAdvance()) warm = loadPoster(nextIndex, "low").catch(() => false);
+        }, 2400)
+      : undefined;
+
+    const timer = window.setInterval(async () => {
+      if (decoding || !heroInViewRef.current || !canAdvance()) return;
       decoding = true;
       try {
-        const ready = await loadPoster(nextIndex, "low");
-        if (cancelled || !ready || document.querySelector("dialog[open]")) return;
-        if (!heroInViewRef.current) return;
-        startTransition(() => {
-          setPrevPoster(poster);
-          setPoster(nextIndex);
-        });
+        const ready = warm ? await warm : true;
+        warm = undefined;
+        if (ready && canAdvance()) await goPoster(nextIndex, { canShow: canAdvance });
       } catch {
-        // Preserve the current art when the next image cannot be delivered.
+        // An automatic advance may fail. Keep the current poster for the next beat.
       } finally {
         decoding = false;
       }
     }, 5200);
     return () => {
       cancelled = true;
-      window.clearInterval(t);
+      window.clearInterval(timer);
+      window.clearTimeout(preload);
     };
   }, [
+    goPoster,
     loadPoster,
     ambientPaused,
     heroVisible,
@@ -297,37 +321,8 @@
     episodePickup,
     shuffling,
     posterControlsFocused,
-  ]);
-
-  useEffect(() => {
-    if (ambientPaused || motionReduced || !heroVisible) return;
-    if (posterControlsFocused) return;
-    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
-    const connection = (
-      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-    ).connection;
-    if (
-      connection?.saveData ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g"
-    )
-      return;
-    const timer = window.setTimeout(() => {
-      void loadPoster((poster + 1) % POSTERS.length, "low");
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [
-    loadPoster,
-    ambientPaused,
-    heroVisible,
-    motionReduced,
-    poster,
-    locked,
-    sideMenuOpen,
-    pickupOpen,
-    episodePickup,
-    shuffling,
-    posterControlsFocused,
+    posterResetting,
+    posterFailure,
   ]);
 
   useEffect(() => {
@@ -366,22 +361,21 @@
   }, [ambientPaused]);
 
   useEffect(() => {
+    if (motionReduced && shuffleActive.current) cancelPosterShuffle();
+  }, [cancelPosterShuffle, motionReduced]);
+
+  useEffect(() => {
     const paused =
-      ambientPaused ||
-      motionReduced ||
-      !heroVisible ||
-      sideMenuOpen ||
-      pickupOpen ||
-      episodePickup !== null;
-    if (paused && shuffleActive.current) cancelPosterShuffle();
+      ambientPaused || !heroVisible || sideMenuOpen || pickupOpen || episodePickup !== null;
+    if (paused && (shuffleActive.current || posterResetting)) cancelPosterShuffle();
   }, [
     cancelPosterShuffle,
     ambientPaused,
-    motionReduced,
     heroVisible,
     sideMenuOpen,
     pickupOpen,
     episodePickup,
+    posterResetting,
   ]);
 
   useEffect(() => {
@@ -509,3 +503,12 @@
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);
+      grid.removeEventListener("touchcancel", endTouch);
+      grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
+      grid.removeEventListener("wheel", releaseProgrammaticScroll);
+      grid.removeEventListener("scroll", onScroll);
+      grid.removeEventListener("scrollend", settleScroll);
+    };
+  }, []);

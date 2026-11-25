@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
+import ts from "typescript";
 import { mountFilmMotion } from "../src/lib/film-motion.js";
 
 function fixture({ reduced = false, economy = false, hidden = false, scan = false } = {}) {
@@ -154,22 +156,115 @@ test("film theme is delivered after the addon without changing special-route ord
   );
 });
 
-test("poster autoplay pauses for overlays, decodes the next image and preserves failed frames", () => {
+test("poster autoplay pauses for overlays, decodes the next image and preserves failed frames", async () => {
   const home = read("src/components/world/world-home.tsx");
-  const effect = home.slice(
-    home.indexOf("let cancelled = false;\n    let decoding = false;"),
-    home.indexOf("const pauseInfiniteAnimations"),
+  const start = home.indexOf(
+    "  useEffect(() => {\n    if (locked || ambientPaused || motionReduced",
   );
+  const effect = home.slice(start, home.indexOf("\n\n  useEffect(", start + 1));
+  const { outputText } = ts.transpileModule(effect, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  });
+  const calls = [];
+  const timers = new Map();
+  let cleanup;
+  let timerId = 0;
+  let settleWarmup;
+  let dialog = false;
+  const queueTimer = (callback, delay) => {
+    timers.set(delay, callback);
+    return ++timerId;
+  };
+  const focused = { current: false };
+  runInNewContext(outputText, {
+    useEffect: (callback) => {
+      cleanup = callback();
+    },
+    locked: false,
+    ambientPaused: false,
+    motionReduced: false,
+    heroVisible: true,
+    heroInViewRef: { current: true },
+    posterControlsFocused: false,
+    posterControlsFocusedRef: focused,
+    posterResetting: false,
+    posterFailure: null,
+    sideMenuOpen: false,
+    pickupOpen: false,
+    episodePickup: null,
+    shuffling: false,
+    shuffleActive: { current: false },
+    poster: 0,
+    POSTERS: [0, 1],
+    document: { hidden: false, querySelector: (selector) => selector === "dialog[open]" && dialog },
+    navigator: {},
+    loadPoster: (next, priority) => {
+      calls.push(["warm", next, priority]);
+      return new Promise((resolve) => {
+        settleWarmup = resolve;
+      });
+    },
+    goPoster: async (next, { canShow }) => {
+      calls.push(["show", next, canShow]);
+    },
+    window: {
+      setTimeout: queueTimer,
+      setInterval: queueTimer,
+      clearTimeout: (id) => {
+        assert.equal(id, 1);
+        timers.delete(2400);
+      },
+      clearInterval: (id) => {
+        assert.equal(id, 2);
+        timers.delete(5200);
+      },
+    },
+  });
+
+  focused.current = true;
+  timers.get(2400)();
+  await timers.get(5200)();
+  assert.deepEqual(calls, [], "focus blocks both speculative warmup and rotation");
+
+  focused.current = false;
+  dialog = true;
+  timers.get(2400)();
+  await timers.get(5200)();
+  assert.deepEqual(calls, [], "an open overlay blocks both timers");
+
+  dialog = false;
+  timers.get(2400)();
+  const failed = timers.get(5200)();
+  assert.deepEqual(calls, [["warm", 1, "low"]]);
+  settleWarmup(false);
+  await failed;
+  assert.equal(calls.length, 1, "a failed warmup cannot replace the decoded frame");
+
+  timers.get(2400)();
+  const next = timers.get(5200)();
+  settleWarmup(true);
+  await next;
+  assert.deepEqual(
+    calls.map(([action, index]) => [action, index]),
+    [
+      ["warm", 1],
+      ["warm", 1],
+      ["show", 1],
+    ],
+  );
+  const canShow = calls.at(-1)[2];
+  assert.equal(canShow(), true);
+  focused.current = true;
+  assert.equal(canShow(), false, "focus acquired during mounted decode blocks the commit");
+  focused.current = false;
+  cleanup();
+  assert.equal(timers.size, 0);
+  assert.equal(canShow(), false, "cleanup also invalidates pending decode completion");
+
   assert.match(
     home,
     /if \(sideMenuOpen \|\| pickupOpen \|\| episodePickup !== null \|\| shuffling\) return/,
   );
-  assert.match(effect, /await loadPoster\(nextIndex, "low"\)/);
-  assert.match(effect, /if \(cancelled \|\| !ready/);
-  assert.match(effect, /document\.querySelector\("dialog\[open\]"\)/);
-  assert.match(effect, /cancelled = true/);
-  assert.match(effect, /clearInterval\(t\)/);
-  assert.match(home, /loadPoster\(\(poster \+ 1\) % POSTERS\.length, "low"\)/);
   assert.doesNotMatch(home, /RETURNING SIGNAL/);
 });
 

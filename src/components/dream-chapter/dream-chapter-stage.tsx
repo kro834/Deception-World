@@ -2,9 +2,21 @@ import { useId, useState, type CSSProperties } from "react";
 import { DREAM_CASES } from "./dream-chapter-data";
 
 /** A manually operated stage: no autoplay, scroll interception or extra artwork. */
-export function DreamChapterStage() {
+export function DreamChapterStage({ chapter }: { chapter: string | null }) {
   const id = useId();
-  const [selection, setSelection] = useState({ index: 0, direction: 1, turn: 0 });
+  const [selection, setSelection] = useState({
+    chapter,
+    index: Math.max(
+      0,
+      DREAM_CASES.findIndex((episode) => episode.no === chapter),
+    ),
+    direction: 1,
+    turn: 0,
+  });
+  if (chapter !== selection.chapter) {
+    const index = DREAM_CASES.findIndex((episode) => episode.no === chapter);
+    setSelection({ ...selection, chapter, index: index < 0 ? selection.index : index, turn: 0 });
+  }
   const episode = DREAM_CASES[selection.index];
   const palette = ["#b28ac7", "#df9b87", "#8dbbbd", "#a99bd0", "#c8b175", "#adbedb"][
     selection.index
@@ -15,6 +27,7 @@ export function DreamChapterStage() {
       current.index === next
         ? current
         : {
+            ...current,
             index: next,
             direction: next > current.index ? 1 : -1,
             turn: current.turn + 1,

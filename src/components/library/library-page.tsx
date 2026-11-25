@@ -511,6 +511,15 @@ export function LibraryPage({
                 <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
                   全文検索 <span aria-hidden="true">↗</span>
                 </GuardedLink>
+                <GuardedLink
+                  to="/world-map"
+                  search={{ q: draft.trim(), view: "list" }}
+                  assets={[]}
+                  beforeNavigate={flushQuery}
+                  className="library-fulltext-link"
+                >
+                  世界関係図 <span aria-hidden="true">↗</span>
+                </GuardedLink>
               </nav>
             </div>
             <div className="library-screen" aria-hidden="true">

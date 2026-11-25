@@ -1107,12 +1107,13 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page = the dossier page; html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) = the same, with the orbit present. */
 
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page {
-  --d1-r: min(128px, 50vw - 52px);
-  --d1-node: 64px;
+  --d1-r: min(158px, 50vw - 46px);
+  --d1-ry: calc(var(--d1-r) + 16px);
+  --d1-node: 60px;
   --d1-focus: 90deg;
-  --d1-fig-w: calc(var(--d1-r) * 0.98);
-  --d1-fig-h: calc(var(--d1-r) * 1.44);
-  --d1-stage-h: calc(var(--d1-r) * 2 + var(--d1-node) + 36px);
+  --d1-fig-w: calc(var(--d1-r) * 1.24);
+  --d1-fig-h: calc(var(--d1-r) * 1.6);
+  --d1-stage-h: calc(var(--d1-ry) * 2 + var(--d1-node) + 28px);
   --d1-top: var(--sd-head, 68px);
 }
 
@@ -1143,6 +1144,17 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .manager-introduction
   > :not(.dossier-identity) {
   display: none;
+}
+
+/* This source belongs to the form records and stays beside their selector. */
+html[data-family="dossier"] main.manager-page .dossier-form-archive {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px var(--sd-pad) 12px;
+}
+
+html[data-family="dossier"] main.manager-page .dossier-form-archive .dossier-read-link {
+  margin: 0;
 }
 
 /* The figure: the art in a card at the orbit's centre. */
@@ -1253,7 +1265,7 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   top: 50%;
   left: 50%;
   width: calc(var(--d1-r) * 2);
-  height: calc(var(--d1-r) * 2);
+  height: calc(var(--d1-ry) * 2);
   border: 1.5px solid color-mix(in srgb, var(--ring-key) 64%, rgb(255 255 255 / 44%));
   border-radius: 50%;
   box-shadow:
@@ -1370,8 +1382,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   font: inherit;
   cursor: pointer;
   pointer-events: auto;
-  /* Out along its spoke, then upright again whatever the orbit's angle. */
-  transform: rotate(var(--d1-a)) translateX(var(--d1-r)) rotate(calc(var(--d1-a) * -1))
+  /* The vertical axis leaves the portrait room to breathe on compact screens. */
+  transform: translate(
+      calc(cos(var(--d1-a)) * var(--d1-r)),
+      calc(sin(var(--d1-a)) * var(--d1-ry))
+    )
     scale(var(--d1-s));
 }
 
@@ -1523,6 +1538,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
     html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page {
       --d1-r: min(290px, 33vh, var(--sd-stage-w) / 2 - 62px);
+      --d1-ry: var(--d1-r);
+      --d1-fig-w: calc(var(--d1-r) * 1.24);
+      --d1-fig-h: calc(var(--d1-r) * 1.48);
       --d1-node: clamp(72px, 9.6vh, 92px);
       --d1-focus: 0deg;
       --d1-stage-h: var(--sd-stage-h);

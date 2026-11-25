@@ -146,6 +146,12 @@
       artwork.style.setProperty("min-height", `${artworkHeight}px`, "important");
       artwork.style.setProperty("max-height", `${artworkHeight}px`, "important");
       artwork.style.setProperty("object-fit", "contain", "important");
+      // Realm can include several paragraphs before its figures. Put the
+      // figures immediately after the artwork so both columns start together
+      // and the visual order also matches the document's reading order.
+      const overview = artwork.parentElement;
+      const figures = overview?.querySelector(":scope > .viz-grid");
+      if (figures && artwork.nextElementSibling !== figures) artwork.after(figures);
     });
 
     const gridA = cardA.querySelector(".viz-grid");
@@ -491,7 +497,7 @@
       if (row.measured) cell.fill.style.setProperty("--diff-share", Math.max(0.02, share).toFixed(4));
     });
     setText(view.shown, row.delta);
-    setText(view.spoken, row.spoken);
+    setText(view.spoken, row.spoken.replaceAll("FORM ", "フォーム"));
   };
 
   const diffLines = new WeakMap();
@@ -505,10 +511,10 @@
     panel.innerHTML = `
       <div class="compare-diff-head">
         <h3 class="compare-diff-title" id="${titleId}">スペック差分</h3>
-        <p class="compare-diff-pair"><span class="compare-diff-name is-a"><b aria-hidden="true">A</b><span></span></span><span class="compare-diff-name is-b"><b aria-hidden="true">B</b><span></span></span></p>
+        <p class="compare-diff-pair" aria-hidden="true"><span class="compare-diff-name is-a"><b aria-hidden="true">A</b><span></span></span><span class="compare-diff-name is-b"><b aria-hidden="true">B</b><span></span></span></p>
       </div>
       <div class="compare-diff-table" role="table" aria-labelledby="${titleId}">
-        <div class="compare-diff-columns" role="rowgroup"><div role="row"><span role="columnheader">項目</span><span role="columnheader">FORM A</span><span role="columnheader">FORM B</span><span role="columnheader">差</span></div></div>
+        <div class="compare-diff-columns" role="rowgroup"><div role="row"><span role="columnheader">項目</span><span role="columnheader" data-compare-form="a">フォームA</span><span role="columnheader" data-compare-form="b">フォームB</span><span role="columnheader">差</span></div></div>
         <div class="compare-diff-rows" role="rowgroup"></div>
       </div>
       <p class="compare-diff-empty" hidden>数値で比べられる項目はありません。</p>
@@ -537,8 +543,10 @@
     );
     const rows = names.map((name) => diffRow(name, figuresA.get(name), figuresB.get(name)));
     const [nameA, nameB] = [sideA, sideB].map(sideName);
-    panel.querySelector(".compare-diff-name.is-a > span").textContent = nameA;
-    panel.querySelector(".compare-diff-name.is-b > span").textContent = nameB;
+    setText(panel.querySelector(".compare-diff-name.is-a > span"), nameA);
+    setText(panel.querySelector(".compare-diff-name.is-b > span"), nameB);
+    setText(panel.querySelector('[data-compare-form="a"]'), nameA ? `A・${nameA}` : "フォームA");
+    setText(panel.querySelector('[data-compare-form="b"]'), nameB ? `B・${nameB}` : "フォームB");
     const body = panel.querySelector(".compare-diff-rows");
     if (!diffLines.has(panel)) diffLines.set(panel, new Map());
     const views = diffLines.get(panel);

@@ -475,6 +475,25 @@ test("input on the control itself is not a scroll: keys and touches inside it, a
   dispose();
 });
 
+test("holding a playing scrubber keeps the exact frame until the pointer leaves", () => {
+  const t = environment();
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  t.play.fire("click");
+  t.tick();
+  t.seek.fire("pointerdown");
+  t.seek.value = String(MOVIE_SEEK_STEPS * 0.4);
+  t.seek.fire("input");
+  const held = t.scrollY();
+  for (let frame = 0; frame < 90; frame++) t.tick();
+  assert.equal(t.scrollY(), held);
+  assert.equal(t.control.dataset.state, "playing");
+  t.seek.fire("lostpointercapture");
+  t.tick();
+  t.tick();
+  assert.ok(t.scrollY() > held);
+  dispose();
+});
+
 test("the control shows while the frame is pinned, is live before the scene is ready (a 再生 waits for it), and the still tiers hide it", () => {
   const t = environment({ load: "waiting" });
   // (The markup's buttons are disabled until the controller is here.)

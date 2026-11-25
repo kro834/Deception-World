@@ -775,6 +775,25 @@ test("Back before an immediate route's first frame also cancels its navigation",
   ui.cleanup();
 });
 
+test("a slow Library chunk leaves Search and its history intact until the reader retries", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const ui = mount("/search");
+  const destination = { to: "/library", hash: "library-browser" };
+  const pending = ui.go(destination);
+  await flushUntil(ui, () => ui.routePreloads.length === 1, "requested Library chunk starts");
+  assert.equal(ui.navigations.length, 0);
+  t.mock.timers.tick(ROUTE_WARMUP_DEADLINE_MS);
+  await settleGo(ui, pending);
+  assert.equal(ui.fallbacks.at(-1).href, "/library#library-browser");
+  ui.releaseWarmup();
+  await ui.flushFrames();
+  await ui.flushTimers();
+  assert.equal(ui.navigations.length, 0, "a late module cannot push history");
+  await settleGo(ui, ui.go(destination));
+  assert.deepEqual(ui.navigations.map(({ to, hash }) => [to, hash]), [["/library", "library-browser"]]);
+  ui.cleanup();
+});
+
 for (const pathname of [
   "/rexonance-saga",
   "/extreme-saga",
@@ -863,6 +882,7 @@ test("rx17: a successful direct go resumes background warming once it has naviga
   ui.reduceMotion();
   const pending = ui.go({ to: "/plain-destination" });
   assert.equal(ui.suitWarmHolds(), 1);
+  ui.releaseWarmup();
   await settleGo(ui, pending);
   assert.equal(ui.navigations.length, 1);
   assert.equal(ui.suitWarmHolds(), 0);
@@ -1339,6 +1359,7 @@ test("another direct destination supersedes a pending same-link duplicate", asyn
     navigate: ({ to }) => to === "/search" ? new Promise((resolve) => { finish = resolve; }) : undefined,
   });
   const previous = ui.go({ to: "/search" });
+  ui.releaseWarmup();
   await flushUntil(ui, () => ui.navigations.length === 1, "the first direct route has started");
   await ui.go({ to: "/search" });
   const latest = ui.go({ to: "/library" });

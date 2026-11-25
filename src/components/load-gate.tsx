@@ -1756,6 +1756,16 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               await settleUnderCover(requestSignal, 1);
             }
             if (!isCurrent()) return;
+            // navigate() writes history before a lazy route finishes. Keep the
+            // current document and URL together if the requested chunk stalls.
+            if (changesDocument) {
+              const prepared = await startDestinationWarmup();
+              if (!isCurrent()) return;
+              if (!prepared) {
+                reportDelay();
+                return;
+              }
+            }
             // A section jump stays in the current document, including its
             // selected archive. Only a new document starts with fresh search.
             const ready = await preloadRouteWithDeadline(

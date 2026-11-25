@@ -180,11 +180,10 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
     );
   }
   assert.ok(webp < jpeg * 0.45, `${webp} of ${jpeg}`);
-  // Both stage layers ask through the delivery helper.
-  assert.equal(
-    home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src\)\}/g)
-      ?.length,
-    2,
+  // Each mounted frame, including the currently decoded and staged one, uses the same delivery helper.
+  assert.match(
+    home,
+    /\[posterFrames.previous, posterFrames.current, posterFrames.pending\]\.map[\s\S]*?key=\{frame.key\}[\s\S]*?\{\.\.\.posterImage\(art.src\)\}/,
   );
   // Autoplay, warmup and shuffle use the same delivery-aware loader as Dream.
   assert.match(
@@ -194,11 +193,12 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   assert.match(home, /posterLoader\.current\.load\(POSTERS\[index\]\.src, priority\)/);
   assert.doesNotMatch(home, /new Image\(/);
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
-  // The stage uses only the selected print and its outgoing decoded image.
-  // Key each image so rapid WebKit transitions keep their warmed resources.
+  // Promotion changes the layer role on the same keyed DOM node.
   assert.doesNotMatch(home, /className="poster-back-card/);
-  assert.match(home, /key=\{`poster-\$\{poster\}`\}/);
-  assert.match(home, /key=\{`poster-prev-\$\{prevPoster\}`\}/);
+  assert.match(
+    home,
+    /data-layer=\{staged \? "pending" : active \? "current" : "previous"\}\s*key=\{frame.key\}/,
+  );
 });
 
 test("the Dream Chapter's poster console asks for the same WebP copies", async () => {

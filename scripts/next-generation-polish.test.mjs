@@ -65,7 +65,14 @@ test("world motion and poster changes stay stable on constrained clients", () =>
     /createReadyPosterLoader\(\(image, source\) =>\s*preparePosterImage\(image, source\)/,
   );
   assert.match(worldHome, /const finalReady = loadPoster\(finalPoster\)/);
-  assert.match(worldHome, /if \(ready\) goPoster\(finalPoster\)/);
+  assert.match(
+    worldHome,
+    /const shown = ready && \(await goPoster\(finalPoster, \{ canShow: candidateIsCurrent \}\)\)/,
+  );
+  assert.match(
+    worldHome,
+    /if \(!shown && candidateIsCurrent\(\)\) setPosterFailure\(finalPoster\)/,
+  );
 });
 
 test("manager archive cards use bounded thumbnail assets", async () => {

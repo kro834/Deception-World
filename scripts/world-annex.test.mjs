@@ -88,11 +88,15 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner (2026-10-23, ruling): the cards' RELATED / 01·02·05 and SECOND DOG / 02 codes and the archive slots' numbers stay (they pair with the artwork cards' RELATED / 03·04); the column pickup shows its own kicker (data) without the ARCHIVE prefix.
     // Owner (2026-10-30): film composition removes two decorative HUD layers; original copy and records stay.
     // Owner 2026-10-31: original artwork stage replaces the hero composition only.
-    markup: "e22bac1597fc906e9f31c0042f55ca3515ca12397cdd0854d3b2a785100b4524",
+    // 2026-11-25: the World poster frame adds decoded image layers, focus and retry.
+    markup: "dcc9f358c041b08e98f228400303ff1fdea01b59bb73ff6b5c608c9fb1ec08a3",
   });
   // Both values are independently pinned from pre-stage HEAD 95eb55fe.
-  // Hero wording and every JSX node outside it remain unchanged.
-  assert.deepEqual(worldArtworkBoundaryContract(preservedHomeView), {
+  // The new error status is functional copy. All previously visible hero words
+  // and every JSX node outside the hero keep their independent pins.
+  const posterError = '<span role="status">画像を読み込めませんでした。</span>';
+  assert.equal(preservedHomeView.split(posterError).length, 2);
+  assert.deepEqual(worldArtworkBoundaryContract(preservedHomeView.replace(posterError, "")), {
     outsideHero: "0846d3f5626222597db807efc886d312cb22802c671d5524ddae2c0cb65a35a2",
     heroWords: "2f6895ba018c5cf288f07508185eb1498d475b231a0930f85540b12d7f4d2825",
   });

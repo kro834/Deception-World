@@ -174,6 +174,7 @@ export function DossierReader({
           {destinations.map((item) => (
             <a
               key={item.id}
+              id={`dossier-reader-link-${item.id}`}
               href={`#${item.id}`}
               aria-current={part === item.id ? "location" : undefined}
             >

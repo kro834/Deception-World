@@ -63,6 +63,21 @@ test("chapter labels, full poster alternatives and downloads share the supplied 
   });
 });
 
+test("a film or poster deep link resolves to its matching selection", () => {
+  const data = fixture();
+  for (const view of ["film", "poster"]) {
+    data.SAGA_CINEMA_FILMS.forEach(({ slug }, index) => {
+      const hash = data.cinemaViewHash(view, index);
+      assert.equal(hash, `#${view}-${slug}`);
+      const selection = data.readCinemaViewHash(hash);
+      assert.equal(selection.view, view);
+      assert.equal(selection.index, index);
+    });
+  }
+  assert.equal(data.readCinemaViewHash("#films"), null);
+  assert.equal(data.readCinemaViewHash("#film-unknown"), null);
+});
+
 test("poster readiness requires decoded pixels and reports failed or empty images", async () => {
   const loaded = fixture();
   await loaded.loadCinemaPoster(2);

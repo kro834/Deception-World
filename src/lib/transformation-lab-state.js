@@ -29,8 +29,10 @@ export function parseLabState(search) {
     form: validLabForm(rider, p.get("form")),
     compareForm: validLabForm(compare || rider, p.get("compareForm")),
     loop: p.get("loop") === "1",
-    rider: LAB_RIDERS.includes(p.get("rider")) ? p.get("rider") : "rexonance",
-    compare: LAB_RIDERS.includes(p.get("compare")) ? p.get("compare") : "",
+    rider,
+    compare,
+    side: compare && p.get("side") === "b" ? "b" : "a",
+    direction: p.get("direction") === "reverse" ? -1 : 1,
     progress: clampProgress(p.get("at")),
     zoom: LAB_ZOOMS.includes(p.get("zoom")) ? p.get("zoom") : "full",
     speed: [0.25, 0.5, 1, 1.5, 2].includes(Number(p.get("speed"))) ? Number(p.get("speed")) : 1,
@@ -42,17 +44,35 @@ export function labSearch(state) {
   p.set("form", state.form || "standard");
   p.set("compareForm", state.compareForm || "standard");
   if (state.loop) p.set("loop", "1");
-  p.set("at", state.progress.toFixed(4));
+  p.set("at", String(state.progress));
   p.set("zoom", state.zoom);
   p.set("speed", String(state.speed));
-  if (state.compare) p.set("compare", state.compare);
+  if (state.compare) {
+    p.set("compare", state.compare);
+    if (state.side === "b") p.set("side", "b");
+  }
+  if (state.direction === -1) p.set("direction", "reverse");
   return p.toString();
 }
-export function advanceLab(progress, milliseconds, speed, direction, rider, form) {
+export function advanceLab(progress, milliseconds, speed, direction, rider, form, compare, compareForm) {
   const elapsed = Math.max(0, Math.min(milliseconds, 100)) * speed * direction;
-  return rider === "far-from"
-    ? advanceFarFromPlayback(progress, elapsed, 12000, form)
-    : clampProgress(progress + elapsed / 12000);
+  const ordinary = clampProgress(progress + elapsed / 12000);
+  const primary = rider === "far-from" ? advanceFarFromPlayback(progress, elapsed, 12000, form) : ordinary;
+  if (!compare) return primary;
+  // Both views follow the slower of their two form sequences, whichever side it is on.
+  const secondary = compare === "far-from"
+    ? advanceFarFromPlayback(progress, elapsed, 12000, compareForm)
+    : ordinary;
+  return direction < 0 ? Math.max(primary, secondary) : Math.min(primary, secondary);
+}
+
+export function labBeatAt(progress) {
+  let active = LAB_BEATS[0];
+  for (const beat of LAB_BEATS) {
+    if (progress < beat.at) break;
+    active = beat;
+  }
+  return active;
 }
 
 export const LAB_NAMES = {

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
+import { DOSSIER_ARCHIVE_SOURCE_SELECTOR } from "@/lib/dossier-origin";
 
 /* The exploded-view dossier (分解図, owner 2026-11-23: 「m1 d1で。」).
    The file's parts (人物紹介, 関連記録, 人物資料, 変身記録) orbit the figure
@@ -33,6 +34,14 @@ function partOf(target: Element, parts: readonly DossierPart[]) {
   return target.closest(`#${PROFILE_PART}`) ? PROFILE_PART : null;
 }
 
+function focusAnchor(target: HTMLElement) {
+  if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) {
+    target.tabIndex = -1;
+    target.addEventListener("blur", () => target.removeAttribute("tabindex"), { once: true });
+  }
+  target.focus({ preventScroll: true });
+}
+
 const media = (query: string) =>
   typeof window !== "undefined" &&
   typeof window.matchMedia === "function" &&
@@ -56,11 +65,11 @@ export function DossierOrbit({
   );
   // Unbounded, so the orbit always turns the short way round.
   const [turn, setTurn] = useState(index);
-  const ringRef = useRef<HTMLDivElement>(null);
   // The form art the figure changes to for 変身記録 (the first record's own
   // picture, read from the page once it is there).
   const [formArt, setFormArt] = useState<string | null>(null);
-  const pendingTarget = useRef<string | null>(null);
+  const pendingTarget = useRef<{ id: string; focus: boolean } | null>(null);
+  const pendingKeyboardTab = useRef<string | null>(null);
 
   useEffect(() => {
     setTurn((value) => {
@@ -80,12 +89,14 @@ export function DossierOrbit({
       if (!panel || panel.hasAttribute("role")) continue;
       panel.setAttribute("role", "tabpanel");
       panel.setAttribute("aria-labelledby", `dossier-orbit-tab-${id}`);
+      panel.setAttribute("tabindex", "-1");
       marked.push(panel);
     }
     return () => {
       for (const panel of marked) {
         panel.removeAttribute("role");
         panel.removeAttribute("aria-labelledby");
+        panel.removeAttribute("tabindex");
       }
     };
   }, [partIds]);
@@ -104,17 +115,56 @@ export function DossierOrbit({
     if (typeof window === "undefined") return;
     const target = pendingTarget.current;
     pendingTarget.current = null;
-    if (target === "") return;
-    const calm = media("(prefers-reduced-motion: reduce)");
+    const returning = window.history.state?.dossierArchiveReturn;
+    if (
+      part === "form-records" &&
+      document.documentElement.dataset.routeRestoring === "true" &&
+      typeof returning === "boolean"
+    ) {
+      const state = { ...window.history.state };
+      delete state.dossierArchiveReturn;
+      History.prototype.replaceState.call(window.history, state, "");
+      if (returning && document.activeElement === document.body) {
+        document
+          .querySelector<HTMLElement>(DOSSIER_ARCHIVE_SOURCE_SELECTOR)
+          ?.focus({ preventScroll: true });
+      }
+      return;
+    }
+    const keyboardTab = pendingKeyboardTab.current;
+    pendingKeyboardTab.current = null;
+    if (keyboardTab) {
+      // On compact layouts the orbit docks away as soon as a record opens.
+      // Keep focus in the matching visible control instead of losing it to <body>.
+      const tab = document.getElementById(`dossier-orbit-tab-${keyboardTab}`);
+      if (tab?.getClientRects().length) {
+        tab.focus({ preventScroll: true });
+        return;
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+      document.getElementById(`dossier-reader-link-${keyboardTab}`)?.focus();
+      return;
+    }
     if (target) {
-      document.getElementById(target)?.scrollIntoView({ block: "start", behavior: "auto" });
+      const anchor = document.getElementById(target.id);
+      if (anchor) {
+        if (target.id === part && !media(SPLIT_STAGE)) {
+          window.scrollTo({ top: 0, behavior: "instant" });
+        } else {
+          anchor.scrollIntoView({ block: "start", behavior: "instant" });
+        }
+        if (target.focus) focusAnchor(anchor);
+      }
       return;
     }
     if (!didMount.current) return;
     if (part === "form-records" && media(SPLIT_STAGE)) {
+      const calm =
+        media("(prefers-reduced-motion: reduce)") ||
+        document.documentElement.dataset.worldEffects === "economy";
       document
         .getElementById("form-records")
-        ?.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" });
+        ?.scrollIntoView({ block: "start", behavior: calm ? "instant" : "smooth" });
       return;
     }
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -130,44 +180,61 @@ export function DossierOrbit({
   const live = useRef({ part, parts, onPart });
   live.current = { part, parts, onPart };
   useEffect(() => {
-    const follow = (hash: string) => {
+    let clickFrame = 0;
+    const follow = (hash: string, focus = false) => {
       const { part: now, parts: list, onPart: choose } = live.current;
-      let id = hash.replace(/^#/, "");
+      let id: string;
       try {
-        id = decodeURIComponent(id);
+        id = decodeURIComponent(hash.slice(1)) || PROFILE_PART;
       } catch {
         return;
       }
-      if (!id) return;
       const target = document.getElementById(id);
       if (!target) return;
       const next = partOf(target, list);
       if (!next) return;
       const isPart = list.some((item) => item.id === id);
       if (next === now) {
-        // Same part: the browser has already scrolled to a visible target.
-        if (isPart && id !== PROFILE_PART && !media(SPLIT_STAGE)) window.scrollTo({ top: 0 });
+        if (isPart && !media(SPLIT_STAGE)) window.scrollTo({ top: 0, behavior: "instant" });
+        if (focus) focusAnchor(target);
         return;
       }
-      pendingTarget.current = isPart ? null : id;
+      pendingTarget.current = !isPart || focus ? { id, focus } : null;
       choose(next);
     };
     const onHash = () => follow(window.location.hash);
-    // The router moves between hashes with pushState (no hashchange): the
-    // click that asked for it names the target.
+    // Router links change the hash via pushState, which emits no hashchange.
+    // Native links and the side-menu links both keep their normal history.
     const onClick = (event: MouseEvent) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
       const origin = event.target instanceof Element ? event.target : null;
       const link = origin?.closest<HTMLAnchorElement>("a[href*='#']");
-      if (!link) return;
+      if (!link || (link.target && link.target !== "_self") || link.hasAttribute("download"))
+        return;
       const url = new URL(link.href, window.location.href);
-      if (url.pathname !== window.location.pathname || !url.hash) return;
-      window.requestAnimationFrame(() => follow(url.hash));
+      if (
+        url.origin !== window.location.origin ||
+        url.pathname !== window.location.pathname ||
+        !url.hash
+      )
+        return;
+      window.cancelAnimationFrame(clickFrame);
+      clickFrame = window.requestAnimationFrame(() => follow(url.hash, event.detail === 0));
     };
-    follow(window.location.hash);
+    if (
+      document.documentElement.dataset.routeRestoring === "true" &&
+      typeof window.history.state?.dossierArchiveReturn === "boolean"
+    ) {
+      follow("#form-records");
+    } else if (window.location.hash) {
+      follow(window.location.hash);
+    }
     window.addEventListener("hashchange", onHash);
     window.addEventListener("popstate", onHash);
     document.addEventListener("click", onClick);
     return () => {
+      window.cancelAnimationFrame(clickFrame);
       window.removeEventListener("hashchange", onHash);
       window.removeEventListener("popstate", onHash);
       document.removeEventListener("click", onClick);
@@ -187,12 +254,23 @@ export function DossierOrbit({
               : -1;
     if (next < 0) return;
     event.preventDefault();
-    // Arrows move the selection, not the page: the reader stays on the orbit.
-    pendingTarget.current = "";
+    if (next === index) return;
+    pendingKeyboardTab.current = parts[next].id;
     onPart(parts[next].id);
-    ringRef.current
-      ?.querySelector<HTMLElement>(`#dossier-orbit-tab-${parts[next].id}`)
-      ?.focus({ preventScroll: true });
+  };
+
+  const openPart = (id: string, keyboard: boolean) => {
+    if (id === part) {
+      if (keyboard) {
+        const panel = document.getElementById(id);
+        panel?.scrollIntoView({ block: "start" });
+        if (panel) focusAnchor(panel);
+      }
+      return;
+    }
+    if (keyboard) pendingKeyboardTab.current = id;
+    if (window.location.hash !== `#${id}`) window.location.hash = id;
+    onPart(id);
   };
 
   return (
@@ -213,7 +291,6 @@ export function DossierOrbit({
         ) : null}
         <div
           className="dossier-orbit-ring"
-          ref={ringRef}
           role="tablist"
           aria-orientation="horizontal"
           onKeyDown={onKeyDown}
@@ -228,7 +305,7 @@ export function DossierOrbit({
               aria-controls={item.id}
               tabIndex={item.id === part ? 0 : -1}
               style={{ ["--d1-i" as string]: itemIndex }}
-              onClick={() => onPart(item.id)}
+              onClick={(event) => openPart(item.id, event.detail === 0)}
             >
               <span>{item.label}</span>
             </button>

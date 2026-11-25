@@ -386,7 +386,7 @@ export function mountAssemblyMovie(
   };
   const tick = (stamp: number) => {
     rafId = 0;
-    if (disposed || state !== "playing") return;
+    if (disposed || scrubbing || state !== "playing") return;
     if (lastStamp) {
       // A hitch is caught up (the movie keeps its length on a slow device);
       // a stall is not jumped over.
@@ -684,17 +684,28 @@ export function mountAssemblyMovie(
     dropLeave();
     measure();
     progress = q;
+    if (queued !== null) queued = q;
     scrollTo(q);
     control.style?.setProperty("--rzn-movie-p", String(Math.round(q * 1000) / 10));
     seek.setAttribute("aria-valuetext", `${Math.round(q * 100)}%`);
     if (state === "ended" && q < 1) setState("paused");
     else if (state === "paused" && q >= 1) setState("ended");
   };
-  const onSeekDown = () => {
+  const onSeekDown = (event: PointerEvent) => {
+    if (event.button > 0 || event.isPrimary === false) return;
     scrubbing = true;
+    // Retain the playing state, but give the reader the clock itself. A
+    // stationary finger can inspect one assembly frame for as long as needed.
+    if (state === "playing") stop();
+    if (typeof event.pointerId === "number") seek?.setPointerCapture?.(event.pointerId);
   };
   const onSeekUp = () => {
+    if (!scrubbing) return;
     scrubbing = false;
+    if (state === "playing" && !rafId) {
+      lastStamp = 0;
+      rafId = environment.requestAnimationFrame(tick);
+    }
   };
 
   /* ---------------- the reader's own input ---------------- */
@@ -748,7 +759,8 @@ export function mountAssemblyMovie(
       yieldToReader();
   };
   const onScroll = () => {
-    clearRails();
+    if (!shown && state !== "playing") return;
+    if (shown) clearRails();
     const y = environment.scrollY;
     // A scroll the browser makes to keep the content in place (scroll
     // anchoring, as the page above settles) leaves the runway where it
@@ -804,10 +816,13 @@ export function mountAssemblyMovie(
     if (state === "paused" && shown) start(progress);
   };
   const onVisibility = () => {
-    if (document.hidden) hold();
-    else resume();
+    if (document.hidden) {
+      scrubbing = false;
+      hold();
+    } else resume();
   };
   const onPageHide = () => {
+    scrubbing = false;
     hold();
     cancelQueue();
     collapse(false);
@@ -885,6 +900,7 @@ export function mountAssemblyMovie(
       if (!ready() && !still()) send(MOVIE_WAKE_EVENT);
     } else {
       delete control.dataset.shown;
+      scrubbing = false;
       collapse(false);
       // The frame unpinned: the movie's turn is over (再生 then plays from
       // wherever the page stands).
@@ -942,6 +958,7 @@ export function mountAssemblyMovie(
   seek?.addEventListener("pointerdown", onSeekDown);
   seek?.addEventListener("pointerup", onSeekUp);
   seek?.addEventListener("pointercancel", onSeekUp);
+  seek?.addEventListener("lostpointercapture", onSeekUp);
   environment.addEventListener("scroll", onScroll, { passive: true });
   environment.addEventListener("resize", onResize, { passive: true });
   environment.addEventListener("wheel", onWheel, { passive: true });
@@ -992,6 +1009,7 @@ export function mountAssemblyMovie(
     seek?.removeEventListener("pointerdown", onSeekDown);
     seek?.removeEventListener("pointerup", onSeekUp);
     seek?.removeEventListener("pointercancel", onSeekUp);
+    seek?.removeEventListener("lostpointercapture", onSeekUp);
     environment.removeEventListener("scroll", onScroll);
     environment.removeEventListener("resize", onResize);
     environment.removeEventListener("wheel", onWheel);

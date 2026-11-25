@@ -18,7 +18,7 @@
   // The archive's own words (as ZEUS_AVOID_PAGE_TEXT_SELECTOR is the page's):
   // the hero's lead line, which the button sat on at first paint at 360
   // (2026-10-26 phone sweep).
-  const PAGE_WORDS = ".hero-lead";
+  const PAGE_WORDS = ".hero-lead, .compare-diff-name, .compare-diff-value, .compare-diff-delta";
   const DISPLAY = "strong, b";
   const DISPLAY_MIN_PX = 24;
   const END = "p, li, dt, dd, small, span, em, q, blockquote, figcaption, time";

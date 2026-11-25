@@ -25,6 +25,7 @@ import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex-sections";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";
+import { useWorldPosterFrames } from "./use-world-poster-frames";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
@@ -509,3 +510,5 @@ const EPISODES: EpisodeRecord[] = [
       },
       {
         label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",

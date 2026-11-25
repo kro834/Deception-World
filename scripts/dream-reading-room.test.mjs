@@ -217,7 +217,9 @@ test("dialog freezes the departure scroll before showModal and releases on histo
   const show = room.indexOf("modal.showModal()");
   assert.ok(lock > 0 && lock < show);
   assert.match(room, /const stopHistory = router\.history\.subscribe/);
-  assert.match(room, /historyDismissed = true;\s*release\(\);\s*close\(\);/);
+  // Capture the reading line before closing the native dialog, then release
+  // synchronously so the history traversal can restore the outer page.
+  assert.match(room, /historyDismissed = true;\s*close\(\);\s*release\(\);/);
   assert.match(room, /return \(\) => \{\s*stopHistory\(\);\s*release\(\);/);
   assert.match(room, /if \(released\) return;/);
   assert.match(

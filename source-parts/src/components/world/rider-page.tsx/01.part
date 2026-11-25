@@ -14,6 +14,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
+import { rememberDossierArchiveReturn } from "@/lib/dossier-origin";
 import { CharacterChapterTools } from "./character-reading-tools";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
@@ -399,3 +400,5 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         ],
       },
       {
+        no: "03",
+        kicker: "外見と戦闘",

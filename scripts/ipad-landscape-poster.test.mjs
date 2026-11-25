@@ -33,3 +33,28 @@ test("common iPad landscape sizes leave room for the full poster and touch contr
     assert.ok(posterWidth * 1.5 + 156 + 76 + 40 <= height, `${width}x${height} preserves controls`);
   }
 });
+
+test("the active World frame budgets room for controls independently of image format", () => {
+  const stage = readFileSync(
+    new URL("../src/styles-world-artwork-stage.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(stage, /@media \(min-width: 900px\) and \(orientation: landscape\)\s*\{/);
+  assert.match(
+    stage.replace(/\s+/g, " "),
+    /100svh - var\(--film-topbar-height, 76px\) - var\(--world-stage-top\) - var\(--world-stage-bottom\) -\s*64px/,
+  );
+  assert.doesNotMatch(stage, /data-format\s*=/);
+  for (const [width, height] of [
+    [1024, 650],
+    [1024, 768],
+    [1133, 744],
+    [1194, 834],
+    [1366, 1024],
+  ]) {
+    const top = Math.min(44, Math.max(18, width * 0.026));
+    const bottom = Math.min(60, Math.max(22, width * 0.034));
+    const frame = Math.min(740, Math.max(320, height - 76 - top - bottom - 64));
+    assert.ok(frame + 76 + top + bottom + 58 <= height, `${width}×${height}`);
+  }
+});

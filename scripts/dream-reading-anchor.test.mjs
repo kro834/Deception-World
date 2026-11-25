@@ -490,7 +490,8 @@ test("opener snapshot precedes freezing and correction runs once only for an exp
     source,
     /if \(closing\.current && !historyDismissed\) restoreReadingOrigin\(trigger, origin\);/,
   );
-  assert.match(source, /historyDismissed = true;\s*release\(\);\s*close\(\);/);
+  // Capture the reading line while the dialog is still laid out.
+  assert.match(source, /historyDismissed = true;\s*close\(\);\s*release\(\);/);
   assert.match(source, /if \(window\.location\.pathname === origin\?\.pathname\)/);
   assert.doesNotMatch(originCode, /requestAnimationFrame|setTimeout|queueMicrotask|Promise/);
 });

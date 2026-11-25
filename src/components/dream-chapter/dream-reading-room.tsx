@@ -9,9 +9,16 @@ import {
 import { DREAM_CASES, DREAM_CHARACTERS } from "./dream-chapter-data";
 
 export type DreamPersonTarget = { id: string; paragraphId: string; start?: number; end?: number };
+export type DreamRoomPosition = {
+  chapter: string;
+  paragraph: number;
+  scrollTop: number;
+  mark: { paragraph: number; slot: number; offset: number; top: number } | { end: true } | null;
+};
 type Props = {
   trigger: HTMLButtonElement | null;
-  onClose: () => void;
+  onClose: (position: DreamRoomPosition | null) => void;
+  resume?: DreamRoomPosition | null;
   personTarget?: DreamPersonTarget | null;
 };
 
@@ -118,6 +125,48 @@ function restoreReadingAnchor(scroller: HTMLDivElement, anchor: ReadingAnchor) {
   }
 }
 
+function snapshotRoom(
+  scroller: HTMLDivElement,
+  chapter: string,
+  paragraph: number,
+): DreamRoomPosition {
+  const anchor = captureReadingAnchor(scroller);
+  let mark: DreamRoomPosition["mark"] = null;
+  if (anchor && "end" in anchor) mark = anchor;
+  else if (anchor) {
+    const text = anchor.text;
+    const block = text.parentElement?.closest<HTMLElement>("[data-room-paragraph]");
+    if (block) {
+      const inline = text.parentElement === block ? text : text.parentNode;
+      const slot = Array.from(block.childNodes).findIndex((node) => node === inline);
+      if (slot >= 0)
+        mark = {
+          paragraph: Number(block.dataset.roomParagraph),
+          slot,
+          offset: anchor.offset,
+          top: anchor.top,
+        };
+    }
+  }
+  return { chapter, paragraph, scrollTop: scroller.scrollTop, mark };
+}
+
+function restoreRoom(scroller: HTMLDivElement, position: DreamRoomPosition) {
+  scroller.scrollTop = position.scrollTop;
+  const mark = position.mark;
+  if (!mark) return;
+  if ("end" in mark) {
+    restoreReadingAnchor(scroller, mark);
+    return;
+  }
+  const block = scroller.querySelector(`[data-room-paragraph="${mark.paragraph}"]`);
+  const child = block?.childNodes[mark.slot];
+  const text = child?.nodeType === Node.TEXT_NODE ? child : child?.firstChild;
+  if (text?.nodeType === Node.TEXT_NODE && mark.offset < (text as Text).length) {
+    restoreReadingAnchor(scroller, { text: text as Text, offset: mark.offset, top: mark.top });
+  }
+}
+
 // ResizeObserver runs after reflow, when reading the old line is already too
 // late. Remember it after ordinary scrolling, and restore that text offset
 // before refreshing the paragraph count for the new viewport dimensions.
@@ -192,7 +241,7 @@ function readParagraph(scroller: HTMLDivElement | null, pin: { current: Pin }) {
   return visibleParagraph(scroller);
 }
 
-export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
+export function DreamReadingRoom({ trigger, onClose, personTarget, resume }: Props) {
   const router = useRouter();
   const [initial] = useState(() => {
     try {
@@ -204,8 +253,13 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
       return { ...DREAM_READER_DEFAULTS };
     }
   });
-  const [chapter, setChapter] = useState(initial.bookmark?.caseNo ?? "0");
-  const [paragraph, setParagraph] = useState(initial.bookmark?.paragraph ?? 1);
+  const firstPosition = useRef(personTarget ? null : resume);
+  const [chapter, setChapter] = useState(
+    firstPosition.current?.chapter ?? initial.bookmark?.caseNo ?? "0",
+  );
+  const [paragraph, setParagraph] = useState(
+    firstPosition.current?.paragraph ?? initial.bookmark?.paragraph ?? 1,
+  );
   const [bookmark, setBookmark] = useState(initial.bookmark);
   const [size, setSize] = useState(initial.size);
   const [spacing, setSpacing] = useState(initial.spacing);
@@ -220,13 +274,20 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
   const chapterHeading = useRef<HTMLHeadingElement>(null);
   const focusNextHeading = useRef(false);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const onCloseRef = useRef(onClose);
+  const onCloseRef = useRef<() => void>(() => undefined);
   const firstLanding = useRef(initial.bookmark?.paragraph ?? 1);
   const pinned = useRef<Pin>(null);
   const readingAnchor = useRef<ReadingAnchor>(null);
   const readingViewport = useRef<ReturnType<typeof watchReadingViewport> | null>(null);
   const closing = useRef(false);
-  onCloseRef.current = onClose;
+  onCloseRef.current = () => {
+    const scroller = viewport.current;
+    onClose(
+      !personTarget && scroller
+        ? snapshotRoom(scroller, chapter, readParagraph(scroller, pinned))
+        : null,
+    );
+  };
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
   const index = DREAM_CASES.indexOf(episode);
   const ciel = DREAM_CHARACTERS.find((character) => character.id === "ciel")!;
@@ -331,8 +392,8 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
     const stopHistory = router.history.subscribe(({ action }) => {
       if (!["BACK", "FORWARD", "GO"].includes(action.type)) return;
       historyDismissed = true;
-      release();
       close();
+      release();
     });
     return () => {
       stopHistory();
@@ -346,10 +407,13 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
   useLayoutEffect(() => {
     const scroller = viewport.current;
     if (!scroller) return;
-    const landing = firstLanding.current;
+    const position = firstPosition.current;
+    firstPosition.current = null;
+    const landing = position?.paragraph ?? firstLanding.current;
     firstLanding.current = 1;
     const target = scroller.querySelector<HTMLElement>(`[data-room-paragraph="${landing}"]`);
-    if (landing > 1 && target) {
+    if (position) restoreRoom(scroller, position);
+    else if (landing > 1 && target) {
       scroller.scrollTop +=
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
     } else scroller.scrollTop = 0;
@@ -550,7 +614,9 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
             <article className="dream-reading-paper" key={chapter}>
               <header>
                 <p lang="en">CASE 0{chapter}</p>
-                <h3 ref={chapterHeading} tabIndex={-1}>{episode.title}</h3>
+                <h3 ref={chapterHeading} tabIndex={-1}>
+                  {episode.title}
+                </h3>
                 <span>{episode.lead}</span>
               </header>
               {episode.paragraphs.map((text, i) => (

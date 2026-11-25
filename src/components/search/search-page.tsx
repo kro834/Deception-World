@@ -477,6 +477,14 @@ export function SearchPage({
             <p role="status" aria-live="polite" aria-atomic="true">
               <strong>{total}</strong> 件{trimmed && <span>「{trimmed}」</span>}
             </p>
+            <GuardedLink
+              className="search-map-link"
+              to="/world-map"
+              search={{ q: trimmed, view: "list" }}
+              assets={[]}
+            >
+              関係図で探す <span aria-hidden="true">↗</span>
+            </GuardedLink>
           </div>
           {visibleCount < total ? (
             <p className="search-display-summary">

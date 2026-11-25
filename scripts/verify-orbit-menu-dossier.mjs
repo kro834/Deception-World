@@ -235,6 +235,16 @@ try {
       });
       check("the facts stand in the reading column", facts.length > 0 && facts.every(Boolean));
     } else {
+      await page.locator("#dossier-orbit-tab-dossier-profile").press("End");
+      await settle(page);
+      check(
+        `${width}: the compact reading bar takes focus when the orbit docks`,
+        await page.evaluate(
+          () => document.activeElement?.id === "dossier-reader-link-form-records",
+        ),
+      );
+      await page.locator('.dossier-reader-links a[href="#dossier-profile"]').click();
+      await settle(page);
       await page.evaluate(() => document.getElementById("dossier-orbit-tab-dossier-index").click());
       await settle(page);
       const reading = await page.evaluate(() =>

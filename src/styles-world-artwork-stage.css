@@ -1,22 +1,20 @@
-/* The World programme starts with its title, followed by the original key visual. */
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
   > #top.world-artwork-hero {
+  --world-stage-gutter: clamp(14px, 4.6vw, 88px);
+  --world-stage-top: clamp(18px, 2.6vw, 44px);
+  --world-stage-bottom: clamp(22px, 3.4vw, 60px);
   display: block;
   position: relative;
   height: auto;
   min-height: 0;
-  padding: calc(var(--film-topbar-height, 76px) + clamp(18px, 2.7vw, 44px)) var(--sw-gutter, 20px)
-    clamp(20px, 3.2vw, 50px);
+  padding: calc(var(--film-topbar-height, 76px) + var(--world-stage-top)) var(--world-stage-gutter)
+    var(--world-stage-bottom);
   overflow: clip;
-  background:
-    radial-gradient(ellipse 66% 56% at 76% 32%, rgb(122 232 255 / 15%), transparent 68%),
-    radial-gradient(ellipse 54% 50% at 26% 66%, rgb(255 92 200 / 11%), transparent 64%),
-    radial-gradient(ellipse 52% 44% at 62% 78%, rgb(240 207 134 / 9%), transparent 64%),
-    linear-gradient(160deg, #0c1522 0%, #07101b 52%, #050b13 100%);
-  color: #f3f4ef;
   isolation: isolate;
+  color: #f3f5f7;
+  background: #070d16;
 }
 
 html[data-family="world"]:root
@@ -26,7 +24,12 @@ html[data-family="world"]:root
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
-  > #top.world-artwork-hero::after {
+  > #top.world-artwork-hero::after,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #top.world-artwork-hero
+  > .scroll-cue {
   display: none;
 }
 
@@ -35,34 +38,42 @@ html[data-family="world"]:root
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(
-      ellipse 56% 58% at 77% 28%,
-      rgb(122 232 255 / 22%),
-      rgb(66 117 147 / 12%) 46%,
-      transparent 68%
-    ),
-    radial-gradient(
-      ellipse 50% 52% at 27% 64%,
-      rgb(255 92 200 / 14%),
-      rgb(122 92 146 / 10%) 48%,
-      transparent 64%
-    ),
-    radial-gradient(ellipse 46% 40% at 68% 72%, rgb(240 207 134 / 12%), transparent 66%),
-    linear-gradient(160deg, #101722, #081019);
+    radial-gradient(ellipse 46% 72% at 78% 40%, #233a51, transparent 90%),
+    radial-gradient(ellipse 54% 64% at 91% 30%, #3a2035, transparent 80%),
+    linear-gradient(125deg, #080d16 29%, #141b2b 72%, #090f19 100%);
+}
+
+#top.world-artwork-hero .world-artwork-light::before {
+  position: absolute;
+  inset: -45% -18% -45% 40%;
+  content: "";
+  transform: skewX(-17deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(164 226 243 / 14%) 38%,
+    rgb(168 225 239 / 5%) 38.2%,
+    transparent 50%,
+    rgb(246 167 209 / 11%) 65%,
+    transparent 65.3%
+  );
+  mask-image: linear-gradient(transparent 20%, #000 45%, #000 60%, transparent 85%);
 }
 
 #top.world-artwork-hero .artwork-stage.world-poster-stage {
-  --stage-art-height: clamp(350px, 64svh, 700px);
-  --poster-line: rgb(156 226 250 / 44%);
-  grid-template-columns: minmax(0, 0.91fr) minmax(0, 1.09fr);
-  gap: clamp(20px, 4.2vw, 74px);
-  max-width: 1480px;
+  --stage-art-height: clamp(330px, 67svh, 720px);
+  --world-stage-rim: rgb(167 204 226 / 35%);
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: clamp(22px, 4.5vw, 86px);
+  align-items: center;
+  max-width: 1560px;
   min-height: 0;
   padding: 0;
   margin-inline: auto;
   border: 0;
   background: none;
   box-shadow: none;
+  perspective: none;
 }
 
 #top.world-artwork-hero .artwork-stage__information {
@@ -72,28 +83,17 @@ html[data-family="world"]:root
 #top.world-artwork-hero .artwork-stage__visual {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
   height: auto;
 }
 
-#top.world-artwork-hero :is(.artwork-stage__plane, .artwork-stage__frame-bevel) {
+#top.world-artwork-hero
+  :is(.artwork-stage__plane, .artwork-stage__frame-bevel, .artwork-stage__halo) {
   display: none;
 }
 
-#top.world-artwork-hero .artwork-stage__halo {
-  inset-inline: 0;
-  background:
-    radial-gradient(
-      ellipse 60% 66% at 54% 48%,
-      rgb(122 232 255 / 26%),
-      rgb(129 183 237 / 14%) 44%,
-      transparent 74%
-    ),
-    radial-gradient(ellipse 48% 52% at 38% 64%, rgb(255 92 200 / 16%), transparent 68%),
-    radial-gradient(ellipse 46% 42% at 68% 30%, rgb(240 207 134 / 14%), transparent 66%);
-}
-
 #top.world-artwork-hero .artwork-stage__aperture {
+  flex: none;
   padding: 0;
 }
 
@@ -107,83 +107,40 @@ html[data-family="world"]:root
 }
 
 #top.world-artwork-hero .world-poster-media {
-  border: 1px solid rgb(156 234 255 / 46%);
-  border-radius: 8px;
+  --poster-mat: clamp(10px, 2.1vw, 34px);
+  border: 1px solid var(--world-stage-rim);
+  border-radius: 11px 11px 0 0;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgb(232 250 255 / 20%) 0%, rgb(122 232 255 / 5%) 24%, transparent 48%),
-    radial-gradient(
-      ellipse 58% 76% at 50% 48%,
-      rgb(122 232 255 / 26%),
-      rgb(255 92 200 / 15%) 46%,
-      rgb(240 207 134 / 9%) 68%,
-      transparent 84%
-    ),
-    radial-gradient(circle at 14% 28%, rgb(122 232 255 / 22%), transparent 52%),
-    radial-gradient(circle at 86% 72%, rgb(255 92 200 / 20%), transparent 54%),
-    radial-gradient(ellipse 68% 42% at 50% 96%, rgb(240 207 134 / 18%), transparent 68%),
-    linear-gradient(165deg, rgb(14 31 52 / 90%) 0%, rgb(6 13 25 / 95%) 52%, rgb(11 22 38 / 92%) 100%);
+    radial-gradient(ellipse 45% 68% at 51% 25%, rgb(110 165 194 / 22%), transparent 85%),
+    linear-gradient(146deg, #151e2d, #080e18 58%, #101724);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 38%),
-    inset 0 -1px 0 rgb(240 207 134 / 28%),
-    inset 1px 0 0 rgb(122 232 255 / 22%),
-    inset -1px 0 0 rgb(255 92 200 / 18%),
-    inset 0 0 56px rgb(122 232 255 / 12%),
-    0 28px 68px -18px rgb(0 0 0 / 82%),
-    0 0 64px -16px rgb(122 232 255 / 28%),
-    0 0 96px -24px rgb(255 92 200 / 20%);
+    inset 0 1px 0 rgb(231 249 255 / 25%),
+    inset 0 0 70px rgb(3 8 15 / 58%),
+    0 24px 72px -40px #000;
 }
 
 #top.world-artwork-hero .world-poster-media::before {
   content: "";
   position: absolute;
   inset: 7px;
-  z-index: 3;
+  border-radius: 6px 6px 0 0;
   pointer-events: none;
-  border: 1px solid rgb(198 245 255 / 14%);
-  border-radius: 4px;
   background:
-    linear-gradient(#7ae8ff 0 0) 0 0 / 16px 2px no-repeat,
-    linear-gradient(#7ae8ff 0 0) 0 0 / 2px 16px no-repeat,
-    linear-gradient(#7ae8ff 0 0) 100% 0 / 16px 2px no-repeat,
-    linear-gradient(#7ae8ff 0 0) 100% 0 / 2px 16px no-repeat,
-    linear-gradient(#f0cf86 0 0) 0 100% / 16px 2px no-repeat,
-    linear-gradient(#f0cf86 0 0) 0 100% / 2px 16px no-repeat,
-    linear-gradient(#f0cf86 0 0) 100% 100% / 16px 2px no-repeat,
-    linear-gradient(#f0cf86 0 0) 100% 100% / 2px 16px no-repeat,
-    linear-gradient(
-        90deg,
-        transparent 6%,
-        rgb(122 232 255 / 56%) 26%,
-        rgb(255 92 200 / 46%) 50%,
-        rgb(240 207 134 / 52%) 74%,
-        transparent 94%
-      )
-      0 0 / 100% 1px no-repeat,
-    linear-gradient(
-        90deg,
-        transparent 10%,
-        rgb(240 207 134 / 44%) 32%,
-        rgb(122 232 255 / 46%) 68%,
-        transparent 90%
-      )
-      0 100% / 100% 1px no-repeat;
+    linear-gradient(#aeeaff 0 0) 0 0 / 15px 1px no-repeat,
+    linear-gradient(#aeeaff 0 0) 0 0 / 1px 15px no-repeat,
+    linear-gradient(#aeeaff 0 0) 100% 0 / 15px 1px no-repeat,
+    linear-gradient(#aeeaff 0 0) 100% 0 / 1px 15px no-repeat,
+    linear-gradient(#d6b47f 0 0) 0 100% / 15px 1px no-repeat,
+    linear-gradient(#d6b47f 0 0) 0 100% / 1px 15px no-repeat,
+    linear-gradient(#d6b47f 0 0) 100% 100% / 15px 1px no-repeat,
+    linear-gradient(#d6b47f 0 0) 100% 100% / 1px 15px no-repeat;
+  opacity: 0.72;
 }
 
-#top.world-artwork-hero .world-stage-media::before {
-  content: "";
-  position: absolute;
-  inset: 4% 8%;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse 58% 72% at 50% 50%,
-    rgb(122 232 255 / 26%),
-    rgb(255 92 200 / 16%) 48%,
-    rgb(240 207 134 / 11%) 68%,
-    transparent 84%
-  );
+#top.world-artwork-hero .world-stage-media {
+  inset: var(--poster-mat);
+  isolation: isolate;
 }
 
 #top.world-artwork-hero .world-stage-image {
@@ -192,47 +149,63 @@ html[data-family="world"]:root
   inset: 0;
   width: auto;
   height: auto;
-  max-width: calc(100% - 16px);
-  max-height: calc(100% - 16px);
+  max-width: 100%;
+  max-height: 100%;
   margin: auto;
-  outline: 1px solid rgb(214 248 255 / 58%);
+  outline: 1px solid rgb(226 235 246 / 40%);
   box-shadow:
-    0 0 0 3px rgb(4 10 20 / 82%),
-    0 0 0 4px rgb(240 207 134 / 32%),
-    0 24px 58px rgb(0 0 0 / 84%),
-    0 0 52px -10px rgb(122 232 255 / 34%),
-    0 0 82px -20px rgb(255 92 200 / 24%);
+    0 0 0 4px rgb(3 8 14 / 80%),
+    0 20px 52px rgb(0 0 0 / 68%);
   object-fit: contain;
   object-position: center;
 }
 
-#top.world-artwork-hero .world-stage-image-current {
-  z-index: 2;
-}
-
-#top.world-artwork-hero .world-stage-image-previous {
+#top.world-artwork-hero .world-stage-image[data-layer="current"] {
   z-index: 1;
-  animation: world-stage-previous 560ms ease-out both;
 }
 
-@keyframes world-stage-previous {
+#top.world-artwork-hero .world-stage-image[data-layer="pending"] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    #top.world-artwork-hero
+    .world-stage-media[data-transitioning="true"]
+    .world-stage-image[data-layer="current"] {
+    animation: world-print-arrival 450ms cubic-bezier(0.2, 0.64, 0.28, 1) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    #top.world-artwork-hero
+    .world-stage-image[data-layer="previous"] {
+    animation: world-print-departure 450ms ease-out both;
+  }
+}
+
+@keyframes world-print-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+@keyframes world-print-departure {
+  0%,
+  42% {
+    opacity: 1;
+  }
   to {
     opacity: 0;
   }
 }
 
 #top.world-artwork-hero .world-stage-identity {
-  margin: 0 0 clamp(12px, 2vw, 26px);
-  padding-top: 14px;
-  background:
-    linear-gradient(
-        90deg,
-        #f0cf86 0%,
-        #7ae8ff 38%,
-        #ff5fc8 72%,
-        transparent 100%
-      )
-      0 0 / min(240px, 72%) 2px no-repeat;
+  position: relative;
+  margin: 0 0 clamp(20px, 3vw, 48px);
+  padding-block: 12px 0;
+  background: linear-gradient(90deg, #f2d196, #a7def1 70%, transparent) 0 0 /
+    clamp(54px, 12vw, 156px) 1px no-repeat;
 }
 
 #top.world-artwork-hero .world-stage-identity .anime-work-title {
@@ -246,67 +219,42 @@ html[data-family="world"]:root
 
 #top.world-artwork-hero .world-stage-identity .anime-work-title > span {
   display: block;
-  color: #f6dcab;
+  color: #ead3a9;
   font-size: clamp(12px, 1.05vw, 15px);
-  line-height: 1.6;
-  letter-spacing: 0.09em;
-  text-shadow:
-    0 0 20px rgb(240 207 134 / 48%),
-    0 0 36px rgb(122 232 255 / 24%);
+  line-height: 1.55;
+  letter-spacing: 0.05em;
 }
 
 #top.world-artwork-hero .world-stage-identity .anime-work-title > b {
   display: block;
-  margin-top: 3px;
-  color: #f3f4ef;
-  font-size: clamp(21px, 2.85vw, 46px);
-  line-height: 1.15;
+  margin-top: 6px;
+  color: #f4f9ff;
+  font-size: clamp(23px, 3.47vw, 58px);
+  line-height: 1.08;
   letter-spacing: 0.025em;
-  filter: drop-shadow(0 6px 24px rgb(3 8 18 / 82%));
 }
 
 #top.world-artwork-hero .world-stage-identity .mr-word::after {
-  opacity: 0.68;
+  opacity: 0.38;
   text-shadow:
-    -3px 0 rgb(122 232 255 / 84%),
-    0 0 36px rgb(122 232 255 / 52%),
-    0 0 64px rgb(255 92 200 / 34%);
+    -2px 0 #9fe1fa,
+    0 0 24px #83aac9;
 }
 
 #top.world-artwork-hero .world-stage-copy {
   min-width: 0;
-  padding-top: clamp(11px, 1.8vw, 24px);
-  border-top: 1px solid var(--poster-line);
-  background:
-    linear-gradient(
-        90deg,
-        #7ae8ff 0%,
-        #ffffff 18%,
-        #ff5fc8 48%,
-        #f0cf86 78%,
-        transparent 100%
-      )
-      0 0 / 100% 2px no-repeat,
-    radial-gradient(
-      ellipse 70% 46% at 24% 0%,
-      rgb(122 232 255 / 16%),
-      rgb(255 92 200 / 8%) 52%,
-      transparent 82%
-    );
 }
 
 #top.world-artwork-hero .world-stage-copy h1 {
   position: relative;
   width: auto;
   max-width: none;
-  margin: 0 0 clamp(14px, 2vw, 30px);
-  color: #f8fcff;
-  font-size: clamp(25px, 3.8vw, 59px);
-  line-height: 1.24;
-  letter-spacing: 0.028em;
-  text-shadow:
-    0 2px 26px rgb(2 6 14 / 92%),
-    0 0 42px rgb(122 232 255 / 28%);
+  margin: 0 0 clamp(16px, 2.2vw, 34px);
+  color: #f4f2ee;
+  font-size: clamp(24px, 3.1vw, 51px);
+  line-height: 1.33;
+  letter-spacing: 0.035em;
+  text-shadow: 0 3px 24px #050810;
 }
 
 #top.world-artwork-hero .world-stage-copy h1 > :is(span, strong) {
@@ -316,41 +264,22 @@ html[data-family="world"]:root
   line-height: inherit;
   letter-spacing: inherit;
   font-weight: inherit;
-  text-wrap: balance;
-}
-
-#top.world-artwork-hero .world-stage-copy h1 > strong {
-  color: #dff8ff;
-  text-shadow:
-    0 0 32px rgb(122 232 255 / 38%),
-    0 0 56px rgb(255 92 200 / 20%);
 }
 
 #top.world-artwork-hero .world-stage-copy h1 .mr-redact {
-  color: #ffffff;
+  color: #fff4f6;
   text-shadow:
-    -2.5px 0 rgb(255 90 126 / 92%),
-    2.5px 0 rgb(122 232 255 / 95%),
-    0 0 30px rgb(255 90 126 / 52%);
+    -1px 0 #fd94b2,
+    1px 0 #79c9dc,
+    0 0 20px rgb(255 134 180 / 36%);
 }
 
 #top.world-artwork-hero .world-stage-copy h1 .mr-redact::after {
-  height: 3px;
-  background: linear-gradient(90deg, #ff5a7e 0%, #ff8aa5 48%, #f0cf86 100%);
-  box-shadow:
-    0 0 16px rgb(255 90 126 / 84%),
-    0 0 32px rgb(255 92 200 / 48%);
+  height: 2px;
+  background: linear-gradient(90deg, #e37ba0, #f0cf86);
 }
 
 #top.world-artwork-hero .world-stage-copy .eyebrow {
-  display: none;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > #top.world-artwork-hero
-  > .scroll-cue {
   display: none;
 }
 
@@ -358,7 +287,7 @@ html[data-family="world"]:root
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 7px 16px;
+  gap: 7px 12px;
 }
 
 #top.world-artwork-hero .world-stage-actions :is(.primary-action, .text-action) {
@@ -368,98 +297,43 @@ html[data-family="world"]:root
 
 #top.world-artwork-hero .world-stage-actions .primary-action.ios26-glass {
   position: relative;
-  border: 1px solid transparent;
-  color: #030914;
-  font-weight: 700;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 12%) 42%, transparent 50%)
-      padding-box,
-    linear-gradient(125deg, #f4fdff 0%, #a4f1ff 36%, #5adafa 72%, #8fe9ff 100%) padding-box,
-    linear-gradient(
-        90deg,
-        #7ae8ff 0%,
-        #ffffff 20%,
-        #ff5fc8 48%,
-        #f0cf86 76%,
-        #7ae8ff 100%
-      )
-      border-box !important;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 95%),
-    inset 0 -1px 0 rgb(10 74 112 / 36%),
-    0 0 0 1px rgb(122 232 255 / 34%),
-    0 14px 34px -10px rgb(0 0 0 / 74%),
-    0 0 32px -4px rgb(122 232 255 / 52%),
-    0 0 56px -12px rgb(255 92 200 / 34%) !important;
-  transition:
-    transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  gap: clamp(9px, 1.2vw, 20px);
+  padding: 8px clamp(12px, 1.7vw, 25px);
+  border: 1px solid #c9eef9;
+  border-radius: 8px;
+  color: #071522;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  background: linear-gradient(122deg, #e4f5fa, #a7d5e9) !important;
+  box-shadow: 0 9px 32px -15px #aedfff !important;
+}
+
+#top.world-artwork-hero .world-stage-actions .primary-action > span {
+  white-space: nowrap;
 }
 
 #top.world-artwork-hero .world-stage-actions .text-action {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgb(230 197 144 / 38%);
-  background:
-    linear-gradient(180deg, rgb(255 244 218 / 12%), transparent 56%),
-    rgb(10 20 34 / 78%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 235 / 22%),
-    0 10px 24px -12px rgb(0 0 0 / 68%);
-  color: #f0d098;
-  transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms ease,
-    box-shadow 220ms ease,
-    color 220ms ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  #top.world-artwork-hero .world-stage-actions .primary-action.ios26-glass:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      inset 0 1px 0 #ffffff,
-      inset 0 -1px 0 rgb(10 74 112 / 26%),
-      0 0 0 1px rgb(206 248 255 / 72%),
-      0 20px 44px -10px rgb(0 0 0 / 82%),
-      0 0 42px -2px rgb(122 232 255 / 72%),
-      0 0 74px -8px rgb(255 92 200 / 46%),
-      0 0 92px -16px rgb(240 207 134 / 36%) !important;
-  }
-
-  #top.world-artwork-hero .world-stage-actions .text-action:hover {
-    transform: translateY(-1px);
-    border-color: rgb(240 207 134 / 72%);
-    color: #fff6dc;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 36%),
-      0 14px 28px -10px rgb(0 0 0 / 76%),
-      0 0 24px -6px rgb(240 207 134 / 42%);
-  }
+  padding: 6px 12px;
+  border: 1px solid rgb(212 224 241 / 32%);
+  border-radius: 8px;
+  color: #e0e9f2;
+  background: rgb(12 21 32 / 65%);
+  transition: border-color 180ms ease;
 }
 
 #top.world-artwork-hero .world-stage-context {
-  margin-top: clamp(10px, 2vw, 27px);
-  padding: 14px 18px;
-  border-radius: 8px;
-  border: 1px solid rgb(148 228 255 / 32%);
-  border-left: 3px solid #7ae8ff;
-  background:
-    linear-gradient(180deg, rgb(224 248 255 / 12%) 0%, transparent 48%),
-    linear-gradient(135deg, rgb(16 34 56 / 82%) 0%, rgb(8 17 30 / 90%) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(240 207 134 / 16%),
-    0 16px 36px -14px rgb(0 0 0 / 74%),
-    0 0 28px -10px rgb(122 232 255 / 22%);
+  margin-top: clamp(18px, 2.3vw, 34px);
+  padding-inline-start: clamp(13px, 1.3vw, 20px);
+  border-inline-start: 1px solid #8bbbce;
 }
 
 #top.world-artwork-hero .world-stage-lead {
   margin: 0;
-  color: #e0edf6;
-  font-size: clamp(13px, 1.25vw, 17px);
+  color: #ccdaea;
+  font-size: clamp(13px, 1.2vw, 17px);
   line-height: 1.85;
   text-wrap: pretty;
 }
@@ -470,460 +344,230 @@ html[data-family="world"]:root
 }
 
 #top.world-artwork-hero .world-stage-controls {
+  container: world-poster-controls / inline-size;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
-  gap: 6px 14px;
+  justify-content: space-between;
+  gap: 4px 8px;
   width: 100%;
-  padding: 9px 12px;
-  border-radius: 12px;
-  border: 1px solid rgb(152 228 255 / 36%);
-  background:
-    linear-gradient(180deg, rgb(224 248 255 / 14%) 0%, transparent 48%),
-    linear-gradient(135deg, rgb(12 25 42 / 88%) 0%, rgb(6 13 24 / 94%) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 rgb(240 207 134 / 18%),
-    0 16px 38px -14px rgb(0 0 0 / 78%),
-    0 0 28px -10px rgb(122 232 255 / 22%);
+  min-height: 58px;
+  padding: 5px clamp(5px, 1vw, 15px);
+  border: 1px solid var(--world-stage-rim);
+  border-top: 0;
+  border-radius: 0 0 11px 11px;
+  background: linear-gradient(180deg, #131e2b, #0d1520);
 }
 
 #top.world-artwork-hero .world-stage-control-cluster {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
   position: relative;
   inset: auto;
   width: auto;
-  max-width: 100%;
   min-width: 44px;
   min-height: 44px;
   margin: 0;
-  padding: 6px clamp(7px, 1vw, 13px);
+  padding: 5px clamp(6px, 1vw, 13px);
+  gap: clamp(4px, 0.55vw, 8px);
   transform: none;
-  border: 1px solid rgb(152 228 255 / 38%);
-  border-radius: 999px;
-  color: #ebf8ff;
-  background:
-    linear-gradient(
-      180deg,
-      rgb(230 250 255 / 20%) 0%,
-      rgb(122 232 255 / 5%) 46%,
-      transparent 52%
-    ),
-    linear-gradient(135deg, rgb(18 36 58 / 92%) 0%, rgb(8 17 31 / 96%) 100%) !important;
-  box-shadow:
-    inset 0 1px 0 rgb(245 253 255 / 32%),
-    inset 0 -1px 0 rgb(122 232 255 / 16%),
-    0 10px 26px -10px rgb(0 0 0 / 72%),
-    0 0 22px -8px rgb(122 232 255 / 26%) !important;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #ebf5ff;
+  background: none !important;
+  box-shadow: none !important;
   transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms ease,
-    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    color 220ms ease;
+    border-color 180ms ease,
+    color 180ms ease;
 }
 
 #top.world-artwork-hero .world-stage-controls .poster-shuffle {
-  border-color: rgb(164 236 255 / 52%);
-  background:
-    linear-gradient(
-      180deg,
-      rgb(236 252 255 / 26%) 0%,
-      rgb(122 232 255 / 8%) 46%,
-      transparent 54%
-    ),
-    linear-gradient(
-      125deg,
-      rgb(22 46 72 / 94%) 0%,
-      rgb(12 26 46 / 96%) 56%,
-      rgb(28 22 48 / 92%) 100%
-    ) !important;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 40%),
-    inset 0 -1px 0 rgb(240 207 134 / 22%),
-    0 12px 28px -10px rgb(0 0 0 / 76%),
-    0 0 26px -6px rgb(122 232 255 / 34%) !important;
+  border-color: rgb(169 220 242 / 34%);
+  background: #202f3e !important;
 }
 
 #top.world-artwork-hero .world-stage-controls .poster-lock.is-locked {
-  border-color: rgb(240 207 134 / 62%);
-  color: #fff6dc;
-  box-shadow:
-    inset 0 1px 0 rgb(255 248 226 / 38%),
-    inset 0 -1px 0 rgb(240 207 134 / 26%),
-    0 10px 26px -10px rgb(0 0 0 / 74%),
-    0 0 24px -6px rgb(240 207 134 / 34%) !important;
+  color: #ffe2a8;
 }
 
-#top.world-artwork-hero
-  .world-stage-controls
-  :is(.poster-shuffle, .poster-reset, .poster-lock):disabled {
-  opacity: 0.46;
-  border-color: rgb(148 210 235 / 18%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%) !important;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  #top.world-artwork-hero
-    .world-stage-controls
-    :is(.poster-shuffle, .poster-reset, .poster-lock):not(:disabled):hover {
-    transform: translateY(-1.5px);
-    border-color: rgb(206 248 255 / 74%);
-    color: #ffffff;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 48%),
-      inset 0 -1px 0 rgb(240 207 134 / 28%),
-      0 14px 30px -10px rgb(0 0 0 / 80%),
-      0 0 28px -4px rgb(122 232 255 / 46%),
-      0 0 44px -10px rgb(255 92 200 / 26%) !important;
-  }
+#top.world-artwork-hero .world-stage-controls .poster-reset[aria-disabled="true"] {
+  opacity: 0.52;
+  cursor: default;
 }
 
 #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) b {
   font-size: 12px !important;
   line-height: 1.25 !important;
-  letter-spacing: 0.065em;
+  letter-spacing: 0.03em;
+}
+
+#top.world-artwork-hero .world-stage-controls .poster-shuffle b {
+  min-width: 13ch;
 }
 
 #top.world-artwork-hero .world-stage-controls output {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  padding: 4px 11px;
-  border-radius: 999px;
-  border: 1px solid rgb(138 226 255 / 28%);
-  background:
-    linear-gradient(180deg, rgb(224 248 255 / 12%), transparent 60%),
-    rgb(8 18 32 / 88%);
-  box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 20%),
-    0 8px 18px -10px rgb(0 0 0 / 65%);
-  color: #d4effc;
+  padding-inline: 5px;
+  color: #bcd1e1;
   font-size: 12px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
+#top.world-artwork-hero .world-poster-recovery {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  border-top: 1px solid var(--world-stage-rim);
+  padding-inline: 6px;
+  color: #f7dba7;
+  font-size: 12px;
+}
+
+#top.world-artwork-hero .world-poster-recovery button {
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: 8px;
+  border: 0;
+  background: none;
+  color: #ecf7ff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#top.world-artwork-hero
+  :is(#poster-stage, .world-stage-actions a, .world-stage-controls button):focus-visible {
+  outline: 2px solid #d1f3ff;
+  outline-offset: -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.world-artwork-hero .world-stage-actions .text-action:hover,
+  #top.world-artwork-hero .world-stage-controls button:not([aria-disabled="true"]):hover {
+    border-color: #9acadd;
+    color: #ffffff;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  #top.world-artwork-hero .artwork-stage.world-poster-stage {
+    --stage-art-height: clamp(
+      320px,
+      calc(
+        100svh - var(--film-topbar-height, 76px) - var(--world-stage-top) -
+          var(--world-stage-bottom) - 64px
+      ),
+      740px
+    );
+  }
+}
+
 @media (max-width: 719px) {
   #top.world-artwork-hero .artwork-stage.world-poster-stage {
-    --stage-art-height: clamp(220px, 105vw, 480px);
+    --stage-art-height: clamp(254px, min(115vw, 60svh), 530px);
     grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-  }
-
-  #top.world-artwork-hero .artwork-stage.world-poster-stage[data-format="landscape"] {
-    --stage-art-height: clamp(170px, 62vw, 380px);
+    gap: 22px;
   }
 
   #top.world-artwork-hero .world-stage-identity .anime-work-title > b {
-    font-size: clamp(22px, 5.5vw, 38px);
+    font-size: clamp(24px, 7.2vw, 43px);
   }
 
   #top.world-artwork-hero .world-stage-copy h1 {
-    font-size: clamp(24px, 6.75vw, 43px);
+    font-size: clamp(24px, 6.6vw, 39px);
+  }
+}
+
+@container world-poster-controls (max-width: 370px) {
+  #top.world-artwork-hero .world-stage-control-cluster {
+    flex: 1 1 100%;
+    justify-content: space-between;
   }
 
-  #top.world-artwork-hero .world-stage-actions .primary-action {
-    gap: 10px;
-    padding: 8px 14px;
-    font-size: 12px;
-    letter-spacing: 0.09em;
+  #top.world-artwork-hero .world-stage-controls output {
+    margin-inline-start: auto;
   }
+}
 
-  #top.world-artwork-hero .world-stage-actions .primary-action > span {
-    white-space: nowrap;
+@container world-poster-controls (max-width: 290px) {
+  #top.world-artwork-hero .world-stage-controls .poster-reset > span[aria-hidden="true"] {
+    display: none;
   }
 }
 
 @media (max-height: 540px) and (orientation: landscape) {
   #top.world-artwork-hero .artwork-stage.world-poster-stage {
-    --stage-art-height: clamp(214px, 62svh, 330px);
+    --stage-art-height: clamp(200px, 61svh, 316px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.16fr);
+    gap: clamp(12px, 3vw, 30px);
   }
 
   #top.world-artwork-hero .world-stage-copy h1 {
-    font-size: clamp(22px, 3.7vw, 41px);
+    font-size: clamp(20px, 3.4vw, 34px);
   }
 }
 
-html[data-world-effects="economy"] #top.world-artwork-hero .world-stage-image-previous {
-  animation-duration: 180ms;
+@media (max-width: 535px) and (orientation: landscape) {
+  #top.world-artwork-hero .artwork-stage.world-poster-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-#top.world-artwork-hero .artwork-stage[data-moving="true"] .world-stage-image-current {
-  animation: artwork-stage-in var(--stage-duration) cubic-bezier(0.18, 0.78, 0.24, 1) both;
+@media (prefers-reduced-motion: reduce) {
+  #top.world-artwork-hero .world-stage-image[data-layer="previous"] {
+    display: none;
+  }
 }
 
 html[data-world-effects="economy"]
-  .world-artwork-hero
-  .artwork-stage[data-moving="true"]
-  .world-stage-image-current {
-  animation-name: artwork-stage-fade;
+  #top.world-artwork-hero
+  .world-stage-image[data-layer="previous"] {
+  display: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  #top.world-artwork-hero .world-stage-image-previous {
-    display: none;
-    animation: none;
-  }
-
-  #top.world-artwork-hero .artwork-stage[data-moving="true"] .world-stage-image-current {
-    animation: none !important;
-  }
-}
-
-/* The four destinations share the artwork stage's visual hierarchy. */
-.world-exploration {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  width: min(1400px, 92vw);
-  margin: 24px auto 64px;
-}
-.world-exploration-card {
-  --we-accent: 122 232 255;
-  --we-accent-2: 255 92 200;
-  --we-accent-3: 240 207 134;
-  position: relative;
-  display: flex;
-  min-height: 204px;
-  align-items: end;
-  overflow: hidden;
-  isolation: isolate;
-  padding: 22px;
-  border: 1px solid rgb(var(--we-accent) / 36%);
-  border-radius: 12px;
-  color: #f3faff;
-  background: #07111d;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(var(--we-accent) / 18%),
-    0 20px 44px -16px rgb(0 0 0 / 80%),
-    0 0 34px -14px rgb(var(--we-accent) / 24%);
-  text-decoration: none;
-  transition:
-    transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 260ms ease,
-    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.world-exploration-card[data-portal="atlas"] {
-  --we-accent: 122 232 255;
-  --we-accent-2: 79 123 255;
-  --we-accent-3: 240 207 134;
-}
-.world-exploration-card[data-portal="lab"] {
-  --we-accent: 112 242 236;
-  --we-accent-2: 122 232 255;
-  --we-accent-3: 255 92 200;
-}
-.world-exploration-card[data-portal="cinema"] {
-  --we-accent: 255 104 206;
-  --we-accent-2: 122 232 255;
-  --we-accent-3: 240 207 134;
-}
-.world-exploration-card[data-portal="library"] {
-  --we-accent: 240 207 134;
-  --we-accent-2: 122 232 255;
-  --we-accent-3: 255 92 200;
-}
-.world-exploration-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 2px;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent 4%,
-    rgb(var(--we-accent) / 95%) 24%,
-    rgb(var(--we-accent-2) / 88%) 52%,
-    rgb(var(--we-accent-3) / 92%) 78%,
-    transparent 96%
-  );
-  box-shadow: 0 2px 16px rgb(var(--we-accent) / 48%);
-}
-.world-exploration-card img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 30%;
-  z-index: -2;
-  transition: transform 0.4s ease;
-}
-.world-exploration-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(
-      ellipse 80% 55% at 50% 100%,
-      rgb(var(--we-accent) / 20%),
-      rgb(var(--we-accent-2) / 10%) 48%,
-      transparent 76%
-    ),
-    linear-gradient(
-      0deg,
-      rgb(4 10 18 / 97%) 0%,
-      rgb(5 12 22 / 78%) 48%,
-      rgb(4 11 20 / 18%) 100%
-    );
-}
-.world-exploration-card span {
-  display: grid;
-  gap: 8px;
-}
-.world-exploration-card strong {
-  font-size: clamp(15px, 1.4vw, 21px);
-  line-height: 1.5;
-  color: #ffffff;
-  text-shadow:
-    0 2px 14px rgb(0 0 0 / 85%),
-    0 0 22px rgb(var(--we-accent) / 28%);
-}
-.world-exploration-card small {
-  font-size: 12px;
-  line-height: 1.6;
-  color: #d0e2ee;
-}
-.world-exploration-card b {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 32px;
-  height: 32px;
-  margin-left: auto;
-  padding: 0;
-  border-radius: 999px;
-  border: 1px solid rgb(var(--we-accent) / 42%);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 18%), transparent 56%),
-    rgb(7 17 30 / 84%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 26%),
-    0 6px 16px -6px rgb(0 0 0 / 70%);
-  color: rgb(var(--we-accent));
-  transition:
-    transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 240ms ease,
-    box-shadow 240ms ease,
-    color 240ms ease;
-}
-.world-exploration-card:focus-visible {
-  outline: 3px solid #a7eeff;
-  outline-offset: 4px;
-}
-@media (hover: hover) {
-  .world-exploration-card:hover img {
-    transform: scale(1.035);
-  }
-}
-@media (hover: hover) and (pointer: fine) {
-  .world-exploration-card:hover {
-    transform: translateY(-4px);
-    border-color: rgb(var(--we-accent) / 72%);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 38%),
-      inset 0 -1px 0 rgb(var(--we-accent-3) / 28%),
-      inset 0 0 32px rgb(var(--we-accent) / 14%),
-      0 26px 54px -14px rgb(0 0 0 / 88%),
-      0 0 42px -8px rgb(var(--we-accent) / 42%),
-      0 0 68px -18px rgb(var(--we-accent-2) / 30%);
-  }
-  .world-exploration-card:hover b {
-    transform: translate(1px, -1px);
-    border-color: rgb(var(--we-accent) / 80%);
-    color: #ffffff;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 44%),
-      0 0 18px -2px rgb(var(--we-accent) / 55%);
-  }
-}
-@media (max-width: 850px) {
-  .world-exploration {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 420px) {
-  .world-exploration-card {
-    padding: 14px;
-    min-height: 170px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .world-exploration-card,
-  .world-exploration-card img,
-  .world-exploration-card b {
-    transition: none;
-  }
-}
-html[data-world-effects="economy"] .world-exploration-card,
-html[data-world-effects="economy"] .world-exploration-card img,
-html[data-world-effects="economy"] .world-exploration-card b {
-  transition: none;
-}
-
-/* The two assembly scenes share a stage. The three reading destinations sit
-   beside it on a wide screen and follow it in the same order on a phone. */
+/* The two featured scenes and the three reading destinations share an edge. */
 #world-exploration {
-  grid-template-columns: minmax(0, 2.15fr) minmax(230px, 1fr);
+  display: grid;
+  grid-template-columns: minmax(0, 1.82fr) minmax(242px, 1fr);
   align-items: stretch;
-  gap: clamp(10px, 1.4vw, 22px);
+  gap: clamp(12px, 2.1vw, 32px);
+  width: min(1560px, calc(100% - 2 * clamp(14px, 4.6vw, 88px)));
+  margin: clamp(22px, 5vw, 68px) auto clamp(42px, 6vw, 100px);
 }
+
 .world-assembly-feature {
-  min-width: 0;
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgb(164 234 255 / 46%);
-  background:
-    linear-gradient(
-        90deg,
-        transparent 4%,
-        rgb(122 232 255 / 92%) 24%,
-        rgb(255 92 200 / 86%) 52%,
-        rgb(240 207 134 / 90%) 78%,
-        transparent 96%
-      )
-      0 0 / 100% 2.5px no-repeat,
-    #0a1020;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 28%),
-    inset 0 -1px 0 rgb(240 207 134 / 22%),
-    0 26px 58px -18px rgb(0 0 0 / 86%),
-    0 0 46px -14px rgb(122 232 255 / 28%);
-  color: #eff6ff;
+  border: 1px solid #385271;
+  border-radius: 11px;
+  background: #0e1726;
+  color: #f3f7fd;
 }
+
 .world-assembly-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px 16px;
   flex-wrap: wrap;
-  padding: 10px clamp(12px, 2vw, 30px);
-  border-bottom: 1px solid rgb(164 232 255 / 34%);
-  background:
-    linear-gradient(180deg, rgb(224 248 255 / 14%) 0%, transparent 56%),
-    linear-gradient(90deg, rgb(16 32 54 / 94%) 0%, rgb(22 19 44 / 94%) 52%, rgb(14 28 48 / 94%) 100%);
-  box-shadow: inset 0 -1px 0 rgb(240 207 134 / 16%);
+  gap: 0 12px;
+  padding: 5px clamp(12px, 2vw, 28px);
+  border-bottom: 1px solid #334866;
 }
+
 .world-assembly-heading h2 {
   margin: 0;
-  font-size: clamp(17px, 1.8vw, 28px);
+  font-size: clamp(17px, 1.85vw, 29px);
   line-height: 1.35;
-  text-shadow:
-    0 2px 14px rgb(0 0 0 / 80%),
-    0 0 24px rgb(122 232 255 / 32%);
 }
+
 .world-assembly-heading a {
   display: inline-flex;
   min-height: 44px;
@@ -932,36 +576,31 @@ html[data-world-effects="economy"] .world-exploration-card b {
   color: inherit;
   text-decoration: none;
 }
+
 .world-assembly-heading h2 span {
-  font-size: 0.65em;
-  color: #96ecff;
+  font-size: 0.64em;
+  color: #b1ddef;
 }
+
 .world-assembly-heading .assembly-comparison-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: 1px solid rgb(240 207 134 / 48%);
-  background:
-    linear-gradient(180deg, rgb(255 244 214 / 18%), transparent 56%),
-    rgb(14 26 44 / 88%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 235 / 30%),
-    0 0 18px -4px rgb(240 207 134 / 32%);
-  color: #fff3d1;
-  font-size: 0.86rem;
-  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1px solid #72664e;
+  background: #272321;
+  color: #fce5b6;
+  font-size: 13px;
 }
+
 .world-assembly-scenes {
   display: grid;
   flex: 1;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  min-height: clamp(260px, 28vw, 400px);
-  overflow: hidden;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: clamp(218px, 27vw, 400px);
 }
+
 .world-assembly-scene {
-  --scene-light: #ff8ae2;
+  --scene-light: #ffc9eb;
+  --scene-glow: #5e2e5d;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -969,54 +608,40 @@ html[data-world-effects="economy"] .world-exploration-card b {
   overflow: hidden;
   min-width: 0;
   text-decoration: none;
-  color: #fff;
-  background:
-    radial-gradient(ellipse 68% 58% at 48% 52%, rgb(216 96 196 / 38%) 0%, rgb(82 48 98 / 32%) 46%, transparent 76%),
-    radial-gradient(ellipse 60% 36% at 50% 94%, rgb(240 207 134 / 22%), transparent 70%),
-    linear-gradient(165deg, #171228 0%, #0d0e1a 100%);
-  box-shadow: inset 0 1px 0 rgb(255 220 248 / 18%);
+  color: #ffffff;
+  background: radial-gradient(ellipse 80% 74% at 53% 42%, var(--scene-glow), #101625 80%);
 }
+
+.world-assembly-scene:first-child {
+  border-end-start-radius: 10px;
+}
+
 .world-assembly-scene + .world-assembly-scene {
-  --scene-light: #96ecff;
-  border-inline-start: 1px solid rgb(186 240 255 / 48%);
-  background:
-    radial-gradient(ellipse 68% 58% at 52% 52%, rgb(88 206 255 / 38%) 0%, rgb(28 76 128 / 34%) 46%, transparent 76%),
-    radial-gradient(ellipse 60% 36% at 50% 94%, rgb(240 207 134 / 20%), transparent 70%),
-    linear-gradient(165deg, #0e1c30 0%, #070e1b 100%);
-  box-shadow: inset 0 1px 0 rgb(214 248 255 / 20%);
+  --scene-light: #b0e9fb;
+  --scene-glow: #24557b;
+  border-inline-start: 1px solid #425671;
+  border-end-end-radius: 10px;
 }
-.world-assembly-scene::before,
+
 .world-assembly-scene::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background: linear-gradient(0deg, #070d16 2%, rgb(7 13 22 / 58%) 20%, transparent 52%);
 }
-.world-assembly-scene::before {
-  background:
-    radial-gradient(ellipse 56% 42% at 50% 34%, rgb(255 138 226 / 22%), transparent 72%),
-    linear-gradient(180deg, rgb(255 214 246 / 12%) 0%, transparent 28%);
-}
-.world-assembly-scene + .world-assembly-scene::before {
-  background:
-    radial-gradient(ellipse 56% 42% at 50% 34%, rgb(122 232 255 / 24%), transparent 72%),
-    linear-gradient(180deg, rgb(214 248 255 / 14%) 0%, transparent 28%);
-}
-.world-assembly-scene::after {
-  background: linear-gradient(0deg, #050913 0%, #060b16cc 16%, transparent 44%);
-}
+
 .world-assembly-scene img {
   position: absolute;
   top: 5%;
   left: 50%;
-  width: min(96%, 388px);
+  width: min(86%, 388px);
   max-width: none;
   height: auto;
   transform: translateX(-50%);
-  filter:
-    drop-shadow(0 14px 28px rgb(0 0 0 / 78%))
-    drop-shadow(0 0 24px rgb(122 232 255 / 20%));
+  filter: drop-shadow(0 18px 23px rgb(0 0 0 / 74%));
 }
+
 .world-assembly-scene span {
   z-index: 1;
   display: flex;
@@ -1024,132 +649,176 @@ html[data-world-effects="economy"] .world-exploration-card b {
   justify-content: space-between;
   gap: 4px;
   width: 100%;
-  padding: clamp(10px, 1.6vw, 24px);
+  padding: clamp(10px, 1.7vw, 25px);
   font-weight: 750;
   font-size: clamp(14px, 2vw, 30px);
   line-height: 1.4;
-  color: #fff;
-  text-shadow:
-    0 2px 16px rgb(0 0 0 / 90%),
-    0 0 24px rgb(122 232 255 / 32%);
+  text-shadow: 0 1px 12px #000;
 }
+
 .world-assembly-scene i {
   font-style: normal;
   color: var(--scene-light);
-  font-size: 0.8em;
-  text-shadow: 0 0 16px var(--scene-light);
+  font-size: 0.84em;
 }
-.world-assembly-heading a:focus-visible,
-.world-assembly-scene:focus-visible {
-  outline: 3px solid #e5f6ff;
-  outline-offset: -4px;
-}
+
 .world-exploration-index {
   display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-auto-rows: 1fr;
+  gap: 8px;
   min-width: 0;
 }
-#world-exploration .world-exploration-index .world-exploration-card {
-  min-height: 84px;
-  padding: 14px 18px;
+
+.world-exploration-card {
+  --portal-light: #aeddf3;
+  position: relative;
+  display: flex;
   align-items: center;
-  border-radius: 10px;
-  border: 1px solid rgb(var(--we-accent) / 48%);
-  border-left: 3px solid rgb(var(--we-accent));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 26%),
-    inset 0 -1px 0 rgb(var(--we-accent) / 22%),
-    0 18px 38px -14px rgb(0 0 0 / 82%),
-    0 0 30px -12px rgb(var(--we-accent) / 28%);
+  justify-content: space-between;
+  gap: 9px;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 94px;
+  padding: 12px clamp(12px, 1.7vw, 24px);
+  border: 1px solid #364a63;
+  border-radius: 9px;
+  background: #111a27;
+  color: #f3f7fd;
+  text-decoration: none;
 }
-#world-exploration .world-exploration-index .world-exploration-card::after {
-  background:
-    radial-gradient(ellipse 72% 80% at 18% 50%, rgb(var(--we-accent) / 24%), transparent 68%),
-    linear-gradient(98deg, rgb(4 10 20 / 95%) 4%, rgb(6 15 28 / 80%) 54%, rgb(4 10 19 / 28%) 100%);
+
+.world-exploration-card[data-portal="cinema"] {
+  --portal-light: #f0bfdc;
 }
-@media (min-width: 680px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]) .world-assembly-scenes {
-    transition: grid-template-columns 340ms cubic-bezier(0.2, 0.7, 0.15, 1);
+
+.world-exploration-card[data-portal="library"] {
+  --portal-light: #f1d8a4;
+}
+
+.world-exploration-card img {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -2;
+  width: 59%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 34%;
+}
+
+.world-exploration-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, #111a27 38%, rgb(17 26 39 / 77%) 61%, rgb(12 19 28 / 18%));
+}
+
+.world-exploration-card span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.world-exploration-card strong {
+  font-size: clamp(15px, 1.52vw, 22px);
+  line-height: 1.45;
+  color: var(--portal-light);
+}
+
+.world-exploration-card small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #dae5f0;
+}
+
+.world-exploration-card b {
+  display: grid;
+  place-items: center;
+  flex: 0 0 29px;
+  height: 29px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: #111a27;
+  color: var(--portal-light);
+}
+
+.world-assembly-heading a:focus-visible,
+.world-assembly-scene:focus-visible,
+.world-exploration-card:focus-visible {
+  outline: 2px solid #e2f6ff;
+  outline-offset: -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .world-exploration-card:hover,
+  .world-assembly-heading a:hover {
+    border-color: #a0cde1;
   }
+
+  .world-assembly-scene:hover span,
+  .world-assembly-heading h2 a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) :is(.world-exploration-card, .world-assembly-scene) img {
+    transition: scale 260ms cubic-bezier(0.2, 0.64, 0.28, 1);
+  }
+
   html:not([data-world-effects="economy"])
-    .world-assembly-scenes:has(> :first-child:is(:hover, :focus-visible)) {
-    grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr);
-  }
-  html:not([data-world-effects="economy"])
-    .world-assembly-scenes:has(> :last-child:is(:hover, :focus-visible)) {
-    grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+    :is(.world-exploration-card, .world-assembly-scene):hover
+    img {
+    scale: 1.035;
   }
 }
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    html:not([data-world-effects="economy"]) .world-assembly-scenes {
-      view-timeline-name: --world-assembly-view;
-    }
-    html:not([data-world-effects="economy"]) .world-assembly-scene img {
-      animation: world-stage-arrival 1s linear both;
-      animation-timeline: --world-assembly-view;
-      animation-range: entry 0% cover 80%;
-    }
-  }
-}
-@keyframes world-stage-arrival {
-  from {
-    translate: 0 4%;
-  }
-  to {
-    translate: 0 -2%;
-  }
-}
-@media (max-width: 800px) {
+
+@media (max-width: 850px) {
   #world-exploration {
     grid-template-columns: minmax(0, 1fr);
   }
+
   .world-exploration-index {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: auto;
-  }
-  .world-assembly-scenes {
-    min-height: clamp(200px, 45vw, 330px);
   }
 }
+
 @media (max-width: 580px) {
+  .world-assembly-scenes {
+    min-height: clamp(176px, 54vw, 255px);
+  }
+
+  .world-assembly-scene img {
+    width: min(93%, 264px);
+  }
+
   .world-exploration-index {
     grid-template-columns: minmax(0, 1fr);
   }
-  #world-exploration .world-exploration-index .world-exploration-card {
-    min-height: 64px;
+
+  .world-exploration-card {
+    min-height: 70px;
   }
-  .world-assembly-heading {
-    padding-block: 4px;
-  }
-  /* Leave the artwork at the trailing edge under the floating site control. */
-  #world-exploration .world-exploration-card b {
-    order: -1;
-    margin-inline: 0;
+
+  .world-exploration-card b {
+    margin-inline-start: auto;
   }
 }
+
 @media (forced-colors: active) {
-  .world-assembly-scene {
-    border: 1px solid LinkText;
-  }
-  .world-assembly-scene span {
-    background: Canvas;
-    color: LinkText;
-  }
-  .world-exploration-card::before,
-  #top.world-artwork-hero .world-poster-media::before,
-  #top.world-artwork-hero .world-stage-media::before {
+  #top.world-artwork-hero .world-artwork-light,
+  #top.world-artwork-hero .world-poster-media::before {
     display: none;
   }
+
+  #top.world-artwork-hero :is(.world-poster-media, .world-stage-context, .world-stage-controls),
+  #top.world-artwork-hero .world-stage-controls button,
+  .world-assembly-scene,
+  .world-assembly-scene span,
   .world-assembly-feature,
   .world-exploration-card,
-  .world-exploration-card b,
-  #top.world-artwork-hero .world-poster-media,
-  #top.world-artwork-hero .world-stage-context,
-  #top.world-artwork-hero .world-stage-controls,
-  #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock),
-  #top.world-artwork-hero .world-stage-controls output {
+  .world-exploration-card b {
     border-color: CanvasText;
     background: Canvas !important;
     box-shadow: none !important;

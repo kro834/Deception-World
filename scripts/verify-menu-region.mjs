@@ -7,6 +7,7 @@ const REGION_OF_GROUP = { rikuei: "riders", related: "riders", unmanaged: "rider
 /** Turn the open menu to the region that holds the first row matching
  * `selector` (a CSS selector, searched inside the side panel). */
 export async function showMenuRow(page, selector) {
+  await page.locator('#site-side-panel[data-open="true"]').waitFor({ state: "visible" });
   await page.waitForFunction(
     (target) => Boolean(document.querySelector(`#site-side-panel ${target}`)),
     selector.replace(/^\.side-panel\s+/, ""),

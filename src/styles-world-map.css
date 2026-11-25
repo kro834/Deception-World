@@ -177,6 +177,7 @@
 }
 
 .wm-tools {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   gap: 14px 24px;
@@ -415,6 +416,85 @@
     inset 0 1px 0 rgb(255 248 232 / 34%),
     0 34px 74px -10px rgb(0 0 0 / 78%),
     0 0 56px -22px rgb(122 232 255 / 38%);
+}
+
+.wm-display-mode {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--wm-seam);
+  border-radius: 999px;
+}
+
+.wm-display-mode button {
+  min-block-size: 44px;
+  padding-inline: 14px;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font-size: 0.8125rem;
+}
+
+.wm-display-mode button[aria-pressed="true"] {
+  border-color: var(--wm-accent);
+  background: rgb(122 232 255 / 13%);
+}
+
+.wm-workspace[data-view="list"] {
+  align-items: start;
+}
+
+.wm-workspace[data-view="list"] > .wm-index {
+  min-inline-size: 0;
+  max-block-size: min(660px, 72svh);
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: auto;
+  scroll-padding-block: 10px;
+}
+
+.wm-workspace[data-view="list"] > .wm-detail {
+  position: sticky;
+  inset-block-start: 16px;
+  max-block-size: calc(100svh - 32px);
+}
+
+.wm-detail-jump {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .wm-workspace[data-view="list"] > .wm-index {
+    max-block-size: clamp(200px, 46svh, 420px);
+  }
+
+  .wm-workspace[data-view="list"] > .wm-detail {
+    position: static;
+    max-block-size: none;
+  }
+
+  .wm-detail-jump {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding-inline: 14px;
+    border-top: 1px solid var(--wm-seam);
+    color: inherit;
+    font-size: 0.875rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .wm-display-mode button[aria-pressed="true"] {
+    color: HighlightText;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
 }
 
 .wm-canvas {

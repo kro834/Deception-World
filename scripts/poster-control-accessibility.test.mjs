@@ -12,13 +12,29 @@ test("poster autoplay and speculative loading pause while controls have focus", 
     home,
     /const \[posterControlsFocused, setPosterControlsFocused\] = useState\(false\)/,
   );
-  assert.equal(home.match(/if \(posterControlsFocused\) return;/g)?.length, 2);
-  assert.match(home, /onFocusCapture=\{\(\) => setPosterControlsFocused\(true\)\}/);
+  const autoplay = home.slice(
+    home.indexOf("    if (locked || ambientPaused || motionReduced"),
+    home.indexOf("  useEffect(() => {\n    if (!ambientPaused)"),
+  );
+  assert.match(
+    autoplay,
+    /if \(posterControlsFocused \|\| posterResetting \|\| posterFailure !== null\) return/,
+  );
+  assert.match(autoplay, /const canAdvance = \(\) =>[\s\S]*?!posterControlsFocusedRef\.current/);
+  assert.match(autoplay, /if \(canAdvance\(\)\) warm = loadPoster/);
+  assert.match(
+    autoplay,
+    /if \(ready && canAdvance\(\)\) await goPoster\(nextIndex, \{ canShow: canAdvance \}\)/,
+  );
+  assert.match(autoplay, /shuffling,\s*posterControlsFocused,/);
   assert.match(
     home,
-    /if \(!event\.currentTarget\.contains\(event\.relatedTarget\)\)\s*setPosterControlsFocused\(false\)/,
+    /onFocusCapture=\{\(\) => \{\s*posterControlsFocusedRef\.current = true;\s*setPosterControlsFocused\(true\)/,
   );
-  assert.equal(home.match(/shuffling,\s*posterControlsFocused,?\s*\]\)/g)?.length, 2);
+  assert.match(
+    home,
+    /if \(event\.currentTarget\.contains\(event\.relatedTarget\)\) return;\s*posterControlsFocusedRef\.current = false;\s*setPosterControlsFocused\(false\)/,
+  );
 });
 
 test("poster controls are named and automatic rotations do not create live announcements", () => {
@@ -37,5 +53,5 @@ test("shuffle keeps keyboard focus while suppressing intermediate announcements"
   assert.match(button, /aria-disabled=\{shuffling\}/);
   assert.doesNotMatch(button, /\sdisabled=\{/);
   assert.match(home, /if \(ambientPaused \|\| shuffleActive\.current\) return/);
-  assert.match(home, /<output[\s\S]*?aria-busy=\{shuffling\}/);
+  assert.match(home, /<output[\s\S]*?aria-busy=\{shuffling \|\| posterResetting\}/);
 });

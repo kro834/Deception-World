@@ -856,6 +856,8 @@ html[data-family]:not([data-family="dream"])
     0 10px 22px -14px rgb(0 0 0 / 0.86);
   color: var(--ring-paper);
   font-size: 15px;
+  line-height: 1.45;
+  line-break: strict;
   text-align: left;
   translate: var(--orbit-hug, 0px) 0;
   align-self: stretch;
@@ -863,6 +865,21 @@ html[data-family]:not([data-family="dream"])
   max-width: none;
   min-width: 0;
   box-sizing: border-box;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  :is(.side-panel-links, .command-atlas-index, .side-panel-head)
+  :is(a, button):focus-visible {
+  outline: 2px solid var(--ring-paper, #f5fbff);
+  outline-offset: -3px;
+}
+
+@media (forced-colors: active) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    :is(.side-panel-links, .command-atlas-index, .side-panel-head)
+    :is(a, button):focus-visible {
+    outline-color: Highlight;
+  }
 }
 
 /* The hub's search is always in reach: the group's copy of it steps aside. */

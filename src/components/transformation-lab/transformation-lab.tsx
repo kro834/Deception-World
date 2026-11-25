@@ -1,7 +1,7 @@
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
-import { type CSSProperties, useCallback, useEffect, useId, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   LAB_BEATS,
   LAB_NAMES,
@@ -11,6 +11,7 @@ import {
   advanceLab,
   createLabUrlWriter,
   labSearch,
+  labBeatAt,
   parseLabState,
   type LabRider,
   type LabState,
@@ -37,12 +38,19 @@ function LabChips<T extends string | number>({
   const rail = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const box = rail.current;
-    const chip = box?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (!box || !chip) return;
-    const frame = box.getBoundingClientRect();
-    const at = chip.getBoundingClientRect();
-    if (at.left < frame.left) box.scrollLeft += at.left - frame.left - 12;
-    else if (at.right > frame.right) box.scrollLeft += at.right - frame.right + 12;
+    if (!box) return;
+    const reveal = () => {
+      const chip = box.querySelector<HTMLElement>('[aria-pressed="true"]');
+      if (!chip) return;
+      const frame = box.getBoundingClientRect();
+      const at = chip.getBoundingClientRect();
+      if (at.left < frame.left) box.scrollLeft += at.left - frame.left - 12;
+      else if (at.right > frame.right) box.scrollLeft += at.right - frame.right + 12;
+    };
+    reveal();
+    const setup = box.closest("details");
+    setup?.addEventListener("toggle", reveal);
+    return () => setup?.removeEventListener("toggle", reveal);
   }, [value, options]);
   return (
     <div className="lab-field" role="group" aria-labelledby={id}>
@@ -50,11 +58,20 @@ function LabChips<T extends string | number>({
         {label}
       </span>
       <div ref={rail} className="lab-chips">
-        {options.map(([key, text]) => (
+        {options.map(([key, text], index) => (
           <button
             key={key}
             type="button"
             aria-pressed={key === value}
+            tabIndex={key === value ? 0 : -1}
+            onKeyDown={(event) => {
+              const move = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: options.length - 1 };
+              if (!(event.key in move)) return;
+              event.preventDefault();
+              const next = (move[event.key as keyof typeof move] + options.length) % options.length;
+              rail.current?.querySelectorAll("button")[next]?.focus();
+              onChange(options[next][0]);
+            }}
             onClick={() => onChange(key)}
           >
             {text}
@@ -78,10 +95,17 @@ export function TransformationLab() {
   const [state, setState] = useState<LabState>(() => parseLabState(""));
   const [hydrated, setHydrated] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [direction, setDirection] = useState(1);
-  const [ready, setReady] = useState(false);
-  const [side, setSide] = useState<"a" | "b">("a");
+  const { direction, side } = state;
+  const [primaryReady, setPrimaryReady] = useState(false);
+  const [comparisonReady, setComparisonReady] = useState(false);
   const [compact, setCompact] = useState(false);
+  const showPrimary = !compact || !state.compare || side === "a";
+  const showComparison = Boolean(state.compare) && (!compact || side === "b");
+  // On a phone the single mounted viewport switches riders in place, retaining
+  // its last frame until the newly selected side can draw at the shared playhead.
+  const pairedStages = Boolean(state.compare) && !compact;
+  const mobileComparison = !showPrimary && state.compare;
+  const ready = primaryReady && (!pairedStages || comparisonReady);
   useEffect(() => {
     const media = matchMedia("(max-width: 680px)");
     const sync = () => setCompact(media.matches);
@@ -94,12 +118,12 @@ export function TransformationLab() {
   const copied = copyResult?.state === state && copyResult.ok;
   const copyFailed = copyResult?.state === state && !copyResult.ok;
   const current = useRef(state);
-  useEffect(() => {
+  useLayoutEffect(() => {
     current.current = state;
   }, [state]);
   // A replay over a finished suit asks the stage first (Rexonance's armour
-  // retracts, then the lab moves: transformation-lab-leave.ts). A comparison
-  // stands still on both sides and asks nothing.
+  // retracts, then the lab moves: transformation-lab-leave.ts). Comparisons
+  // share a single clock, so a side-specific exit never takes over.
   const stages = useRef<HTMLDivElement>(null);
   const [leave] = useState(() => createLabLeave());
   const leaveThen = useCallback((then: () => void) => {
@@ -134,8 +158,28 @@ export function TransformationLab() {
       root.dataset.worldEffects !== "economy" &&
       !("rznConstrained" in root.dataset);
     setHydrated(true);
+    // Save even the last scrub before an immediate reload or a client-side link.
+    // Capture the departing entry while the address still belongs to the lab.
+    const saveMoment = () => {
+      const url = new URL(location.href);
+      url.search = labSearch(current.current);
+      writer.write(url.href);
+      writer.flush();
+    };
+    const onLink = (event: MouseEvent) => {
+      if (event.target instanceof Element && event.target.closest("a[href]")) saveMoment();
+    };
+    const saveWhenHidden = () => {
+      if (document.hidden) saveMoment();
+    };
+    document.addEventListener("visibilitychange", saveWhenHidden);
+    window.addEventListener("pagehide", saveMoment);
+    document.addEventListener("click", onLink, true);
     window.addEventListener("popstate", restore);
     return () => {
+      document.removeEventListener("visibilitychange", saveWhenHidden);
+      window.removeEventListener("pagehide", saveMoment);
+      document.removeEventListener("click", onLink, true);
       window.removeEventListener("popstate", restore);
       // The router has already moved on; a late write would rename its page.
       writer.cancel();
@@ -149,15 +193,15 @@ export function TransformationLab() {
     urlWriter.current?.write(url.href);
   }, [state, hydrated, playing]);
   useEffect(() => {
-    if (!playing || !ready || state.compare) return;
+    if (!playing || !ready) return;
     let frame = 0;
     let previous = 0;
     let stopped = false;
     const tick = (now: number) => {
       const elapsed = previous ? now - previous : 0;
       previous = now;
-      const { progress, speed, rider, form } = current.current;
-      const next = advanceLab(progress, elapsed, speed, direction, rider, form);
+      const { progress, speed, rider, form, compare, compareForm } = current.current;
+      const next = advanceLab(progress, elapsed, speed, direction, rider, form, compare, compareForm);
       current.current = { ...current.current, progress: next };
       setState(current.current);
       if (next === (direction > 0 ? 1 : 0)) {
@@ -204,8 +248,6 @@ export function TransformationLab() {
     if (document.hidden || current.current.compare || current.current.progress !== 0) return;
     setPlaying(true);
   }, [ready]);
-  const primaryReady = useCallback((value: boolean) => setReady(value), []);
-  const comparisonReady = useCallback(() => {}, []);
   const change = (patch: Partial<LabState>) => {
     // The reader's hand on the playhead or the stage ends a leave in play.
     if ("progress" in patch || "rider" in patch || "compare" in patch) leave.cancel();
@@ -214,6 +256,7 @@ export function TransformationLab() {
     setCopyResult(null);
     setState((value) => {
       const next = { ...value, ...patch };
+      if (!next.compare) next.side = "a";
       next.form = validLabForm(next.rider, next.form);
       next.compareForm = validLabForm(next.compare || next.rider, next.compareForm);
       return next;
@@ -246,6 +289,8 @@ export function TransformationLab() {
     change({ progress: 0 });
   };
   const copy = async () => {
+    opening.current = false;
+    setPlaying(false);
     const request = ++copyRequest.current;
     setCopyResult(null);
     const url = new URL(location.href);
@@ -257,8 +302,7 @@ export function TransformationLab() {
       if (request === copyRequest.current) setCopyResult({ state, ok: false });
     }
   };
-  const currentBeat =
-    [...LAB_BEATS].reverse().find((beat) => state.progress >= beat.at - 0.005) ?? LAB_BEATS[0];
+  const currentBeat = labBeatAt(state.progress);
   const activeRider = side === "b" && state.compare ? state.compare : state.rider;
 
   return (
@@ -283,27 +327,50 @@ export function TransformationLab() {
             <p>変身の一瞬を、手元で確かめる。</p>
           </div>
         </header>
-        <div className="lab-selectors">
-          <LabChips
-            label="ライダー"
-            value={state.rider}
-            options={LAB_RIDER_OPTIONS}
-            onChange={(rider) => change({ rider: rider as LabRider })}
-          />
-          <LabChips
-            label="フォーム"
-            value={state.form}
-            options={LAB_FORMS[state.rider]}
-            onChange={(form) => change({ form })}
-          />
-        </div>
+        <details className="lab-setup">
+          <summary>ライダー・フォームの選択と比較</summary>
+          <div className="lab-setup-panels">
+            <div className="lab-selectors">
+              <LabChips
+                label="ライダー"
+                value={state.rider}
+                options={LAB_RIDER_OPTIONS}
+                onChange={(rider) => change({ rider: rider as LabRider, side: "a" })}
+              />
+              <LabChips
+                label="フォーム"
+                value={state.form}
+                options={LAB_FORMS[state.rider]}
+                onChange={(form) => change({ form, side: "a" })}
+              />
+            </div>
+            <div className="lab-selectors lab-compare">
+              <LabChips
+                label="同じ瞬間を比較"
+                value={state.compare}
+                options={LAB_COMPARE_OPTIONS}
+                onChange={(compare) => {
+                  change({ compare: compare as LabState["compare"], side: compare ? "b" : "a" });
+                }}
+              />
+              {state.compare && (
+                <LabChips
+                  label="比較フォーム"
+                  value={state.compareForm}
+                  options={LAB_FORMS[state.compare]}
+                  onChange={(compareForm) => change({ compareForm, side: "b" })}
+                />
+              )}
+            </div>
+          </div>
+        </details>
         {state.compare && (
           <div className="lab-mobile-switch" role="group" aria-label="比較するライダーを切り替え">
-            <button aria-pressed={side === "a"} onClick={() => setSide("a")}>
+            <button aria-pressed={side === "a"} onClick={() => change({ side: "a" })}>
               {LAB_NAMES[state.rider]}・
               {LAB_FORMS[state.rider].find(([key]) => key === state.form)?.[1]}
             </button>
-            <button aria-pressed={side === "b"} onClick={() => setSide("b")}>
+            <button aria-pressed={side === "b"} onClick={() => change({ side: "b" })}>
               {LAB_NAMES[state.compare]}・
               {LAB_FORMS[state.compare].find(([key]) => key === state.compareForm)?.[1]}
             </button>
@@ -315,26 +382,29 @@ export function TransformationLab() {
           data-compare={Boolean(state.compare)}
           data-side={side}
         >
-          <div className="lab-side-a">
-            {(!compact || !state.compare || side === "a") && (
+          <div className={mobileComparison ? "lab-side-b" : "lab-side-a"}>
+            {!hydrated && <div className="lab-stage lab-stage-placeholder" role="status">変身素材を準備中…</div>}
+            {hydrated && (
               <LabStage
-                form={state.form}
-                rider={state.rider}
+                form={mobileComparison ? state.compareForm : state.form}
+                rider={mobileComparison || state.rider}
                 progress={state.progress}
                 zoom={state.zoom}
-                onReady={primaryReady}
+                comparing={Boolean(state.compare)}
+                onReady={setPrimaryReady}
               />
             )}
           </div>
-          {state.compare && (
+          {pairedStages && state.compare && (
             <div className="lab-side-b">
-              {(!compact || side === "b") && (
+              {hydrated && (
                 <LabStage
                   form={state.compareForm}
                   rider={state.compare}
                   progress={state.progress}
                   zoom={state.zoom}
-                  onReady={comparisonReady}
+                  comparing
+                  onReady={setComparisonReady}
                 />
               )}
             </div>
@@ -342,14 +412,13 @@ export function TransformationLab() {
         </div>
         <div className="lab-controls">
           <div className="lab-transport">
-            <button onClick={play} disabled={!ready || Boolean(state.compare)}>
+            <button onClick={play} disabled={!ready && !playing}>
               {playing ? "一時停止" : "再生"}
             </button>
             <button
               aria-pressed={direction < 0}
-              disabled={Boolean(state.compare)}
               onClick={() => {
-                setDirection((value) => -value);
+                setState((value) => ({ ...value, direction: value.direction === 1 ? -1 : 1 }));
               }}
             >
               逆再生
@@ -357,7 +426,6 @@ export function TransformationLab() {
             <button onClick={rewind}>最初へ</button>
             <button
               aria-pressed={state.loop}
-              disabled={Boolean(state.compare)}
               onClick={() => setState((value) => ({ ...value, loop: !value.loop }))}
             >
               ループ
@@ -370,20 +438,17 @@ export function TransformationLab() {
                 ? "URLをコピーしました。"
                 : ""}
           </p>
-          {state.compare && (
-            <p className="lab-note">
-              比較中は同じ瞬間で静止します。スライダーや段階を選んで見比べられます。
-            </p>
-          )}
           <label className="lab-seek">
-            変身の進行 <output>{Math.round(state.progress * 100)}% <span className="lab-seek-milestone">({currentBeat.label})</span></output>
+            <span className="sr-only">変身の進行</span>
+            <span className="lab-seek-milestone">{currentBeat.label}</span>
+            <output aria-live="off">{Math.round(state.progress * 100)}%</output>
             <span className="lab-seek-slider">
               <span className="lab-seek-rail" aria-hidden="true">
                 <i className="lab-seek-fill" />
               </span>
               <input
                 aria-label="変身の進行"
-                aria-valuetext={`${Math.round(state.progress * 100)}%`}
+                aria-valuetext={`${currentBeat.label}、${Math.round(state.progress * 100)}%`}
                 type="range"
                 min="0"
                 max="1"
@@ -411,6 +476,20 @@ export function TransformationLab() {
               })}
             </span>
           </label>
+          <div className="lab-zoom" role="group" aria-label="拡大する部位">
+            {(
+              [
+                ["full", "全身"],
+                ["head", "頭部"],
+                ["reactor", "リアクター"],
+                ["legs", "脚部"],
+              ] as [LabZoom, string][]
+            ).map(([zoom, label]) => (
+              <button key={zoom} aria-pressed={state.zoom === zoom} onClick={() => change({ zoom })}>
+                {label}
+              </button>
+            ))}
+          </div>
           <div className="lab-transport lab-transport-more">
             <LabChips
               label="速度"
@@ -449,7 +528,7 @@ export function TransformationLab() {
                 style={{ "--ring-i": index } as CSSProperties}
               >
                 <button
-                  aria-pressed={Math.abs(state.progress - beat.at) < 0.001}
+                  aria-pressed={beat === currentBeat}
                   data-state={
                     beat === currentBeat
                       ? "active"
@@ -465,43 +544,12 @@ export function TransformationLab() {
             ))}
           </div>
         </div>
-        <div className="lab-selectors lab-compare">
-          <LabChips
-            label="同じ瞬間を比較"
-            value={state.compare}
-            options={LAB_COMPARE_OPTIONS}
-            onChange={(compare) => {
-              setSide("a");
-              change({ compare: compare as LabState["compare"] });
-            }}
-          />
-          {state.compare && (
-            <LabChips
-              label="比較フォーム"
-              value={state.compareForm}
-              options={LAB_FORMS[state.compare]}
-              onChange={(compareForm) => change({ compareForm })}
-            />
+        <div className="lab-records">
+          {showPrimary && <LabPartRecord rider={state.rider} zoom={state.zoom} />}
+          {showComparison && state.compare && (!showPrimary || state.compare !== state.rider) && (
+            <LabPartRecord rider={state.compare} zoom={state.zoom} />
           )}
         </div>
-        <div className="lab-zoom" role="group" aria-label="拡大する部位">
-          {(
-            [
-              ["full", "全身"],
-              ["head", "頭部"],
-              ["reactor", "リアクター"],
-              ["legs", "脚部"],
-            ] as [LabZoom, string][]
-          ).map(([zoom, label]) => (
-            <button key={zoom} aria-pressed={state.zoom === zoom} onClick={() => change({ zoom })}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <LabPartRecord
-          rider={side === "b" && state.compare ? state.compare : state.rider}
-          zoom={state.zoom}
-        />
       </main>
     </>
   );

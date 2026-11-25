@@ -91,6 +91,21 @@ try {
       await selects.nth(0).selectOption(last);
       await selects.nth(1).selectOption(first);
       await assertPair(last, first);
+      const specRows = compare.locator(".compare-diff-row");
+      await specRows.first().waitFor({ state: "attached" });
+      const specAlignment = await specRows.first().evaluate((row) => {
+        const [a, b] = [...row.querySelectorAll(".compare-diff-side-cell")].map((cell) =>
+          cell.getBoundingClientRect(),
+        );
+        const delta = row.querySelector(".compare-diff-delta").getBoundingClientRect();
+        return a.right < b.left && Math.abs(a.width - b.width) <= 1 && delta.top >= a.bottom;
+      });
+      assert.ok(specAlignment, `${archive} ${width}px: A/B share a row with the delta below`);
+      const names = await selects.evaluateAll((nodes) =>
+        nodes.map((select) => select.selectedOptions[0].textContent.trim()),
+      );
+      const headers = await compare.locator("[data-compare-form]").allTextContents();
+      assert.deepEqual(headers, [`A・${names[0]}`, `B・${names[1]}`]);
       await compare.locator('[id$="saga-compare-swap-button"]').click();
       await assertPair(first, last);
       await ranges.nth(0).focus();

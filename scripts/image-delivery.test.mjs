@@ -122,12 +122,19 @@ test("World preload, first poster and transition warmup use the same image selec
   const route = readSource("../src/routes/world.tsx");
   const home = readSource("../src/components/world/world-home.tsx");
   assert.match(route, /posterImage\(WORLD_ENTER_ASSETS\[0\]\)/);
-  assert.match(readSource("../src/lib/asset-loader.ts"), /url === WORLD_ENTER_ASSETS\[0\]\) return posterImage\(url\)/);
+  const loader = readSource("../src/lib/asset-loader.ts");
+  assert.match(loader, /WORLD_ENTER_ASSETS = \["\/deception-world-poster-delivery\.webp"\]/);
+  assert.match(loader, /url === WORLD_ENTER_ASSETS\[0\]\) return posterImage\(url\)/);
   assert.match(route, /href: poster\.src/);
   assert.match(route, /imageSrcSet: poster\.srcSet/);
   assert.match(route, /imageSizes: poster\.sizes/);
-  assert.match(home, /posterImage\(current\.src\)/);
-  assert.match(home, /src: "\/deception-world-poster-delivery\.webp"/);
+  const frames = readSource("../src/components/world/use-world-poster-frames.ts");
+  assert.match(frames, /current: \{ index: 0, key: 0 \}/);
+  assert.match(home, /const POSTERS = \[\s*\{\s*src: "\/deception-world-poster-delivery\.webp"/);
+  assert.match(
+    home,
+    /\[posterFrames.previous, posterFrames.current, posterFrames.pending\]\.map[\s\S]*?const art = POSTERS\[frame.index\][\s\S]*?\{\.\.\.posterImage\(art.src\)\}/,
+  );
   assert.doesNotMatch(home, /["']\/deception-world-poster\.webp["']/);
   const original = statSync(new URL("../public/deception-world-poster.webp", import.meta.url)).size;
   const delivery = statSync(new URL("../public/deception-world-poster-delivery.webp", import.meta.url)).size;

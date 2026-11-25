@@ -33,8 +33,8 @@ test("the app uses memory-safe embedded archives and recreates the iframe when s
   // 2026-11-23 (ring system): both documents link archive-ring.css / .js
   // before the labels sheet, which re-versions them again (ring1).
   // 2026-11-23: bumped with the archive motion profile change (phones equal PC).
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20261123-phone1/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20261123-phone1/);
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20261125-spec1/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20261125-spec1/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   // A history step to another form of the same archive reopens it (reopen).
