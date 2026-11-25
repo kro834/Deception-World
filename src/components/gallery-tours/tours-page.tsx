@@ -99,6 +99,7 @@ export function GalleryToursPage({
   const focusAfterNavigation = useRef(false);
   const returnTourIdRef = useRef<string | null>(null);
   const tour = getGalleryTour(tourId);
+  const previousTourId = useRef(tour?.id);
   const nextTour = tour
     ? GALLERY_TOURS[(GALLERY_TOURS.indexOf(tour) + 1) % GALLERY_TOURS.length]
     : undefined;
@@ -143,9 +144,11 @@ export function GalleryToursPage({
   }, []);
 
   useEffect(() => {
-    if (!focusAfterNavigation.current) return;
+    const previousId = previousTourId.current;
+    previousTourId.current = tour?.id;
+    if (!focusAfterNavigation.current && previousId === tour?.id) return;
     focusAfterNavigation.current = false;
-    const returnId = returnTourIdRef.current;
+    const returnId = returnTourIdRef.current ?? previousId;
     returnTourIdRef.current = null;
     if (!tour && returnId) {
       // Restore the course after the router has applied its navigation scroll reset.

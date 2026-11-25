@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
 import { ExhibitionStudio } from "@/components/exhibition/exhibition-studio";
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/exhibition")({
 function ExhibitionRoom() {
   const { work } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const currentWorkRef = useRef<HTMLElement>(null);
   const ready = useExhibitionArtworkReady();
   const index = Math.max(
     0,
@@ -38,7 +39,13 @@ function ExhibitionRoom() {
   const artwork = GALLERY_ARTWORKS[index];
   const number = String(index + 1).padStart(3, "0");
   const select = (id: string) =>
-    void navigate({ search: { work: id }, replace: true, resetScroll: false });
+    navigate({ search: { work: id }, replace: true, resetScroll: false });
+
+  const showCurrentWork = () => {
+    const section = currentWorkRef.current;
+    section?.focus({ preventScroll: true });
+    section?.scrollIntoView({ block: "start", behavior: "instant" });
+  };
 
   return (
     <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
@@ -60,6 +67,7 @@ function ExhibitionRoom() {
       <section
         className="exhibition-room-current"
         id="exhibition-current-work"
+        ref={currentWorkRef}
         tabIndex={-1}
         aria-labelledby="exhibition-current-title"
       >
@@ -145,7 +153,12 @@ function ExhibitionRoom() {
           </button>
         </nav>
       </section>
-      <ExhibitionArtworkBrowser currentIndex={index} onSelect={select} />
+      <ExhibitionArtworkBrowser
+        currentIndex={index}
+        onSelect={(id) => {
+          void select(id).then(showCurrentWork);
+        }}
+      />
     </main>
   );
 }

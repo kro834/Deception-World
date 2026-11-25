@@ -945,7 +945,7 @@
   }
 
   .gallery-tour-artwork {
-    height: clamp(230px, 51dvh, 560px);
+    height: clamp(230px, 56dvh, 590px);
   }
 
   .gallery-tour-stage,
