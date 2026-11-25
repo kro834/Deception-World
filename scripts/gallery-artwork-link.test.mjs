@@ -285,3 +285,27 @@ test("a shuffled session survives history restoration without sharing its privat
   assert.equal(withMissingWork.record.mode, "shuffle");
   assert.deepEqual(withMissingWork.record.ids, ["g113", "g81"]);
 });
+
+test("changing works leaves the original gallery card attached to Back and Forward", () => {
+  const history = createMemoryHistory({ initialEntries: ["/gallery"] });
+  const record = {
+    id: "g01",
+    ids: ["g01", "g81"],
+    position: { top: 2800, left: 0 },
+    opener: { kind: "grid", artworkId: "g01" },
+  };
+  history.push("/gallery?work=g01", { galleryViewer: record });
+  history.replace("/gallery?work=g81", { galleryViewer: { ...record, id: "g81" } });
+  history.back();
+  history.forward();
+
+  const restored = planGalleryArtworkEntry({
+    ...options,
+    href: history.location.href,
+    viewerState: history.location.state.galleryViewer,
+  });
+  assert.equal(restored.kind, "open");
+  assert.equal(restored.record.id, "g81");
+  assert.deepEqual(restored.record.opener, record.opener);
+  assert.deepEqual(restored.record.position, record.position);
+});

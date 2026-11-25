@@ -149,12 +149,16 @@ const ZEUS_AVOID_SELECTOR = [
   ".wa-quote-controls",
   '.rider-tabs [role="tab"]',
   '.rxs-stage-tabs [role="tab"]',
+  '.fst-cast-tabs [role="tab"]',
+  ".exs-chapter-index > a",
   ".dream-poster-thumbnails button",
   ".dream-poster-controls button",
+  ".dream-chapter-stage-chapters button",
   // 2026-10-31 QA: /gallery's preview filmstrip and its トップに飾る plate.
   // On phones the button rested on the strip's last thumbnail (005).
   ".gallery-stage-candidates > button",
   ".gallery-stage-controls > button",
+  ".gallery-feature-save",
   // Same QA: /saga-cinema's chapter reel (the button sat on 終末 on an iPad
   // Pro) and its 自動切替 switch (iPad mini).
   ".chapter-reel > button",
@@ -185,6 +189,7 @@ const ZEUS_AVOID_SELECTOR = [
   ".lab-ring button",
   ".library-card-actions button",
   ".search-input-row",
+  ".dream-record-search-field",
   ".export-page :is(.export-page-alt, .export-page-back)",
   ".app-not-found > a",
   // rx10 review: the ZIP plate, which the button settled on at 390x844 once

@@ -214,7 +214,7 @@ const ORBIT_REGIONS = [
   ["special", "サーガ"],
   ["stories", "物語"],
   ["riders", "人物"],
-  ["information", "ギャラリー・お知らせ"],
+  ["information", "ギャラリー", "・お知らせ"],
   ["system", "設定"],
 ] as const;
 const ORBIT_REGION_OF_GROUP: Record<string, string> = {
@@ -1500,7 +1500,7 @@ export function SideMenuLayer({
             onClickCapture={onOrbitClickCapture}
             onKeyDown={onOrbitKeyDown}
           >
-            {ORBIT_REGIONS.map(([group, label], index) => (
+            {ORBIT_REGIONS.map(([group, label, nextLine], index) => (
               <button
                 key={group}
                 type="button"
@@ -1508,6 +1508,7 @@ export function SideMenuLayer({
                 id={`command-atlas-tab-${group}`}
                 aria-selected={index === orbitIndex}
                 aria-controls={`command-atlas-${group}`}
+                aria-label={nextLine ? label + nextLine : undefined}
                 tabIndex={index === orbitIndex ? 0 : -1}
                 style={{ ["--orbit-i" as string]: index }}
                 onClick={(event) => {
@@ -1521,7 +1522,10 @@ export function SideMenuLayer({
                   }
                 }}
               >
-                <span>{label}</span>
+                <span>
+                  {label}
+                  {nextLine && <span className="command-atlas-label-line">{nextLine}</span>}
+                </span>
               </button>
             ))}
           </nav>
@@ -1920,7 +1924,9 @@ export function SideMenuLayer({
                     beforeNavigate={close}
                     aria-current={pathname === r.href ? "page" : undefined}
                   >
-                    <span>{r.name}</span>
+                    <span>
+                      <DisplayName value={r.name} />
+                    </span>
                     <i>{String(i + 1).padStart(2, "0")}</i>
                   </GuardedLink>
                 ) : null,
@@ -1948,7 +1954,9 @@ export function SideMenuLayer({
                     {isOpen ? (
                       <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
                     ) : null}
-                    <span>{file.name}</span>
+                    <span>
+                      <DisplayName value={file.name} />
+                    </span>
                     <i>{file.id}</i>
                   </GuardedLink>
                 ))}
@@ -1978,7 +1986,9 @@ export function SideMenuLayer({
                     {isOpen ? (
                       <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
                     ) : null}
-                    <span>{file.name}</span>
+                    <span>
+                      <DisplayName value={file.name} />
+                    </span>
                   </GuardedLink>
                 ))}
               </div>
@@ -1994,7 +2004,9 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={pathname === "/characters/dante" ? "page" : undefined}
             >
-              <span>ダンテ／ヴァルグ</span>
+              <span>
+                <DisplayName value="ダンテ／ヴァルグ" />
+              </span>
               <i>第二の犬</i>
             </GuardedLink>
           </div>

@@ -129,6 +129,8 @@
   --ring-space-6: 64px;
   --ring-radius-card: 28px;
   --ring-radius-pill: 999px;
+  --ring-metal-edge: conic-gradient(from 215deg, #43494d, #8a8c86 13%, #e1dbca 18%, #626667 26%, #373d41 48%, #a8adae 68%, #e0e3df 71%, #595f61 81%, #43494d);
+  --ring-graphite: linear-gradient(146deg, #32363a, #202428 42%, #131619 86%);
 }
 
 @supports (transition-timing-function: linear(0, 1)) {

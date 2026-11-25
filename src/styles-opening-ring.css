@@ -46,7 +46,7 @@
    passes through (the logo is dark there). The economy renderer has no
    assembly: its rings appear once the title holds. */
 .cine-stage:is(.is-playing, .is-complete) .cine-glass-rings[data-glass] {
-  opacity: 0.92;
+  opacity: 0.68;
 }
 
 html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data-glass],
@@ -75,10 +75,12 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data
 
 .cine-glass-rings[data-glass] .cine-glass-ring-inner > b {
   background-image: url("/ring-glass-20261123/hero-inner.webp");
+  opacity: 0.42;
 }
 
 .cine-glass-rings[data-glass] .cine-glass-ring-holo > b {
   background-image: url("/ring-glass-20261123/hero-holo.webp");
+  opacity: 0.35;
 }
 
 /* Per layer: when it starts (s into the sequence), the depth it flies in
@@ -136,15 +138,9 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data
    the pill (the plate-lock still locks it on). */
 .cine-stage .cine-replay-slot > .cine-btn:not(#opr)::before {
   inset: 0;
-  padding: 1.5px;
+  padding: 1px;
   border-radius: inherit;
-  background: conic-gradient(
-    from 210deg,
-    rgb(var(--ring-key-rgb, 122 232 255) / 0.95),
-    rgb(var(--ring-pink-rgb, 255 95 200) / 0.85) 32%,
-    rgb(var(--ring-gold-rgb, 240 207 134) / 0.95) 62%,
-    rgb(var(--ring-key-rgb, 122 232 255) / 0.95)
-  );
+  background: var(--ring-metal-edge, linear-gradient(122deg, #838883, #ece6d5 24%, #686d6d 58%, #adaea6));
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -167,6 +163,27 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data
 .cine-stage .cine-replay-slot > .cine-btn:not(#opr):active {
   transform: none;
   scale: 0.93;
+}
+
+@media (forced-colors: none) {
+  .cine-stage .cine-replay-slot > .cine-btn-primary:not(#opr) {
+    color: #f9f4e8;
+    background: linear-gradient(125deg, #494840, #323532 45%, #202427);
+    box-shadow: inset 0 1px 0 rgb(252 246 225 / 0.28), 0 9px 22px -11px #000;
+    border-color: transparent;
+    text-shadow: none;
+  }
+  .cine-stage .cine-replay-slot > .cine-btn-secondary:not(#opr) {
+    color: #e0e1dc;
+    background: #171b1f;
+    box-shadow: none;
+    border-color: transparent;
+    text-shadow: none;
+  }
+  .cine-stage .cine-replay-slot > .cine-btn-primary:not(#opr)::after {
+    background: linear-gradient(90deg, transparent, #d9c9a5, transparent);
+    box-shadow: none;
+  }
 }
 
 /* ---- Motion (gated) ------------------------------------------------------- */

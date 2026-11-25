@@ -46,7 +46,7 @@ test("both embedded archives request the revised design stylesheet", () => {
       `public/${archive}-form-archive-embedded.html`,
     ]) {
       const source = readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
-      assert.match(source, /archive-elevation\.css\?v=20261006-elev4/);
+      assert.match(source, /archive-elevation\.css\?v=20261126-nav/);
     }
   }
 });

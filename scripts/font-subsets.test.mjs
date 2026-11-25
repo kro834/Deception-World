@@ -78,10 +78,10 @@ test("each subset sheet is linked after the Google sheet of the same faces (late
   assert.match(root, /\{ href: openingFontsCss, members: \[SITE_CORE_FONTS_URL, DOSSIER_HUD_FONTS_URL\] \}/);
   // The display subsets only where the display faces exist (not on the title).
   assert.match(root, /=== "\/"\)\s*\?\s*\[\]\s*:\s*\[\{ rel: "stylesheet", href: fontSubsetsDisplayCss \}\]/);
-  const dream = read("src/routes/dream-chapter.tsx");
-  const google = dream.indexOf('{ rel: "stylesheet", href: DREAM_FONTS_URL }');
-  const subsets = dream.indexOf('{ rel: "stylesheet", href: fontSubsetsDreamCssUrl }');
-  assert.ok(google > 0 && subsets > google);
+  assert.match(
+    root,
+    /<head>[\s\S]*?pathname === "\/dream-chapter" && \([\s\S]*?<link rel="stylesheet" href=\{DREAM_FONTS_URL\} \/>\s*<link rel="stylesheet" href=\{fontSubsetsDreamCss\} \/>[\s\S]*?<\/head>/,
+  );
 });
 
 test("the subsets are cached like /assets/ (hashed names)", () => {

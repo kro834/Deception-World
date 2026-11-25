@@ -53,7 +53,7 @@ test("detail routes use per-location restoration without overwriting the world s
   );
   assert.match(loadGate, /useLayoutEffect\(\(\) => \{[\s\S]*?resetDetailScroll/);
   assert.match(loadGate, /const pathnameChanged = previousPathname\.current !== pathname/);
-  assert.match(loadGate, /const isDossierSectionHash =\s*\/\^#\?character-section-\//);
+  assert.match(loadGate, /const isDossierSectionHash = DOSSIER_SECTION_LINK\.test\(/);
   assert.match(
     loadGate,
     /DETAIL_ROUTE\.test\(pathname\) && pathnameChanged && !isDossierSectionHash/,

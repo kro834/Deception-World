@@ -79,9 +79,10 @@ test("World episode records follow the actual chapter boundaries and later conse
       ["02", "LEGENDS"],
       ["03", "DECEPTION WORLD"],
       ["04", "癒えぬ傷を負った者共"],
+      ["05", "来訪"],
     ],
   );
-  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 11]);
+  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 16, 4]);
   for (const { synopsis } of WORLD_EPISODE_NOTES) {
     assert.ok(synopsis.every((paragraph) => paragraph.length > 80));
   }

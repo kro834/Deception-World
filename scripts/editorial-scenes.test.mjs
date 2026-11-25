@@ -43,14 +43,20 @@ test("World episode lines follow reunion, intervention and resistance in source 
           by: "ローア",
         },
       ],
+      // 2026-11-26 export: EP5 opens at line 13467 (lines 13485, 13618, 13660).
+      [
+        { text: "……おい、全員。余韻に浸ってる暇はねぇぞ", by: "紅城真守" },
+        { text: "シエル！早く、あの『扉』を出してくれ！ 一刻も早く、ここから抜けるぞッ！！", by: "紅城真守" },
+        { text: "お帰りなさい、シエル", by: "マキャベルゴアナイトメア" },
+      ],
     ],
   );
 });
 
-test("World records expand the three supplied episodes without inventing a resolved ending", () => {
+test("World records preserve the supplied chapter lengths and EP3's unresolved ending", () => {
   for (const episode of WORLD_EPISODE_NOTES) {
-    // The October 18 continuation expands EP3; the October 27 export opens EP4.
-    const expected = { "03": 9, "04": 11 }[episode.no] ?? 3;
+    // The November 26 continuation completes EP4 and opens EP5.
+    const expected = { "03": 9, "04": 16, "05": 4 }[episode.no] ?? 3;
     assert.equal(episode.synopsis.length, expected, episode.no);
     assert.ok(
       episode.synopsis.every((text) => text.length >= 80),

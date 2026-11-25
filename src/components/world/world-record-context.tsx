@@ -8,7 +8,7 @@ export function WorldEpisodeIndex() {
           <li key={episode.no}>
             <a href={episode.href}>
               <span className="wr-record-number">EP.{episode.no}</span>
-              <span lang="en">{episode.title}</span>
+              <span lang={episode.titleLang}>{episode.title}</span>
             </a>
           </li>
         ))}

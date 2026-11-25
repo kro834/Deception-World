@@ -17,14 +17,14 @@ test("EP4 carries its November 1 events and their uncertainties into the continu
 });
 
 test("EP4 reaches the November 18 exchange in the ruined castle", () => {
-  const [dream, headquarters, trap, explom, returnToCastle, latest] = synopsis.slice(5);
+  const [dream, headquarters, trap, explom, returnToCastle, exchange] = synopsis.slice(5, 11);
   assert.match(dream, /魔理沙の面影.*花畑を出た.*崩壊の異界/);
   assert.match(headquarters, /ヴァルグ.*CODE北米本部を壊滅.*ウィル.*救難信号/);
   assert.match(trap, /シュザを裏切る.*焔雷・暁天穿.*再生までシュザに打ち消された/);
   assert.match(explom, /ナイトメアの力が目覚め.*エクスプロム.*フリートは再び天智で斬りかかる/);
   assert.match(returnToCastle, /真守がアルゲノム.*予告状.*レディックとなった千桐/);
-  assert.match(latest, /右手のガシャコンエッジを砕かれた.*もう一本を左手に.*片膝をついて踏みとどまった/);
-  assert.doesNotMatch(synopsis.join(""), /シュザを撃破|フリートを倒した|第五の犬を倒した/);
+  assert.match(exchange, /右手のガシャコンエッジを砕かれた.*もう一本を左手に.*片膝をついて踏みとどまった/);
+  assert.doesNotMatch(synopsis.slice(0, 11).join(""), /シュザを撃破|フリートを倒した|第五の犬を倒した/);
 });
 
 test("implemented technology preserves its danger and EP3 historical development state", () => {

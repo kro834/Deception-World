@@ -105,17 +105,21 @@ test("EP4 opens Fals and each requested Ruler mode at its own existing form", ()
   assert.match(readFileSync(new URL("../src/components/world/lejas-page.tsx", import.meta.url), "utf8"), /id="form-records"/);
 });
 
-test("EP4 form hashes bypass the delayed dossier top reset after route arrival", () => {
+test("dossier form hashes bypass the delayed top reset after route arrival", () => {
   const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
+  const linkPattern = gate.match(/const DOSSIER_SECTION_LINK =\s*([^;]+);/)?.[1];
   const recognized = gate.match(/const isDossierSectionHash =([\s\S]*?);/)?.[1];
   const reset = gate.match(/const resetRouteTop =([\s\S]*?);/)?.[1];
-  assert.ok(recognized && reset);
+  assert.ok(linkPattern && recognized && reset);
   const shouldReset = new Function(
     "pathname",
     "locationHash",
     "pathnameChanged",
     "fromHistory",
-    `const DETAIL_ROUTE = /^\\/(?:riders|managers|characters)\\//; const isDossierSectionHash = ${recognized}; return (${reset});`,
+    `const DETAIL_ROUTE = /^\\/(?:riders|managers|characters)\\//;
+      const DOSSIER_SECTION_LINK = ${linkPattern};
+      const isDossierSectionHash = ${recognized};
+      return (${reset});`,
   );
   for (const hash of ["ruler-enigma", "ruler-polaris", "form-records"]) {
     for (const prefix of ["", "#"]) {
@@ -123,6 +127,8 @@ test("EP4 form hashes bypass the delayed dossier top reset after route arrival",
     }
   }
   assert.equal(shouldReset("/managers/lejas", "form-records", true, false), false);
+  assert.equal(shouldReset("/riders/over-zeztz", "form-record-2", true, false), false);
+  assert.equal(shouldReset("/riders/leddic", "#partner-form-3", true, false), false);
   assert.equal(shouldReset("/characters/dante", "", true, false), true);
   assert.equal(shouldReset("/characters/dante", "unknown-form", true, false), true);
   assert.equal(shouldReset("/characters/dante", "", true, true), false);

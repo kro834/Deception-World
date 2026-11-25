@@ -304,6 +304,44 @@ try {
     "last course ending routes to first work of next course, resets playback and focuses new title",
   );
   await tours.screenshot({ path: `${output}/next-course.png` });
+
+  const historyTour = await newPage();
+  await historyTour.goto(`${base}/gallery-tours`);
+  await historyTour.locator("#gallery-tour-course-starlight")
+    .getByRole("button", { name: /^星光をたどるの4点目/ })
+    .click();
+  await expectTour(historyTour, "starlight", "g94");
+  await historyTour.locator("#gallery-tour-stage").focus();
+  await historyTour.locator("#gallery-tour-title").evaluate((heading) => {
+    window.scrollTo({ top: scrollY + heading.getBoundingClientRect().bottom + 8, behavior: "instant" });
+  });
+  await historyTour.keyboard.press("ArrowRight");
+  await expectTour(historyTour, "starlight", "g21", 5);
+  await settle(historyTour);
+  const previousScroll = await historyTour.evaluate(() => scrollY);
+
+  await historyTour.goBack();
+  await historyTour.waitForFunction(
+    () => document.activeElement?.id === "gallery-tour-title-starlight",
+  );
+  await historyTour.goForward();
+  await expectTour(historyTour, "starlight", "g21", 5);
+  await settle(historyTour);
+  const restored = await historyTour.evaluate(() => {
+    const active = document.activeElement;
+    const bounds = active?.getBoundingClientRect();
+    const barBottom = document.querySelector(".gallery-topbar").getBoundingClientRect().bottom;
+    return {
+      scroll: scrollY,
+      focusedInTheatre: !!active?.closest(".gallery-tour-theatre"),
+      visibleHeight: bounds
+        ? Math.min(bounds.bottom, innerHeight) - Math.max(bounds.top, barBottom)
+        : 0,
+    };
+  });
+  assert.ok(Math.abs(restored.scroll - previousScroll) <= 1, JSON.stringify(restored));
+  assert.ok(restored.focusedInTheatre && restored.visibleHeight >= 24, JSON.stringify(restored));
+  record("Forward restores the exact work and scroll with visible keyboard focus");
   assert.deepEqual(results.errors, [], "Unexpected page errors");
 } catch (error) {
   results.failure = error.stack;

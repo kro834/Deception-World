@@ -967,7 +967,7 @@ function dispatchOpeningHandoffState(active: boolean) {
 const DETAIL_ROUTE = /^\/(?:riders|managers|characters)\//;
 // The dossier reader's and contents' in-page links.
 const DOSSIER_SECTION_LINK =
-  /^#(?:character-section-[\w-]+|dossier-profile|dossier-index|identity-records|form-records|ruler-enigma|ruler-polaris)$/;
+  /^#(?:character-section-[\w-]+|dossier-profile|dossier-index|identity-records|form-records|form-record-\d+|partner-form-\d+|ruler-enigma|ruler-polaris)$/;
 const SCROLL_KEYS = new Set([
   "ArrowDown",
   "ArrowLeft",
@@ -3555,11 +3555,9 @@ export function AppGuards() {
       restoringTimer = 0;
       delete root.dataset.routeRestoring;
     };
-    const isDossierSectionHash =
-      /^#?character-section-/.test(locationHash) ||
-      /^#?(?:dossier-profile|dossier-index|identity-records|form-records|ruler-enigma|ruler-polaris)$/.test(
-        locationHash,
-      );
+    const isDossierSectionHash = DOSSIER_SECTION_LINK.test(
+      locationHash.startsWith("#") ? locationHash : `#${locationHash}`,
+    );
     const resetRouteTop =
       (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash && !fromHistory) ||
       (pathname === "/world" &&

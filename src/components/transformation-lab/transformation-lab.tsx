@@ -96,23 +96,16 @@ export function TransformationLab() {
   const [hydrated, setHydrated] = useState(false);
   const [playing, setPlaying] = useState(false);
   const { direction, side } = state;
-  const [primaryReady, setPrimaryReady] = useState(false);
-  const [comparisonReady, setComparisonReady] = useState(false);
-  const [compact, setCompact] = useState(false);
+  const [firstReady, setFirstReady] = useState(false);
+  const [secondReady, setSecondReady] = useState(false);
+  // In the paired layout the lead slot draws A. On a phone it draws the
+  // selected side, staying mounted as the reader switches between A and B.
+  const [{ compact, leadSlot }, setLayout] = useState({ compact: false, leadSlot: 0 });
+  const otherSlot = 1 - leadSlot;
   const showPrimary = !compact || !state.compare || side === "a";
   const showComparison = Boolean(state.compare) && (!compact || side === "b");
-  // On a phone the single mounted viewport switches riders in place, retaining
-  // its last frame until the newly selected side can draw at the shared playhead.
   const pairedStages = Boolean(state.compare) && !compact;
-  const mobileComparison = !showPrimary && state.compare;
-  const ready = primaryReady && (!pairedStages || comparisonReady);
-  useEffect(() => {
-    const media = matchMedia("(max-width: 680px)");
-    const sync = () => setCompact(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
+  const ready = pairedStages ? firstReady && secondReady : leadSlot === 0 ? firstReady : secondReady;
   const [copyResult, setCopyResult] = useState<{ state: LabState; ok: boolean } | null>(null);
   const copyRequest = useRef(0);
   const copied = copyResult?.state === state && copyResult.ok;
@@ -121,6 +114,22 @@ export function TransformationLab() {
   useLayoutEffect(() => {
     current.current = state;
   }, [state]);
+  useEffect(() => {
+    const media = matchMedia("(max-width: 680px)");
+    const sync = () => {
+      const narrow = media.matches;
+      const selected = current.current.side;
+      setLayout((previous) => previous.compact === narrow ? previous : {
+        compact: narrow,
+        // B is the opposite slot in the pair. Keep its mounted engine
+        // when folding the pair down to B or expanding from B to the pair.
+        leadSlot: selected === "b" ? 1 - previous.leadSlot : previous.leadSlot,
+      });
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   // A replay over a finished suit asks the stage first (Rexonance's armour
   // retracts, then the lab moves: transformation-lab-leave.ts). Comparisons
   // share a single clock, so a side-specific exit never takes over.
@@ -170,7 +179,12 @@ export function TransformationLab() {
       if (event.target instanceof Element && event.target.closest("a[href]")) saveMoment();
     };
     const saveWhenHidden = () => {
-      if (document.hidden) saveMoment();
+      if (!document.hidden) return;
+      // A comparison can still be loading, or a replay waiting for the suit to leave.
+      opening.current = false;
+      leave.cancel();
+      setPlaying(false);
+      saveMoment();
     };
     document.addEventListener("visibilitychange", saveWhenHidden);
     window.addEventListener("pagehide", saveMoment);
@@ -232,14 +246,9 @@ export function TransformationLab() {
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
-    const hide = () => {
-      if (document.hidden) setPlaying(false);
-    };
-    document.addEventListener("visibilitychange", hide);
     return () => {
       stopped = true;
       cancelAnimationFrame(frame);
-      document.removeEventListener("visibilitychange", hide);
     };
   }, [playing, ready, direction, state.compare, leaveThen]);
   useEffect(() => {
@@ -376,172 +385,169 @@ export function TransformationLab() {
             </button>
           </div>
         )}
-        <div
-          ref={stages}
-          className="lab-stages"
-          data-compare={Boolean(state.compare)}
-          data-side={side}
-        >
-          <div className={mobileComparison ? "lab-side-b" : "lab-side-a"}>
-            {!hydrated && <div className="lab-stage lab-stage-placeholder" role="status">変身素材を準備中…</div>}
-            {hydrated && (
-              <LabStage
-                form={mobileComparison ? state.compareForm : state.form}
-                rider={mobileComparison || state.rider}
-                progress={state.progress}
-                zoom={state.zoom}
-                comparing={Boolean(state.compare)}
-                onReady={setPrimaryReady}
-              />
-            )}
-          </div>
-          {pairedStages && state.compare && (
-            <div className="lab-side-b">
-              {hydrated && (
-                <LabStage
-                  form={state.compareForm}
-                  rider={state.compare}
-                  progress={state.progress}
-                  zoom={state.zoom}
-                  comparing
-                  onReady={setComparisonReady}
-                />
-              )}
-            </div>
-          )}
-        </div>
-        <div className="lab-controls">
-          <div className="lab-transport">
-            <button onClick={play} disabled={!ready && !playing}>
-              {playing ? "一時停止" : "再生"}
-            </button>
-            <button
-              aria-pressed={direction < 0}
-              onClick={() => {
-                setState((value) => ({ ...value, direction: value.direction === 1 ? -1 : 1 }));
-              }}
-            >
-              逆再生
-            </button>
-            <button onClick={rewind}>最初へ</button>
-            <button
-              aria-pressed={state.loop}
-              onClick={() => setState((value) => ({ ...value, loop: !value.loop }))}
-            >
-              ループ
-            </button>
-          </div>
-          <p role="status" className={copyFailed ? "lab-note" : "sr-only"}>
-            {copyFailed
-              ? "コピーできませんでした。一時停止して、アドレス欄のURLをコピーしてください。"
-              : copied
-                ? "URLをコピーしました。"
-                : ""}
-          </p>
-          <label className="lab-seek">
-            <span className="sr-only">変身の進行</span>
-            <span className="lab-seek-milestone">{currentBeat.label}</span>
-            <output aria-live="off">{Math.round(state.progress * 100)}%</output>
-            <span className="lab-seek-slider">
-              <span className="lab-seek-rail" aria-hidden="true">
-                <i className="lab-seek-fill" />
-              </span>
-              <input
-                aria-label="変身の進行"
-                aria-valuetext={`${currentBeat.label}、${Math.round(state.progress * 100)}%`}
-                type="range"
-                min="0"
-                max="1"
-                step="0.001"
-                value={state.progress}
-                onChange={(event) => change({ progress: Number(event.target.value) })}
-              />
-            </span>
-            <span className="lab-seek-ticks" aria-hidden="true">
-              {LAB_BEATS.map((beat) => {
-                const tickState =
-                  beat === currentBeat
-                    ? "active"
-                    : beat.at < currentBeat.at
-                      ? "passed"
-                      : "upcoming";
-                return (
-                  <i
-                    key={beat.at}
-                    className={`lab-seek-tick is-${tickState}`}
-                    data-state={tickState}
-                    style={{ left: `${beat.at * 100}%` }}
-                  />
-                );
-              })}
-            </span>
-          </label>
-          <div className="lab-zoom" role="group" aria-label="拡大する部位">
-            {(
-              [
-                ["full", "全身"],
-                ["head", "頭部"],
-                ["reactor", "リアクター"],
-                ["legs", "脚部"],
-              ] as [LabZoom, string][]
-            ).map(([zoom, label]) => (
-              <button key={zoom} aria-pressed={state.zoom === zoom} onClick={() => change({ zoom })}>
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="lab-transport lab-transport-more">
-            <LabChips
-              label="速度"
-              value={state.speed}
-              options={LAB_SPEED_OPTIONS}
-              onChange={(speed) => setState((value) => ({ ...value, speed }))}
-            />
-            <button onClick={copy}>{copied ? "コピーしました" : "この瞬間のURLをコピー"}</button>
-          </div>
-          {/* Ring system (2026-11-23): the stages of one suit-up are nodes on
-              one ring (chrome only: the engine is not touched). The ring in
-              the centre is lit up to the stage in progress: it changes only
-              when the stage does, so nothing repaints per frame beside the
-              engine. Each node is a wrapper, placed by the orbit; the button
-              keeps its own press. */}
+        <div className="lab-workbench">
           <div
-            className="lab-ring ring-orbit ring-orbit-keep ring-enter"
-            role="group"
-            aria-label="変身の段階"
-            style={{ "--ring-n": LAB_BEATS.length } as CSSProperties}
+            ref={stages}
+            className="lab-stages"
+            data-compare={Boolean(state.compare)}
+            data-side={side}
           >
-            <span className="ring-orbit-track" aria-hidden="true" />
-            <span
-              className="lab-ring-core"
-              aria-hidden="true"
-              style={
-                {
-                  "--ring-p": (LAB_BEATS.indexOf(currentBeat) / (LAB_BEATS.length - 1)).toFixed(4),
-                } as CSSProperties
-              }
-            />
-            {LAB_BEATS.map((beat, index) => (
-              <span
-                key={beat.at}
-                className="ring-orbit-item"
-                style={{ "--ring-i": index } as CSSProperties}
+            {(["a", "b"] as const).map((panel) => {
+              const primary = panel === "a";
+              const rider = primary ? state.rider : state.compare;
+              if (!rider || !(primary ? showPrimary : showComparison)) return null;
+              const slot = primary || compact ? leadSlot : otherSlot;
+              return (
+                <div key={slot} className={primary ? "lab-side-a" : "lab-side-b"}>
+                  {hydrated ? (
+                    <LabStage
+                      form={primary ? state.form : state.compareForm}
+                      rider={rider}
+                      progress={state.progress}
+                      zoom={state.zoom}
+                      comparing={Boolean(state.compare)}
+                      onReady={slot === 0 ? setFirstReady : setSecondReady}
+                    />
+                  ) : (
+                    <div className="lab-stage lab-stage-placeholder" role="status">変身素材を準備中…</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="lab-controls">
+            <div className="lab-transport">
+              <button onClick={play} disabled={!ready && !playing}>
+                {playing ? "一時停止" : "再生"}
+              </button>
+              <button
+                aria-pressed={direction < 0}
+                onClick={() => {
+                  setState((value) => ({ ...value, direction: value.direction === 1 ? -1 : 1 }));
+                }}
               >
-                <button
-                  aria-pressed={beat === currentBeat}
-                  data-state={
+                逆再生
+              </button>
+              <button onClick={rewind}>最初へ</button>
+              <button
+                aria-pressed={state.loop}
+                onClick={() => setState((value) => ({ ...value, loop: !value.loop }))}
+              >
+                ループ
+              </button>
+            </div>
+            <p role="status" className={copyFailed ? "lab-note" : "sr-only"}>
+              {copyFailed
+                ? "コピーできませんでした。一時停止して、アドレス欄のURLをコピーしてください。"
+                : copied
+                  ? "URLをコピーしました。"
+                  : ""}
+            </p>
+            <label className="lab-seek">
+              <span className="sr-only">変身の進行</span>
+              <span className="lab-seek-milestone">{currentBeat.label}</span>
+              <output aria-live="off">{Math.round(state.progress * 100)}%</output>
+              <span className="lab-seek-slider">
+                <span className="lab-seek-rail" aria-hidden="true">
+                  <i className="lab-seek-fill" />
+                </span>
+                <input
+                  aria-label="変身の進行"
+                  aria-valuetext={`${currentBeat.label}、${Math.round(state.progress * 100)}%`}
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.001"
+                  value={state.progress}
+                  onChange={(event) => change({ progress: Number(event.target.value) })}
+                />
+              </span>
+              <span className="lab-seek-ticks" aria-hidden="true">
+                {LAB_BEATS.map((beat) => {
+                  const tickState =
                     beat === currentBeat
                       ? "active"
                       : beat.at < currentBeat.at
                         ? "passed"
-                        : "upcoming"
-                  }
-                  onClick={() => change({ progress: beat.at })}
-                >
-                  {beat.label}
-                </button>
+                        : "upcoming";
+                  return (
+                    <i
+                      key={beat.at}
+                      className={`lab-seek-tick is-${tickState}`}
+                      data-state={tickState}
+                      style={{ left: `${beat.at * 100}%` }}
+                    />
+                  );
+                })}
               </span>
-            ))}
+            </label>
+            <div className="lab-zoom" role="group" aria-label="拡大する部位">
+              {(
+                [
+                  ["full", "全身"],
+                  ["head", "頭部"],
+                  ["reactor", "リアクター"],
+                  ["legs", "脚部"],
+                ] as [LabZoom, string][]
+              ).map(([zoom, label]) => (
+                <button key={zoom} aria-pressed={state.zoom === zoom} onClick={() => change({ zoom })}>
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="lab-transport lab-transport-more">
+              <LabChips
+                label="速度"
+                value={state.speed}
+                options={LAB_SPEED_OPTIONS}
+                onChange={(speed) => setState((value) => ({ ...value, speed }))}
+              />
+              <button onClick={copy}>{copied ? "コピーしました" : "この瞬間のURLをコピー"}</button>
+            </div>
+            {/* Ring system (2026-11-23): the stages of one suit-up are nodes on
+                one ring (chrome only: the engine is not touched). The ring in
+                the centre is lit up to the stage in progress: it changes only
+                when the stage does, so nothing repaints per frame beside the
+                engine. Each node is a wrapper, placed by the orbit; the button
+                keeps its own press. */}
+            <div
+              className="lab-ring ring-orbit ring-orbit-keep ring-enter"
+              role="group"
+              aria-label="変身の段階"
+              style={{ "--ring-n": LAB_BEATS.length } as CSSProperties}
+            >
+              <span className="ring-orbit-track" aria-hidden="true" />
+              <span
+                className="lab-ring-core"
+                aria-hidden="true"
+                style={
+                  {
+                    "--ring-p": (LAB_BEATS.indexOf(currentBeat) / (LAB_BEATS.length - 1)).toFixed(4),
+                  } as CSSProperties
+                }
+              />
+              {LAB_BEATS.map((beat, index) => (
+                <span
+                  key={beat.at}
+                  className="ring-orbit-item"
+                  style={{ "--ring-i": index } as CSSProperties}
+                >
+                  <button
+                    aria-pressed={beat === currentBeat}
+                    data-state={
+                      beat === currentBeat
+                        ? "active"
+                        : beat.at < currentBeat.at
+                          ? "passed"
+                          : "upcoming"
+                    }
+                    onClick={() => change({ progress: beat.at })}
+                  >
+                    {beat.label}
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         <div className="lab-records">

@@ -97,6 +97,7 @@ import siteDisplayFontsCss from "../styles-site-display-fonts.css?url";
 import siteMetricFacesCss from "../styles-site-metric-faces.css?url";
 import fontSubsetsCoreCss from "../styles-font-subsets-core.css?url";
 import fontSubsetsDisplayCss from "../styles-font-subsets-display.css?url";
+import fontSubsetsDreamCss from "../styles-font-subsets-dream.css?url";
 import controlOpticsCss from "../styles-control-optics.css?url";
 import openingInterfaceCss from "../styles-opening-interface.css?url";
 import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
@@ -123,7 +124,12 @@ import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport"
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
-import { siteFontLinks, SITE_CORE_FONTS_URL, SITE_DISPLAY_FONTS_URL } from "@/lib/site-fonts";
+import {
+  DREAM_FONTS_URL,
+  siteFontLinks,
+  SITE_CORE_FONTS_URL,
+  SITE_DISPLAY_FONTS_URL,
+} from "@/lib/site-fonts";
 const CIEL_BUTTON_SIZES = "(max-width: 560px) 48px, 80px";
 const CIEL_BUTTON_SRCSET =
   "/ciel-button-20261018-144.webp 144w, /ciel-button-20261018-216.webp 216w, /ciel-button-20261018-360.webp 360w";
@@ -486,6 +492,14 @@ function RootDocument() {
     <html lang="ja" data-viewport-chrome={chrome} data-family={family} suppressHydrationWarning>
       <head>
         <HeadContent />
+        {pathname === "/dream-chapter" && (
+          <>
+            {/* Ordinary links keep a failed supplemental font out of the router's
+                managed stylesheet promises. The local subsets have priority. */}
+            <link rel="stylesheet" href={DREAM_FONTS_URL} />
+            <link rel="stylesheet" href={fontSubsetsDreamCss} />
+          </>
+        )}
       </head>
       <body className="antialiased">
         <SkipLink />

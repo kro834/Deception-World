@@ -29,18 +29,16 @@ const ruleBody = (css, selector) => {
   return css.slice(start, css.indexOf("}", start));
 };
 
-test("Taisho layer and its Mincho faces load after the Dream sheets, before cinematic", async () => {
+test("Taisho layer loads after the Dream sheets and uses the approved Mincho faces", async () => {
   const source = await read("src/routes/dream-chapter.tsx");
   assert.match(source, /import dreamTaishoCssUrl from "@\/styles-dream-taisho\.css\?url";/);
-  assert.match(source, /family=Shippori\+Mincho\+B1:wght@500;800/);
-  assert.match(source, /family=Shippori\+Mincho:wght@400;500;700/);
-  assert.match(source, /display=swap/);
+  const fonts = await read("src/lib/site-fonts.ts");
+  assert.match(fonts, /DREAM_FONTS_URL =\s*"https:\/\/fonts\.googleapis\.com\/css2\?family=Shippori\+Mincho\+B1:wght@500;800&family=Shippori\+Mincho:wght@400;500;700&display=swap"/);
   const links = source.slice(source.search(/links:\s*\[/));
   const order = [
     "href: dreamChapterCssUrl",
     "href: dreamFilmCssUrl",
     "href: dreamStoryCssUrl",
-    "href: DREAM_FONTS_URL",
     "href: dreamTaishoCssUrl",
     "CINEMATIC_STYLESHEET_LINK",
   ].map((needle) => links.indexOf(needle));

@@ -423,7 +423,7 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
   // The pinned markup the earlier pins read is untouched.
   assert.match(
     component,
-    /<section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">/,
+    /<section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title" tabIndex=\{-1\}>/,
   );
   assert.match(component, /<div className="rxs-specs rxs-reveal">/);
 });

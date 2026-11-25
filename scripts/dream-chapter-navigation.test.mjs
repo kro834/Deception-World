@@ -8,6 +8,7 @@ function setup(hash = "#cases") {
   const frames = new Map();
   let frameId = 0;
   let focus = 0;
+  const landings = [];
   const chapters = Array.from({ length: 6 }, (_, no) => ({
     dataset: { caseNo: String(no) },
     open: false,
@@ -27,12 +28,21 @@ function setup(hash = "#cases") {
   const targets = Object.fromEntries(chapters.map((chapter, no) => [`dream-case-${no}`, chapter]));
   targets["dream-chronicle-case-3"] = chronicle;
   targets["dream-case-note-3"] = note;
+  targets["dream-case-note-5"] = { ...note };
+  targets["dream-chronicle-case-5"] = { ...chronicle, id: "dream-chronicle-case-5" };
   targets["dream-chapter-index"] = note;
   targets["dream-chronicle-event-25"] = {
     closest: () => chronicle,
     matches: (selector) => selector === ".dream-chronicle-item",
     focus: () => focus++,
   };
+  for (const [id, target] of Object.entries(targets)) {
+    target.scrollIntoView = (options) => {
+      assert.deepEqual(options, { block: "start", behavior: "instant" });
+      assert.ok(target.closest("details")?.open, "open before aligning the destination");
+      landings.push(id);
+    };
+  }
   const root = {
     ownerDocument: { getElementById: (id) => targets[id] },
     contains: (target) => Object.values(targets).includes(target) || target?.isLink,
@@ -45,6 +55,7 @@ function setup(hash = "#cases") {
   };
   const environment = {
     location: { hash },
+    innerHeight: 740,
     addEventListener: (name, listener) => historyListeners.set(name, listener),
     removeEventListener: (name) => historyListeners.delete(name),
     requestAnimationFrame: (callback) => {
@@ -71,6 +82,7 @@ function setup(hash = "#cases") {
           target: options.target ?? "",
           hasAttribute: () => false,
           getAttribute: () => href,
+          closest: () => null,
         }),
       },
       preventDefault: () => assert.fail("native navigation must retain history and scroll"),
@@ -78,6 +90,7 @@ function setup(hash = "#cases") {
     });
   return {
     chapters,
+    landings,
     chronicle,
     environment,
     rootListeners,
@@ -241,4 +254,204 @@ test("the chapter index receives keyboard focus, clears current location and cle
   assert.equal(h.frames.size, 0);
   assert.equal(h.rootListeners.size, 0);
   assert.equal(h.historyListeners.size, 0);
+});
+
+test("cold event links and history restore a closed case before aligning and focusing it", () => {
+  const event = "#dream-chronicle-event-25";
+  const fold = "#dream-chronicle-case-3";
+  const h = setup(event);
+  h.flush();
+  assert.deepEqual(h.landings, [event.slice(1)]);
+  assert.equal(h.focus(), 1);
+  for (const hash of [fold, event]) {
+    h.chronicle.open = false;
+    h.environment.location.hash = hash;
+    h.historyListeners.get("popstate")();
+    h.historyListeners.get("hashchange")();
+    h.flush();
+    assert.equal(h.landings.at(-1), hash.slice(1));
+    assert.ok(h.chronicle.open);
+  }
+  assert.equal(h.landings.length, 3);
+  assert.equal(h.focus(), 3);
+  h.environment.location.hash = fold;
+  h.historyListeners.get("popstate")();
+  h.historyListeners.get("wheel")();
+  h.flush();
+  assert.equal(h.landings.length, 3, "a new reading gesture cancels a pending history landing");
+  h.cleanup();
+});
+
+test("Back from a record returns focus to the search result, Forward to its case", () => {
+  const origin = "#dream-record-explorer";
+  const hash = "#dream-chronicle-event-25";
+  const h = setup(origin);
+  let returnedFocus = 0;
+  let returnedScroll = 0;
+  let resultTop = 1000;
+  const link = {
+    isLink: true,
+    closest: (selector) => (selector === "details" ? null : link),
+    matches: () => false,
+    hasAttribute: () => false,
+    getAttribute: () => hash,
+    focus: () => returnedFocus++,
+    getBoundingClientRect: () => ({ top: resultTop, bottom: resultTop + 44 }),
+    scrollIntoView: () => returnedScroll++,
+  };
+  h.click(hash, { target: { closest: () => link }, detail: 0 });
+  h.environment.location.hash = hash;
+  h.historyListeners.get("hashchange")();
+  h.flush();
+  h.environment.location.hash = origin;
+  h.historyListeners.get("popstate")();
+  h.flush();
+  assert.equal(returnedFocus, 1);
+  assert.equal(returnedScroll, 1);
+  h.chronicle.open = false;
+  h.environment.location.hash = hash;
+  h.historyListeners.get("popstate")();
+  h.flush();
+  assert.deepEqual(h.landings, [hash.slice(1)]);
+  resultTop = 340;
+  h.environment.location.hash = origin;
+  h.historyListeners.get("popstate")();
+  h.flush();
+  assert.equal(returnedFocus, 2);
+  assert.equal(returnedScroll, 1, "a visible result keeps its restored viewport position");
+  h.cleanup();
+});
+
+const note5 = "#dream-case-note-5";
+const chronicle5 = "#dream-chronicle-case-5";
+
+function visit(h, hash, key) {
+  h.environment.location.hash = hash;
+  h.environment.navigation = { currentEntry: { key } };
+  h.historyListeners.get("popstate")();
+  h.historyListeners.get("hashchange")();
+}
+
+function followCrossLink(h, href, key, sourceClass = ".dream-reader-backlinks") {
+  const link = {
+    isLink: true,
+    focused: 0,
+    top: 347,
+    closest: (selector) => (selector.split(", ").includes(sourceClass) ? link : null),
+    matches: () => false,
+    hasAttribute: () => false,
+    getAttribute: () => href,
+    getBoundingClientRect: () => ({ top: link.top, bottom: link.top + 44, height: 44 }),
+    focus: (options) => {
+      assert.deepEqual(options, { preventScroll: true });
+      link.focused++;
+    },
+    scrollIntoView: () => assert.fail("Back must keep the restored reading position"),
+  };
+  h.click(href, { target: { closest: () => link }, detail: 0 });
+  visit(h, href, key);
+  h.flush();
+  return link;
+}
+
+test("Case 5 reciprocal links restore the exact opener on each Back and the destination on Forward", () => {
+  const h = setup(note5);
+  visit(h, note5, "first-note");
+  const eventsLink = followCrossLink(h, chronicle5, "chronicle");
+  const noteLink = followCrossLink(h, note5, "second-note");
+
+  visit(h, chronicle5, "chronicle");
+  h.flush();
+  assert.equal(noteLink.focused, 1);
+  visit(h, note5, "first-note");
+  h.flush();
+  assert.equal(eventsLink.focused, 1);
+  assert.deepEqual(h.landings, []);
+
+  visit(h, chronicle5, "chronicle");
+  h.flush();
+  assert.deepEqual(h.landings, [chronicle5.slice(1)]);
+  const focusBeforeForward = h.focus();
+  visit(h, note5, "second-note");
+  h.flush();
+  assert.equal(h.focus(), focusBeforeForward + 1, "Forward focuses the destination note");
+  assert.equal(eventsLink.focused, 1, "a later visit to the same hash is a distinct entry");
+  h.cleanup();
+});
+
+test("Back puts the synopsis link back at its reading position if native scrolling leaves it offscreen", () => {
+  const h = setup(note5);
+  visit(h, note5, "note");
+  const link = followCrossLink(h, chronicle5, "chronicle");
+  h.environment.scrollBy = (options) => {
+    assert.deepEqual(options, { top: -13234, behavior: "instant" });
+    link.top -= options.top;
+  };
+  link.top = -12887;
+  visit(h, note5, "note");
+  h.flush();
+  assert.equal(link.top, 347);
+  assert.equal(link.focused, 1);
+  h.cleanup();
+});
+
+test("jumping between two visits to the same synopsis keeps Back and Forward in history order", () => {
+  const h = setup(note5);
+  visit(h, note5, "first-note");
+  const eventsLink = followCrossLink(h, chronicle5, "chronicle");
+  const noteLink = followCrossLink(h, note5, "second-note");
+
+  visit(h, note5, "first-note");
+  h.flush();
+  assert.equal(eventsLink.focused, 1);
+  visit(h, chronicle5, "chronicle");
+  h.flush();
+  assert.deepEqual(h.landings, [chronicle5.slice(1)]);
+  assert.equal(noteLink.focused, 0, "Forward to the chronicle cannot restore its outgoing link");
+
+  visit(h, note5, "first-note");
+  h.flush();
+  assert.equal(eventsLink.focused, 2);
+  const focusBeforeSkip = h.focus();
+  visit(h, note5, "second-note");
+  h.flush();
+  assert.equal(h.focus(), focusBeforeSkip + 1, "Forward two entries focuses the second visit");
+  assert.equal(eventsLink.focused, 2);
+  h.cleanup();
+});
+
+test("a missing or repurposed opener never aligns the old chronicle on Back", () => {
+  for (const changeLink of [
+    (link) => {
+      link.isLink = false;
+    },
+    (link) => {
+      link.getAttribute = () => "#dream-case-1";
+    },
+  ]) {
+    const h = setup(chronicle5);
+    visit(h, chronicle5, "chronicle");
+    const link = followCrossLink(h, note5, "note");
+    visit(h, chronicle5, "chronicle");
+    changeLink(link); // React can update the source after popstate and before the focus frame.
+    h.flush();
+    assert.equal(link.focused, 0);
+    assert.deepEqual(h.landings, []);
+    h.cleanup();
+  }
+});
+
+test("a new reading gesture cancels the pending return to a synopsis cross-link", () => {
+  for (const gesture of ["keydown", "pointerdown", "focusin", "wheel"]) {
+    const h = setup("#dream-case-5");
+    const link = followCrossLink(h, note5, "note", ".dream-reader-related");
+    visit(h, "#dream-case-5", "chapter");
+    const listener = h.rootListeners.get(gesture) ?? h.historyListeners.get(gesture);
+    listener({ target: { tagName: "A" } });
+    h.historyListeners.get("hashchange")();
+    h.flush();
+    assert.equal(link.focused, 0, gesture);
+    assert.deepEqual(h.landings, []);
+    h.cleanup();
+  }
 });

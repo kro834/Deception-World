@@ -36,6 +36,7 @@
   :is(
     [id^="wa-location-"],
     [id^="wa-episode-"],
+    [id^="wa-event-"],
     [id^="wa-term-"],
     [id^="wa-brief-"],
     [id^="wa-person-"]
@@ -48,6 +49,7 @@
     :is(
       [id^="wa-location-"],
       [id^="wa-episode-"],
+      [id^="wa-event-"],
       [id^="wa-term-"],
       [id^="wa-brief-"],
       [id^="wa-person-"]

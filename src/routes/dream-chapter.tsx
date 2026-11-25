@@ -33,11 +33,6 @@ import dreamDossierGuideCssUrl from "@/styles-dream-dossier-guide.css?url";
 import dreamChapterStageCssUrl from "@/styles-dream-chapter-stage.css?url";
 import dreamGpuCssUrl from "@/styles-dream-gpu.css?url";
 import tabletReadingCssUrl from "@/styles-tablet-reading.css?url";
-import fontSubsetsDreamCssUrl from "@/styles-font-subsets-dream.css?url";
-
-// Shippori Mincho carries the Taisho letterpress voice of the film site.
-const DREAM_FONTS_URL =
-  "https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;800&family=Shippori+Mincho:wght@400;500;700&display=swap";
 
 export const Route = createFileRoute("/dream-chapter")({
   component: DreamChapter,
@@ -61,10 +56,6 @@ export const Route = createFileRoute("/dream-chapter")({
       { rel: "stylesheet", href: dreamChapterCssUrl },
       { rel: "stylesheet", href: dreamFilmCssUrl },
       { rel: "stylesheet", href: dreamStoryCssUrl },
-      { rel: "stylesheet", href: DREAM_FONTS_URL },
-      // The same Shippori faces cut to the site's characters, tried before
-      // Google's slices (scripts/build-font-subsets.mjs; owner 2026-11-06).
-      { rel: "stylesheet", href: fontSubsetsDreamCssUrl },
       { rel: "stylesheet", href: dreamTaishoCssUrl },
       { rel: "stylesheet", href: dreamElevationCssUrl },
       { rel: "stylesheet", href: dreamAnnexCssUrl },

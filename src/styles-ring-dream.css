@@ -5,8 +5,7 @@
    Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
    アニメーションにして」. The programme keeps its Taisho letterpress (gilt,
    vermilion lacquer, deep violet-ink, kinari washi) and elevates the ring
-   idiom: round windows (円窓) hung on a twin gilt arc with luminous double-ring
-   halos, gilt ring dividers between acts, sculpted pill controls with top
+   idiom: round windows (円窓) hung on a gilt arc, gilt ring dividers between acts, sculpted pill controls with top
    specular highlights, and elastic spring responses for every pointer.
 
    The tokens are gilt and vermilion (styles-ring-chrome.css maps
@@ -130,10 +129,7 @@ html[data-family="dream"]
   border-color: #fff0c2;
   outline: 2px solid var(--ring-key);
   outline-offset: -2px;
-  box-shadow:
-    0 0 0 2px rgb(var(--ring-pink-rgb) / 0.46),
-    0 0 22px rgb(var(--ring-key-rgb) / 0.52),
-    0 10px 22px rgb(0 0 0 / 0.6);
+  box-shadow: 0 3px 0 #bc9455;
 }
 
 html[data-family="dream"]
@@ -153,6 +149,24 @@ html[data-family="dream"]
   border-radius: 20px;
 }
 
+/* Ink and vermilion entry slips below the key visual. */
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) .dream-hero-actions {
+    & a {
+      border-radius: 5px;
+      border-color: #796750;
+      background: #281c2a;
+      box-shadow: inset 0 1px 0 rgb(241 216 167 / 0.22);
+    }
+
+    & a.dream-cinema-primary {
+      border-color: #bf9b69;
+      background: linear-gradient(112deg, #812f36, #521d29);
+      box-shadow: inset 0 1px 0 #dac099;
+    }
+  }
+}
+
 /* A file's own controls: the switcher is a row of pills, the close a
    circle. !important: the Taisho and image-cinema sheets square them from
    selectors that carry the dialog's own ids. Shape + luminous ring polish. */
@@ -161,12 +175,8 @@ html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-plate-contro
   border-radius: var(--ring-radius-pill) !important;
   clip-path: none !important;
   border: 1px solid rgb(var(--ring-key-rgb) / 0.52);
-  background:
-    radial-gradient(90% 80% at 50% 0%, rgb(255 244 214 / 16%), transparent 70%),
-    linear-gradient(180deg, #271734 0%, #150c1e 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 244 212 / 24%),
-    0 6px 16px rgb(0 0 0 / 0.42);
+  background: #251a28;
+  box-shadow: inset 0 1px 0 rgb(255 244 212 / 0.18);
 }
 
 html[data-family="dream"]
@@ -176,34 +186,20 @@ html[data-family="dream"]
   :is(button[aria-current="true"], button[aria-pressed="true"]) {
   border-color: #fff0c2;
   color: #fff8ea;
-  background:
-    radial-gradient(90% 80% at 50% 0%, rgb(255 232 178 / 34%), transparent 70%),
-    linear-gradient(135deg, #922a30 0%, #651b24 56%, #41111a 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 248 224 / 44%),
-    0 0 0 1px rgb(var(--ring-key-rgb) / 0.65),
-    0 0 18px rgb(var(--ring-pink-rgb) / 0.34),
-    0 10px 22px rgb(0 0 0 / 0.54);
+  background: linear-gradient(108deg, #802c35, #511d2a);
+  box-shadow: inset 0 1px 0 #dfc997;
 }
 
 html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-close {
   border-radius: 50% !important;
   clip-path: none !important;
   border: 1px solid rgb(var(--ring-key-rgb) / 0.8);
-  background:
-    radial-gradient(84% 84% at 32% 24%, rgb(255 242 206 / 24%), transparent 68%),
-    linear-gradient(155deg, #2a1838 0%, #140b1d 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 246 218 / 36%),
-    0 0 0 3px #120919,
-    0 0 0 4.5px rgb(var(--ring-pink-rgb) / 0.56),
-    0 12px 26px rgb(0 0 0 / 0.66);
+  background: #35232c;
+  box-shadow: inset 0 1px 0 #d2b781;
 }
 
 /* ---------------------------------------------------------------
-   2. 円窓: the three leads in round windows on one gilt twin arc.
-   The card's frame dissolves; the portrait is the round window ringed
-   in gilt with a vermilion hairline and warm amber halo.
+   2. 円窓: three portraits above ink nameplates, joined by a gilt arc.
    --------------------------------------------------------------- */
 
 html[data-family="dream"]
@@ -266,15 +262,8 @@ html[data-family="dream"]
   margin: 18px auto 30px;
   border-radius: 50%;
   object-fit: cover;
-  /* Gilt double-ring window: deep lacquer moat, bright gilt ring, second moat,
-     vermilion hairline, and soft warm gold outer halation (no filter on art). */
-  box-shadow:
-    0 0 0 6px #150b1a,
-    0 0 0 8.5px var(--ring-key),
-    0 0 0 15px #150b1a,
-    0 0 0 16.5px rgb(var(--ring-pink-rgb) / 0.78),
-    0 0 32px rgb(var(--ring-key-rgb) / 0.22),
-    0 26px 46px -12px rgb(0 0 0 / 0.84);
+  /* A fine gilt rim leaves the gap between portrait and name open. */
+  box-shadow: 0 0 0 1px #c8aa72, 0 12px 20px -15px #09060b;
 }
 
 html[data-family="dream"]
@@ -284,16 +273,11 @@ html[data-family="dream"]
   .dream-character-copy {
   box-sizing: border-box;
   align-items: center;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.44);
-  border-top: 2px solid rgb(var(--ring-key-rgb) / 0.78);
-  border-radius: 22px;
-  background:
-    radial-gradient(88% 60% at 50% 0%, rgb(255 232 178 / 14%), transparent 70%),
-    radial-gradient(66% 52% at 50% 100%, rgb(var(--ring-pink-rgb) / 0.1), transparent 72%),
-    linear-gradient(180deg, #21132d 0%, #130b1c 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 246 218 / 26%),
-    0 18px 36px -10px rgb(0 0 0 / 0.66);
+  border: 0;
+  border-top: 1px solid #c4a46b;
+  border-radius: 0;
+  background: linear-gradient(180deg, #211621, #19111c);
+  box-shadow: none;
   text-align: center;
 }
 
@@ -307,7 +291,7 @@ html[data-family="dream"]
   text-align: center;
 }
 
-/* The gilt twin arc behind the three round windows: text-free ornament. */
+/* The gilt arc behind the three round windows: text-free ornament. */
 html[data-family="dream"]
   body
   main#top.dream-page.dream-image-cinema:not(#ring-b)
@@ -320,29 +304,16 @@ html[data-family="dream"]
   aspect-ratio: 1;
   margin-left: calc(min(1500px, 190%) / -2);
   border-radius: 50%;
-  background: conic-gradient(
-    from -64deg,
-    transparent 0turn,
-    rgb(var(--ring-pink-rgb) / 0.56) 0.05turn,
-    rgb(var(--ring-key-rgb) / 0.85) 0.11turn,
-    rgb(var(--ring-gold-rgb) / 0.98) 0.178turn,
-    rgb(var(--ring-key-rgb) / 0.85) 0.246turn,
-    rgb(var(--ring-pink-rgb) / 0.56) 0.306turn,
-    transparent 0.356turn
-  );
+  background: conic-gradient(from -64deg, transparent, #806541 0.07turn, #e1c992 0.18turn, #806541 0.29turn, transparent 0.356turn);
   -webkit-mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 11px),
-    rgb(0 0 0 / 0.42) calc(100% - 10.4px) calc(100% - 9.2px),
-    transparent calc(100% - 8.6px) calc(100% - 3px),
-    #000 calc(100% - 2.2px)
+    transparent calc(100% - 1.5px),
+    #000 calc(100% - 0.75px)
   );
   mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 11px),
-    rgb(0 0 0 / 0.42) calc(100% - 10.4px) calc(100% - 9.2px),
-    transparent calc(100% - 8.6px) calc(100% - 3px),
-    #000 calc(100% - 2.2px)
+    transparent calc(100% - 1.5px),
+    #000 calc(100% - 0.75px)
   );
   pointer-events: none;
 }
@@ -413,14 +384,7 @@ html[data-family="dream"]
     .dream-character-grid
     button.ios26-glass:hover
     > img {
-    box-shadow:
-      0 0 0 5px #150b1a,
-      0 0 0 8.5px #fff0c2,
-      0 0 0 14.5px #150b1a,
-      0 0 0 16.5px rgb(var(--ring-pink-rgb) / 0.96),
-      0 0 42px rgb(var(--ring-key-rgb) / 0.48),
-      0 0 68px rgb(var(--ring-pink-rgb) / 0.24),
-      0 30px 54px -12px rgb(0 0 0 / 0.9);
+    box-shadow: 0 0 0 2px #f3d99e, 0 12px 20px -15px #09060b;
   }
 
   html[data-family="dream"]
@@ -431,10 +395,7 @@ html[data-family="dream"]
     .dream-character-copy {
     border-color: rgb(255 236 184 / 0.72);
     border-top-color: #fff0c2;
-    box-shadow:
-      inset 0 1px 0 rgb(255 248 224 / 38%),
-      0 0 26px rgb(var(--ring-key-rgb) / 0.18),
-      0 22px 42px -10px rgb(0 0 0 / 0.78);
+    box-shadow: none;
   }
 
   html[data-family="dream"]
@@ -463,9 +424,7 @@ html[data-family="dream"]
     .dream-poster-thumbnails
     button:hover {
     border-color: #fff0c2;
-    box-shadow:
-      0 0 18px rgb(var(--ring-key-rgb) / 0.42),
-      0 10px 22px rgb(0 0 0 / 0.56);
+    box-shadow: 0 2px 0 #bc9455;
   }
 
   html[data-family="dream"]
@@ -483,12 +442,7 @@ html[data-family="dream"]
 
   html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-close:hover {
     border-color: #fff4ce;
-    box-shadow:
-      inset 0 1px 0 rgb(255 248 228 / 48%),
-      0 0 0 3px #120919,
-      0 0 0 5px rgb(var(--ring-key-rgb) / 0.85),
-      0 0 24px rgb(var(--ring-key-rgb) / 0.42),
-      0 14px 30px rgb(0 0 0 / 0.72);
+    box-shadow: inset 0 1px 0 #f3d99e;
   }
 }
 

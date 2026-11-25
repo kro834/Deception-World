@@ -10,6 +10,10 @@
    Motion gates as in styles-ring.css.
    ================================================================ */
 
+html[data-family="world"] main.site-shell {
+  --world-ring-metal: linear-gradient(128deg, #46494d 6%, #e2dfd6 20%, #606870 34%, #32383e 66%, var(--ring-key));
+}
+
 /* The dial fills the portrait and takes no input. */
 html[data-family="world"] body .rider-console .rider-visual > .rider-ring-dial {
   position: absolute;
@@ -89,10 +93,7 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring > i.is-on::b
   border-color: #fff;
   background: var(--ring-tone);
   scale: 2.5;
-  box-shadow:
-    0 0 0 3px rgb(6 16 27 / 0.72),
-    0 0 0 5px color-mix(in srgb, var(--ring-tone) 46%, transparent),
-    0 0 16px 2px color-mix(in srgb, var(--ring-tone) 72%, transparent);
+  box-shadow: 0 0 0 2px #15191f;
 }
 
 /* The rail's markers: a ring instead of a diamond (paint only). */
@@ -182,15 +183,11 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-conte
   margin: 0 0 calc(var(--ws-ring-size) * 0.1);
 }
 
-/* The orbit's line (radius 38%) and a halo round the heading. */
+/* One track links the chapters around the clear title. */
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-contents
-  > .ws-map::before,
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
-  body
-  .ws-contents
-  > .ws-map::after {
+  > .ws-map::before {
   content: "";
   position: absolute;
   border-radius: 50%;
@@ -203,35 +200,14 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > .ws-map::before {
   inset: 12%;
   border: 1px solid rgb(var(--ring-key-rgb) / 0.34);
-  box-shadow:
-    inset 0 0 28px -12px rgb(var(--ring-key-rgb) / 0.24),
-    0 0 28px -12px rgb(var(--ring-key-rgb) / 0.24);
+  box-shadow: none;
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-contents
   > .ws-map::after {
-  inset: 31%;
-  background:
-    radial-gradient(
-      closest-side,
-      transparent calc(100% - 1.5px),
-      rgb(var(--ring-gold-rgb) / 0.44) calc(100% - 1.5px) 100%,
-      transparent 100%
-    ),
-    radial-gradient(
-      closest-side,
-      transparent calc(76% - 1.25px),
-      rgb(var(--ring-pink-rgb) / 0.32) calc(76% - 1.25px) 76%,
-      transparent 76%
-    ),
-    radial-gradient(
-      closest-side,
-      rgb(var(--ring-key-rgb) / 0.16) 0%,
-      rgb(var(--ring-pink-rgb) / 0.08) 48%,
-      transparent 76%
-    );
+  content: none;
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(2) {
@@ -279,16 +255,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   border: 0;
   border-image: none;
   border-radius: 50%;
-  background:
-    radial-gradient(120% 120% at 22% 12%, rgb(var(--ws-card-tone-rgb) / 0.34), transparent 58%),
-    #07101c;
+  background: #181c20;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.22),
     0 20px 44px -16px rgb(0 0 0 / 0.86);
 }
 
-/* Chapters 04, 05, 06 (no picture): a jewel-like double concentric optical
-   ring, cardinal astrolabe nodes, and a soft nebula aura behind the numeral. */
+/* The last three chapters carry their own colour across the upper edge of a graphite index plate. */
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-map
@@ -315,62 +288,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .ws-map
   > li[data-phase="annex"]
   > a {
-  background:
-    radial-gradient(64% 40% at 30% 15%, rgb(255 255 255 / 0.22), transparent 70%),
-    radial-gradient(
-      circle at 50% 12%,
-      rgb(255 255 255 / 0.72) 0 1.5px,
-      rgb(var(--ws-card-tone-rgb) / 0.35) 2.5px,
-      transparent 4px
-    ),
-    radial-gradient(
-      circle at 50% 88%,
-      rgb(var(--ring-gold-rgb) / 0.76) 0 1.5px,
-      rgb(var(--ring-gold-rgb) / 0.3) 2.5px,
-      transparent 4px
-    ),
-    radial-gradient(
-      circle at 12% 50%,
-      rgb(var(--ws-card-tone-rgb) / 0.72) 0 1.5px,
-      transparent 3.5px
-    ),
-    radial-gradient(
-      circle at 88% 50%,
-      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.72) 0 1.5px,
-      transparent 3.5px
-    ),
-    radial-gradient(
-      closest-side,
-      transparent calc(76% - 1.5px),
-      rgb(var(--ws-card-tone-rgb) / 0.56) calc(76% - 1.5px) 76%,
-      transparent calc(76% + 0.5px)
-    ),
-    radial-gradient(
-      closest-side,
-      transparent calc(52% - 1.25px),
-      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.52) calc(52% - 1.25px) 52%,
-      transparent calc(52% + 0.5px)
-    ),
-    radial-gradient(
-      closest-side,
-      rgb(var(--ws-card-tone-rgb) / 0.32) 0%,
-      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.18) 42%,
-      rgb(var(--ring-pink-rgb) / 0.12) 66%,
-      transparent 88%
-    ),
-    radial-gradient(115% 115% at 22% 16%, rgb(var(--ws-card-tone-rgb) / 0.44), transparent 58%),
-    radial-gradient(
-      95% 95% at 80% 84%,
-      rgb(var(--ws-annex-aura-rgb, 240 207 134) / 0.28),
-      transparent 62%
-    ),
-    #06111c;
-  box-shadow:
-    inset 0 1.5px 1px rgb(255 255 255 / 0.34),
-    inset 0 -2px 6px rgb(var(--ws-card-tone-rgb) / 0.24),
-    inset 0 0 26px -4px rgb(var(--ws-card-tone-rgb) / 0.3),
-    0 20px 44px -16px rgb(0 0 0 / 0.88),
-    0 0 28px -10px rgb(var(--ws-card-tone-rgb) / 0.34);
+  background: linear-gradient(150deg, rgb(var(--ws-annex-aura-rgb) / 0.13), transparent 54%), #191c20;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -378,27 +297,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .ws-map
   > li[data-phase="annex"]
   > a::before {
-  content: "";
-  position: absolute;
-  inset: 14%;
-  padding: 1.5px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 135deg,
-    rgb(var(--ws-card-tone-rgb) / 0.78),
-    rgb(var(--ring-gold-rgb) / 0.68) 0.28turn,
-    rgb(var(--ring-pink-rgb) / 0.56) 0.55turn,
-    rgb(var(--ring-key-rgb) / 0.72) 0.82turn,
-    rgb(var(--ws-card-tone-rgb) / 0.78)
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  pointer-events: none;
+  content: none;
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a::after {
@@ -407,7 +306,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   inset: -7px;
   padding: 2px;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: var(--world-ring-metal);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -712,22 +611,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   inset: 12%;
   border: 1px solid rgb(var(--ring-key-rgb) / 0.34);
   border-radius: 50%;
-  background:
-    radial-gradient(
-      closest-side,
-      transparent calc(72% - 1.25px),
-      rgb(var(--ring-gold-rgb) / 0.28) calc(72% - 1.25px) 72%,
-      transparent 72%
-    ),
-    radial-gradient(
-      closest-side,
-      rgb(var(--ring-pink-rgb) / 0.1) 0%,
-      rgb(var(--ring-key-rgb) / 0.08) 46%,
-      transparent 72%
-    );
-  box-shadow:
-    inset 0 0 28px -12px rgb(var(--ring-key-rgb) / 0.22),
-    0 0 28px -12px rgb(var(--ring-key-rgb) / 0.22);
+  background: none;
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -819,7 +704,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: auto;
   padding: 2px;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: var(--world-ring-metal);
   box-shadow: none;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -864,9 +749,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: 36px;
   padding: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.22), transparent 64%),
-    #07101c;
+  background: #191c20;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.24),
     inset 0 0 0 1px rgb(var(--ring-gold-rgb) / 0.48),
@@ -1096,15 +979,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   inset: 9%;
   border: 1px solid rgb(var(--ring-gold-rgb) / 0.36);
   border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    transparent calc(58% - 1.25px),
-    rgb(var(--ring-key-rgb) / 0.24) calc(58% - 1.25px) 58%,
-    transparent 58%
-  );
-  box-shadow:
-    inset 0 0 32px -12px rgb(var(--ring-gold-rgb) / 0.22),
-    0 0 32px -12px rgb(var(--ring-gold-rgb) / 0.22);
+  background: none;
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -1182,14 +1058,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: auto;
   padding: 2px;
   border-radius: 50%;
-  background: conic-gradient(
-    from 210deg,
-    var(--ws-door),
-    #fff8 0.2turn,
-    var(--ws-door-2) 0.5turn,
-    var(--ring-gold) 0.78turn,
-    var(--ws-door)
-  );
+  background: linear-gradient(128deg, var(--ws-door), #e8e3d8 16%, #47494b 34%, var(--ws-door-2));
   opacity: 1;
   transform: none;
   -webkit-mask:
@@ -1600,7 +1469,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   margin: -0.75em 0 0 -0.75em;
   padding: 2px;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: var(--world-ring-metal);
   /* The outer ring: an outline, so it takes no layout. */
   outline: 1px solid rgb(var(--ring-gold-rgb) / 0.4);
   outline-offset: 10px;
@@ -1662,7 +1531,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   border-radius: 18px;
 }
 
-/* The poster's halo: three rings behind the key visual. */
+/* A single hairline sits behind the key visual. */
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.site-shell
@@ -1676,25 +1545,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   aspect-ratio: 1;
   translate: -50% -50%;
   pointer-events: none;
-  background:
-    radial-gradient(
-      closest-side,
-      transparent calc(100% - 1.5px),
-      rgb(var(--ring-key-rgb) / 0.4) calc(100% - 1.5px) 100%,
-      transparent 100%
-    ),
-    radial-gradient(
-      closest-side,
-      transparent calc(86% - 1px),
-      rgb(var(--ring-gold-rgb) / 0.3) calc(86% - 1px) 86%,
-      transparent 86%
-    ),
-    radial-gradient(
-      closest-side,
-      transparent calc(72% - 1px),
-      rgb(var(--ring-pink-rgb) / 0.26) calc(72% - 1px) 72%,
-      transparent 72%
-    );
+  background: radial-gradient(closest-side, transparent calc(87% - 1px), rgb(var(--ring-key-rgb) / 0.28) 87%, transparent calc(87% + 1px));
   opacity: 1;
 }
 
@@ -1782,7 +1633,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: auto;
   padding: 2px;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: var(--world-ring-metal);
   opacity: 1;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -2075,5 +1926,18 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     > .threat-copy
     > h3 {
     font-size: 12px;
+  }
+}
+
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  html[data-family="world"] body #top.world-artwork-hero .world-poster-media {
+    border-color: #525a60;
+    background: linear-gradient(150deg, #282e33, #14191d 65%);
+    box-shadow: inset 0 1px 0 #a2a9ab, 0 12px 30px -24px #000;
+  }
+
+  html[data-family="world"] body #top.world-artwork-hero .world-poster-media::before {
+    background: linear-gradient(90deg, transparent, #cad2d4 22%, #78858b 39%, transparent 84%)
+      50% 0 / 100% 1px no-repeat;
   }
 }

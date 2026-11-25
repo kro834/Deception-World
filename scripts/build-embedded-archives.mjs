@@ -10,9 +10,9 @@ const mediaDirectory = resolve(root, "public/archive-media");
 const stabilityStylesheet =
   '<link rel="stylesheet" href="/archive-mobile-stability.css?v=20261009-r51">';
 const stabilityScript = '<script src="/archive-scroll-stability.js?v=20260930-r48" defer></script>';
-// Reports the archive's titles and fixed controls to the page, so the
+// Reports the archive's titles and controls to the page, so the
 // floating Zeus button keeps off them inside this sandboxed frame too.
-const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20261125-z4" defer></script>';
+const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20261126-compare" defer></script>';
 // Carries the reader's form and compared pair between the page URL and this
 // sandboxed frame (the page passes them in the frame's #fragment).
 const stateBridgeScript = '<script src="/archive-state-bridge.js?v=20261022-s2" defer></script>';
@@ -26,7 +26,7 @@ const labelsStylesheet = '<link rel="stylesheet" href="/archive-labels.css?v=202
 // feeds the page's topbar ring. Linked after every archive sheet and before
 // the labels sheet, which stays last.
 const ringAssets =
-  '<link rel="stylesheet" href="/archive-ring.css?v=20261123-ring1">\n<script src="/archive-ring.js?v=20261123-ring1" defer></script>';
+  '<link rel="stylesheet" href="/archive-ring.css?v=20261126-material1">\n<script src="/archive-ring.js?v=20261123-ring1" defer></script>';
 // The frame intentionally has an opaque sandbox origin. Classic scripts
 // preserve that boundary; ES module fetches would require CORS permission.
 const nameRules = readFileSync(resolve(root, "src/lib/name-break-rules.js"), "utf8").replace(/^export /gm, "");

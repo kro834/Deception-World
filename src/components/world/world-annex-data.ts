@@ -6,8 +6,9 @@ import { WORLD_MYSTERY_QUOTES } from "./world-mystery-data.ts";
 // the continuation supplied on 2026-10-06. The latter is reviewed in
 // docs/world-content-source-review-20261006.md; the private export stays out
 // of this repository. The 2026-10-27 export closes episode 03 and opens
-// episode 04 (癒えぬ傷を負った者共). The EP4 export supplied on 2026-11-18
-// runs through the fight in the ruined castle. Its dates identify posts.
+// episode 04 (癒えぬ傷を負った者共). The 2026-11-26 export concludes that
+// chapter at L13466 and opens episode 05 (来訪) at L13467. The dates
+// attached to the line ranges identify posts.
 // Existing quotation provenance is kept in dw-src/provenance.json. Names keep the
 // source's spelling; readings are left out (the source gives conflicting ones).
 
@@ -321,14 +322,21 @@ export const WORLD_CAST_ROSTER: readonly WorldCastEntry[] = [
 export type WorldEpisodeNote = {
   no: string;
   title: string;
+  titleLang?: "en";
   stage: string;
   synopsis: readonly string[];
   lines: readonly WorldAnnexLine[];
 };
+
+export function worldEpisodeEventId(episodeNo: string, index: number) {
+  return `wa-event-${episodeNo}-${String(index + 1).padStart(2, "0")}`;
+}
+
 export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
   {
     no: "01",
     title: "HIDE-AND-SEEK",
+    titleLang: "en",
     stage: "碧栄",
     synopsis: [
       "荒廃した碧栄で追跡部隊を斬り伏せ、逃走を続ける月城悠真。その背後に、たった一台のバイクが迫る。乗っていたのは、悠真が自ら殺したはずのベル・アレインだった。瓦礫も水没した地下道も越えて追いついたベルは手を差し出すが、悠真はその手を取れず、高架から身を投げて再び逃げ出してしまう。",
@@ -353,6 +361,7 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
   {
     no: "02",
     title: "LEGENDS",
+    titleLang: "en",
     stage: "レルムズフランス本部",
     synopsis: [
       "ローアが荒地に作り出したコンビニで、一行はようやく食事と治療の時間を得る。サーガが街を滅ぼしたという任務の前提を問い直すジェームズに、ローアはアザトの事件について語った。明日にはリームーが戻ってくる。ベルは悠真からターミナルコアとクリスタルコアを預かり、フリートに対抗する道具を取りにREALMSフランス本部へ向かう。",
@@ -377,6 +386,7 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
   {
     no: "03",
     title: "DECEPTION WORLD",
+    titleLang: "en",
     stage: "天守閣・悠真の夢・光の間",
     synopsis: [
       "兄を救えず、レジェンズへの変身も封じられたベルを迎え、一行はコンビニで次の戦いに備える。倒されたはずのリームーが神聖なる間へ戻る一方、六詠第三位のシュザはサーガたちを自分のものにしようと動き出していた。悠真が夢の中で新しいコアの設計を進める間に、シュザは夜番のジェームズの前へ現れ、眠っていた真守を天守閣へ連れ去る。目覚めた仲間たちの周囲にも、見知らぬ城下町が広がっていた。",
@@ -437,6 +447,17 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
       "ルーラーが膝をついた悠真と慶弥に刃を振り下ろしたとき、真守がアルゲノムの姿で割って入る。自分の結末は自分で決めると言い、シュザに予告状を渡した。悠真はラストヴィンクルムサーガのまま射撃に回る。反管理権限を備えたレディックとなった千桐も、慶弥と同時にシュザへ踏み込んだ。",
       // 2026-11-18 L12079–12288.
       "悠真の射撃がルーラーの頬をかすめる。アルゲノムはルーラーの腹部から伸び、ガヴガブレイドを操っていた舌を斬り落とすが、続く一撃を鉄扇で受けられ、右手のガシャコンエッジを砕かれた。ルーラーが鎌を振り下ろす。アルゲノムは温存していたもう一本を左手に出し、鉄扇を弾いて胸の装甲を斬る。水鏡の床を滑ったルーラーは、片膝をついて踏みとどまった。",
+      // 2026-11-18 to 11-20 L12289–12523.
+      "水鏡が逆巻くなか、華火はシュザに岩山盾を投げつけた。一方、城門の下の水堀では、エクスプロムとなったジェームズがフリートの天智を受け止め、斬撃の力をエクスプロムゲイムへ変換して蓄える。天智を折り、エクスプロムスマッシュでフリートを退けると、城門の石壁も崩れた。爆発が収まった水堀には、折れた天智が残る。",
+      // 2026-11-20 L12524–12850.
+      "ルーラーは岩山盾を鉄扇で弾き、分身とともに破滅の間を攻撃する。なおも食い下がったアルゲノムがシュザから異界の管理権限を盗むと、再生したはずの傷が開き、形勢が変わった。真守が作った隙に、慶弥が神・武王発勁を放ち、ルーラーの装甲を打ち破る。ローアが帰還した直後、出力の反動に耐えきれなくなった悠真の変身が解けた。",
+      // 2026-11-20 and 11-23 L12856–13063.
+      "一行が息をつく間もなくダンテが現れ、シュザのディセプションガヴを奪ってルーラー・ポラリスモードへ変身する。シュザは消滅し、水鏡に囚われていた世界や力の欠片が解放され、星となって夜空へ昇った。戦いに勝った者たちを自分が管理すると言うダンテに、真守はガシャコンエッジを向け、その支配を拒む。",
+      // 2026-11-24 to 11-25 L13067–13386.
+      "消耗した仲間たちを見た無神千桐は、レディック 犭フォームで戦いを引き受けるが、理性を失って暴走する。ダンテは悠真をシエルと呼び、エニグマモードでも攻める。アルゲノムは千桐を引き離してダンテと対峙する。ダンテが悠真へポラリスデストロイを放ったとき、千桐が二人の間に飛び込み、ダンテを倒した。",
+      // 2026-11-26 L13394–13466. The outcome of Yuma's blow is stated
+      // in the first scene of EP5, after the room-name boundary.
+      "千桐の暴走は続き、止めに入った慶弥にも刃を向ける。ダンテへの追撃は、出所の分からない赤い波動に阻まれた。仲間へ襲いかかろうとする千桐へ、悠真はラストヴィンクルムサーガに再変身して大輪拳・徒桜を放つ。その間に赤い波動はダンテの亡骸を包み、どこへ向かったかも分からぬまま姿を消した。",
     ],
     lines: [
       {
@@ -450,6 +471,36 @@ export const WORLD_EPISODE_NOTES: readonly WorldEpisodeNote[] = [
       {
         text: "ネクストピースは地球の核付近に存在していたが、乱獲のせいで枯渇した哀れな金属だ",
         by: "ローア",
+      },
+    ],
+  },
+  {
+    no: "05",
+    title: "来訪",
+    stage: "天守閣・城門の水堀・悠真の夢",
+    synopsis: [
+      // 2026-11-26 L13468–13500.
+      "大輪拳・徒桜で変身を解かれた千桐は、意識を失って倒れた。真守は赤い波動が消えた場所に警戒を解かない。シュザを失った異界はいつ崩れてもおかしくないと考え、千桐を連れて城から退くよう一行に促す。仲間たちは、半壊した天守閣から城門へ向かった。",
+      // 2026-11-26 L13502–13572. The narrative returns to the moat
+      // just before the party's arrival.
+      "その少し前、水堀ではナイトメアの力を引き出した反動がジェームズを襲っていた。右腕に負傷し、未知のカプセムは消滅、エクスプロムへの変身も解ける。妻ヴィクトリアと娘エマを失った日の記憶がよみがえるなか、水面に映る自分の姿が一瞬ナイトメアに見え、ジェームズはそこで意識を失った。",
+      // 2026-11-26 L13575–13630.
+      "城門に着いた真守は、城下を一直線にえぐった破壊の跡と、水堀で倒れているジェームズを見つける。かすかな呼吸を確かめて彼を担ぎ上げ、シエルに出口の扉を求めた。開いた扉をくぐり、一行は城を離れ、シエルの夢世界に広がる赤い海へ戻る。",
+      // 2026-11-26 L13633–13665.
+      "真守はジェームズを、かつて本人が明晰夢操作で作った古いソファーに横たえた。ジェームズが息をしているのを確かめると、ようやく壁にもたれて呼吸を整える。その傍らで赤い水面が揺れ、拒絶の悪夢マキャベルゴアナイトメアが近づき、帰ってきたシエルを迎えた。",
+    ],
+    lines: [
+      {
+        text: "……おい、全員。余韻に浸ってる暇はねぇぞ",
+        by: "紅城真守",
+      },
+      {
+        text: "シエル！早く、あの『扉』を出してくれ！ 一刻も早く、ここから抜けるぞッ！！",
+        by: "紅城真守",
+      },
+      {
+        text: "お帰りなさい、シエル",
+        by: "マキャベルゴアナイトメア",
       },
     ],
   },

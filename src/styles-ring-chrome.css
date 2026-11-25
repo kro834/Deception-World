@@ -29,6 +29,7 @@ html[data-family="dream"] {
   --ring-pink-rgb: 217 85 63;
   --ring-gold: #f3e6c4;
   --ring-gold-rgb: 243 230 196;
+  --orbit-bed: #1e161a;
 }
 
 /* ================================================================
@@ -46,15 +47,8 @@ html[data-family]:not([data-button-style="liquid"]) body .side-panel-trigger:not
   /* !important: the shell, streamline, command and spectrum sheets each
      paint the trigger with !important; this is the layer above them. */
   border-radius: 50% !important;
-  background:
-    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.24), transparent 44%),
-    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.34), transparent 60%),
-    radial-gradient(circle at 72% 86%, rgb(var(--ring-pink-rgb) / 0.26), transparent 62%), #07101c !important;
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 0.34),
-    inset 0 -4px 10px rgb(0 0 0 / 0.54),
-    0 0 0 1px rgb(var(--ring-key-rgb) / 0.18),
-    0 10px 24px -10px rgb(var(--ring-key-rgb) / 0.82) !important;
+  background: var(--ring-graphite) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.23), 0 5px 14px -7px #000 !important;
   color: #f0fbff !important;
   clip-path: none !important;
 }
@@ -93,19 +87,13 @@ html[data-family]:not([data-button-style="liquid"])
 html[data-family]:not([data-button-style="liquid"])
   body
   .side-panel-trigger:not(#ring-x#ring-x)::before {
-  background: rgb(var(--ring-key-rgb) / 0.26);
+  background: rgb(214 218 213 / 0.3);
 }
 
 html[data-family]:not([data-button-style="liquid"])
   body
   .side-panel-trigger:not(#ring-x#ring-x)::after {
-  background: conic-gradient(
-    from 0deg,
-    var(--ring-key) 0turn,
-    var(--ring-pink) calc(var(--ring-p) * 0.62turn),
-    var(--ring-gold) calc(var(--ring-p) * 1turn),
-    transparent calc(var(--ring-p) * 1turn)
-  );
+  background: conic-gradient(var(--ring-key), var(--ring-gold) calc(var(--ring-p) * 1turn), transparent 0);
 }
 
 /* The glyph: three satellites and their fourth, as dots on the lens. */
@@ -168,11 +156,7 @@ html[data-family]:not([data-button-style="liquid"])
     body
     .side-panel-trigger:not(#ring-x#ring-x):hover:not(:active) {
     scale: 1.06;
-    box-shadow:
-      inset 0 1px 1px rgb(255 255 255 / 0.48),
-      inset 0 -4px 10px rgb(0 0 0 / 0.5),
-      0 0 0 2px rgb(var(--ring-key-rgb) / 0.28),
-      0 12px 28px -8px rgb(var(--ring-key-rgb) / 0.92) !important;
+    box-shadow: inset 0 0 0 1px #a7aaa4, 0 7px 16px -9px #000 !important;
   }
 
   html[data-family]:not([data-world-effects="economy"]):not([data-button-style="liquid"])
@@ -196,13 +180,8 @@ html[data-family="world"]
 html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil.brand-sigil {
   border: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.28), transparent 44%),
-    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 62%),
-    radial-gradient(circle at 74% 82%, rgb(var(--ring-pink-rgb) / 0.22), transparent 58%), #07101c;
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 0.34),
-    0 0 22px -6px rgb(var(--ring-key-rgb) / 0.86);
+  background: var(--ring-graphite);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
   clip-path: none;
   isolation: isolate;
 }
@@ -224,10 +203,10 @@ html[data-family="dossier"]
   display: block;
   width: auto;
   height: auto;
-  padding: 2px;
+  padding: 1px;
   border: 0;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: var(--ring-metal-edge);
   opacity: 1;
   transform: none;
   -webkit-mask:
@@ -427,6 +406,8 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar > na
   justify-content: start;
   padding: 0 40px 0 var(--orbit-list);
   overflow-x: clip;
+  --orbit-face: var(--ring-graphite);
+  --orbit-rule: rgb(219 222 215 / 0.22);
 }
 
 @supports (height: 100dvh) {
@@ -435,30 +416,13 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar > na
   }
 }
 
-/* The halo: static rings round the dial, painted on the panel's own
-   background (it does not scroll with the rows). */
+/* The light stays behind the dial as the rows scroll. */
 html[data-family]:not([data-family="dream"])
   body
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
   /* !important: the menu's own sheets set this background with it. */
   background-image:
-    radial-gradient(
-      circle at var(--orbit-cx) var(--orbit-cy),
-      transparent calc(var(--orbit-r) + 109px),
-      rgb(var(--ring-key-rgb) / 0.16) calc(var(--orbit-r) + 110px) calc(var(--orbit-r) + 111px),
-      transparent calc(var(--orbit-r) + 112px)
-    ),
-    radial-gradient(
-      circle at var(--orbit-cx) var(--orbit-cy),
-      transparent calc(var(--orbit-r) + 219px),
-      rgb(var(--ring-pink-rgb) / 0.1) calc(var(--orbit-r) + 220px) calc(var(--orbit-r) + 221px),
-      transparent calc(var(--orbit-r) + 222px)
-    ),
-    radial-gradient(
-      circle at var(--orbit-cx) var(--orbit-cy),
-      rgb(36 140 255 / 0.2),
-      transparent calc(var(--orbit-r) + 160px)
-    ) !important;
+    radial-gradient(ellipse at var(--orbit-cx) var(--orbit-cy), #282c2f, #171a1d 44%, #0d1012 90%) !important;
 }
 
 /* The head no longer takes a row: it is a zero-height sticky anchor at the
@@ -521,16 +485,10 @@ html[data-family]:not([data-family="dream"])
   left: auto;
   width: 48px;
   height: 48px;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.56);
+  border: 1px solid var(--orbit-rule);
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.22), transparent 48%),
-    radial-gradient(circle at 72% 84%, rgb(var(--ring-pink-rgb) / 0.16), transparent 60%),
-    #0b1627 !important;
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 0.34),
-    0 10px 24px -10px rgb(0 0 0 / 0.86),
-    0 0 18px -8px rgb(var(--ring-key-rgb) / 0.56) !important;
+  background: var(--ring-graphite) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000 !important;
 }
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -571,18 +529,11 @@ html[data-family]:not([data-family="dream"])
   min-height: 46px;
   margin: 0;
   padding: 0 18px;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.44);
-  border-top-color: rgb(228 248 255 / 0.54);
+  border: 1px solid var(--orbit-rule);
+  border-top-color: #7d8486;
   border-radius: var(--ring-radius-pill);
-  background:
-    radial-gradient(ellipse 68% 120% at 14% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 66%),
-    radial-gradient(ellipse 56% 120% at 88% 100%, rgb(var(--ring-gold-rgb) / 0.14), transparent 66%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.12) 0%, rgb(13 24 41 / 0.82) 56%, rgb(9 18 32 / 0.94) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    inset 0 -1px 0 rgb(0 0 0 / 0.45),
-    0 10px 24px -12px rgb(0 0 0 / 0.84),
-    0 0 22px -12px rgb(var(--ring-key-rgb) / 0.46);
+  background: linear-gradient(155deg, #353b3d, #22272a);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
   color: var(--ring-paper);
   font-size: 15px;
 }
@@ -611,15 +562,15 @@ html[data-family]:not([data-family="dream"])
   cursor: grabbing;
 }
 
-/* The orbit's line: one prism stroke. */
+/* A narrow metal edge describes the dial. */
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .command-atlas-index::before {
   content: "";
   position: absolute;
   inset: 0;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-radius: 50%;
-  background: var(--ring-prism) border-box;
+  background: var(--ring-metal-edge) border-box;
   -webkit-mask:
     linear-gradient(#000 0 0) padding-box,
     linear-gradient(#000 0 0);
@@ -627,11 +578,11 @@ html[data-family]:not([data-family="dream"])
   mask:
     linear-gradient(#000 0 0) padding-box exclude,
     linear-gradient(#000 0 0);
-  opacity: 0.68;
+  opacity: 0.64;
   pointer-events: none;
 }
 
-/* The luminous plasma-core thread from the focused planet to its rows. */
+/* A fine rule leads from the selected group to its rows. */
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .command-atlas-index::after {
   content: "";
@@ -639,19 +590,11 @@ html[data-family]:not([data-family="dream"])
   left: calc(100% + var(--orbit-disc) * 0.61 + 6px);
   top: 50%;
   width: calc(var(--orbit-gap) - var(--orbit-disc) * 0.61 - 22px);
-  height: 2px;
+  height: 1px;
   margin-top: -1px;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    var(--ring-key) 26%,
-    rgb(var(--ring-pink-rgb) / 0.68) 72%,
-    rgb(var(--ring-key-rgb) / 0.2) 100%
-  );
-  box-shadow:
-    0 0 12px 1px rgb(var(--ring-key-rgb) / 0.72),
-    0 0 22px -2px rgb(var(--ring-pink-rgb) / 0.42);
+  background: linear-gradient(90deg, #e4d6b6, rgb(198 197 185 / 0.25));
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -671,16 +614,10 @@ html[data-family]:not([data-family="dream"])
   min-height: 0;
   margin: calc(var(--orbit-disc) / -2);
   padding: 5px;
-  border: 2px solid transparent;
+  border: 1px solid #6d7272;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.2), transparent 44%) padding-box,
-    radial-gradient(circle at 34% 28%, #1f3658, #0a1426 70%) padding-box,
-    var(--ring-prism) border-box;
-  box-shadow:
-    inset 0 1px 2px rgb(255 255 255 / 0.3),
-    inset 0 -6px 12px rgb(0 0 0 / 0.56),
-    0 10px 22px -10px rgb(0 0 0 / 0.88);
+  background: var(--orbit-face);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
   color: var(--ring-paper);
   /* Out along its spoke, then upright again whatever the dial's angle. */
   transform: rotate(var(--orbit-a)) translateX(var(--orbit-r)) rotate(calc(var(--orbit-a) * -1))
@@ -695,11 +632,11 @@ html[data-family]:not([data-family="dream"])
   > button
   > span {
   display: block;
-  font-size: clamp(10.5px, 1.5vh, 12.5px);
-  font-weight: 800;
+  font-size: clamp(12px, 1.55vh, 14px);
+  font-weight: 650;
   line-height: 1.2;
   text-align: center;
-  text-shadow: 0 1px 6px rgb(0 0 0 / 0.72);
+  text-shadow: none;
   white-space: normal;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -707,17 +644,31 @@ html[data-family]:not([data-family="dream"])
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .command-atlas-index
+  > #command-atlas-tab-information {
+  padding-inline: 0;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index
+  > #command-atlas-tab-information
+  > span {
+  font-size: 12px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.command-atlas-label-line {
+  display: block;
+}
+
+#site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+  .command-atlas-index
   > button[aria-selected="true"] {
   --orbit-s: 1.22;
-  background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.38), transparent 42%) padding-box,
-    radial-gradient(circle at 34% 28%, #3586e0, #102e5c 72%) padding-box,
-    var(--ring-prism) border-box;
-  box-shadow:
-    inset 0 1px 3px rgb(255 255 255 / 0.56),
-    0 0 0 6px rgb(var(--ring-key-rgb) / 0.16),
-    0 0 0 12px rgb(var(--ring-pink-rgb) / 0.08),
-    0 0 32px -4px rgb(var(--ring-key-rgb) / 0.78);
+  background: linear-gradient(142deg, #f0e8d6, #d7d0bf 42%, #b4b3a7);
+  box-shadow: inset 0 1px 0 #fff7df, 0 8px 18px -9px #000;
+  border: 1px solid #e9ddc1;
+  color: #191d20;
 }
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -737,14 +688,9 @@ html[data-family]:not([data-family="dream"])
     .command-atlas-index
     > button:not([aria-selected="true"]):hover:not(:active) {
     --orbit-s: 1.09;
-    background:
-      radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.3), transparent 44%) padding-box,
-      radial-gradient(circle at 34% 28%, #284b7a, #0e203c 72%) padding-box,
-      var(--ring-prism) border-box;
-    box-shadow:
-      inset 0 1px 2px rgb(255 255 255 / 0.44),
-      0 0 0 4px rgb(var(--ring-key-rgb) / 0.14),
-      0 0 24px -6px rgb(var(--ring-key-rgb) / 0.68);
+    background: #373d40;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
+    border-color: #bebfb5;
   }
 }
 
@@ -824,7 +770,7 @@ html[data-family]:not([data-family="dream"])
   padding: 0;
 }
 
-/* A row: a sculpted dark-lens pill with top specular edge and celestial depth. */
+/* Hairlines keep the rows together and leave the dial in the foreground. */
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .side-panel-links
   > :is(a, button) {
@@ -843,17 +789,10 @@ html[data-family]:not([data-family="dream"])
   margin: 0;
   padding: 5px 18px 5px 22px;
   overflow: hidden;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.28);
-  border-top-color: rgb(224 246 255 / 0.36);
-  border-radius: var(--ring-radius-pill) !important;
-  background:
-    radial-gradient(ellipse 66% 124% at 10% 0%, rgb(var(--ring-key-rgb) / 0.14), transparent 64%),
-    radial-gradient(ellipse 52% 114% at 94% 100%, rgb(var(--ring-pink-rgb) / 0.08), transparent 66%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.11) 0%, rgb(16 29 48 / 0.72) 48%, rgb(9 18 32 / 0.92) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.26),
-    inset 0 -1px 0 rgb(0 0 0 / 0.48),
-    0 10px 22px -14px rgb(0 0 0 / 0.86);
+  border: 1px solid transparent;
+  border-radius: 6px !important;
+  background: linear-gradient(100deg, rgb(202 206 201 / 0.07), transparent);
+  box-shadow: none;
   color: var(--ring-paper);
   font-size: 15px;
   line-height: 1.45;
@@ -865,6 +804,7 @@ html[data-family]:not([data-family="dream"])
   max-width: none;
   min-width: 0;
   box-sizing: border-box;
+  border-bottom-color: var(--orbit-rule);
 }
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -872,6 +812,13 @@ html[data-family]:not([data-family="dream"])
   :is(a, button):focus-visible {
   outline: 2px solid var(--ring-paper, #f5fbff);
   outline-offset: -3px;
+}
+
+@media (forced-colors: none) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index > button[aria-selected="true"]:focus-visible {
+    outline-color: #252a2b;
+  }
 }
 
 @media (forced-colors: active) {
@@ -920,11 +867,9 @@ html[data-family]:not([data-family="dream"])
   width: 38px;
   height: 38px;
   margin: 0;
-  border: 2px solid rgb(var(--ring-key-rgb) / 0.78);
+  border: 1px solid var(--orbit-rule);
   border-radius: 50%;
-  box-shadow:
-    0 0 0 2px rgb(var(--ring-key-rgb) / 0.14),
-    0 4px 10px -4px rgb(0 0 0 / 0.72);
+  box-shadow: none;
   object-fit: cover;
   object-position: 50% 18%;
   opacity: 1;
@@ -961,10 +906,10 @@ html[data-family]:not([data-family="dream"])
   position: static;
   margin: 0 0 0 auto;
   padding: 2px 8px;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.28);
+  border: 0;
   border-radius: var(--ring-radius-pill);
-  background: rgb(6 14 26 / 0.72);
-  color: #bcefff;
+  background: none;
+  color: #d3cfbf;
   font-size: 12px;
   font-style: normal;
   font-weight: 700;
@@ -1016,16 +961,10 @@ html[data-family]:not([data-family="dream"])
   min-height: 50px;
   margin: 0;
   padding: 5px 18px 5px 22px;
-  border: 1px solid rgb(var(--ring-gold-rgb) / 0.56);
-  border-top-color: rgb(255 246 218 / 0.64);
-  border-radius: var(--ring-radius-pill);
-  background:
-    radial-gradient(ellipse 68% 124% at 12% 0%, rgb(var(--ring-gold-rgb) / 0.22), transparent 66%),
-    linear-gradient(180deg, rgb(255 248 232 / 0.14) 0%, rgb(24 30 42 / 0.82) 52%, rgb(13 20 32 / 0.94) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 248 232 / 0.34),
-    0 10px 22px -14px rgb(0 0 0 / 0.86),
-    0 0 22px -12px rgb(var(--ring-gold-rgb) / 0.44);
+  border: 1px solid var(--orbit-rule);
+  border-radius: 8px;
+  background: var(--orbit-face);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
   color: #fdf6e6;
   font-size: 15px;
   font-weight: 700;
@@ -1043,12 +982,10 @@ html[data-family]:not([data-family="dream"])
   min-width: 0;
   margin: 0;
   padding: 8px 18px 10px 22px;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.28);
-  border-top-color: rgb(224 246 255 / 0.34);
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.08) 0%, rgb(12 22 36 / 0.84) 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
+  border: 1px solid var(--orbit-rule);
+  border-radius: 10px;
+  background: #1a1e21;
+  box-shadow: none;
   translate: var(--orbit-hug, 0px) 0;
 }
 
@@ -1062,35 +999,20 @@ html[data-family]:not([data-family="dream"])
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .side-panel-links
   > :is(a, button)[aria-current] {
-  border-color: var(--ring-key);
-  border-top-color: #f0fdff;
-  background:
-    radial-gradient(ellipse 74% 140% at 12% 0%, rgb(var(--ring-key-rgb) / 0.34), transparent 66%),
-    radial-gradient(ellipse 62% 130% at 92% 100%, rgb(var(--ring-pink-rgb) / 0.24), transparent 68%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.16) 0%, rgb(15 36 62 / 0.92) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.48),
-    inset 0 0 18px -6px rgb(var(--ring-key-rgb) / 0.42),
-    0 10px 26px -12px rgb(var(--ring-key-rgb) / 0.64),
-    0 0 24px -8px rgb(var(--ring-pink-rgb) / 0.36);
+  border-color: transparent;
+  background: linear-gradient(100deg, #393a35, #262a2a);
+  box-shadow: inset 3px 0 0 var(--ring-gold);
   color: #ffffff;
+  border-bottom-color: #8a897b;
 }
 
 @media (hover: hover) and (pointer: fine) {
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
     .side-panel-links
     > :is(a, button):hover {
-    border-color: rgb(var(--ring-key-rgb) / 0.88);
-    border-top-color: #f4fdff;
-    background:
-      radial-gradient(ellipse 74% 140% at 10% 0%, rgb(var(--ring-key-rgb) / 0.26), transparent 66%),
-      radial-gradient(ellipse 62% 130% at 92% 100%, rgb(var(--ring-pink-rgb) / 0.16), transparent 68%),
-      linear-gradient(180deg, rgb(255 255 255 / 0.15) 0%, rgb(18 36 60 / 0.9) 100%);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.44),
-      inset 0 0 16px -6px rgb(var(--ring-key-rgb) / 0.32),
-      0 14px 28px -12px rgb(0 0 0 / 0.9),
-      0 0 26px -10px rgb(var(--ring-key-rgb) / 0.58);
+    border-color: var(--orbit-rule);
+    background: #34393a;
+    box-shadow: none;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -1099,10 +1021,7 @@ html[data-family]:not([data-family="dream"])
     > button:not(:disabled):hover {
     border-color: var(--ring-gold);
     border-top-color: #fff6dc;
-    box-shadow:
-      inset 0 1px 0 rgb(255 250 236 / 0.46),
-      0 14px 26px -12px rgb(0 0 0 / 0.88),
-      0 0 26px -8px rgb(var(--ring-gold-rgb) / 0.56);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -1110,10 +1029,7 @@ html[data-family]:not([data-family="dream"])
     > *:hover {
     border-color: var(--ring-key);
     border-top-color: #f4fdff;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.42),
-      0 12px 26px -12px rgb(0 0 0 / 0.88),
-      0 0 26px -8px rgb(var(--ring-key-rgb) / 0.62);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
   }
 }
 
@@ -1151,11 +1067,9 @@ html[data-family]:not([data-family="dream"])
   flex: none;
   width: 64px;
   height: 64px;
-  border: 2px solid rgb(var(--ring-key-rgb) / 0.82);
+  border: 1px solid #8d9087;
   border-radius: 50%;
-  box-shadow:
-    0 0 0 4px rgb(var(--ring-key-rgb) / 0.14),
-    0 8px 20px -8px rgb(var(--ring-key-rgb) / 0.62);
+  box-shadow: none;
   object-fit: cover;
   opacity: 1;
   filter: none;
@@ -1201,16 +1115,6 @@ html[data-family]:not([data-family="dream"])
     padding: 0 16px var(--orbit-zone);
   }
 
-  html[data-family]:not([data-family="dream"])
-    body
-    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
-    background-image: radial-gradient(
-      circle at var(--orbit-cx) var(--orbit-cy),
-      rgb(36 140 255 / 0.22),
-      transparent calc(var(--orbit-r) + 190px)
-    ) !important;
-  }
-
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
     > .side-panel-head {
     margin: 0 -16px;
@@ -1239,9 +1143,7 @@ html[data-family]:not([data-family="dream"])
     position: absolute;
     inset: calc(var(--orbit-vh) - var(--orbit-zone) - 4px) 0 auto;
     height: calc(var(--orbit-zone) + 4px);
-    background:
-      radial-gradient(ellipse 84% 38% at 50% 6%, rgb(var(--ring-key-rgb) / 0.14), transparent 68%),
-      linear-gradient(180deg, rgb(var(--ring-ink-rgb) / 0), #06101e 26px);
+    background: linear-gradient(180deg, transparent, var(--orbit-bed, #191c1f) 26px, var(--orbit-bed, #191c1f));
     pointer-events: none;
   }
 
@@ -1277,12 +1179,12 @@ html[data-family]:not([data-family="dream"])
     .command-atlas-index::after {
     left: 50%;
     top: calc(var(--orbit-disc) * -0.61 - 14px);
-    width: 2px;
+    width: 1px;
     height: 12px;
     margin: 0 0 0 -1px;
     border-radius: 999px;
-    background: linear-gradient(180deg, rgb(var(--ring-pink-rgb) / 0.65), var(--ring-key) 56%, #ffffff);
-    box-shadow: 0 0 10px 1px rgb(var(--ring-key-rgb) / 0.72);
+    background: linear-gradient(180deg, #716f64, #ded3b7);
+    box-shadow: none;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -1295,7 +1197,7 @@ html[data-family]:not([data-family="dream"])
     .command-atlas-index
     > button
     > span {
-    font-size: 10.5px;
+    font-size: 12px;
     line-height: 1.15;
   }
 
@@ -1401,6 +1303,9 @@ html[data-family]:not([data-family="dream"])
     > :is(a, button)
     > span {
     font-size: 13px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
@@ -1417,6 +1322,32 @@ html[data-family]:not([data-family="dream"])
     > i {
     padding-left: 2px;
     font-size: 10.5px;
+  }
+}
+
+@media (max-width: 359px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links > a {
+    gap: 5px;
+    padding-inline: 7px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links > a > img {
+    width: 28px;
+    height: 28px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links > a > span {
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    .side-panel-links > a > i {
+    flex: none;
+    padding-inline: 0;
   }
 }
 

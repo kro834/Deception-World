@@ -1,6 +1,6 @@
 /* Zeus bridge. The form archive runs in a sandboxed frame the page cannot
    read, so the page's floating Zeus button could not see its titles and sat
-   on them. The archive reports where its own words and fixed controls are,
+   on them. The archive reports where its own words and controls are,
    and the button keeps off them as it does on every other page
    (src/components/zeus-button.tsx reads "deception-world:frame-avoid").
 
@@ -22,9 +22,16 @@
   const DISPLAY = "strong, b";
   const DISPLAY_MIN_PX = 24;
   const END = "p, li, dt, dd, small, span, em, q, blockquote, figcaption, time";
-  // Controls that never scroll away: the phone dock and anything in an open
-  // sheet or dialog. The button never rests on these, even partly.
-  const CONTROLS = '.mobile-dock button, dialog[open] button, [aria-modal="true"] button';
+  // Send full hit areas for the dock, dialogs and comparison controls. The
+  // comparison sliders and native selectors have little or no visible text.
+  const CONTROLS = [
+    ".mobile-dock button",
+    "dialog[open] button",
+    '[aria-modal="true"] button',
+    ".compare-native-select",
+    ".compare-range",
+    ".compare-swap",
+  ].join(",");
   const MAX_BOXES = 480;
 
   let timer = 0;

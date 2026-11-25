@@ -188,6 +188,7 @@ export function createIllusionculumScrollAccents(options: {
   core: readonly [number, number];
   seams: Readonly<Record<string, string>>;
   budget: IllusionculumAccentBudget;
+  entry?: boolean;
   floatingSeams?: boolean;
 }): RexonanceAssemblyAccents {
   const { width: W, height: H } = options.size;
@@ -819,31 +820,30 @@ export function createIllusionculumScrollAccents(options: {
     const at = ILLUSIONCULUM_ACCENT_BEATS.clamp;
     if (p < at || p > at + 0.09) return;
     const v = clamp01((p - at) / 0.09);
+    // In the entry cover, ease the white seal in at a lower intensity
+    // so it leads into the blue reactor ignition.
+    const opacity = options.entry ? 0.4 * smooth(clamp01((p - at) / 0.015)) : 1;
     // Every seam glows with the seal and fades (the build's afterglow).
     if (allLoops.length) {
       const fade = (1 - v) * (1 - v);
       context.strokeStyle = TONE_CSS[0];
-      context.globalAlpha = 0.6 * fade;
+      context.globalAlpha = opacity * 0.6 * fade;
       context.lineWidth = 1 + 1.6 * fade;
       context.beginPath();
       for (let k = 0; k < allLoops.length; k += 1) wholeLoop(context, allLoops[k]);
       context.stroke();
     }
     if (calm) return;
-    // The bloom lasts, and stays lit, until the reactor's light (.9) has
-    // begun: gone at .895 (and mostly gone well before), the chest went dark
-    // for a few frames between the two and the entry read as two flashes in
-    // a second on a phone (verify-route-transitions); now the light takes
-    // over from it, one rise and one fall.
+    // Keep the seal's glow present as the reactor begins to light at .9.
     const w = clamp01((p - at) / 0.06);
     if (w < 1 && glows[groupCount]) {
       // The seal's bloom, from the reactor: the one larger glow, once.
       context.fillStyle = glows[groupCount] as CanvasGradient;
-      context.globalAlpha = 0.42 * Math.pow(1 - w, 0.8);
+      context.globalAlpha = opacity * 0.42 * Math.pow(1 - w, 0.8);
       const r = glowRadius[groupCount];
       context.fillRect(coreX - r, coreY - r, r * 2, r * 2);
       context.strokeStyle = WHITE;
-      context.globalAlpha = 0.8 * (1 - w);
+      context.globalAlpha = opacity * 0.8 * (1 - w);
       context.lineWidth = 1.5 + 3 * (1 - w);
       context.beginPath();
       context.ellipse(

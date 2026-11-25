@@ -164,13 +164,15 @@ test("materialize: the glass lenses in with its dialog, only under full motion",
 
 test("accessibility: frostier under reduced transparency, black and white with a border under increased contrast", () => {
   assert.match(glass, /@media \(prefers-reduced-transparency: reduce\) \{\s*html\[data-button-style="liquid"\] \{\s*--lg-blur: 14px;\s*--lg-fill-alpha: 0\.84;/);
-  const more = glass.slice(glass.indexOf("@media (prefers-contrast: more)"));
-  assert.ok(more.length > 100, "an increased-contrast block");
-  assert.match(more, /--lg-fill: rgb\(0 0 0 \/ 0\.9\);/);
+  const start = glass.indexOf("@media (prefers-contrast: more) {");
+  assert.ok(start >= 0, "an increased-contrast block");
+  const more = glass.slice(start, glass.indexOf("\n}\n", start) + 3);
+  assert.match(more, /--lg-fill: var\(--lg-contrast-fill, rgb\(0 0 0 \/ 0\.9\)\);/);
   assert.match(more, /--lg-rim-map: none;/);
-  assert.match(more, /outline: 1\.5px solid rgb\(255 255 255 \/ 0\.92\);/);
-  assert.match(more, /--lg-fill: rgb\(255 255 255 \/ 0\.94\);\s*color: rgb\(0 0 0\) !important;/);
-  for (const { selector } of rules(more.slice(0, more.indexOf("\n}\n") + 3)))
+  assert.match(more, /outline: var\(--lg-keyboard-outline, 1\.5px solid var\(--lg-contrast-edge, rgb\(255 255 255 \/ 0\.92\)\)\);/);
+  assert.match(more, /--lg-contrast-fill: rgb\(255 255 255 \/ 0\.94\);\s*--lg-contrast-edge: rgb\(0 0 0 \/ 0\.9\);\s*color: rgb\(0 0 0\) !important;/);
+  assert.match(glass, /:focus-visible\s*\{\s*--lg-keyboard-outline: 2px solid var\(--lg-keyboard-ink\);\s*--lg-keyboard-offset: 3px;/);
+  for (const { selector } of rules(more))
     if (selector && !selector.startsWith("@")) assert.match(selector, /html\[data-button-style="liquid"\]/, selector);
 });
 

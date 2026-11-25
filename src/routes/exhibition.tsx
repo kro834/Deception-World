@@ -30,7 +30,7 @@ export const Route = createFileRoute("/exhibition")({
 function ExhibitionRoom() {
   const { work } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const currentWorkRef = useRef<HTMLElement>(null);
+  const shelfReturnRef = useRef<{ button: HTMLButtonElement; top: number } | null>(null);
   const ready = useExhibitionArtworkReady();
   const index = Math.max(
     0,
@@ -39,13 +39,7 @@ function ExhibitionRoom() {
   const artwork = GALLERY_ARTWORKS[index];
   const number = String(index + 1).padStart(3, "0");
   const select = (id: string) =>
-    navigate({ search: { work: id }, replace: true, resetScroll: false });
-
-  const showCurrentWork = () => {
-    const section = currentWorkRef.current;
-    section?.focus({ preventScroll: true });
-    section?.scrollIntoView({ block: "start", behavior: "instant" });
-  };
+    void navigate({ search: { work: id }, replace: true, resetScroll: false });
 
   return (
     <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
@@ -67,7 +61,6 @@ function ExhibitionRoom() {
       <section
         className="exhibition-room-current"
         id="exhibition-current-work"
-        ref={currentWorkRef}
         tabIndex={-1}
         aria-labelledby="exhibition-current-title"
       >
@@ -124,7 +117,29 @@ function ExhibitionRoom() {
                 ))}
               </select>
             </label>
-            <a className="dg-control" href="#exhibition-shelf-heading">
+            <a
+              className="dg-control"
+              href="#exhibition-shelf-heading"
+              onClick={(event) => {
+                const origin = shelfReturnRef.current;
+                if (
+                  !origin?.button.isConnected ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                )
+                  return;
+                event.preventDefault();
+                origin.button.focus({ preventScroll: true });
+                // The exhibit can resize above the shelf when a new work comes in.
+                // Return to the same thumbnail at its previous viewport position.
+                window.scrollBy({
+                  top: origin.button.getBoundingClientRect().top - origin.top,
+                  behavior: "instant",
+                });
+              }}
+            >
               画像から選ぶ ↓
             </a>
           </div>
@@ -155,8 +170,9 @@ function ExhibitionRoom() {
       </section>
       <ExhibitionArtworkBrowser
         currentIndex={index}
-        onSelect={(id) => {
-          void select(id).then(showCurrentWork);
+        onSelect={(id, button) => {
+          shelfReturnRef.current = { button, top: button.getBoundingClientRect().top };
+          select(id);
         }}
       />
     </main>

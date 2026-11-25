@@ -1781,3 +1781,71 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
 html[data-family="utility"] body .transformation-lab .lab-ring button {
   font-size: clamp(12px, 0.9vw, 13px);
 }
+
+/* A wrapped form name must move both comparison frames down together. */
+@media (min-width: 681px) {
+  .lab-stages[data-compare="true"] > div {
+    display: grid;
+  }
+  .lab-stages[data-compare="true"] .lab-stage {
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+}
+
+@media (max-width: 360px), (min-width: 600px) and (max-height: 450px) {
+  .lab-controls > .lab-transport:first-child {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .lab-controls > .lab-transport:first-child > button {
+    min-width: 0;
+    padding-inline: 2px;
+    letter-spacing: normal;
+  }
+}
+
+/* In a short viewport the transport sits beside the figures so both
+   comparison frames can stay in view as the controls scroll. */
+@media (min-width: 600px) and (max-height: 450px) {
+  .lab-workbench {
+    --lab-landscape-frame-height: clamp(170px, calc(100svh - 106px), 300px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(290px, 41%);
+    align-items: start;
+    gap: 10px;
+    max-width: 1280px;
+    margin-inline: auto;
+  }
+  .lab-workbench > .lab-stages {
+    position: sticky;
+    top: 4px;
+    gap: 12px;
+    margin: 0;
+  }
+  .lab-workbench > .lab-controls {
+    min-width: 0;
+    margin: 0;
+    padding: 12px 14px;
+  }
+  .lab-workbench .lab-zoom {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(min-content, 1fr));
+    gap: 4px;
+  }
+  .lab-workbench .lab-zoom button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px;
+    font-size: 12px;
+    letter-spacing: normal;
+    white-space: nowrap;
+  }
+  .lab-workbench .lab-engine {
+    height: var(--lab-landscape-frame-height);
+  }
+  .lab-workbench .lab-stage-placeholder {
+    min-height: var(--lab-landscape-frame-height);
+  }
+}

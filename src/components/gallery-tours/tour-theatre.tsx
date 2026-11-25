@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import type { GalleryArtwork } from "../gallery/gallery-data";
 import { getTourArtwork } from "./tour-data";
 import type { GalleryTour } from "./tour-data";
@@ -85,6 +85,7 @@ export type GalleryTourTheatreProps = {
   actions?: ReactNode;
   suspended?: boolean;
   nextTour?: GalleryTour;
+  nextTourButtonRef?: Ref<HTMLButtonElement>;
   onNextTour?: () => void;
 };
 
@@ -97,6 +98,7 @@ export function GalleryTourTheatre({
   actions,
   suspended = false,
   nextTour,
+  nextTourButtonRef,
   onNextTour,
 }: GalleryTourTheatreProps) {
   const stop = tour.stops[index];
@@ -286,24 +288,6 @@ export function GalleryTourTheatre({
         <div className="gallery-tour-screen-column">
           <div className="gallery-tour-view-controls" role="group" aria-label="鑑賞画面の表示">
             <button
-              className="gallery-tour-theatre-button gallery-tour-selection-toggle"
-              type="button"
-              aria-expanded={!focused && filmstripOpen}
-              aria-controls="gallery-tour-filmstrip"
-              onClick={() => {
-                setPlaying(false);
-                if (focused) {
-                  setFocused(false);
-                  setFilmstripOpen(true);
-                } else {
-                  setFilmstripOpen((current) => !current);
-                }
-              }}
-            >
-              <span aria-hidden="true">▦</span> 作品を選ぶ
-              <span aria-hidden="true">{!focused && filmstripOpen ? "−" : "+"}</span>
-            </button>
-            <button
               className="gallery-tour-theatre-button gallery-tour-focus-toggle"
               ref={focusToggleRef}
               type="button"
@@ -365,8 +349,10 @@ export function GalleryTourTheatre({
             <button
               className="gallery-tour-theatre-button"
               type="button"
-              disabled={index === 0}
-              onClick={() => selectStop(index - 1)}
+              aria-disabled={index === 0}
+              onClick={() => {
+                if (index > 0) selectStop(index - 1);
+              }}
             >
               ← 前の作品
             </button>
@@ -397,11 +383,88 @@ export function GalleryTourTheatre({
             <button
               className="gallery-tour-theatre-button"
               type="button"
-              disabled={lastStop}
-              onClick={() => selectStop(index + 1)}
+              aria-disabled={lastStop}
+              onClick={() => {
+                if (!lastStop) selectStop(index + 1);
+              }}
             >
               次の作品 →
             </button>
+          </div>
+          <div className="gallery-tour-work-selection">
+            <button
+              className="gallery-tour-theatre-button gallery-tour-selection-toggle"
+              type="button"
+              aria-expanded={!focused && filmstripOpen}
+              aria-controls="gallery-tour-filmstrip"
+              onClick={() => {
+                setPlaying(false);
+                if (focused) {
+                  setFocused(false);
+                  setFilmstripOpen(true);
+                } else {
+                  setFilmstripOpen((current) => !current);
+                }
+              }}
+            >
+              <span aria-hidden="true">▦</span> 作品を選ぶ
+              <span aria-hidden="true">{!focused && filmstripOpen ? "−" : "+"}</span>
+            </button>
+            <div
+              id="gallery-tour-filmstrip"
+              className="gallery-tour-filmstrip"
+              ref={filmstripRef}
+              hidden={focused || !filmstripOpen}
+              role="group"
+              aria-label="巡回する作品"
+            >
+              {tour.stops.map((item, itemIndex) => {
+                const thumbnail = getTourArtwork(item.artworkId);
+                if (!thumbnail) return null;
+                return (
+                  <button
+                    key={`${item.artworkId}:${itemIndex}`}
+                    ref={itemIndex === index ? activeThumbnailRef : undefined}
+                    className="gallery-tour-thumbnail"
+                    data-visited={itemIndex <= index || undefined}
+                    type="button"
+                    tabIndex={itemIndex === index ? 0 : -1}
+                    aria-label={`${itemIndex + 1}点目、${thumbnail.alt}`}
+                    aria-current={itemIndex === index ? "step" : undefined}
+                    onClick={() => selectStop(itemIndex)}
+                    onKeyDown={(event) => {
+                      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+                      const nextIndex =
+                        event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? tour.stops.length - 1
+                            : event.key === "ArrowLeft"
+                              ? Math.max(0, itemIndex - 1)
+                              : event.key === "ArrowRight"
+                                ? Math.min(tour.stops.length - 1, itemIndex + 1)
+                                : undefined;
+                      if (nextIndex === undefined) return;
+                      event.preventDefault();
+                      selectStop(nextIndex);
+                      filmstripRef.current
+                        ?.querySelectorAll<HTMLButtonElement>("button")
+                        [nextIndex]?.focus({ preventScroll: true });
+                    }}
+                  >
+                    <img
+                      src={thumbnail.preview}
+                      alt=""
+                      width={thumbnail.width}
+                      height={thumbnail.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span>{String(itemIndex + 1).padStart(2, "0")}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="gallery-tour-focused-caption" hidden={!focused}>
             <p className="gallery-tour-focused-title">{artwork.alt}</p>
@@ -427,6 +490,7 @@ export function GalleryTourTheatre({
               {nextTour && onNextTour ? (
                 <button
                   className="gallery-tour-next-tour"
+                  ref={nextTourButtonRef}
                   type="button"
                   style={{ "--gallery-tour-next-accent": nextTour.accent } as CSSProperties}
                   onClick={() => {
@@ -464,66 +528,11 @@ export function GalleryTourTheatre({
               )}
             </div>
           )}
-          <div
-            id="gallery-tour-filmstrip"
-            className="gallery-tour-filmstrip"
-            ref={filmstripRef}
-            hidden={focused || !filmstripOpen}
-            role="group"
-            aria-label="巡回する作品"
-          >
-            {tour.stops.map((item, itemIndex) => {
-              const thumbnail = getTourArtwork(item.artworkId);
-              if (!thumbnail) return null;
-              return (
-                <button
-                  key={`${item.artworkId}:${itemIndex}`}
-                  ref={itemIndex === index ? activeThumbnailRef : undefined}
-                  className="gallery-tour-thumbnail"
-                  data-visited={itemIndex <= index || undefined}
-                  type="button"
-                  tabIndex={itemIndex === index ? 0 : -1}
-                  aria-label={`${itemIndex + 1}点目、${thumbnail.alt}`}
-                  aria-current={itemIndex === index ? "step" : undefined}
-                  onClick={() => selectStop(itemIndex)}
-                  onKeyDown={(event) => {
-                    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-                    const nextIndex =
-                      event.key === "Home"
-                        ? 0
-                        : event.key === "End"
-                          ? tour.stops.length - 1
-                          : event.key === "ArrowLeft"
-                            ? Math.max(0, itemIndex - 1)
-                            : event.key === "ArrowRight"
-                              ? Math.min(tour.stops.length - 1, itemIndex + 1)
-                              : undefined;
-                    if (nextIndex === undefined) return;
-                    event.preventDefault();
-                    selectStop(nextIndex);
-                    filmstripRef.current
-                      ?.querySelectorAll<HTMLButtonElement>("button")
-                      [nextIndex]?.focus({ preventScroll: true });
-                  }}
-                >
-                  <img
-                    src={thumbnail.preview}
-                    alt=""
-                    width={thumbnail.width}
-                    height={thumbnail.height}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span>{String(itemIndex + 1).padStart(2, "0")}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         <div id="gallery-tour-reading" className="gallery-tour-reading-column" hidden={focused}>
           <div className="gallery-tour-stop-caption">
-            <h2>{artwork.alt}</h2>
+            <h2 tabIndex={-1}>{artwork.alt}</h2>
             <p className="gallery-tour-stop-note">{stop.note}</p>
           </div>
           <div className="gallery-tour-playback" data-playing={playing || undefined}>

@@ -3047,6 +3047,9 @@ html[data-world-effects="economy"] .rx-call-sequence .rx-suit-figure {
     .rx-call-blackout-line {
     animation: rxCallBlackoutLine var(--rx-call-blackout-duration, 660ms) var(--rx-call-ease)
       var(--rx-call-blackout-start, 0ms) both;
+    /* The consecutive titles stay readable on the black field with a
+       softer peak luminance during the paired cuts. */
+    color: #c5d2df;
   }
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]

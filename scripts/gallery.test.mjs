@@ -166,7 +166,7 @@ test("native viewer owns and releases the shared viewport lock and dismisses on 
   assert.match(component, /const release = acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
   assert.match(component, /if \(dialog\.open\) dialog\.close\(\)/);
   assert.match(component, /release\(\)/);
-  assert.match(component, /router.history.subscribe\(restore\)/);
+  assert.match(component, /router\.history\.subscribe\(\(\{ action \}\) => restore\(action\.type === "REPLACE"\)\)/);
   assert.match(component, /plan.kind === "none"[\s\S]*?setSelectedId\(null\)/);
 });
 

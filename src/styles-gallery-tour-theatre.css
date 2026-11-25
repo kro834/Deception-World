@@ -97,6 +97,13 @@
   color: #cdd9df;
 }
 
+.gallery-tour-work-selection {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+  gap: 8px;
+}
+
 .gallery-tour-selection-toggle {
   display: inline-flex;
   align-items: center;
@@ -332,14 +339,14 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .gallery-tour-theatre .gallery-tour-theatre-button:hover:not(:disabled) {
+  .gallery-tour-theatre .gallery-tour-theatre-button:hover:not(:disabled, [aria-disabled="true"]) {
     border-color: var(--gallery-tour-accent);
     background: rgb(218 197 157 / 0.06);
   }
 
   .gallery-tours-page.command-support-tours
     .gallery-tour-theatre
-    .gallery-tour-theatre-button:not([aria-pressed="true"]):hover:not(:disabled) {
+    .gallery-tour-theatre-button:hover:not(:disabled, [aria-disabled="true"], [aria-pressed="true"]) {
     border-color: var(--gallery-tour-accent);
     background: linear-gradient(180deg, #243646, #14202c);
     color: #f7fbfd;
@@ -368,7 +375,7 @@
   }
 }
 
-.gallery-tour-theatre .gallery-tour-theatre-button:disabled {
+.gallery-tour-theatre .gallery-tour-theatre-button:is(:disabled, [aria-disabled="true"]) {
   opacity: 0.4;
   cursor: default;
 }

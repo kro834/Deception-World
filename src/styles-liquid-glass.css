@@ -401,6 +401,8 @@ html[data-button-style="liquid"]
   .cine-btn.cine-btn-primary.cine-btn-primary:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   --lg-fill: rgb(243 236 222 / 0.78);
   --lg-tint: 201 228 232;
+  color: #12161c;
+  text-shadow: none;
 }
 
 /* The launcher's glyph was ink on a lit square; on glass it is light. */
@@ -497,6 +499,7 @@ html[data-button-style="liquid"]
   :is(
     .cine-btn-primary,
     .primary-action,
+    .command-deck-enter,
     .command-deck-scene-buttons > a.is-selected,
     .rxe-hero-primary
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
@@ -505,6 +508,14 @@ html[data-button-style="liquid"]
   --lg-tint-a: 0.16;
   --lg-sheen: 0.16;
   --lg-rim: 0.95;
+}
+
+html[data-button-style="liquid"]
+  body
+  .command-deck-scene-buttons
+  > a.is-selected:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: #12161c;
+  text-shadow: none;
 }
 
 /* ---------------------------------------------------------------
@@ -1115,6 +1126,15 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
   }
 }
 
+@media (prefers-contrast: more), (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    :is(.cine-btn-primary, .command-deck-enter, .command-deck-scene-buttons > a):focus-visible {
+    --lg-keyboard-outline: 2px solid var(--lg-keyboard-ink);
+    --lg-keyboard-offset: 3px;
+  }
+}
+
 /* Increase contrast: "makes elements predominantly black or white and
    highlights them with a contrasting border" (WWDC25). The glass keeps its
    shape and its press; its veil goes near solid, its label pure, and a
@@ -1168,12 +1188,13 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
       .rxe-hero-secondary,
       .exo-door
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --lg-fill: rgb(0 0 0 / 0.9);
+    --lg-fill: var(--lg-contrast-fill, rgb(0 0 0 / 0.9));
     --lg-tint-a: 0;
     --lg-sheen: 0;
     --lg-rim-map: none;
-    outline: 1.5px solid rgb(255 255 255 / 0.92);
-    outline-offset: -1.5px;
+    --lg-keyboard-ink: white;
+    outline: var(--lg-keyboard-outline, 1.5px solid var(--lg-contrast-edge, rgb(255 255 255 / 0.92)));
+    outline-offset: var(--lg-keyboard-offset, -1.5px);
   }
 
   html[data-button-style="liquid"]
@@ -1181,13 +1202,14 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
     :is(
       .cine-btn-primary,
       .primary-action,
+      .command-deck-enter,
       .command-deck-scene-buttons > a.is-selected,
       .rxe-hero-primary,
       [data-lg-tone="light"]
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --lg-fill: rgb(255 255 255 / 0.94);
+    --lg-contrast-fill: rgb(255 255 255 / 0.94);
+    --lg-contrast-edge: rgb(0 0 0 / 0.9);
     color: rgb(0 0 0) !important;
-    outline-color: rgb(0 0 0 / 0.9);
   }
 }
 
@@ -1243,8 +1265,9 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
     box-shadow: none !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
-    outline: 1px solid ButtonText;
-    outline-offset: -1px;
+    --lg-keyboard-ink: Highlight;
+    outline: var(--lg-keyboard-outline, 1px solid ButtonText);
+    outline-offset: var(--lg-keyboard-offset, -1px);
   }
 }
 

@@ -629,6 +629,12 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                           <wbr />
                           ワールド
                         </>
+                      ) : item.id === "final" ? (
+                        <>
+                          ファイナル
+                          <wbr />
+                          ステージ
+                        </>
                       ) : (
                         item.japanese
                       )}

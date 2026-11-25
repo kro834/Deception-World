@@ -206,6 +206,53 @@ try {
     await page.keyboard.press("Enter");
     await withinViewport(page, page.locator('[id="wa-term-夢への扉"]'), "related term landing");
 
+    if (scenario.width === 320) {
+      await page.goto(`${base}/world#episode-notes`);
+      await ready(page);
+      const latest = episodeIndex.locator('a[href="#wa-episode-05"]');
+      await show(latest);
+      await latest.press("Enter");
+      await page.waitForURL("**#wa-episode-05");
+      await withinViewport(page, page.locator("#wa-episode-05"), "latest episode landing");
+      await show(page.locator("#wa-episode-05 .wa-episode-synopsis p").last());
+      await page.goBack({ waitUntil: "commit" });
+      await page.waitForURL("**#episode-notes");
+      await page.waitForFunction(
+        () => document.activeElement?.matches('.wr-record-index a[href="#wa-episode-05"]'),
+      );
+      await page.keyboard.press("Shift+Tab");
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute("href")),
+        "#wa-episode-04",
+      );
+      await page.keyboard.press("Tab");
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute("href")),
+        "#wa-episode-05",
+      );
+      await page.goForward({ waitUntil: "commit" });
+      await page.waitForURL("**#wa-episode-05");
+    }
+
+    const eventMap = new URL("/world-map", base);
+    eventMap.searchParams.set("node", "event:05:3");
+    eventMap.searchParams.set("view", "list");
+    eventMap.searchParams.set("kind", "event");
+    eventMap.searchParams.set("q", "古いソファー シエル");
+    await page.goto(eventMap.href);
+    assert.match(await page.locator(".wm-event-excerpt").innerText(), /マキャベルゴアナイトメアが近づき/);
+    await geometry(page, ".wm-filters button");
+    const eventSource = page.locator('a.wm-source[href="/world#wa-event-05-04"]');
+    await eventSource.press("Enter");
+    await page.waitForURL("**/world#wa-event-05-04");
+    await ready(page);
+    const eventExcerpt = page.locator("#wa-event-05-04");
+    await withinViewport(page, eventExcerpt, "World map event excerpt");
+    assert.match(await eventExcerpt.innerText(), /マキャベルゴアナイトメアが近づき/);
+    await page.goBack();
+    await page.waitForURL((url) => url.searchParams.get("node") === "event:05:3");
+    await eventSource.waitFor();
+
     for (const person of people) {
       await page.goto(`${base}/characters/${person}?from=cast-roster#dossier-index`);
       await ready(page);

@@ -1,11 +1,41 @@
 export type GalleryReadingPosition = { top: number; left: number };
 export type GalleryViewerMode = "normal" | "shuffle";
+export type GalleryViewerOpener =
+  | { kind: "feature" | "shuffle" }
+  | { kind: "grid"; artworkId: string };
 export type GalleryViewerRecord = {
   id: string;
   ids: string[];
   position: GalleryReadingPosition;
   mode?: GalleryViewerMode;
+  opener?: GalleryViewerOpener;
 };
+
+const currentFeatureSelector = ".artwork-stage__image--current .gallery-feature-open";
+
+export function galleryViewerOpenerSelector(record: GalleryViewerRecord): string {
+  const opener = record.opener;
+  if (opener?.kind === "feature") return currentFeatureSelector;
+  if (opener?.kind === "shuffle" || (!opener && record.mode === "shuffle"))
+    return ".gallery-shuffle-start";
+  const id = opener?.kind === "grid" ? opener.artworkId : record.id;
+  return `[data-gallery-artwork="${CSS.escape(id)}"] .gallery-work-open`;
+}
+
+export function galleryReturnFocusTarget(
+  opener: HTMLElement | null,
+  kind: GalleryViewerOpener["kind"] | undefined,
+  favorites: HTMLButtonElement | null,
+): HTMLElement | null {
+  if (opener?.isConnected && !opener.closest("[inert], :disabled")) return opener;
+  if (kind === "feature") {
+    const current = document.querySelector<HTMLElement>(currentFeatureSelector);
+    return current && !current.closest("[inert]")
+      ? current
+      : document.querySelector<HTMLButtonElement>(".gallery-feature-save");
+  }
+  return favorites;
+}
 
 export type GalleryImageViewport = {
   width: number;
@@ -141,11 +171,17 @@ export function readGalleryViewerRecord(value: unknown): GalleryViewerRecord | n
     record.position.left < 0
   )
     return null;
+  const opener = record.opener;
   return {
     id: record.id,
     ids: [...new Set(record.ids)],
     position: { ...record.position },
     ...(record.mode === undefined ? {} : { mode: record.mode }),
+    ...(opener?.kind === "feature" || opener?.kind === "shuffle"
+      ? { opener: { kind: opener.kind } }
+      : opener?.kind === "grid" && typeof opener.artworkId === "string" && opener.artworkId
+        ? { opener: { kind: opener.kind, artworkId: opener.artworkId } }
+        : {}),
   };
 }
 

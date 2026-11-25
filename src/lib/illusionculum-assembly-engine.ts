@@ -196,6 +196,7 @@ export function mountIllusionculumAssemblyEngine(
     core: ILLUSIONCULUM_SUIT_MARKS.core,
     seams: ILLUSIONCULUM_SUIT_SEAMS,
     budget: illusionculumScrollAccentBudget(environment, { compact, entry }),
+    entry,
     floatingSeams: !entry,
   });
   if (compact) config.prewarm = !entry;

@@ -567,6 +567,7 @@ export function WorldMap({
               <h2>{selected.title}</h2>
               <p className="wm-detail-subtitle">{selected.subtitle}</p>
             </div>
+            {selected.excerpt && <p className="wm-event-excerpt">{selected.excerpt}</p>}
             <div className="wm-detail-actions">
               <a className="wm-source" href={selected.href}>
                 <span>元の資料を読む</span>

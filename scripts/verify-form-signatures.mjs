@@ -15,11 +15,19 @@ const themes = [
   {
     id: "explom",
     route: "over-zeztz",
+    anchor: "form-record-2",
     face: "Explom Display",
     title: "エクスプロム",
     stat: "205.9cm（est.）",
   },
-  { id: "kemonohen", route: "leddic", face: "Kemonohen Brush", title: "犭フォーム", stat: "227cm" },
+  {
+    id: "kemonohen",
+    route: "leddic",
+    anchor: "partner-form-3",
+    face: "Kemonohen Brush",
+    title: "犭フォーム",
+    stat: "227cm",
+  },
 ];
 
 async function fits(locator, label) {
@@ -67,7 +75,7 @@ try {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     for (const theme of themes) {
-      await page.goto(`${base}/riders/${theme.route}`, { waitUntil: "networkidle" });
+      await page.goto(`${base}/riders/${theme.route}#${theme.anchor}`, { waitUntil: "networkidle" });
       await page.waitForSelector('html[data-family="dossier"]');
       if (scenario.economy)
         await page.evaluate(() => {
@@ -75,8 +83,18 @@ try {
         });
       const card = page.locator(`section.form-pickup[data-form-theme="${theme.id}"]`);
       assert.equal(await card.count(), 1);
-      // Instant scroll, no scroll-behavior or animated arrival ambiguity.
-      await card.evaluate((el) => el.scrollIntoView({ behavior: "instant", block: "center" }));
+      assert.equal(await card.getAttribute("id"), theme.anchor);
+      await card.waitFor({ state: "visible" });
+      await page.waitForFunction(
+        () => !document.documentElement.hasAttribute("data-route-scroll-settling"),
+      );
+      assert.ok(
+        await card.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.bottom > 0 && rect.top < innerHeight;
+        }),
+        `${label}/${theme.id}: the direct link stays at the form after the page settles`,
+      );
       await page.waitForFunction(
         (id) =>
           document.querySelector(`section[data-form-theme="${id}"]`)?.dataset.signatureArrived ===

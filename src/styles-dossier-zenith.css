@@ -3594,8 +3594,9 @@ html[data-family="dossier"]
     > .dossier-reader
     .dossier-reader-links {
     gap: 4px;
-    margin-block: 6px;
-    padding: 3px;
+    /* Give the links 48px of the same sticky dock height. */
+    margin-block: 3px;
+    padding: 1px 3px;
     border: 1px solid color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 14%));
     border-radius: 10px;
     background:
@@ -3623,7 +3624,7 @@ html[data-family="dossier"]
     > .dossier-reader
     .dossier-reader-links
     a {
-    min-height: 38px;
+    min-height: 48px;
     padding: 0 14px;
     border: 0;
     border-radius: 7px;

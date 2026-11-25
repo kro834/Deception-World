@@ -192,8 +192,10 @@ test("all Chronicle entries featuring Keiya resolve Keiya's canonical character 
   assert.ok(canonical);
 
   const matchingRecords = DREAM_CHRONICLE.filter((record) => record.cast.includes("東風谷慶弥"));
-  assert.equal(matchingRecords.length, 15);
-  assert.equal(matchingRecords.at(-1).no, 74, "Keiya’s decision to return also links to his record");
+  assert.deepEqual(
+    matchingRecords.map(({ no }) => no),
+    [3, 4, 5, 8, 14, 17, 39, 43, 45, 54, 59, 62, 65, 67, 74, 76, 79, 81, 83, 84, 85],
+  );
   for (const record of matchingRecords) {
     assert.deepEqual(
       resolveDreamRecordLinks(record, {

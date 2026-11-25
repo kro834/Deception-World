@@ -334,11 +334,11 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     "声の記録を綴る。ときどき、その輪郭が乱れる。",
     "軽量設定・動きを減らす設定では、全文を表示します。",
     "スワイプ・左右キーで切替",
-    "EP.01〜04の展開を含みます。",
     "EPISODE",
     "STAGE",
     "資料目次",
   ]);
+  assert.ok(body.includes('`EP.${WORLD_EPISODE_NOTES[0].no}〜${WORLD_EPISODE_NOTES.at(-1)?.no}の展開を含みます。`'));
   // Count the published reading elements separately from the SPA loading/error UI.
   const sections = [...shell.matchAll(/<section\s+id="[^"]+"[^>]*>/g)].map(([tag]) => tag);
   const readingMarkup = [body, contents, ...sections].join("\n");
@@ -353,6 +353,7 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
   const searchAnchors = [
     "id={`wa-location-${place.name}`}",
     "id={`wa-episode-${episode.no}`}",
+    "id={worldEpisodeEventId(episode.no, index)}",
     "id={`wa-term-${entry.term}`}",
   ];
   for (const anchor of searchAnchors) assert.equal(count(anchor), 1, anchor);
@@ -370,12 +371,16 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — NO FILE's lang
   // goes with it (74 → 73); the cast numbers' aria-hidden gives way to the exit
   // chevron's.
-  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 73);
+  // Each episode heading's list item can receive native fragment focus.
+  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 75);
+  assert.equal(count("tabIndex={-1}"), 2);
+  assert.match(body, /<li\s+key=\{episode\.no\}\s+id=\{`wa-episode-\$\{episode\.no\}`\}[^>]*tabIndex=\{-1\}/);
   assert.equal(count('aria-label="用語の索引"'), 1);
   assert.equal(count("href={`#wa-term-${entry.term}`}"), 1);
   assert.equal(count('aria-hidden="true"'), 12);
   assert.equal(count('alt=""'), 5);
-  assert.equal(count('lang="en"'), 5);
+  assert.equal(count('lang="en"'), 4);
+  assert.equal(count('lang={episode.titleLang}'), 1);
   for (const attr of [
     'aria-labelledby="cast-roster-title"',
     'title="人物一覧"',
