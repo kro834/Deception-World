@@ -20,7 +20,6 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { rememberRiderReturn } from "./rider-return-state";
 import { DossierTopbar } from "./world-chrome";
 import type { FormTheme } from "./form-signature-state";
 
@@ -1492,9 +1491,6 @@ export function RiderPage({ id }: { id: string }) {
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
   const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
-  useEffect(() => {
-    rememberRiderReturn(rider.id);
-  }, [rider.id]);
   useEffect(
     () => () => {
       cancelNightmareScrollReset.current?.();

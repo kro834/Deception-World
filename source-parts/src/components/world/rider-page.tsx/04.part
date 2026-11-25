@@ -1,3 +1,4 @@
+            group: "フィジカム（身体能力）",
             tone: "#ff4a4a",
             body: "カスタムアーマーの機能を強化し、装着者の身体能力を大幅に向上させる。また、装着者の意思に応じて、負傷した部位や破損した装甲を圧縮・変形させ、外骨格として機能させることが可能。これにより、身体の動作を補助するとともに、装着者にかかる衝撃を緩和し、戦闘能力の低下を抑制する。",
           },
@@ -278,9 +279,6 @@ export function RiderPage({ id }: { id: string }) {
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
   const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
-  useEffect(() => {
-    rememberRiderReturn(rider.id);
-  }, [rider.id]);
   useEffect(
     () => () => {
       cancelNightmareScrollReset.current?.();
@@ -403,3 +401,4 @@ export function RiderPage({ id }: { id: string }) {
           </header>
           <div className="manager-quotes">
             {rider.quotes.map((q) => (
+              <q key={q}>{q}</q>

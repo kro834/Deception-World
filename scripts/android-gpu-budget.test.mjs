@@ -166,7 +166,18 @@ test("no blurred shadow over 48px on Android's poster frame, topbar or Zeus butt
   );
   for (const blur of blurRadii(declaration(zeus.body, "box-shadow"))) assert.equal(blur, 0);
 
-  // Every other renderer keeps the full halo.
+  // The current artwork stage uses the same bounded print shadows on every renderer.
+  const artwork = styleRules(stripComments(await read("src/styles-world-artwork-stage.css")));
+  for (const target of [".world-poster-media", ".world-stage-image"]) {
+    const rule = artwork.find(
+      ({ selector }) => selector === `#top.world-artwork-hero ${target}`,
+    );
+    const shadow = declaration(rule.body, "box-shadow");
+    assert.ok(shadow, `${target} shadow`);
+    for (const blur of blurRadii(shadow)) assert.ok(blur <= 48, shadow);
+  }
+
+  // The earlier frame rule still carries the full halo outside the Android tier.
   const base = styleRules(stripComments(await read("src/styles-world-mirage.css"))).find(
     ({ selector }) => selector === ".site-shell.film-edition.mirage-edition .poster-frame",
   );

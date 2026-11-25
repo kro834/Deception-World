@@ -391,6 +391,10 @@ html[data-family="world"]:root
   background: #202f3e !important;
 }
 
+#top.world-artwork-hero .world-stage-controls .poster-shuffle[aria-busy="true"] svg {
+  opacity: 0.55;
+}
+
 #top.world-artwork-hero .world-stage-controls .poster-lock.is-locked {
   color: #ffe2a8;
 }
@@ -406,8 +410,21 @@ html[data-family="world"]:root
   letter-spacing: 0.03em;
 }
 
-#top.world-artwork-hero .world-stage-controls .poster-shuffle b {
-  min-width: 13ch;
+#top.world-artwork-hero .world-stage-controls .world-stage-state-label {
+  display: inline-grid;
+}
+
+#top.world-artwork-hero .world-stage-controls .world-stage-state-label > span {
+  display: block;
+  grid-area: 1 / 1;
+  width: auto;
+  height: auto;
+  color: inherit;
+  font: inherit;
+}
+
+#top.world-artwork-hero .world-stage-controls .world-stage-state-label > [data-inactive] {
+  visibility: hidden;
 }
 
 #top.world-artwork-hero .world-stage-controls output {
@@ -503,8 +520,16 @@ html[data-family="world"]:root
 }
 
 @media (max-height: 540px) and (orientation: landscape) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #top.world-artwork-hero {
+    --world-stage-top: 12px;
+    --world-stage-bottom: 18px;
+  }
+
   #top.world-artwork-hero .artwork-stage.world-poster-stage {
-    --stage-art-height: clamp(200px, 61svh, 316px);
+    --stage-art-height: clamp(180px, 54svh, 288px);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.16fr);
     gap: clamp(12px, 3vw, 30px);
   }
@@ -823,5 +848,167 @@ html[data-world-effects="economy"]
     background: Canvas !important;
     box-shadow: none !important;
     color: CanvasText;
+  }
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > header.topbar
+  > .world-section-nav {
+  display: flex;
+  min-width: 0;
+  justify-content: center;
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > header.topbar
+  > .world-section-nav
+  > a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > header.topbar
+  > .world-section-nav
+  > a[aria-current="location"] {
+  background-color: rgb(143 227 249 / 12%);
+}
+
+.world-story-navigation {
+  min-width: 0;
+  margin-block: clamp(26px, 5vw, 68px);
+}
+
+.world-story-navigation > #world-exploration {
+  max-width: 100%;
+  margin-bottom: 0;
+}
+
+@media (max-width: 719px) and (orientation: portrait) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #top.world-artwork-hero {
+    --world-stage-top: 11px;
+    --world-stage-bottom: 10px;
+  }
+
+  #top.world-artwork-hero .artwork-stage.world-poster-stage {
+    --stage-art-height: clamp(248px, 39svh, 400px);
+    gap: 10px;
+  }
+
+  #top.world-artwork-hero .world-stage-identity {
+    margin-bottom: 12px;
+  }
+
+  #top.world-artwork-hero .world-stage-identity .anime-work-title > b {
+    font-size: clamp(21px, 5.8vw, 33px);
+  }
+
+  #top.world-artwork-hero .world-stage-copy h1 {
+    margin-bottom: 10px;
+    font-size: clamp(1.4rem, 5.9vw, 2.25rem);
+  }
+
+  #top.world-artwork-hero .world-stage-context {
+    margin-top: 12px;
+  }
+
+  #top.world-artwork-hero .world-stage-lead {
+    line-height: 1.6;
+  }
+
+  #top.world-artwork-hero
+    .world-stage-controls
+    :is(.poster-shuffle, .poster-reset, .poster-lock)
+    > span:not(.liquid-pointer-glow) {
+    flex-basis: 16px;
+    width: 16px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story.story-section {
+    display: block;
+    padding-top: 8px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story.story-section
+    > .section-index {
+    position: absolute;
+    z-index: 2;
+    inset: 23px calc(var(--sw-gutter, 20px) + 15px) auto auto;
+    display: block;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story.story-section
+    > .section-index
+    > span {
+    font-size: 0.875rem;
+    line-height: 1;
+    color: #735c32;
+    -webkit-text-stroke: 0;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story.story-section
+    > .story-layout {
+    margin-block-start: 0;
+    padding-block-start: 14px;
+    gap: 18px;
+    animation: none;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story.story-section
+    > .story-layout
+    > .story-heading {
+    padding-inline-end: 1rem;
+  }
+
+  /* Keep the first headline readable at the fold during its one-shot entrance. */
+  #story.story-section .story-heading h2[data-film-reveal] {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  /* This headline introduces the reading page while it is still at the fold. */
+  #story.story-section .story-heading [data-text-reveal="heading"] .tr-c {
+    animation: none;
+    color: inherit;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > header.topbar
+    > .world-section-nav
+    > a[aria-current="location"] {
+    text-decoration: underline;
   }
 }

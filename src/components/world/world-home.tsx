@@ -12,7 +12,7 @@ import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { captureRiderReturn, readRiderReturn, restoreRiderControl } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import { RevealText } from "./reveal-text";
@@ -947,7 +947,7 @@ const WorldSectionNav = memo(function WorldSectionNav() {
   }, []);
 
   return (
-    <nav ref={navRef} aria-label="メインメニュー">
+    <nav ref={navRef} className="world-section-nav" aria-label="世界の章">
       <a
         href="#story"
         aria-label="STORY：ストーリーへ移動"
@@ -1004,6 +1004,7 @@ export function WorldHome() {
   const poster = posterFrames.current.index;
   const prevPoster = posterFrames.previous?.index ?? null;
   const [posterFailure, setPosterFailure] = useState<number | null>(null);
+  const posterRestoring = useRef(false);
   const [posterResetting, setPosterResetting] = useState(false);
   const posterShuffleButton = useRef<HTMLButtonElement>(null);
   const [locked, setLocked] = useState(false);
@@ -1072,6 +1073,7 @@ export function WorldHome() {
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
+    posterRestoring.current = false;
     cancelPosterFrame();
     setShuffling(false);
     setPosterResetting(false);
@@ -1092,13 +1094,43 @@ export function WorldHome() {
   );
 
   useLayoutEffect(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    if (returnIndex < 0) return;
-    riderTabRef.current = returnIndex;
-    setInitialRiderTab(returnIndex);
-    setRiderTab(returnIndex);
-  }, []);
+    let stopAlign: (() => void) | undefined;
+    const restore = () => {
+      const ticket = readRiderReturn();
+      if (!ticket) return;
+      const returnIndex = RIDERS.findIndex((rider) => rider.id === ticket.id);
+      if (returnIndex < 0) return;
+      riderTabRef.current = returnIndex;
+      setInitialRiderTab(returnIndex);
+      setRiderTab(returnIndex);
+      if (ticket.poster != null && POSTERS[ticket.poster]) {
+        const storedPoster = ticket.poster;
+        cancelPosterShuffle();
+        const runId = shuffleRunId.current;
+        posterRestoring.current = true;
+        void goPoster(storedPoster).then((ready) => {
+          if (shuffleRunId.current !== runId) return;
+          posterRestoring.current = false;
+          setPosterFailure(ready ? null : storedPoster);
+        });
+      }
+      if (ticket.locked != null) setLocked(ticket.locked);
+      const control = shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+      if (control) {
+        stopAlign?.();
+        stopAlign = restoreRiderControl(ticket, control);
+      }
+    };
+    restore();
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restore();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      stopAlign?.();
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [cancelPosterShuffle, goPoster, locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-other") return;
@@ -1211,10 +1243,6 @@ export function WorldHome() {
     return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
-  useEffect(() => {
-    clearRiderReturn();
-  }, []);
-
   const selectRider = useCallback((next: number) => {
     const current = riderTabRef.current;
     if (current === next) return;
@@ -1301,6 +1329,7 @@ export function WorldHome() {
     const canAdvance = () =>
       !cancelled &&
       !shuffleActive.current &&
+      !posterRestoring.current &&
       !posterControlsFocusedRef.current &&
       !document.hidden &&
       heroInViewRef.current &&
@@ -1599,6 +1628,7 @@ export function WorldHome() {
 
   const shufflePoster = () => {
     if (ambientPaused || shuffleActive.current) return;
+    posterRestoring.current = false;
     cancelPosterFrame();
     setPosterFailure(null);
     setPosterResetting(false);
@@ -1896,10 +1926,11 @@ export function WorldHome() {
                     const art = POSTERS[frame.index];
                     const staged = frame === posterFrames.pending;
                     const active = frame === posterFrames.current;
+                    const layer = staged ? "pending" : active ? "current" : "previous";
                     return (
                       <img
-                        className="world-stage-image"
-                        data-layer={staged ? "pending" : active ? "current" : "previous"}
+                        className={`world-stage-image world-stage-image-${layer}`}
+                        data-layer={layer}
                         key={frame.key}
                         src={art.src}
                         width={art.width}
@@ -1960,7 +1991,10 @@ export function WorldHome() {
                   <span aria-hidden="true">
                     <UiVectorIcon kind="shuffle" size={18} />
                   </span>
-                  <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={shuffling || undefined}>SHUFFLE POSTER</span>
+                    <span data-inactive={!shuffling || undefined}>SHUFFLING...</span>
+                  </b>
                 </button>
                 <button
                   type="button"
@@ -2039,7 +2073,10 @@ export function WorldHome() {
                       </svg>
                     )}
                   </span>
-                  <b>{locked ? "固定中" : "自動切替"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={locked || undefined}>自動切替</span>
+                    <span data-inactive={!locked || undefined}>固定中</span>
+                  </b>
                 </button>
               </div>
               <output
@@ -2124,11 +2161,6 @@ export function WorldHome() {
         </a>
       </section>
 
-      <MirageTicker variant="open" records={EPISODES.length} />
-
-      <WorldContents />
-      <WorldExploration />
-
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
@@ -2162,6 +2194,12 @@ export function WorldHome() {
               </RevealText>
             </p>
           </div>
+        </div>
+
+        <div className="world-story-navigation">
+          <MirageTicker variant="open" records={EPISODES.length} />
+          <WorldContents />
+          <WorldExploration />
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
@@ -2691,6 +2729,19 @@ export function WorldHome() {
                 label="個別資料"
                 opensDialog={false}
                 onOpen={(source) => {
+                  const control =
+                    shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+                  const viewport = window.visualViewport;
+                  captureRiderReturn({
+                    id: rider.id,
+                    poster,
+                    locked,
+                    keyboard: source === "keyboard",
+                    viewportFraction: control
+                      ? (control.getBoundingClientRect().top - (viewport?.offsetTop ?? 0)) /
+                        Math.max(1, viewport?.height ?? window.innerHeight)
+                      : undefined,
+                  });
                   void go({
                     to: `/riders/${rider.id}`,
                     assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],

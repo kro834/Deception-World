@@ -1,3 +1,6 @@
+      grid.removeEventListener("scrollend", settleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     syncRail(columnRail.current, columnTab);
@@ -57,6 +60,7 @@
 
   const shufflePoster = () => {
     if (ambientPaused || shuffleActive.current) return;
+    posterRestoring.current = false;
     cancelPosterFrame();
     setPosterFailure(null);
     setPosterResetting(false);
@@ -354,10 +358,11 @@
                     const art = POSTERS[frame.index];
                     const staged = frame === posterFrames.pending;
                     const active = frame === posterFrames.current;
+                    const layer = staged ? "pending" : active ? "current" : "previous";
                     return (
                       <img
-                        className="world-stage-image"
-                        data-layer={staged ? "pending" : active ? "current" : "previous"}
+                        className={`world-stage-image world-stage-image-${layer}`}
+                        data-layer={layer}
                         key={frame.key}
                         src={art.src}
                         width={art.width}
@@ -418,7 +423,10 @@
                   <span aria-hidden="true">
                     <UiVectorIcon kind="shuffle" size={18} />
                   </span>
-                  <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={shuffling || undefined}>SHUFFLE POSTER</span>
+                    <span data-inactive={!shuffling || undefined}>SHUFFLING...</span>
+                  </b>
                 </button>
                 <button
                   type="button"
@@ -497,7 +505,10 @@
                       </svg>
                     )}
                   </span>
-                  <b>{locked ? "固定中" : "自動切替"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={locked || undefined}>自動切替</span>
+                    <span data-inactive={!locked || undefined}>固定中</span>
+                  </b>
                 </button>
               </div>
               <output
@@ -509,6 +520,3 @@
                 {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
               </output>
               {posterFailure !== null && (
-                <div className="world-poster-recovery">
-                  <span role="status">画像を読み込めませんでした。</span>
-                  <button

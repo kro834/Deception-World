@@ -39,6 +39,7 @@ function harness({ reducedMotion = true, random = 0, deferPresentation = false }
     motionReduced: reducedMotion,
     poster: 0,
     posterFailure: null,
+    posterRestoring: { current: false },
     prevPoster: null,
     POSTERS: [{ src: "first" }, { src: "second" }, { src: "third" }],
     shuffleActive,

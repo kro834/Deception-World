@@ -52,8 +52,8 @@ const current = (page) =>
 
 function scrollPosition(section) {
   const y = Math.round(window.scrollY);
-  if (!section) return { y };
-  const element = document.getElementById(section);
+  const element = section ? document.getElementById(section) : null;
+  if (!element) return { y, top: null, margin: null };
   return {
     y,
     top: Math.round(element.getBoundingClientRect().top),
@@ -70,7 +70,8 @@ async function rest(page, section = null) {
     const { y, top, margin } = await page.evaluate(scrollPosition, section);
     // A long smooth jump can stall for more than one sample before moving
     // again. Only count stationary samples at the expected landing.
-    if (y === last && (!section || Math.abs(top - margin) <= landingTolerance)) break;
+    const landed = top !== null && Math.abs(top - margin) <= landingTolerance;
+    if (y === last && (!section || landed)) break;
     last = y;
   }
   await page.waitForTimeout(250);
@@ -84,6 +85,7 @@ for (const viewport of [
   { name: "landscape-740", width: 740, height: 360, android: true },
   { name: "landscape-667", width: 667, height: 375, android: true },
   { name: "phone-390", width: 390, height: 844, android: true },
+  { name: "phone-320", width: 320, height: 568, android: true },
   { name: "tablet-1024", width: 1024, height: 768 },
 ]) {
   const { context, page, errors } = await openWorld({
@@ -95,13 +97,21 @@ for (const viewport of [
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
     await rest(page);
     const link = page.locator(`.topbar nav a[href="#${id}"]`);
-    if (await link.isVisible()) await link.click();
-    else await link.evaluate((anchor) => anchor.click());
+    await link.waitFor({ state: "visible", timeout: 8_000 });
+    if (id === "story") {
+      await page.locator('.topbar a.brand[href="#top"]').focus();
+      await page.keyboard.press("Tab");
+      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute("href")), "#story");
+      await page.keyboard.press("Enter");
+    } else {
+      await link.click();
+    }
+    await page.waitForURL(`**/world#${id}`);
     await rest(page, id);
     const { top, margin } = await page.evaluate(scrollPosition, id);
     const marked = await current(page);
     assert.ok(
-      Math.abs(top - margin) <= landingTolerance,
+      top !== null && Math.abs(top - margin) <= landingTolerance,
       `${viewport.name} #${id}: landed at ${top}, scroll-margin ${margin}`,
     );
     assert.equal(marked, `#${id}`, `${viewport.name} #${id}: aria-current ${marked}`);

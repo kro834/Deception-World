@@ -188,6 +188,7 @@ test("poster autoplay pauses for overlays, decodes the next image and preserves 
     posterControlsFocused: false,
     posterControlsFocusedRef: focused,
     posterResetting: false,
+    posterRestoring: { current: false },
     posterFailure: null,
     sideMenuOpen: false,
     pickupOpen: false,

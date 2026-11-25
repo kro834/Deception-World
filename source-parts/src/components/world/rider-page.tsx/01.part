@@ -20,7 +20,6 @@ import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { rememberRiderReturn } from "./rider-return-state";
 import { DossierTopbar } from "./world-chrome";
 import type { FormTheme } from "./form-signature-state";
 
@@ -402,3 +401,4 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       {
         no: "03",
         kicker: "外見と戦闘",
+        title: "生身でも、この世界で最強とされる。",

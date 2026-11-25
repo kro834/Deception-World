@@ -1,19 +1,3 @@
-  const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
-  const [episode, setEpisode] = useState(0);
-  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
-  const [pickupOpen, setPickupOpen] = useState(false);
-  const [sideMenuOpen, setSideMenuOpen] = useState(false);
-  const [heroVisible, setHeroVisible] = useState(true);
-  // Read by the poster timer at once; the state follows when scrolling settles.
-  const heroInViewRef = useRef(true);
-  const [motionReduced, setMotionReduced] = useState(false);
-  const managerRail = useRef<HTMLDivElement>(null);
-  const columnRail = useRef<HTMLDivElement>(null);
-  const riderRail = useRef<HTMLDivElement>(null);
-  const episodeGridRef = useRef<HTMLDivElement>(null);
-  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
-  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const episodePickupOpenedByKeyboard = useRef(false);
   const episodePointerFocusTimer = useRef<number | null>(null);
   const episodeScrollTimer = useRef<number | null>(null);
   const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
@@ -44,6 +28,7 @@
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
+    posterRestoring.current = false;
     cancelPosterFrame();
     setShuffling(false);
     setPosterResetting(false);
@@ -64,13 +49,43 @@
   );
 
   useLayoutEffect(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    if (returnIndex < 0) return;
-    riderTabRef.current = returnIndex;
-    setInitialRiderTab(returnIndex);
-    setRiderTab(returnIndex);
-  }, []);
+    let stopAlign: (() => void) | undefined;
+    const restore = () => {
+      const ticket = readRiderReturn();
+      if (!ticket) return;
+      const returnIndex = RIDERS.findIndex((rider) => rider.id === ticket.id);
+      if (returnIndex < 0) return;
+      riderTabRef.current = returnIndex;
+      setInitialRiderTab(returnIndex);
+      setRiderTab(returnIndex);
+      if (ticket.poster != null && POSTERS[ticket.poster]) {
+        const storedPoster = ticket.poster;
+        cancelPosterShuffle();
+        const runId = shuffleRunId.current;
+        posterRestoring.current = true;
+        void goPoster(storedPoster).then((ready) => {
+          if (shuffleRunId.current !== runId) return;
+          posterRestoring.current = false;
+          setPosterFailure(ready ? null : storedPoster);
+        });
+      }
+      if (ticket.locked != null) setLocked(ticket.locked);
+      const control = shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+      if (control) {
+        stopAlign?.();
+        stopAlign = restoreRiderControl(ticket, control);
+      }
+    };
+    restore();
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restore();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      stopAlign?.();
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [cancelPosterShuffle, goPoster, locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-other") return;
@@ -183,10 +198,6 @@
     return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
-  useEffect(() => {
-    clearRiderReturn();
-  }, []);
-
   const selectRider = useCallback((next: number) => {
     const current = riderTabRef.current;
     if (current === next) return;
@@ -273,6 +284,7 @@
     const canAdvance = () =>
       !cancelled &&
       !shuffleActive.current &&
+      !posterRestoring.current &&
       !posterControlsFocusedRef.current &&
       !document.hidden &&
       heroInViewRef.current &&
@@ -509,6 +521,3 @@
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
-      grid.removeEventListener("scrollend", settleScroll);
-    };
-  }, []);

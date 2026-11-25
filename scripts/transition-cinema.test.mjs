@@ -168,7 +168,7 @@ test("the hand-over: rendered under the still cover, two frames, then data-loadi
   assert.doesNotMatch(gate, /announceRouteCommit/);
   // The wrapper must release the global lock and local marker at the same reveal boundary.
   const branches = gate.match(
-    /if \(!\(await commitCoveredDestination\(\)\) \|\| !isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*await settleUnderCover\(requestSignal\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?setDocumentLoading\(false\);[\s\S]*?phase: "revealing",[\s\S]*?await clock\.wait\(\s*revealRan\(\s*timings\.reveal/g,
+    /if \(!\(await commitCoveredDestination\((?:riderState)?\)\) \|\| !isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*await settleUnderCover\(requestSignal\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?setDocumentLoading\(false\);[\s\S]*?phase: "revealing",[\s\S]*?await clock\.wait\(\s*revealRan\(\s*timings\.reveal/g,
   );
   assert.equal(branches?.length, 2, "rider dives/cut-ins and the sovereign gate");
   // Only a prepared Rexonance renderer has no portrait to dock. A failed

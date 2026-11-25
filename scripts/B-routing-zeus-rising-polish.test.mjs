@@ -45,7 +45,7 @@ test("Back and Forward into the world keep the reading position; fresh entries s
   );
   assert.match(
     loadGate,
-    /\(pathname === "\/world" && \(!locationHash \|\| locationHash === "top"\) && !fromHistory\)/,
+    /\(pathname === "\/world" &&\s*\(!locationHash \|\| locationHash === "top"\) &&\s*!fromHistory &&\s*!firstWorldAlreadyRead &&\s*readRiderReturn\(\)\?\.viewportFraction == null\)/,
   );
 });
 

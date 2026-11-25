@@ -130,7 +130,7 @@ async function openWorld(page) {
   );
   await page.evaluate(() => document.fonts.ready);
   await page
-    .locator(".poster-image-current")
+    .locator(".world-stage-image-current")
     .evaluate((node) => node.decode?.().catch(() => undefined));
 }
 

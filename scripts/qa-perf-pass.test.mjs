@@ -195,10 +195,8 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
   // Promotion changes the layer role on the same keyed DOM node.
   assert.doesNotMatch(home, /className="poster-back-card/);
-  assert.match(
-    home,
-    /data-layer=\{staged \? "pending" : active \? "current" : "previous"\}\s*key=\{frame.key\}/,
-  );
+  assert.match(home, /const layer = staged \? "pending" : active \? "current" : "previous"/);
+  assert.match(home, /data-layer=\{layer\}\s*key=\{frame.key\}/);
 });
 
 test("the Dream Chapter's poster console asks for the same WebP copies", async () => {
