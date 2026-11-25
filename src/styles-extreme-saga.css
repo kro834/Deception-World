@@ -411,7 +411,8 @@
     .rxs-page.rxs-page.exs-page
     .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs
     > button[role="tab"]
-    span {
+    > span {
     font-size: 12px !important;
+    white-space: nowrap;
   }
 }

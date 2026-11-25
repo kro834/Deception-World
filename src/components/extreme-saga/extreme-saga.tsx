@@ -282,7 +282,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           which stays in the text. */}
       <div className="rxs-headline-metrics">
         <div className="exi-stage">
-          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
+          <article className="rxs-reveal" data-exi-hit="" data-exi-line="punch">
             <strong>
               <b className="exi-figure">
                 <b className="exi-real">205.6</b>
