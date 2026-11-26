@@ -1,5 +1,3 @@
-        src: "/rider-leddic-ishihen.jpeg",
-        pos: "50% 12%",
         alt: "仮面ライダーレディック",
         width: 750,
         height: 1400,
@@ -521,3 +519,7 @@ export function WorldHome() {
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
   const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
   const episodePickupOpenedByKeyboard = useRef(false);
+  const episodePointerFocusTimer = useRef<number | null>(null);
+  const episodeScrollTimer = useRef<number | null>(null);
+  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
+  const pickupBtnRef = useRef<HTMLButtonElement>(null);

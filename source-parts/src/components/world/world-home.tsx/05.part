@@ -1,3 +1,6 @@
+                {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+              </output>
+              {posterFailure !== null && (
                 <div className="world-poster-recovery">
                   <span role="status">画像を読み込めませんでした。</span>
                   <button
@@ -519,5 +522,3 @@
                 {COLUMNS.map((item, index) => (
                   <h3
                     key={item.no}
-                    id={`world-column-${item.no}`}
-                    className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}

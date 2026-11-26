@@ -520,3 +520,5 @@ const EPISODES: EpisodeRecord[] = [
       },
       {
         label: "仮面ライダーレディック",
+        src: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 12%",

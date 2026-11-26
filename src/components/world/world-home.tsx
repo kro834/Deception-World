@@ -1606,6 +1606,17 @@ export function WorldHome() {
       cancelPickupGlass.current?.();
     };
   }, []);
+  // The first print (INITIAL_FRAMES: poster 0) is in the server HTML. If it
+  // fails before hydration, React attaches onError too late to hear it and
+  // the stage keeps a broken image instead of offering 再試行; read the
+  // element once instead (a fast cache or network error on Safari settles
+  // before hydration).
+  useEffect(() => {
+    const image = shellRef.current?.querySelector<HTMLImageElement>(
+      '#poster-stage .world-stage-image[data-layer="current"]',
+    );
+    if (image?.complete && image.naturalWidth === 0 && image.currentSrc) setPosterFailure(0);
+  }, []);
   const current = POSTERS[poster];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];

@@ -1,7 +1,3 @@
-  const episodePointerFocusTimer = useRef<number | null>(null);
-  const episodeScrollTimer = useRef<number | null>(null);
-  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
-  const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
@@ -521,3 +517,8 @@
       grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
       grid.removeEventListener("wheel", releaseProgrammaticScroll);
       grid.removeEventListener("scroll", onScroll);
+      grid.removeEventListener("scrollend", settleScroll);
+    };
+  }, []);
+
+  useEffect(() => {

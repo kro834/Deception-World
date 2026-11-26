@@ -47,6 +47,11 @@ export function ArtworkStage({
     if (image?.complete && image.naturalWidth > 0) {
       loadedArtwork.current = artwork;
       setReadyId(artwork.id);
+    } else if (image?.complete && image.currentSrc && failedId !== artwork.id) {
+      // A server-rendered artwork that failed before hydration fired its
+      // error before onErrorCapture existed; show the stage's error instead
+      // of a broken image.
+      setFailedId(artwork.id);
     }
   }, [artwork, media, failedId]);
   const information = useRef<HTMLDivElement>(null);
