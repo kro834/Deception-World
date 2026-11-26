@@ -28,7 +28,10 @@ test("every bar's DW mark takes the shared diameter with its glyph inside the ri
     assert.match(rules, mark);
   }
   // The name clears the larger ring on the special sites.
-  assert.match(rules, /\.rxs-brand\.rxs-brand \{\s*padding-left: calc\(var\(--dw-header-mark\) \+ 12px\);/);
+  assert.match(
+    rules,
+    /\.rxs-brand\.rxs-brand \{\s*padding-left: calc\(var\(--dw-header-mark\) \+ 12px\);/,
+  );
 });
 
 test("the gallery, tours, lab and world map gain the same ring; the gallery's is gold", () => {
@@ -44,7 +47,10 @@ test("the gallery family's trigger draws the shared four cells, not three bars",
     rules,
     /html\[data-family="gallery"\][^{]*\.side-panel-trigger-glyph\.side-panel-trigger-glyph \{[^}]*display: grid;[^}]*grid-template-columns: repeat\(2, 7px\);/,
   );
-  assert.match(rules, /glyph\.side-panel-trigger-glyph::after \{[^}]*background: var\(--ring-gold\);/);
+  assert.match(
+    rules,
+    /glyph\.side-panel-trigger-glyph::after \{[^}]*background: var\(--ring-gold\);/,
+  );
 });
 
 test("the shared bars draw no lit seam on the left edge", () => {
@@ -77,4 +83,46 @@ test("the bars' context links share the compact button height and the pill", () 
 
 test("the grammar sheet is paint and box only", () => {
   assert.doesNotMatch(rules, /animation|transition|@keyframes|backdrop-filter|filter:\s*blur/);
+});
+
+test("/exhibition renders the gallery family's header: the gold ring, the pill and the dots menu", () => {
+  const route = read("src/routes/exhibition.tsx");
+  const bar = read("src/components/exhibition/exhibition-bar.tsx");
+  const barCss = read("src/styles-exhibition-bar.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  // The bar is the gallery's header.gallery-topbar inside a .gallery-page, so the grammar's
+  // selectors (the gold ring, the pill, the iPad launcher) reach it without a copy.
+  assert.match(
+    route,
+    /<div className="gallery-page exhibition-page">\s*<ExhibitionBar \/>\s*<main/,
+  );
+  assert.match(bar, /<header className="gallery-topbar">/);
+  assert.match(bar, /<Link className="gallery-brand" to="\/world">/);
+  assert.match(bar, /<Link to="\/gallery">/);
+  assert.match(bar, /<SideMenuTrigger open=\{menuOpen\} onOpenChange=\{setMenuOpen\} \/>/);
+  assert.match(
+    bar,
+    /<SideMenuLayer context="gallery" open=\{menuOpen\} onOpenChange=\{setMenuOpen\} \/>/,
+  );
+  // The box sheet follows the ring sheet and gives the room its top offset under the bar.
+  assert.match(
+    route,
+    /href: ringGalleryCssUrl \},[\s\S]{0,200}\{ rel: "stylesheet", href: barCssUrl \},/,
+  );
+  assert.match(barCss, /\.exhibition-page > header\.gallery-topbar \{[^}]*position: fixed;/);
+  assert.match(barCss, /var\(--dw-header-h, var\(--sh-bar-h, 64px\)\)/);
+  assert.match(
+    barCss,
+    /main\.exhibition-room\.exhibition-room-curated \{\s*padding-top: calc\(\s*var\(--exhibition-bar\)/,
+  );
+  // The halo's sideways clip (f826b7e) stays, and the bar sheet is paint and box only.
+  assert.match(
+    read("src/styles-ring-gallery.css"),
+    /html\[data-family="gallery"\] body main\.exhibition-room \{\s*overflow-x: clip;/,
+  );
+  assert.doesNotMatch(barCss, /animation|transition|@keyframes|backdrop-filter|filter:\s*blur/);
+  // The iPad launcher and the viewport edge follow the bar: /exhibition is a gallery chrome route.
+  assert.match(
+    read("src/lib/viewport-chrome.js"),
+    /case "\/gallery-tours":[\s\S]{0,200}case "\/exhibition":\s*return "gallery";/,
+  );
 });
