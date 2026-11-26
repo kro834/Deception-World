@@ -1140,3 +1140,142 @@ html[data-family="gallery"] body .gallery-topbar-actions > :is(a, button):not(#r
     outline: 1px solid CanvasText;
   }
 }
+
+/* ---------- Brush-up (2026-11-26): the tile's meta is one row ----------
+   Owner (2026-11-26): a magnifier replaces the visible 拡大して鑑賞 (the
+   link's accessible name keeps it), so a tile is its print and one 44px row:
+   the number, お気に入り and the magnifier. The magnifier sits below the
+   mat, never over the print; the caption shares its row and lets taps on
+   the empty part of the row through to the link. */
+html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-work-hint:not(#ring-x#ring-x) {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  align-self: stretch;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 2px 0 0;
+  border: 0;
+  border-radius: 0 !important;
+  background: none;
+  box-shadow: none;
+  color: #ecd8b0;
+  opacity: 1;
+  transform: none;
+}
+
+html[data-family="gallery"]
+  body
+  .gallery-page[data-gallery-page]
+  .gallery-work-hint:not(#ring-x#ring-x)
+  > svg {
+  box-sizing: content-box;
+  padding: 6px;
+  border: 1px solid rgb(var(--ring-g-gold, 240 207 134) / 38%);
+  border-radius: 50%;
+  background: rgb(14 20 30 / 72%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="gallery"]:not([data-world-effects="economy"])
+    body
+    .gallery-page[data-gallery-page]
+    .gallery-work-hint:not(#ring-x#ring-x)
+    > svg {
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+}
+
+html[data-family="gallery"]
+  body
+  .gallery-page[data-gallery-page]
+  .gallery-work-open:is(:hover, :focus-visible)
+  .gallery-work-hint:not(#ring-x#ring-x)
+  > svg {
+  border-color: rgb(var(--ring-g-gold, 240 207 134));
+  background: rgb(var(--ring-g-gold, 240 207 134) / 18%);
+}
+
+html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-work-open:not(#ring-x#ring-x) {
+  gap: 6px;
+}
+
+html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-work figcaption:not(#ring-x#ring-x) {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 6px;
+  min-height: 44px;
+  margin-top: -44px;
+  padding: 0 36px 0 2px;
+  border: 0;
+  pointer-events: none;
+}
+
+html[data-family="gallery"]
+  body
+  .gallery-page[data-gallery-page]
+  .gallery-work
+  figcaption:not(#ring-x#ring-x)
+  > * {
+  pointer-events: auto;
+}
+
+html[data-family="gallery"]
+  body
+  .gallery-page[data-gallery-page]
+  .gallery-work
+  figcaption:not(#ring-x#ring-x)
+  > h3 {
+  order: 3;
+  flex: 1 0 100%;
+  padding-bottom: 6px;
+}
+
+html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-favorite-toggle:not(#ring-x#ring-x) {
+  grid-column: auto;
+  min-height: 44px;
+  margin: 0;
+  padding-inline: 8px;
+  white-space: nowrap;
+}
+
+/* Body copy in the gallery reads at 14px (it sat at 12px), flush. */
+html[data-family="gallery"]
+  body
+  .gallery-page[data-gallery-page]
+  :is(
+    .gallery-community-disclosure > p,
+    .gallery-submission-copy > p,
+    .gallery-submission-details > div > p
+  ):not(#ring-x#ring-x) {
+  font-size: 14px;
+  line-height: 1.85;
+  word-break: normal;
+}
+
+@media (forced-colors: active) {
+  html[data-family="gallery"]
+    body
+    .gallery-page[data-gallery-page]
+    .gallery-work-hint:not(#ring-x#ring-x)
+    > svg {
+    border-color: ButtonText;
+    background: Canvas;
+    color: ButtonText;
+  }
+}
+
+/* /exhibition on a phone: the heading stacks, and its title and entrances
+   start at the left edge like the gallery and the tours (they were pushed
+   to the right by the room sheet's bottom alignment). */
+@media (max-width: 600px) {
+  html[data-family="gallery"] body .exhibition-room-curated .exhibition-room-heading:not(#ring-x#ring-x) {
+    align-items: flex-start;
+  }
+}

@@ -18,6 +18,7 @@ import { gallerySelectFocus } from "./gallery-select-focus";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
+import { UiVectorIcon } from "@/components/world/ui-vector-icon";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES, GALLERY_DEFAULT_ARTWORK } from "./gallery-data";
@@ -1468,8 +1469,10 @@ export function GalleryPage() {
                       decoding="async"
                     />
                   </span>
-                  <span className="gallery-work-hint">
-                    拡大して鑑賞 <span aria-hidden="true">↗</span>
+                  <span className="gallery-work-hint" aria-hidden="true">
+                    {/* Owner (2026-11-26): a magnifier replaces the visible 拡大して鑑賞;
+                        the link's accessible name still ends with 拡大して鑑賞. */}
+                    <UiVectorIcon kind="zoom" size={18} />
                   </span>
                 </a>
                 <figcaption>

@@ -2047,3 +2047,59 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     }
   }
 }
+
+/* ---------- Brush-up (2026-11-26): spec labels, reading tabs, numeral ----------
+   The Michroma spec labels (NAME / AGE …) read at the 12px label size in a
+   pale tint of the file's accent, so they stay legible on the dark plate. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:not(.is-sovereign)
+  .manager-facts
+  dt {
+  color: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sd-accent, #7ae8ff) 30%, #eef5fd) 76%,
+    transparent
+  );
+  font-size: var(--dw-fs-label, 12px);
+  letter-spacing: 0.12em;
+}
+
+/* The four reading tabs: 44px targets, and the current one carries a fill. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-reader-links
+  > a {
+  min-height: 44px;
+}
+
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:not(.is-sovereign)
+  .dossier-reader-links
+  > a[aria-current] {
+  color: #ffffff;
+  background-color: color-mix(in srgb, var(--sd-accent, #7ae8ff) 26%, rgb(9 20 34 / 92%));
+}
+
+/* The numeral's ring clears the top bar on the split stage. */
+@media (min-width: 1100px) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-file-numeral {
+    margin-top: 52px;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-reader-links
+    > a[aria-current] {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

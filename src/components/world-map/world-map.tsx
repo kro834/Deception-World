@@ -191,6 +191,13 @@ export function WorldMap({
   };
   const selectedOptic = KIND_OPTICS[selected.kind];
   const isFiltering = Boolean(q.trim()) || kind !== "all";
+  // Without a query the shelf is grouped by kind under its own heads; a
+  // query keeps its ranked order in one list.
+  const indexGroups: { kind: MapKind | ""; nodes: typeof results }[] = q.trim()
+    ? [{ kind: "", nodes: results }]
+    : (Object.keys(MAP_KINDS) as MapKind[])
+        .map((k) => ({ kind: k, nodes: results.filter((n) => n.kind === k) }))
+        .filter((group) => group.nodes.length > 0);
   const directory = (
     <section className="wm-index" data-filtered={isFiltering} aria-labelledby="wm-index-title">
       <div className="wm-index-heading">
@@ -198,23 +205,33 @@ export function WorldMap({
         <span role="status">{results.length} 件</span>
         {isFiltering && <a href="#wm-selected-record">選択中の資料へ ↓</a>}
       </div>
-      <div className="wm-index-grid">
-        {results.map((n) => (
-          <button
-            key={n.id}
-            type="button"
-            data-kind={n.kind}
-            aria-pressed={n.id === selected.id}
-            onClick={() => choose(n.id, true)}
-          >
-            <small>{MAP_KINDS[n.kind]}</small>
-            {/* Names break at their own seams (仮面ライダー／サイファー), not
-                wherever the column ends. Zero-width seams only: the title's
-                own spaces and spelling render as stored. */}
-            <span>{withWordBreaks(n.title)}</span>
-          </button>
-        ))}
-      </div>
+      {indexGroups.map((group) => (
+        <div className="wm-index-group" data-kind={group.kind} key={group.kind || "ranked"}>
+          {group.kind && (
+            <h3 className="wm-index-group-head">
+              {MAP_KINDS[group.kind]}
+              <span>{group.nodes.length}</span>
+            </h3>
+          )}
+          <div className="wm-index-grid">
+            {group.nodes.map((n) => (
+              <button
+                key={n.id}
+                type="button"
+                data-kind={n.kind}
+                aria-pressed={n.id === selected.id}
+                onClick={() => choose(n.id, true)}
+              >
+                <small>{MAP_KINDS[n.kind]}</small>
+                {/* Names break at their own seams (仮面ライダー／サイファー), not
+                    wherever the column ends. Zero-width seams only: the title's
+                    own spaces and spelling render as stored. */}
+                <span>{withWordBreaks(n.title)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
       {!results.length && <p>該当する資料がありません。検索語や種類を変えてください。</p>}
     </section>
   );

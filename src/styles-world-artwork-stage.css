@@ -1012,3 +1012,182 @@ html[data-family="world"]
     text-decoration: underline;
   }
 }
+
+/* ---------- Brush-up (2026-11-26): hero scale, one CTA pair, a frame that hugs ----------
+   The owner kept the phone-portrait poster fit of 249733c8, so the frame and
+   the type change from 720px up only. The CTA pair takes the shared button
+   tokens (44px on a phone, 52px from 720px) as pills of one family. */
+#top.world-artwork-hero .world-stage-actions {
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+#top.world-artwork-hero .world-stage-actions :is(.primary-action, .text-action) {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: var(--dw-btn-h, 44px);
+  border-radius: var(--dw-btn-radius, 999px);
+  font-size: 13px;
+  letter-spacing: var(--dw-btn-track, 0.12em);
+}
+
+#top.world-artwork-hero .world-stage-actions .primary-action.ios26-glass {
+  gap: 12px;
+  padding: 0 var(--dw-btn-pad-x, 20px);
+  border-color: transparent;
+  border-radius: var(--dw-btn-radius, 999px);
+  color: var(--dw-btn-primary-ink, #061423);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: var(--dw-btn-track, 0.12em);
+  /* The World primary is the prism fill, with glass on or off. */
+  background: var(
+    --dw-btn-primary-fill,
+    linear-gradient(112deg, #c9f4ff 0%, #7ae8ff 30%, #f4b8e4 68%, #f0cf86 100%)
+  ) !important;
+  box-shadow: var(--dw-btn-primary-glow, 0 10px 28px -14px rgb(122 232 255 / 70%)) !important;
+}
+
+#top.world-artwork-hero .world-stage-actions .text-action {
+  flex: none;
+  justify-content: center;
+  padding: 0 var(--dw-btn-pad-x, 20px);
+  border: var(--dw-btn-outline, 1px solid rgb(122 232 255 / 42%));
+  color: var(--dw-btn-outline-ink, #f3f8fc);
+  background: var(--dw-btn-outline-fill, rgb(122 232 255 / 6%));
+  font-weight: 600;
+  letter-spacing: var(--dw-btn-track, 0.12em);
+}
+
+/* The lead hangs from a straight 2px rule, not a rounded bracket. */
+#top.world-artwork-hero .world-stage-context {
+  border-inline-start: 2px solid rgb(var(--ring-key-rgb, 122 232 255) / 55%);
+}
+
+@media (max-width: 359px) {
+  #top.world-artwork-hero .world-stage-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 720px) {
+  #top.world-artwork-hero .artwork-stage.world-poster-stage {
+    --world-frame-mat: 12px;
+    /* The key poster is 2:3; the frame hugs it instead of letterboxing. */
+    --world-frame-ar: 0.6667;
+  }
+
+  #top.world-artwork-hero .world-poster-media {
+    --poster-mat: var(--world-frame-mat);
+  }
+
+  #top.world-artwork-hero .artwork-stage__visual {
+    container-type: inline-size;
+  }
+
+  #top.world-artwork-hero .artwork-stage__aperture {
+    height: min(
+      var(--stage-art-height),
+      calc((100cqi - 2 * var(--world-frame-mat)) / var(--world-frame-ar) + 2 * var(--world-frame-mat))
+    );
+  }
+
+  #top.world-artwork-hero .world-stage-identity .anime-work-title > span {
+    font-size: clamp(13px, 1vw, 15px);
+  }
+
+  #top.world-artwork-hero .world-stage-identity .anime-work-title > b {
+    font-size: clamp(20px, 2.5vw, 36px);
+  }
+
+  #top.world-artwork-hero .world-stage-copy {
+    container-type: inline-size;
+  }
+
+  /* The headline scales with the viewport, and never past the copy column's
+     width for its nine-letter second line (欺瞞でできている。). */
+  #top.world-artwork-hero .world-stage-copy h1 {
+    font-size: min(var(--dw-fs-hero, clamp(26px, 4.4vw, 64px)), 100cqi / 9.6);
+    line-height: 1.28;
+  }
+
+  #top.world-artwork-hero .world-stage-actions :is(.primary-action, .text-action),
+  #top.world-artwork-hero .world-stage-actions .primary-action.ios26-glass {
+    min-height: var(--dw-btn-h-hero, 52px);
+  }
+
+  #top.world-artwork-hero .world-stage-lead {
+    font-size: clamp(14px, 1.2vw, 17px);
+  }
+}
+
+@media (min-width: 720px) and (orientation: portrait) {
+  #top.world-artwork-hero .artwork-stage.world-poster-stage {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(22px, 3.6vw, 40px);
+  }
+}
+
+/* Wide screens: the poster column is exactly as wide as the framed poster,
+   so the copy takes the rest instead of a letterboxed frame. */
+@media (min-width: 900px) and (orientation: landscape) and (min-height: 541px) {
+  #top.world-artwork-hero .artwork-stage.world-poster-stage {
+    grid-template-columns:
+      minmax(0, 1fr)
+      min(
+        58%,
+        max(
+          /* wide enough for the poster strip's one-row track */
+          448px,
+          calc(
+            (var(--stage-art-height) - 2 * var(--world-frame-mat)) * var(--world-frame-ar) + 2 *
+              var(--world-frame-mat)
+          )
+        )
+      );
+  }
+}
+
+/* The poster strip is one segmented track: three pills and the counter,
+   all inside the same rounded bar. A narrow bar keeps the owner's phone
+   arrangement (249733c8) and sets the counter at the end of its second row,
+   still inside the bar. */
+@container world-poster-controls (max-width: 429px) {
+  #top.world-artwork-hero .world-stage-controls output {
+    margin-inline-start: auto;
+  }
+}
+
+@container world-poster-controls (min-width: 430px) {
+  #top.world-artwork-hero .world-stage-controls .world-stage-control-cluster {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
+    padding-inline: 8px;
+  }
+
+  #top.world-artwork-hero .world-stage-controls output {
+    flex: none;
+    margin-inline-start: 0;
+  }
+}
+
+#top.world-artwork-hero .world-stage-controls {
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 22px;
+}
+
+#top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
+  justify-content: center;
+  border-radius: var(--ring-radius-pill, 999px);
+}
+
+#top.world-artwork-hero .world-stage-controls .poster-shuffle {
+  border-color: transparent;
+  background: rgb(var(--ring-key-rgb, 122 232 255) / 12%) !important;
+}

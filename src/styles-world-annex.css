@@ -364,6 +364,14 @@
   line-height: 1.9;
 }
 
+/* Long-form prose stays flush like a printed page: character breaking with
+   the global strict kinsoku, only the last line protected. Phrase breaking
+   left the right edge of these paragraphs ragged by about 12% of the line. */
+.site-shell.film-edition.mirage-edition :is(.wa-prose, .wa-locations li p, .world-column-summary-pane p) {
+  word-break: normal;
+  text-wrap-style: pretty;
+}
+
 .site-shell.film-edition.mirage-edition .wa-quote + .wa-prose {
   margin-top: 14px;
 }
