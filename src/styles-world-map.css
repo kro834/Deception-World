@@ -1633,3 +1633,78 @@
     color: #000000;
   }
 }
+
+/* ---------- Brush-up (2026-11-26): the shelf grouped by kind ----------
+   Without a query the 121 records stand under five heads (人物 / 組織 /
+   形態 / 出来事 / 章) with their counts; the head stays in view while its
+   group scrolls. Each row keeps its kind word for assistive technology but
+   no longer repeats it on screen above every name. */
+.wm-index-group + .wm-index-group {
+  margin-top: 18px;
+}
+
+.wm-index-group-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgb(240 207 134 / 26%);
+  background: rgb(5 10 18 / 94%);
+  color: #f1dfbb;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.wm-index-group-head > span {
+  min-width: 2.4em;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgb(240 207 134 / 14%);
+  color: #f6e6c6;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.wm-index-group[data-kind]:not([data-kind=""]) .wm-index-grid button {
+  min-height: 48px;
+}
+
+.wm-index-group[data-kind]:not([data-kind=""]) .wm-index-grid small {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .wm-index-group-head {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+
+  .wm-index-group-head > span {
+    background: Canvas;
+    color: CanvasText;
+    outline: 1px solid CanvasText;
+  }
+}
+
+@media print {
+  .wm-index-group-head {
+    position: static;
+    background: none;
+    color: #000000;
+  }
+}
