@@ -1212,7 +1212,7 @@ html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-work 
   gap: 4px 6px;
   min-height: 44px;
   margin-top: -44px;
-  padding: 0 40px 0 2px;
+  padding: 0 36px 0 2px;
   border: 0;
   pointer-events: none;
 }
@@ -1241,7 +1241,7 @@ html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-favor
   grid-column: auto;
   min-height: 44px;
   margin: 0;
-  padding-inline: 10px;
+  padding-inline: 8px;
   white-space: nowrap;
 }
 
