@@ -119,6 +119,7 @@ import fxMotionCss from "../styles-fx-motion.css?url";
 import futureSpectrumCss from "../styles-future-spectrum.css?url";
 import ringCss from "../styles-ring.css?url";
 import ringChromeCss from "../styles-ring-chrome.css?url";
+import chromeUnifyCss from "../styles-chrome-unify.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -408,7 +409,12 @@ export const Route = createRootRoute({
       // excluded, so the title does not load it).
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
-        : [{ rel: "stylesheet", href: futureSpectrumCss }]),
+        : [
+            { rel: "stylesheet", href: futureSpectrumCss },
+            // 2026-11-26: one header grammar over every page's bar (the DW
+            // ring mark, one trigger, one height), after the spectrum's paint.
+            { rel: "stylesheet", href: chromeUnifyCss },
+          ]),
       // Owner (2026-10-30, 10-31): the optional liquid glass (buttons, then
       // the sliders, tabs, rails, switches and selects, then the surfaces and
       // chrome) belongs here, after the spectrum and before the faces. Every
