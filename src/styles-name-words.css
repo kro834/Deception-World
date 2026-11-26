@@ -21,3 +21,26 @@ html body .name-word--protected {
   word-break: normal;
   overflow-wrap: normal;
 }
+
+/* Protected phrase units (2026-11-26, owner 「途中改行を根こそぎ直して」).
+   src/lib/phrase-children.js wraps each proper noun, term, bracketed title
+   and number token in an inline <dw-u>; it keeps that unit on one line in
+   every engine (plain CSS 2 nowrap, no Chromium-only phrase breaking) while
+   the text around it keeps strict kinsoku and stays flush. Units wider than
+   a narrow line are split at their seams or left alone before they get here,
+   so a phone column is not pushed wider. <dw-t> only groups a text run.
+   (keep-all with overflow-wrap on the unit was tried and rejected: Blink
+   then also drops the break opportunity beside the unit, gluing it to its
+   neighbours and breaking it anywhere once the glued run overflows.) */
+dw-u {
+  white-space: nowrap;
+}
+
+/* A table cell can be narrower than one unit at 320px (the spec tables):
+   there the unit holds together with keep-all and still breaks rather than
+   push the table wider. */
+:is(td, th) dw-u {
+  white-space: inherit;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}

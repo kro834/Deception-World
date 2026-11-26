@@ -475,6 +475,9 @@ export function watchRingMotion(doc = document) {
   const ownText = (el) => {
     for (let node = el.firstChild; node; node = node.nextSibling) {
       if (node.nodeType === 3 && /\S/.test(/** @type {Text} */ (node).data)) return true;
+      // Text in the phrase-unit wrappers (phrase-children.js) is still own text.
+      const name = /** @type {Element} */ (node).localName;
+      if (name === "dw-t" || name === "dw-u") return true;
     }
     return false;
   };
