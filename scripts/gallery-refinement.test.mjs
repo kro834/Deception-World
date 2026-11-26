@@ -143,8 +143,21 @@ test("pending selection still requires an explicit public-post confirmation", ()
 test("artwork hint moves outside the mat without filtering or transforming original pixels", () => {
   assert.match(
     page,
-    /<span className="gallery-work-frame">[\s\S]*?<\/span>\s*<span className="gallery-work-hint">/,
+    /<span className="gallery-work-frame">[\s\S]*?<\/span>\s*<span className="gallery-work-hint" aria-hidden="true">/,
   );
+  // Owner (2026-11-26): the visible 拡大して鑑賞 became a magnifier icon; the
+  // link's accessible name keeps the words, and the icon stays below the mat
+  // in a 44px row (never over the print).
+  const hintTag = page.slice(page.indexOf('<span className="gallery-work-hint"'));
+  const hintBody = hintTag.slice(0, hintTag.indexOf("</span>"));
+  assert.match(hintBody, /<UiVectorIcon kind="zoom"/);
+  assert.doesNotMatch(hintBody.replace(/\{\/\*[\s\S]*?\*\/\}/g, ""), /拡大して鑑賞/);
+  assert.match(page, /aria-label=\{`\$\{numberFor\(work\)\}、\$\{work\.alt\}。拡大して鑑賞`\}/);
+  const ringCss = read("src/styles-ring-gallery.css");
+  const iconRow = ringCss.slice(
+    ringCss.indexOf(".gallery-page[data-gallery-page] .gallery-work-hint:not(#ring-x#ring-x) {"),
+  );
+  assert.match(iconRow.slice(0, iconRow.indexOf("}")), /position: static;[\s\S]*min-height: 44px;/);
   const hint = rule(refinementCss, ".gallery-page .gallery-work-hint");
   assert.match(hint, /position:\s*static;/);
   assert.match(hint, /opacity:\s*1;/);
