@@ -608,6 +608,74 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
   return glyphs;
 }
 
+/* Owner (2026-11-26): while the button rests over body text (a paragraph, a
+   list, a quote) it dims, so the words under it stay legible. Read once per
+   placement from a few hit tests inside the button's resting box: the
+   elements under those points (the button and its dialog's own chrome
+   excluded) whose glyphs meet the box. Placement and paint only: where the
+   button goes is unchanged. */
+const ZEUS_PROSE_SELECTOR =
+  ".dw-prose, [data-prose], p, li, dd, blockquote, figcaption";
+
+function readOverProse(button: HTMLElement, box: ZeusRect): boolean {
+  if (typeof document.elementsFromPoint !== "function") return false;
+  const width = box.right - box.left;
+  const height = box.bottom - box.top;
+  if (width <= 0 || height <= 0) return false;
+  const cx = box.left + width / 2;
+  const cy = box.top + height / 2;
+  const points: Array<[number, number]> = [
+    [cx, cy],
+    [cx - width * 0.3, cy],
+    [cx + width * 0.3, cy],
+    [cx, cy - height * 0.3],
+    [cx, cy + height * 0.3],
+  ];
+  const seen = new Set<Element>();
+  const range = document.createRange();
+  for (const [x, y] of points) {
+    if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
+    for (const element of document.elementsFromPoint(x, y)) {
+      if (element === button || button.contains(element)) continue;
+      const prose = element.closest(ZEUS_PROSE_SELECTOR);
+      if (!prose || seen.has(prose)) continue;
+      seen.add(prose);
+      if (prose.closest("header, nav, button, a[href], [role='tab']")) continue;
+      if (!drawn(prose)) continue;
+      const walker = document.createTreeWalker(prose, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.nodeValue?.trim()) continue;
+        range.selectNodeContents(node);
+        for (const rect of Array.from(range.getClientRects())) {
+          if (rect.width > 0 && rect.height > 0 && meetsAny(rect, [box])) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/* The iPad's compact launcher, while it floats (styles-viewport-chrome.css):
+   its drawn box, or null. The button stacks over it with this gap. */
+const ZEUS_STACK_GAP = 12;
+function readCompactLauncher(): ZeusRect | null {
+  const root = document.documentElement;
+  if (
+    typeof root?.getAttribute !== "function" ||
+    root.getAttribute("data-ipad-menu") !== "compact" ||
+    root.getAttribute("data-ipad-menu-scrolled") !== "true"
+  )
+    return null;
+  for (const trigger of document.querySelectorAll<HTMLElement>(".side-panel-trigger")) {
+    if (!drawn(trigger)) continue;
+    if (window.getComputedStyle(trigger).position !== "fixed") continue;
+    const box = trigger.getBoundingClientRect();
+    if (box.width < 1 || box.height < 1) continue;
+    return { left: box.left, right: box.right, top: box.top, bottom: box.bottom };
+  }
+  return null;
+}
+
 /* A fixed or sticky bar across the top of the screen (a header, a chapter
    nav). Only the steps away from home are kept off it; a spot the reader
    chose is theirs. One hit test and a short ancestor walk per settle. */
@@ -1346,6 +1414,31 @@ function ZeusButton({
         // (index 8); the far side's own steps keep their order after it.
         candidates.splice(4, 0, ...candidates.splice(8, 1));
       }
+      // Owner (2026-11-26): on an iPad, when the compact launcher (the menu
+      // opener that leaves the bar) floats in the corner, a button that would
+      // sit on it or beside it stacks in one column with it instead: centred
+      // over the launcher, 12px above it. Taken only when the spot it was
+      // headed for is near the launcher; a spot clear of it is kept.
+      const launcher = readCompactLauncher();
+      if (launcher) {
+        const reach = rect.height;
+        const near =
+          preferred.x + rect.width / 2 > launcher.left - reach &&
+          preferred.x - rect.width / 2 < launcher.right + reach &&
+          preferred.y + rect.height / 2 > launcher.top - reach &&
+          preferred.y - rect.height / 2 < launcher.bottom + reach;
+        if (near) {
+          candidates.splice(
+            1,
+            0,
+            clampZeusCenter(
+              (launcher.left + launcher.right) / 2,
+              launcher.top - ZEUS_STACK_GAP - rect.height / 2,
+              bounds,
+            ),
+          );
+        }
+      }
       // Inside a dialog only its own controls count, as with its words: the
       // page behind it is covered and cannot be pressed.
       const controlRoot: ParentNode = button.closest("dialog") ?? document;
@@ -1624,6 +1717,18 @@ function ZeusButton({
           x: (actual.x - viewport.offsetLeft) / viewport.width,
           y: (actual.y - viewport.offsetTop) / viewport.height,
         };
+        // Dim over body text (owner, 2026-11-26), from the spot it rests on.
+        const overProse = readOverProse(button, {
+          left: actual.x - size.width / 2,
+          right: actual.x + size.width / 2,
+          top: actual.y - size.height / 2,
+          bottom: actual.y + size.height / 2,
+        });
+        if (overProse) {
+          if (button.dataset.overText !== "true") button.dataset.overText = "true";
+        } else if (button.dataset.overText) {
+          delete button.dataset.overText;
+        }
         return actual;
       };
       const travel = Math.hypot(
