@@ -82,6 +82,14 @@ test("signature lines keep phrase breaks at every width, balanced", () => {
   for (const rule of wordBreaks) {
     // 2026-10-03: a REALMS office title with no ・ is one compound label, not
     // a quote; it breaks as ordinary Japanese, balanced (書 was left alone).
+    // 2026-11-26 (design brush-up): long-form prose (.wa-prose and the
+    // location and column notes) is set flush like a printed page; that rule
+    // never selects a quote.
+    if (/\.wa-prose/.test(rule.selector)) {
+      assert.doesNotMatch(rule.selector, /wa-quote|blockquote|is-signature/);
+      assert.match(rule.body, /word-break: normal;/);
+      continue;
+    }
     if (/\.wa-doc-office/.test(rule.selector)) {
       assert.match(rule.selector, /\.wa-doc:not\(\[aria-label\*="・"\]\) \.wa-doc-office$/);
       assert.match(rule.body, /word-break: normal;\s*text-wrap: balance;/);

@@ -1503,7 +1503,6 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     .world-exploration-index > *,
     .world-column-content,
     .episode-card-surface,
-    .world-stage-context,
     .wa-plate,
     .wa-contents-inner :is(a, button),
     .dante-archive,
@@ -1553,7 +1552,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.site-shell
-  :is(.primary-action, .world-stage-controls, .wa-open, footer > a) {
+  :is(.primary-action, .wa-open, footer > a) {
   border-radius: var(--ring-radius-pill);
   clip-path: none;
 }
