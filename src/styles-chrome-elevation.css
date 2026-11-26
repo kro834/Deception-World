@@ -1898,6 +1898,31 @@ html body .zeus-button[data-parked="true"]:not([data-navigating="true"]):not(:fo
   pointer-events: none;
 }
 
+/* Owner (2026-11-26): on an iPad, while the compact launcher floats in the
+   corner (styles-viewport-chrome.css, a fixed 60px circle), the button takes
+   the same 60px diameter (its phone size) and stacks over the launcher in
+   one column, 12px above it (zeus-button.tsx). */
+html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"]
+  body
+  .zeus-button {
+  --zeus-button-size: 60px;
+}
+
+/* Owner (2026-11-26): resting over body text (a paragraph, a list, a quote),
+   it dims so the words under it stay legible (zeus-button.tsx sets
+   data-over-text from the spot it rests on). It is whole again while it is
+   touched, dragged, hovered, focused or navigating, and the hand-off states
+   above keep their own opacity. Paint only: it keeps its spot and its taps. */
+html
+  body
+  .zeus-button[data-over-text="true"]:not([data-relocating]):not([data-dragging="true"]):not(
+    [data-pressing="true"]
+  ):not([data-holding="true"]):not([data-navigating="true"]):not([data-menu-open="true"]):not(
+    [data-parked="true"]
+  ):not(:focus-visible):not(:hover) {
+  opacity: 0.58;
+}
+
 /* A mouse can drag it straight away, so the grab cursor now tells the
    truth; hover lights the ring. */
 @media (hover: hover) and (pointer: fine) {
