@@ -1806,3 +1806,24 @@ html
     animation-timing-function: var(--ring-spring-snap);
   }
 }
+
+/* ================================================================
+   2026-11-26 brush-up (package G): the menu on an iPad in portrait.
+   The rows sat at the foot of the screen with a quarter of it empty above
+   them; they now start under the sticky head, and the free room gathers
+   between the rows and the dial instead. The dial keeps its size, so the
+   longest list (人物: riders, 六詠, related, unmanaged) still clears its
+   plate. Phones keep their thumb-reach layout; the desktop's side-by-side
+   layout is unchanged.
+   ================================================================ */
+@media (min-width: 640px) and (max-width: 1019px) and (min-height: 561px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    grid-template-rows: 76px auto auto minmax(0, 1fr);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    > .side-panel-group {
+    align-self: start;
+    padding-top: 8px;
+  }
+}

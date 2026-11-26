@@ -57,6 +57,17 @@ test("the shared bars draw no lit seam on the left edge", () => {
   }
 });
 
+test("the iPad portrait menu starts its rows under the head, not at the screen's foot", () => {
+  const ring = read("src/styles-ring-chrome.css");
+  const block = ring.slice(
+    ring.lastIndexOf("@media (min-width: 640px) and (max-width: 1019px) and (min-height: 561px) {"),
+  );
+  assert.match(block, /grid-template-rows: 76px auto auto minmax\(0, 1fr\);/);
+  assert.match(block, /> \.side-panel-group \{\s*align-self: start;/);
+  // The dial keeps its size there, so the longest list clears its plate.
+  assert.doesNotMatch(block, /--orbit-(r|disc):/);
+});
+
 test("the grammar sheet is paint and box only", () => {
   assert.doesNotMatch(rules, /animation|transition|@keyframes|backdrop-filter|filter:\s*blur/);
 });
