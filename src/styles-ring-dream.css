@@ -852,3 +852,35 @@ html[data-family="dream"]
     box-shadow: none;
   }
 }
+
+/* ================================================================
+   Design brush-up, package S (2026-11-26): flush prose on the
+   programme. The records, chronicle, atlas, voices and annex quotes
+   break phrase by phrase (auto-phrase), which left their right edge
+   ragged by 11-15% of the line on a phone. They now break like the
+   story cases already do (character breaking, strict kinsoku, last
+   line protected); short, centred copy keeps its phrases whole.
+   ================================================================ */
+
+html[data-family="dream"] body main.dream-page.dream-page:not(#ring-s)
+  :is(
+    blockquote p,
+    dd p,
+    .dream-chronicle-body p,
+    .dream-atlas-body p,
+    .dream-record-reading-body p,
+    .dream-archive-add p,
+    .dream-agent-copy p,
+    p.dream-record-excerpt,
+    p.dream-karakuri-excerpt,
+    p.dream-agent-note,
+    p.dream-faction-archive-text,
+    p.dream-archive-said,
+    p.dream-story-crossings-lead,
+    p.dream-research-lead,
+    .dream-story-intro p
+  ) {
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}

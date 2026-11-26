@@ -131,6 +131,90 @@
   --ring-radius-pill: 999px;
   --ring-metal-edge: conic-gradient(from 215deg, #43494d, #8a8c86 13%, #e1dbca 18%, #626667 26%, #373d41 48%, #a8adae 68%, #e0e3df 71%, #595f61 81%, #43494d);
   --ring-graphite: linear-gradient(146deg, #32363a, #202428 42%, #131619 86%);
+
+  /* The shared design system (2026-11-26 brush-up, package G). One type
+     scale, one surface/radius family, one palette and one button family that
+     every page reads (pages consume them with fallbacks, e.g.
+     var(--dw-fs-body, 15px)). Special sites may re-voice (paint, face) but
+     not re-size. Values only: nothing here selects an element. */
+  /* Type scale. Floors: 11px absolute, 12px for HUD labels. */
+  --dw-fs-floor: 11px;
+  --dw-fs-label: 12px;
+  --dw-fs-small: 13px;
+  --dw-fs-body: 15px;
+  --dw-lh-body: 1.9;
+  --dw-fs-h3: clamp(18px, 1.2vw + 14px, 22px);
+  --dw-fs-h2: clamp(26px, 2.4vw + 16px, 40px);
+  --dw-track-label: 0.12em;
+  --dw-font-latin: "Oxanium", "Zen Kaku Gothic New", sans-serif;
+  --dw-font-hud: "Michroma", "Oxanium", sans-serif;
+  --dw-font-jp: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  /* Palette: the ring palette under the system names (chrome and shared
+     sheets map their stray golds and ices to these). */
+  --dw-ice: var(--ring-key);
+  --dw-ice-rgb: var(--ring-key-rgb);
+  --dw-gold: var(--ring-gold);
+  --dw-gold-rgb: var(--ring-gold-rgb);
+  --dw-pink: var(--ring-pink);
+  --dw-ink: var(--ring-ink);
+  --dw-ink-rgb: var(--ring-ink-rgb);
+  --dw-text: #f3f8fc;
+  --dw-muted: #a5b5c4;
+  --dw-prism-line: linear-gradient(90deg, var(--ring-key), var(--ring-pink) 52%, var(--ring-gold));
+  /* Surfaces and radius family. Pills for actions and chips, 12px for
+     segmented controls and inputs, 20px (phone) or 28px (>=720) for cards,
+     2-4px only inside instrument identities. One border weight. */
+  --dw-r-control: 12px;
+  --dw-r-card: 20px;
+  --dw-r-panel: 28px;
+  --dw-r-pill: 999px;
+  --dw-surface: rgb(7 16 29 / 94%);
+  --dw-surface-raised: rgb(10 22 38 / 97%);
+  --dw-tint: rgb(var(--ring-key-rgb) / 6%);
+  --dw-line: rgb(var(--ring-key-rgb) / 20%);
+  --dw-line-strong: rgb(var(--ring-key-rgb) / 42%);
+  --dw-border: 1px solid var(--dw-line);
+  /* Buttons. 44px compact, 52px hero. Primary: filled (prism on World, the
+     chrome and the opening's ENTER; gold in the gallery family). Secondary:
+     a 1px outline. Tertiary: text plus an arrow. */
+  --dw-btn-h: 44px;
+  --dw-btn-h-hero: 52px;
+  --dw-btn-pad-x: 20px;
+  --dw-btn-radius: var(--dw-r-pill);
+  --dw-btn-font: 600 13px/1 var(--dw-font-latin);
+  --dw-btn-font-jp: 700 14px/1 var(--dw-font-jp);
+  --dw-btn-track: var(--dw-track-label);
+  --dw-btn-primary-fill: linear-gradient(112deg, #c9f4ff 0%, var(--ring-key) 30%, #f4b8e4 68%, var(--ring-gold) 100%);
+  --dw-btn-primary-ink: #061423;
+  --dw-btn-primary-glow: 0 10px 28px -14px rgb(var(--ring-key-rgb) / 70%);
+  --dw-btn-outline: 1px solid rgb(var(--ring-key-rgb) / 42%);
+  --dw-btn-outline-fill: rgb(var(--ring-key-rgb) / 6%);
+  --dw-btn-outline-ink: var(--dw-text);
+  /* The shared header (package G): 64px on a phone, 76px from 720px; sub-tabs
+     sit in their own 44px row below it. */
+  --dw-header-h: 64px;
+  --dw-header-mark: 44px;
+}
+
+@media (min-width: 720px) {
+  :root {
+    --dw-fs-body: 16px;
+    --dw-r-card: 28px;
+    --dw-header-h: 76px;
+    --dw-header-mark: 48px;
+  }
+}
+
+/* The gallery family keeps its gold (owner, 2026-11-26). */
+html[data-family="gallery"] {
+  --dw-btn-primary-fill: linear-gradient(112deg, #fae6b6 0%, var(--ring-gold) 46%, #d9ab5c 100%);
+  --dw-btn-primary-ink: #1a1206;
+  --dw-btn-primary-glow: 0 10px 28px -14px rgb(var(--ring-gold-rgb) / 70%);
+  --dw-btn-outline: 1px solid rgb(var(--ring-gold-rgb) / 46%);
+  --dw-btn-outline-fill: rgb(var(--ring-gold-rgb) / 7%);
+  --dw-line: rgb(var(--ring-gold-rgb) / 22%);
+  --dw-line-strong: rgb(var(--ring-gold-rgb) / 46%);
+  --dw-prism-line: linear-gradient(90deg, transparent, var(--ring-gold) 18%, #fae6b6 50%, var(--ring-gold) 82%, transparent);
 }
 
 @supports (transition-timing-function: linear(0, 1)) {

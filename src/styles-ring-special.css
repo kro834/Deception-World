@@ -1318,3 +1318,144 @@ html[data-family="special"]
     box-shadow: none;
   }
 }
+
+/* ================================================================
+   Design brush-up, package S (2026-11-26): the special sites' reading
+   surfaces. Loaded last on the six special routes and the cinema, so one
+   block settles prose, dead bands and small-text floors. Copy, art,
+   engines and the stages' geometry are untouched.
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   S1. Long Japanese prose set flush like a printed page.
+   The same technique as .fst-copy and .ffs-report-body: character
+   breaking under strict kinsoku (the <wbr> seams stay as extra
+   opportunities), the last line protected by `pretty`. Phrase-wise
+   breaking (auto-phrase, keep-all) left the right edge ragged by up to
+   a seventh of the line on a phone column.
+   --------------------------------------------------------------- */
+
+html body #top.rxs-page:not(#ring-s)
+  :is(
+    .rxs-processing-comparison > p,
+    p.rxs-comparison-note,
+    p.rxs-p14-method-note,
+    .rxs-p14-copy p,
+    article.rxs-reveal > p,
+    .ffs-copy p,
+    p.ffs-table-note,
+    p.ffs-panel-lede,
+    .ffs-p16-copy p,
+    .ffs-p16-source p,
+    .ffs-p16-lineage p,
+    .ffs-p16-generation-copy p,
+    .ffs-p16-main p,
+    .ffs-p16-note p,
+    .ffs-p16-summary p,
+    .ffs-stage-copy p,
+    p.ffs-note,
+    .ffs-report-chapters p,
+    .ics-more-body p,
+    p.ics-lead-line,
+    p.ics-note,
+    .ics-prose p,
+    .ics-article-copy p,
+    .ics-evaluation p,
+    .ics-form-copy p,
+    .mus-copy p,
+    .mus-more-body p
+  ) {
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------
+   S2. Small-text floors: the comparison and table notes read at 13px.
+   --------------------------------------------------------------- */
+
+html body #top.rxs-page:not(#ring-s) :is(p.rxs-comparison-note, p.ffs-table-note, p.ics-note) {
+  font-size: max(var(--dw-fs-small, 13px), 13px);
+  line-height: 1.85;
+}
+
+/* ---------------------------------------------------------------
+   S3. Illusionculum: the runway's stage keeps its height; the padding
+   around it (a stage-sized pause before and after the 02 変身 chapter)
+   is trimmed to one ring space either side.
+   --------------------------------------------------------------- */
+
+html body #top.rxs-page.ics-page:not(#ring-s) > section#comparison {
+  padding-bottom: var(--ring-space-5, 40px);
+}
+
+html body #top.rxs-page.ics-page:not(#ring-s) > section#suitup {
+  padding-top: var(--ring-space-4, 24px);
+  padding-bottom: var(--ring-space-4, 24px);
+}
+
+html body #top.rxs-page.ics-page:not(#ring-s) > section#forms {
+  padding-top: var(--ring-space-5, 40px);
+}
+
+/* ---------------------------------------------------------------
+   S4. Far From on a tablet: the article plates keep one reading column.
+   Between 701 and 1100px the number, title and body sat in three
+   columns, so the title stood alone in a third of the plate beside a
+   narrow body. The title now runs under its number and the body takes
+   the full plate at a 34-38em measure; generation plates stack likewise.
+   --------------------------------------------------------------- */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  html body #top.ffs-page:not(#ring-s) > :is(#theories, #system, #authority) .ffs-articles > article {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+  }
+
+  html body #top.ffs-page:not(#ring-s) > :is(#theories, #system, #authority) .ffs-articles > article > p {
+    grid-column: 1 / -1;
+    max-width: 38em;
+  }
+
+  html body #top.ffs-page:not(#ring-s) > :is(#theories, #system, #authority) .ffs-articles > article > p:first-of-type {
+    grid-row: 2;
+    margin-top: 16px;
+  }
+
+  html body #top.ffs-page:not(#ring-s) #p16 .ffs-p16-generations article {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html body #top.ffs-page:not(#ring-s) #p16 .ffs-p16-generations article > header {
+    margin-bottom: 6px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   S5. Saga cinema: no stage-sized pauses between its chapters.
+   --------------------------------------------------------------- */
+
+html body .saga-cinema.saga-cinema:not(#ring-s) :is(#introduction, #films, #visuals, #information) {
+  padding-block: var(--ring-space-6, 64px);
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  /* The hero was a 1100px stage for a 626px composition. */
+  html body .saga-cinema.saga-cinema:not(#ring-s) #top.hero {
+    min-height: 0;
+    padding-bottom: var(--ring-space-6, 64px);
+  }
+}
+
+html body .saga-cinema.saga-cinema:not(#ring-s) :is(p.hero-description, .visual-copy p) {
+  font-size: max(var(--dw-fs-small, 13px), 14px);
+  line-height: 1.9;
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+html body .saga-cinema.saga-cinema:not(#ring-s) .section-label h2 {
+  font-size: max(var(--dw-fs-small, 13px), 14px);
+  letter-spacing: 0.2em;
+}
