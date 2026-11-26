@@ -72,6 +72,8 @@ const original = [
   "../styles-ring-chrome.css?url",
   // Owner (2026-10-30): 未来的でダイナミックな色合い — the future spectrum's colour and surfaces, after the kit.
   "../styles-future-spectrum.css?url",
+  // 2026-11-26: one header grammar over every bar, after the spectrum (not on the title).
+  "../styles-chrome-unify.css?url",
   // Owner (2026-11-20): the optional liquid glass's three sheets (about 160 KB,
   // every rule scoped to html[data-button-style="liquid"]) are no longer linked
   // on every page. Their place in the cascade is still here, after the spectrum
@@ -131,6 +133,8 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     .filter((href) => href !== "@/styles-interaction-choreography.css?url")
     // Owner (2026-10-30): the future spectrum paints no title surface, so the title skips it.
     .filter((href) => href !== "../styles-future-spectrum.css?url")
+    // The title's dashboard header is styled in its own sheet.
+    .filter((href) => href !== "../styles-chrome-unify.css?url")
     .map((href) =>
       href === "../styles-stage-shell.css?url" ? "../styles-opening-shell.css?url" : href,
     );
@@ -270,11 +274,13 @@ test("with the option on the glass sheets take their old place in the cascade, i
     const order = on.links.map((link) => link.href);
     const first = order.indexOf(GLASS_SHEETS[0]);
     assert.deepEqual(order.slice(first, first + 3), GLASS_SHEETS);
-    // After the spectrum (the interface bundle on the title), before the faces.
+    // After the spectrum and the header grammar (the interface bundle on the
+    // title), before the faces.
     assert.equal(
       order[first - 1],
-      route === "/" ? "../styles-opening-interface.css?url" : "../styles-future-spectrum.css?url",
+      route === "/" ? "../styles-opening-interface.css?url" : "../styles-chrome-unify.css?url",
     );
+    if (route !== "/") assert.equal(order[first - 2], "../styles-future-spectrum.css?url");
     assert.equal(order[first + 3], "../styles-opening-fonts.css?url");
     assert.deepEqual(order.filter((href) => !href.includes("liquid-glass")), hrefs);
   }
