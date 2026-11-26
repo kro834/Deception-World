@@ -518,6 +518,31 @@ html[data-button-style="liquid"]
   text-shadow: none;
 }
 
+/* 2026-11-26 brush-up (package G): the primaries keep their fill under the
+   glass, so a primary never reads as a secondary. The prism (World, the
+   chrome, the opening's ENTER and the dashboard's door) is the glass's
+   base layer, a little translucent; the glass's light, sheen and rim stay
+   over it. The opening's cream rule above is outweighed on purpose. */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .cine-btn.cine-btn-primary.cine-btn-primary,
+    .command-deck .command-deck-enter.command-deck-enter,
+    .primary-action.primary-action.primary-action
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-fill: linear-gradient(
+    112deg,
+    rgb(201 244 255 / 0.9) 0%,
+    rgb(122 232 255 / 0.86) 30%,
+    rgb(244 184 228 / 0.86) 68%,
+    rgb(240 207 134 / 0.9) 100%
+  );
+  --lg-tint-a: 0.06;
+  --lg-sheen: 0.12;
+  color: #061423;
+  text-shadow: none;
+}
+
 /* ---------------------------------------------------------------
    Adaptivity (src/lib/liquid-glass-tone.ts estimates each control's
    backdrop once, and again when a pinned bar's page comes to rest).

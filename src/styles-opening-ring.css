@@ -165,11 +165,30 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data
   scale: 0.93;
 }
 
+/* 2026-11-26 brush-up (package G): ENTER is the site's primary, the prism
+   fill with dark ink (it read as a muted greige pill beside もう一度), at
+   the hero height with the 13px label; もう一度 keeps its outline. Paint and
+   box only, after the sequence: timing, the burn and the dive are untouched. */
+.cine-stage .cine-replay-slot > .cine-btn:not(#opr) {
+  min-height: var(--dw-btn-h-hero, 52px);
+}
+
+.cine-stage .cine-replay-slot > .cine-btn-primary:not(#opr) {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
 @media (forced-colors: none) {
   .cine-stage .cine-replay-slot > .cine-btn-primary:not(#opr) {
-    color: #f9f4e8;
-    background: linear-gradient(125deg, #494840, #323532 45%, #202427);
-    box-shadow: inset 0 1px 0 rgb(252 246 225 / 0.28), 0 9px 22px -11px #000;
+    color: var(--dw-btn-primary-ink, #061423);
+    background: var(
+      --dw-btn-primary-fill,
+      linear-gradient(112deg, #c9f4ff 0%, #7ae8ff 30%, #f4b8e4 68%, #f0cf86 100%)
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.55),
+      var(--dw-btn-primary-glow, 0 10px 28px -14px rgb(122 232 255 / 0.7));
     border-color: transparent;
     text-shadow: none;
   }
@@ -181,8 +200,14 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-glass-rings[data
     text-shadow: none;
   }
   .cine-stage .cine-replay-slot > .cine-btn-primary:not(#opr)::after {
-    background: linear-gradient(90deg, transparent, #d9c9a5, transparent);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.72), transparent);
     box-shadow: none;
+  }
+
+  /* The tagline under the logo: 12px and more, at 0.7 of the light. */
+  .cine-stage .cine-title-caption:not(#opr) {
+    font-size: clamp(12px, 0.85vw, 13px);
+    color: rgb(216 227 237 / 0.7);
   }
 }
 
