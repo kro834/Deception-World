@@ -71,6 +71,18 @@
   word-break: normal;
 }
 
+/* The reusable prose hook (2026-11-26 brush-up): any block of three lines
+   and more marked .dw-prose or [data-prose] (on the paragraph itself or on
+   its container) is set flush with strict kinsoku; only its last line is
+   protected. Names keep their seams (src/lib/name-breaks.ts, .name-words).
+   Zero specificity: a page that must override it says so with its own rule. */
+:where(.dw-prose, [data-prose]),
+:where(.dw-prose, [data-prose]) :where(p, li) {
+  word-break: normal;
+  line-break: strict;
+  text-wrap-style: pretty;
+}
+
 /* Below 350px a Dolminence card's name column is too narrow for 仮面ライダー
    on one line; strict kinsoku would then set 仮面ライ／ダードレッ／ド on three
    lines, so those names keep the default rules (仮面ライダ／ードレッド). */
