@@ -1849,3 +1849,78 @@ html[data-family="utility"] body .transformation-lab .lab-ring button {
     min-height: var(--lab-landscape-frame-height);
   }
 }
+
+/* ================================================================
+   Design brush-up, package S (2026-11-26): one control dock, and the
+   lab's type floors. Markup, URL state and the engines are untouched.
+   The dock reads as three tiers, not four stacked pill rows: the
+   transport and the part selector are matching four-up segmented rows
+   of 44px cells; the speed is one compact track; copying the URL is a
+   tertiary text action. The beats ring below keeps its ring language.
+   ================================================================ */
+
+html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s)
+  :is(.lab-transport:first-child, .lab-zoom) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  align-items: stretch;
+  margin: 0 0 10px;
+  padding: 0;
+}
+
+html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s)
+  :is(.lab-transport:first-child, .lab-zoom) > button {
+  min-width: 0;
+  min-height: var(--dw-btn-h, 44px);
+  padding-inline: 4px;
+  font-size: max(var(--dw-fs-small, 13px), 13px);
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+
+html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s) .lab-zoom {
+  padding-bottom: 0;
+}
+
+html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s) .lab-transport-more {
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 12px;
+}
+
+/* Copy the URL: a text action with an underline, not a fourth pill. */
+html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s) .lab-transport-more > button {
+  min-height: var(--dw-btn-h, 44px);
+  margin-inline-start: auto;
+  padding-inline: 8px;
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+  color: var(--lab-key, #7ae8ff);
+  font-size: max(var(--dw-fs-small, 13px), 13px);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35em;
+}
+
+@media (max-width: 680px) {
+  html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s) .lab-zoom {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  html[data-family="utility"] body .transformation-lab .lab-controls:not(#ring-s#ring-s#ring-s) .lab-transport-more > button {
+    flex: 1 0 100%;
+    margin-inline-start: 0;
+  }
+}
+
+/* Type floors: the lab's intro and the part record read at 14px, the
+   segmented labels at 13px. */
+html[data-family="utility"] body .transformation-lab :is(.lab-title p, .tl-part-record p) {
+  font-size: max(var(--dw-fs-small, 13px), 14px);
+  line-height: 1.9;
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}
