@@ -76,6 +76,7 @@ import { watchPresses } from "@/lib/press-feedback.js";
 import { watchDynamicGui } from "@/lib/dynamic-gui.js";
 import { watchFxMotion } from "@/lib/fx-motion.js";
 import { watchRingMotion } from "@/lib/ring-motion.js";
+import { watchPhraseFit } from "@/lib/phrase-fit.js";
 import { startPerfHud } from "@/lib/perf-hud-gate.js";
 import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
@@ -177,6 +178,13 @@ function FxMotion() {
    (src/lib/ring-motion.js, src/styles-ring.css). */
 function RingMotion() {
   useEffect(() => watchRingMotion(), []);
+  return null;
+}
+
+/* dw-u[data-dw-fit]: a protected phrase unit wider than its own box may wrap
+   (src/lib/phrase-fit.js, src/styles-name-words.css). */
+function PhraseFit() {
+  useEffect(() => watchPhraseFit(), []);
   return null;
 }
 
@@ -525,6 +533,7 @@ function RootDocument() {
               <DynamicGui />
               <FxMotion />
               <RingMotion />
+              <PhraseFit />
               <PerfHudGate />
               <QuickSearchHost />
               <GalleryStickerWarmup />

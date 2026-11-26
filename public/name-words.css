@@ -36,6 +36,19 @@ dw-u {
   white-space: nowrap;
 }
 
+/* A unit wider than the box it sits in (src/lib/phrase-fit.js measures after
+   layout and sets data-dw-fit on exactly those) may wrap rather than run out
+   of the box: at its own seams first (a space, a hyphen, a middle dot, kept
+   whole by keep-all) and, only when one piece is still wider than the line,
+   anywhere. Plain CSS 2 / CSS Text 3 behaviour, so iOS Safari, Blink and
+   Gecko agree; every other unit stays nowrap. */
+dw-u[data-dw-fit] {
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
 /* A table cell can be narrower than one unit at 320px (the spec tables):
    there the unit holds together with keep-all and still breaks rather than
    push the table wider. */

@@ -1,4 +1,5 @@
 import { nameWords } from "./name-break-rules.js";
+import { watchPhraseFit } from "./phrase-fit.js";
 import { HEADING_CAP, LABEL_CAP, PROSE_CAP, splitPhraseUnits } from "./phrase-units.js";
 
 // The archive is a separate document. Enhance only display labels after its
@@ -38,6 +39,8 @@ function enhanceNames() {
       });
     });
   enhancePhrases();
+  // A unit wider than its own box wraps (src/lib/phrase-fit.js).
+  watchPhraseFit(document);
   // Existing geometry sync measures the new labels; no row or artwork sizes
   // are changed here, and no polling/scroll listener is added.
   window.ArchiveComparisonUI?.refresh();

@@ -14,6 +14,7 @@ import {
   splitPhraseUnits,
 } from "../src/lib/phrase-units.js";
 import { phraseNode, phraseProps } from "../src/lib/phrase-children.js";
+import { FIT_ATTRIBUTE, measureOverflow, overflows, watchPhraseFit } from "../src/lib/phrase-fit.js";
 import { Fragment, jsx, jsxs } from "../src/lib/phrase-jsx-runtime.js";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -196,4 +197,95 @@ test("Latin, number and bracketed units are held like names", () => {
     renderToStaticMarkup(jsx("p", { children: "『SA-GA OS 5.5』と0.00021s／100mのシエル" })),
     "<p><dw-t><dw-u>『SA-GA OS 5.5』</dw-u>と<dw-u>0.00021s／100m</dw-u>の<dw-u>シエル</dw-u></dw-t></p>",
   );
+});
+
+// A fake element tree for the fit pass: a node is { display, width (offset),
+// inner (clientWidth), ...style }; parent links make the ancestor chain.
+function tree(chain, unitWidth) {
+  const nodes = chain.map((node) => ({
+    display: "block",
+    overflowX: "visible",
+    whiteSpace: "normal",
+    textOverflow: "clip",
+    writingMode: "horizontal-tb",
+    paddingLeft: "0px",
+    paddingRight: "0px",
+    paddingTop: "0px",
+    paddingBottom: "0px",
+    ...node,
+  }));
+  const elements = nodes.map((node) => ({ node, clientWidth: node.inner ?? 0, clientHeight: 0 }));
+  elements.forEach((element, index) => {
+    element.parentElement = elements[index + 1] ?? null;
+  });
+  const unit = { node: { display: "inline" }, offsetWidth: unitWidth, offsetHeight: 0, parentElement: elements[0] };
+  return { unit, style: (element) => element.node };
+}
+const verdict = (chain, unitWidth) => {
+  const { unit, style } = tree(chain, unitWidth);
+  return measureOverflow([unit], style);
+};
+
+test("fit: a unit wider than its box wraps, one that fits stays whole", () => {
+  assert.equal(overflows(100, 99), false, "subpixel slack");
+  assert.equal(overflows(100, 90), true);
+  assert.equal(overflows(0, 90), false, "no box yet");
+  assert.equal(verdict([{ inner: 85 }, {}], 118).fit.length, 1);
+  assert.equal(verdict([{ inner: 130 }, {}], 118).fit.length, 0);
+  // padding is not room
+  assert.equal(verdict([{ inner: 130, paddingLeft: "10px", paddingRight: "10px" }, {}], 118).fit.length, 1);
+  // a unit with no layout box (a closed tab) is revisited, not decided
+  const hidden = verdict([{ inner: 85 }, {}], 0);
+  assert.deepEqual([hidden.fit.length, hidden.pending.length], [0, 1]);
+});
+
+test("fit: lines that are meant to overflow are left alone", () => {
+  assert.equal(verdict([{ inner: 40, whiteSpace: "nowrap" }, {}], 118).fit.length, 0);
+  assert.equal(
+    verdict([{ inner: 40, overflowX: "hidden", textOverflow: "ellipsis" }, {}], 118).fit.length,
+    0,
+  );
+  // clipping without an ellipsis is still an overflow worth wrapping
+  assert.equal(verdict([{ inner: 40, overflowX: "hidden" }, {}], 118).fit.length, 1);
+});
+
+test("fit: a flex or grid item is held to its container, a scroller is not", () => {
+  // the item grew to the unit, the container is narrower
+  assert.equal(verdict([{ inner: 118 }, { display: "flex", inner: 90 }], 118).fit.length, 1);
+  assert.equal(verdict([{ inner: 118 }, { display: "grid", inner: 200 }], 118).fit.length, 0);
+  // a horizontal scroller (carousel) may hold wide items
+  assert.equal(
+    verdict([{ inner: 118 }, { display: "flex", inner: 90, overflowX: "auto" }], 118).fit.length,
+    0,
+  );
+  // a plain block ancestor is not consulted: its own box is the line
+  assert.equal(verdict([{ inner: 118 }, { inner: 90 }], 118).fit.length, 0);
+});
+
+test("fit: inline wrappers are skipped to the block, vertical text uses its height", () => {
+  assert.equal(verdict([{ display: "inline" }, { inner: 85 }, {}], 118).fit.length, 1);
+  const vertical = tree([{ writingMode: "vertical-rl" }, {}], 0);
+  vertical.unit.offsetHeight = 118;
+  vertical.unit.parentElement.clientHeight = 85;
+  assert.equal(measureOverflow([vertical.unit], vertical.style).fit.length, 1);
+});
+
+test("fit: the wrapping rule is plain CSS, the pass is SSR-safe and shipped to the archives", () => {
+  const css = read("src/styles-name-words.css");
+  const rule = css.match(/dw-u\[data-dw-fit\] \{([^}]*)\}/)?.[1] ?? "";
+  assert.match(rule, /white-space:\s*normal/);
+  assert.match(rule, /word-break:\s*keep-all/);
+  assert.match(rule, /overflow-wrap:\s*break-word;\s*overflow-wrap:\s*anywhere/);
+  assert.doesNotMatch(css, /auto-phrase|:has\(/);
+  assert.equal(FIT_ATTRIBUTE, "data-dw-fit");
+  // no document here: nothing starts, nothing throws
+  assert.equal(typeof watchPhraseFit(), "function");
+  assert.equal(watchPhraseFit()(), undefined);
+  assert.doesNotMatch(read("src/lib/phrase-fit.js"), /^(?:const|let|var)[^\n]*\b(?:document|window)\b/m);
+  assert.match(read("src/routes/__root.tsx"), /useEffect\(\(\) => watchPhraseFit\(\), \[\]\)/);
+  assert.match(read("src/lib/archive-name-words.js"), /watchPhraseFit\(document\)/);
+  assert.match(read("scripts/build-embedded-archives.mjs"), /classic\("src\/lib\/phrase-fit\.js"\)/);
+  const archive = read("public/archive-name-words.generated.js");
+  assert.match(archive, /function watchPhraseFit/);
+  assert.doesNotMatch(archive, /^(?:import|export) /m);
 });
