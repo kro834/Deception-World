@@ -93,7 +93,7 @@ export const RevealText = memo(function RevealText({
             </span>
           ),
         );
-        // Copy has the prose measure; a heading holds about 10em.
+        // Copy has the prose measure; a heading holds about 8em.
         return holdUnits(String(child), letters, copy ? PROSE_CAP : HEADING_CAP);
       }
       if (splittable(child)) return cloneElement(child, undefined, split(child.props.children));

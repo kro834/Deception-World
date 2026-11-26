@@ -89,9 +89,9 @@ function emWidth(text) {
 }
 
 /** Prose blocks have a full measure (about 17em at 320px); headings hold
-    about 10em at their size; labels and tiles may be ~7em wide. */
+    about 8em at their size in a phone card; labels and tiles ~7em. */
 const PROSE_CAP = 12;
-const HEADING_CAP = 10;
+const HEADING_CAP = 8;
 const LABEL_CAP = 7;
 
 // The name seams (src/lib/name-break-rules.js), the joint after a name the

@@ -47,7 +47,7 @@ const SKIP = new Set([
 ]);
 // Running prose has the full measure, so it holds longer units whole.
 const PROSE = new Set(["p", "li", "dd", "blockquote", "figcaption"]);
-// Section headings are set larger, but a column still holds ~10em of them.
+// Section headings are set larger, but a column still holds ~8em of them.
 const HEADING = new Set(["h2", "h3", "h4", "h5", "h6", "dt", "summary", "legend", "caption"]);
 
 /** @param {string} text @param {number} cap @param {string} [key] */
