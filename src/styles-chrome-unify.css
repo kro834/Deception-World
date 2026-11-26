@@ -306,3 +306,21 @@ html[data-family]
     content: none;
   }
 }
+
+/* ---------- 3. One context pill ---------- */
+/* The bar's context links (back to the list, the gallery's refresh and
+   works, the tours' way back, the map's lab, Saga Cinema's way home) take
+   the compact button height and the pill; each keeps its own paint. */
+html[data-family]
+  body
+  :is(
+    .manager-page > header.manager-topbar .detail-topbar-actions > a.manager-back,
+    .gallery-page > header.gallery-topbar .gallery-topbar-actions > :is(a, button),
+    .wm-page header.wm-header .wm-header-actions > a,
+    .saga-cinema .site-header > a.world-return-link
+  ) {
+  box-sizing: border-box;
+  min-height: var(--dw-btn-h);
+  height: var(--dw-btn-h);
+  border-radius: var(--dw-r-pill);
+}

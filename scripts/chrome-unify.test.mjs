@@ -68,6 +68,13 @@ test("the iPad portrait menu starts its rows under the head, not at the screen's
   assert.doesNotMatch(block, /--orbit-(r|disc):/);
 });
 
+test("the bars' context links share the compact button height and the pill", () => {
+  assert.match(
+    rules,
+    /a\.world-return-link\s*\) \{\s*box-sizing: border-box;\s*min-height: var\(--dw-btn-h\);\s*height: var\(--dw-btn-h\);\s*border-radius: var\(--dw-r-pill\);/,
+  );
+});
+
 test("the grammar sheet is paint and box only", () => {
   assert.doesNotMatch(rules, /animation|transition|@keyframes|backdrop-filter|filter:\s*blur/);
 });
