@@ -328,7 +328,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
 }
 
 /* The chapter's own heading hangs under its lens; the numeral is a small
-   node on the frame (in the lens itself where a chapter has no picture). */
+   node on the frame (in the lens itself where a chapter has no picture:
+   data-art marks a lens that has one, 04-06 too since 2026-11-26). */
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li .ws-map-label {
   position: absolute;
   top: calc(100% + 24px);
@@ -368,7 +369,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-map
-  > li[data-phase="annex"]
+  > li[data-phase="annex"]:not([data-art])
   .ws-map-label {
   top: calc(100% + 16px);
   padding: 0;
@@ -377,7 +378,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-map
-  > li[data-phase="annex"]
+  > li[data-phase="annex"]:not([data-art])
   .ws-map-label
   > b {
   top: calc(-16px - var(--ws-ring-item) / 2);
@@ -1784,7 +1785,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     body
     .ws-map
-    > li[data-phase="annex"]
+    > li[data-phase="annex"]:not([data-art])
     .ws-map-label {
     top: calc(100% + 12px);
   }
@@ -1792,7 +1793,7 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     body
     .ws-map
-    > li[data-phase="annex"]
+    > li[data-phase="annex"]:not([data-art])
     .ws-map-label
     > b {
     top: calc(-12px - var(--ws-ring-item) / 2);

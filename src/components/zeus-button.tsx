@@ -184,6 +184,9 @@ const ZEUS_AVOID_SELECTOR = [
   // settle on either.
   ".ring-cast-node",
   ".ring-kind",
+  // 2026-11-26 (owner's iPhone): /world's 目次 lenses; at rest MOVE sat on
+  // 03 at 375px, over the chapter's picture.
+  ".ws-map > li > a",
   ".search-ring button",
   ".gallery-tour-ring-node",
   ".lab-ring button",
