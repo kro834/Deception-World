@@ -484,13 +484,6 @@ for (let i = 0; i < N; i += 1) {
 }
 
 const svgPath = (points) => `M${points.map(([x, y]) => `${x} ${y}`).join("L")}Z`;
-async function rasterise(polys) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><path d="${polys
-    .map(svgPath)
-    .join("")}" fill="#fff"/></svg>`;
-  const { data } = await sharp(Buffer.from(svg)).extractChannel(0).raw().toBuffer({ resolveWithObject: true });
-  return Float32Array.from(data, (v) => v / 255);
-}
 async function samShare(name) {
   const { data, info } = await sharp(join(SAM_DIR, name)).extractChannel(0).raw().toBuffer({ resolveWithObject: true });
   if (info.width !== W || info.height !== H) throw new Error(`${name}: not the cutout's frame`);
@@ -666,7 +659,7 @@ async function goldLayersOf(colours) {
   }
   return { goldTrim: gold, goldSoft, rawGold };
 }
-const { goldTrim, goldSoft, rawGold } = await goldLayersOf(rgb);
+const { goldSoft, rawGold } = await goldLayersOf(rgb);
 
 // --- Partition: the belt by its outline, the rest by SAM's shares --------------
 // The driver's own SAM mask (decontaminated below), claiming first.
@@ -902,7 +895,6 @@ const UNDERSUIT = await writeWebp("undersuit.webp", undersuitRaw, FIG_W, FIG_H, 
 const TILE = 9;
 const MARGIN = 2;
 let tileCount = 0;
-let goldCount = 0;
 const goldCells = {};
 const pieces = [];
 const cells = [];
@@ -933,7 +925,6 @@ for (const plate of plateIds) {
         if (total < 2) continue;
         const bit = row * gcols + col;
         gbits[bit >> 3] |= 1 << (bit & 7);
-        goldCount += 1;
       }
     if (gbits.some(Boolean)) goldCells[plate.id] = Buffer.from(gbits).toString("base64");
   }
