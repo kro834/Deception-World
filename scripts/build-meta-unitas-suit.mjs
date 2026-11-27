@@ -36,36 +36,24 @@
 //                        composited so its soles and reactor meet ミドル's soles
 //                        and helix.
 // and the generated module src/lib/meta-unitas-suit.ts lists the plates.
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import {
   META_UNITAS_BELTS,
   META_UNITAS_MARKS,
   META_UNITAS_REGIONS,
 } from "./meta-unitas-suit-regions.mjs";
 
-const require = createRequire(import.meta.url);
-const sharp = require(process.env.SHARP_MODULE || "sharp");
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const importTs = (path) => import(pathToFileURL(join(ROOT, path)).href);
 
 const VERSION = "20261023";
 const DESIGN = join(ROOT, `design/meta-unitas-saga-${VERSION}`);
 const SAM_ROOT = join(DESIGN, "sam-masks");
-const OUT_DIR = join(ROOT, `public/meta-unitas-suit-${VERSION}/`);
-const PUBLIC_PATH = `/meta-unitas-suit-${VERSION}`;
-const MODULE = join(ROOT, "src/lib/meta-unitas-suit.ts");
 const FORMS = ["middle", "ultra"];
 const CUTOUT = (form) => `design/meta-unitas-saga-${VERSION}/cutouts/${form}.webp`;
 const W = 1024;
 const H = 1536;
-const FIG_H = 1040;
-const SCALE = FIG_H / H;
-const FIG_W = Math.round(W * SCALE);
-const debugArg = process.argv.find((arg) => arg.startsWith("--debug="));
-const DEBUG = debugArg ? debugArg.slice("--debug=".length) : null;
 
 // --- SAM's prompts --------------------------------------------------------------
 if (process.argv.includes("--sam-prompts")) {
