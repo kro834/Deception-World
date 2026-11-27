@@ -395,6 +395,8 @@ test("the Rexonance page's read-outs, HUD and key visual are kept clear", () => 
     source.indexOf("const ZEUS_AVOID_PAGE_TEXT_SELECTOR"),
     source.indexOf("const ZEUS_AVOID_ART_SELECTOR"),
   );
+  // 2026-11-28: dropped .rxl-stage-slate, .rxe-chapter-map-heading small and
+  // .rxe-form-status-heading; their markup is gone after the redesigns.
   for (const selector of [
     '".rxs-p14-overview :is(dt, dd)"',
     '".rxs-p14-metrics article > :not(.rxs-p14-values)"',
@@ -402,9 +404,7 @@ test("the Rexonance page's read-outs, HUD and key visual are kept clear", () => 
     '".rxs-comparison-key"',
     '".rxs-comparison-note"',
     '".rxs-headline-metrics :is(small, p)"',
-    '".rxl-stage-slate"',
     '".rxs-section-heading > p"',
-    '".rxe-chapter-map-heading small"',
     '".rzn-call .rzn-chip"',
     '".rzn-parts .rzn-part"',
     '".rzn-readout"',
@@ -412,7 +412,6 @@ test("the Rexonance page's read-outs, HUD and key visual are kept clear", () => 
     '".rxs-p14-values i"',
     '"#rxs-p14-baseline-help"',
     '".rxs-p14-method-note"',
-    '".rxe-form-status-heading"',
     '".rzn-form-code"',
     '".rxs-p14-copy > small"',
     '".rxs-assembly-status"',
