@@ -1,0 +1,230 @@
+diff --git a/look/look.js b/look/look.js
+index aafdcd6..94b9fd3 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -57,5 +57,8 @@ export function createLook({ renderer, camera }) {
+   const scratch = new THREE.Vector3();
+   let tier = TIERS.includes(params.get('tier')) ? params.get('tier') : 'full';
+-  let shaderFailed = false;
++  // Materials whose program failed to compile or link: sticky, because three reports a broken program
++  // only on its first use and a later attempt would otherwise "succeed" with it.
++  const broken = new Set();
++  let fatal = ''; // set when the figure itself (painted material, final pass) cannot be drawn
+   let manifest = null;
+   let maps = null;
+@@ -69,5 +72,4 @@ export function createLook({ renderer, camera }) {
+   renderer.autoClear = false;
+   renderer.debug.onShaderError = (gl, program, vertexShader, fragmentShader) => {
+-    shaderFailed = true;
+     const log = gl.getShaderInfoLog(fragmentShader) || gl.getShaderInfoLog(vertexShader) || gl.getProgramInfoLog(program) || '';
+     console.error('Look shader failed to compile:', log.slice(0, 600));
+@@ -376,6 +378,27 @@ export function createLook({ renderer, camera }) {
+   }
+ 
++  // After a frame: which programs failed for the first time? A painted material or the final pass is
++  // fatal; a failed backdrop, bloom or star pass is switched off; a failed brush pass lowers the tier.
++  function checkPrograms(scene) {
++    const test = (material) => {
++      if (broken.has(material)) return false;
++      const program = renderer.properties.get(material).currentProgram;
++      if (program?.diagnostics?.runnable !== false) return false;
++      broken.add(material);
++      return true;
++    };
++    scene.traverse((object) => {
++      if (object.isMesh && object.material?.isShaderMaterial && test(object.material)) fatal ||= `shader of ${object.material.name} failed`;
++    });
++    const failed = pipeline.checkPrograms(test);
++    if (failed.includes('final')) fatal ||= 'final pass shader failed';
++    for (const kind of failed) notes.push(`${kind} shader failed`);
++    if (fatal) console.error(`Look: ${fatal}; 3D cannot be shown.`);
++    return failed;
++  }
++
+   // Draw one frame. `full` runs the brush pass; `paint` (0..1) is how much of it shows.
+   function render(scene, { full = false, paint = 1 } = {}) {
++    if (fatal) return;
+     fitDepthRange();
+     castShadows(scene, full);
+@@ -383,5 +406,4 @@ export function createLook({ renderer, camera }) {
+     while (tier !== 'forward') {
+       try {
+-        shaderFailed = false;
+         if (!pipeline.renderGeometry(scene, camera, ground)) throw new Error('geometry target incomplete');
+         pipeline.renderLight();
+@@ -389,5 +411,8 @@ export function createLook({ renderer, camera }) {
+         pipeline.renderFinal(camera, paint);
+         renderer.setRenderTarget(null);
+-        if (shaderFailed) throw new Error('shader compile error');
++        const failed = checkPrograms(scene);
++        if (fatal) return;
++        if (failed.includes('paint')) { lower('brush shader failed'); continue; }
++        if (failed.length) continue; // draw this frame again without the passes just switched off
+         if (full) lastFullMs = performance.now() - started;
+         return;
+@@ -399,9 +424,10 @@ export function createLook({ renderer, camera }) {
+     }
+     renderForward(scene);
++    if (checkPrograms(scene).length && !fatal) renderForward(scene);
+   }
+ 
+   // Re-run only the final pass with a different paint mix (used for the settle cross-fade).
+   function composite(paint) {
+-    if (tier === 'forward') return;
++    if (tier === 'forward' || fatal) return;
+     try {
+       pipeline.renderFinal(camera, paint);
+@@ -422,4 +448,5 @@ export function createLook({ renderer, camera }) {
+     get tier() { return tier; },
+     get paintable() { return paintOn(); },
++    get failed() { return fatal; },
+     // True when the frame drawn at rest differs from the last frame drawn while moving (the flattening
+     // pass, or cast shadows that a heavy model on a touch device only gets at rest).
+diff --git a/look/post.js b/look/post.js
+index b3596b4..99de229 100644
+--- a/look/post.js
++++ b/look/post.js
+@@ -462,4 +462,7 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+   });
+   const materials = [backdrop, prefilter, down, up, seed, star, tensor, tensorBlur, brush, final];
++  // Passes whose program failed to compile or link are switched off for good (see checkPrograms).
++  const kinds = new Map([[backdrop, 'backdrop'], [prefilter, 'prefilter'], [down, 'bloom'], [up, 'bloom'], [seed, 'stars'], [star, 'stars'], [tensor, 'paint'], [tensorBlur, 'paint'], [brush, 'paint'], [final, 'final']]);
++  const off = { backdrop: false, bloom: false, stars: false };
+ 
+   let targets = null;
+@@ -519,4 +522,5 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+   // The backdrop on its own (forward tier, and inside the G pass).
+   function drawBackdrop(camera, ground) {
++    if (off.backdrop) return; // the clear colour stands in for it
+     backdrop.uniforms.uInvProjection.value.copy(camera.projectionMatrixInverse);
+     backdrop.uniforms.uCameraWorld.value.copy(camera.matrixWorld);
+@@ -546,6 +550,7 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+     prefilter.uniforms.tAux.value = aux;
+     prefilter.uniforms.uTexel.value.set(1 / size.width, 1 / size.height);
++    if (off.bloom && off.stars) return;
+     draw(prefilter, downs[0]);
+-    for (let i = 1; i < downs.length; i++) {
++    for (let i = 1; i < downs.length && !off.bloom; i++) {
+       down.uniforms.tSource.value = downs[i - 1].texture;
+       down.uniforms.uTexel.value.set(1 / levels[i - 1][0], 1 / levels[i - 1][1]);
+@@ -554,5 +559,5 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+     let low = downs[downs.length - 1];
+     up.uniforms.uSpread.value = bloom.radius * (size.pixelRatio / 1.5) / 2 ** (downs.length - 4);
+-    for (let i = downs.length - 2; i >= 0; i--) {
++    for (let i = downs.length - 2; i >= 0 && !off.bloom; i--) {
+       up.uniforms.tLow.value = low.texture;
+       up.uniforms.tHigh.value = downs[i].texture;
+@@ -561,4 +566,5 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+       low = ups[i];
+     }
++    if (off.stars) return;
+     seed.uniforms.tSource.value = downs[0].texture;
+     seed.uniforms.uTexel.value.set(1 / starSize[0], 1 / starSize[1]);
+@@ -608,4 +614,5 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+     u.tTensor.value = hasPaint ? targets.tensorA.texture : g.textures[0];
+     u.uPaint.value = hasPaint ? paintMix * paint.amount : 0;
++    u.uLight.value.set(off.bloom ? 0 : bloom.strength, off.stars ? 0 : sparkle.strength);
+     u.uInkPx.value.set(Math.max(0.75, ink.outlineCss * size.pixelRatio * 0.5), Math.max(0.75, ink.innerCss * size.pixelRatio * 0.5));
+     draw(final, null);
+@@ -620,4 +627,18 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+     renderPaint,
+     renderFinal,
++    // Marks passes whose program failed (test(material) is true once per newly failed material) and
++    // switches them off. Returns the newly failed kinds: backdrop, prefilter, bloom, stars, paint, final.
++    checkPrograms(test) {
++      const failed = [];
++      for (const [material, kind] of kinds) {
++        if (!test(material)) continue;
++        failed.push(kind);
++        if (kind === 'backdrop') off.backdrop = true;
++        if (kind === 'prefilter' || kind === 'bloom') off.bloom = true;
++        if (kind === 'prefilter' || kind === 'stars') off.stars = true;
++      }
++      return failed;
++    },
++    resetPrograms() { off.backdrop = off.bloom = off.stars = false; },
+     get hasPaint() { return hasPaint; },
+     get size() { return size; },
+diff --git a/viewer.js b/viewer.js
+index 71fead0..b1e5e3d 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -185,8 +185,21 @@ function startViewer() {
+   }
+ 
++  // A shader the figure needs did not compile or link: keep the posters, as when WebGL is missing.
++  let failed3D = false;
++  function draw(options) {
++    look.render(scene, options);
++    if (!look.failed || failed3D) return;
++    failed3D = true;
++    cancelPending();
++    revealModel(false);
++    setState('error');
++    showStatus('このブラウザでは3Dを表示できません。画像で各方向を確認できます。');
++    quality.disabled = true;
++  }
++
+   function renderFull() {
+     cancelPending();
+-    if (contextLost || !model) return;
+-    look.render(scene, { full: true, paint: 1 });
++    if (contextLost || failed3D || !model) return;
++    draw({ full: true, paint: 1 });
+     flushWaiters();
+   }
+@@ -203,7 +216,8 @@ function startViewer() {
+   function settle() {
+     settleTimer = 0;
+-    if (contextLost || !model) return;
++    if (contextLost || failed3D || !model) return;
+     if (!look.paintable || matchMedia('(prefers-reduced-motion: reduce)').matches) { renderFull(); return; }
+-    look.render(scene, { full: true, paint: 0 });
++    draw({ full: true, paint: 0 });
++    if (failed3D) return;
+     fade = { start: performance.now(), duration: settings.paint.fadeMs };
+     frameId = requestAnimationFrame(fadeStep);
+@@ -212,7 +226,8 @@ function startViewer() {
+   function renderFast() {
+     frameId = 0;
+-    if (contextLost || !model) return;
++    if (contextLost || failed3D || !model) return;
+     if (pendingFull) { pendingFull = false; renderFull(); return; }
+-    look.render(scene, { full: false, paint: 0 });
++    draw({ full: false, paint: 0 });
++    if (failed3D) return;
+     clearTimeout(settleTimer);
+     settleTimer = setTimeout(settle, settings.paint.settleMs);
+@@ -220,5 +235,5 @@ function startViewer() {
+ 
+   function requestRender(full = false) {
+-    if (contextLost) return;
++    if (contextLost || failed3D) return;
+     pendingFull = pendingFull || full;
+     fade = null;
+@@ -409,5 +424,5 @@ function startViewer() {
+       fitView();
+       framedModel = model;
+-      if (!contextLost) {
++      if (!contextLost && !failed3D) {
+         revealModel(true);
+         showStatus();
+@@ -428,5 +443,5 @@ function startViewer() {
+       else if (progress) progress.textContent = '';
+       stage.removeAttribute('aria-busy');
+-      quality.disabled = contextLost;
++      quality.disabled = contextLost || failed3D;
+       quality.textContent = model ? (mode === 'detail' ? '標準に切替' : '高精細に切替') : '3D表示を再試行';
+       quality.setAttribute('aria-pressed', String(mode === 'detail'));
+@@ -438,4 +453,5 @@ function startViewer() {
+     event.preventDefault();
+     contextLost = true;
++    if (failed3D) return; // already showing the posters with the error message
+     cancelPending();
+     quality.disabled = true;
+@@ -447,4 +463,5 @@ function startViewer() {
+     contextLost = false;
+     look.onContextRestored();
++    if (failed3D) return; // the posters stay
+     quality.disabled = loading;
+     revealModel(!!model);

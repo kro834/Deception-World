@@ -1,0 +1,32 @@
+添付の armored-warrior-viewer.zip を、新しいサイトとして ChatGPT Sites で公開してください。
+
+【これは何か】
+完成済みの静的サイト（3Dビューア「装甲戦士」）です。ビルドは不要で、zip を展開したフォルダがそのまま公開物です。ルートに index.html があります。
+
+【必ず守ってほしいこと】
+1. 既存のサイトは変更しないでください。新しいサイトとして作成してください。
+2. ファイルは一切加工しないでください。圧縮・最小化・再エンコード・改名・フレームワークへの変換・パスの変更・ファイルの追加や削除はすべて不要です。HTML / CSS / JS / 画像 / 3Dモデル（.glb .gltf .bin）を、zip の中のフォルダ構成のまま静的ファイルとして配信してください。
+3. index.html の中の相対パス（./viewer.js、./model-v15/… など）はそのまま動く必要があります。サイトのルートに index.html が来るように配置してください。
+4. 展開後、zip 内の MANIFEST.txt と照合してください。1行目が「files=ファイル数 <TAB> bytes=合計バイト数」、2行目以降が「パス <TAB> サイズ <TAB> SHA-256」です（MANIFEST.txt 自身は一覧に含まれません）。1つでも一致しないファイルがあれば、公開せずにそのファイル名を報告してください。
+5. MANIFEST.txt は公開物に含めても含めなくても構いません。
+
+【公開後に確認して報告してほしいこと】
+- 公開URL
+- 次のURLがすべて 200 で返ること（URLは公開URLからの相対）:
+  ./index.html
+  ./viewer.js
+  ./look/look.js
+  ./vendor/three/build/three.module.min.js
+  ./model-v15/standard-v15.glb
+  ./model-v15/detail-v15.gltf
+  ./model-v15/detail-v15.bin
+  ./model-v15/manifest.json
+  ./previews-v15p/front.webp
+  ./thumbs/front.webp
+- .glb / .gltf / .bin / .webp が途中で切れずに全サイズ配信されていること（MANIFEST.txt のサイズと一致）
+- 公開範囲（非公開か、リンクを知っている人が見られるか）。まずは私だけが見られる状態で公開し、URLを教えてください。
+
+【補足】
+- 最大のファイルは model-v15/standard-v15.glb（約9.3MB）と model-v15/detail-v15.bin（約8.6MB）です。
+- diag.js は URL に ?diag=1 を付けたときだけ読み込まれる診断用のファイルです。削除しないでください。
+- うまく配置できない点や、加工が必要だと判断した点があれば、作業を進める前に質問してください。

@@ -1,0 +1,78 @@
+{
+ "front.png": {
+  "black": {
+   "share": 0.191,
+   "shadow": "#030304",
+   "mid": "#14141b",
+   "light": "#2d2b34"
+  },
+  "gold": {
+   "share": 0.188,
+   "shadow": "#643a1e",
+   "mid": "#9b663d",
+   "light": "#e3aa70"
+  },
+  "blue": {
+   "share": 0.136,
+   "shadow": "#152d74",
+   "mid": "#3159c8",
+   "light": "#6899f2"
+  },
+  "violet": {
+   "share": 0.016,
+   "shadow": "#64407a",
+   "mid": "#c077ec",
+   "light": "#dfa5f7"
+  },
+  "pink": {
+   "share": 0.032,
+   "shadow": "#b25086",
+   "mid": "#f07cbf",
+   "light": "#f9addf"
+  },
+  "white_hot": {
+   "share": 0.032,
+   "shadow": "#e9ccef",
+   "mid": "#e9e1ed",
+   "light": "#eef2e7"
+  }
+ },
+ "back.jpg": {
+  "black": {
+   "share": 0.242,
+   "shadow": "#0b0a0e",
+   "mid": "#1c1a21",
+   "light": "#322e35"
+  },
+  "gold": {
+   "share": 0.162,
+   "shadow": "#66422b",
+   "mid": "#9c6f4c",
+   "light": "#ddaa7a"
+  },
+  "blue": {
+   "share": 0.108,
+   "shadow": "#1d2b72",
+   "mid": "#364eb8",
+   "light": "#728ee2"
+  },
+  "violet": {
+   "share": 0.019,
+   "shadow": "#5a396d",
+   "mid": "#b372d4",
+   "light": "#dea1ef"
+  },
+  "pink": {
+   "share": 0.03,
+   "shadow": "#965475",
+   "mid": "#da79b1",
+   "light": "#eaa9d6"
+  },
+  "white_hot": {
+   "share": 0.042,
+   "shadow": "#e0caed",
+   "mid": "#e8e0e9",
+   "light": "#eaf2ec"
+  }
+ }
+}

@@ -1,0 +1,21 @@
+Armored Warrior viewer: hand-over summary
+release folder: /tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/release
+files (excluding MANIFEST*.txt and vercel.json): 64
+total bytes: 33188239 (31.65 MiB)
+
+five largest files:
+     9736588    9.29 MiB  model-v15/standard-v15.glb
+     9031688    8.61 MiB  model-v15/detail-v15.bin
+     1510176    1.44 MiB  model-v15/emissive_5-v12.webp
+     1413789    1.35 MiB  model-v15/baseColor_2.jpg
+     1284708    1.23 MiB  model-v15/emissive_1-v12.webp
+
+single-file size check (host believed to cap one file at 25 MiB = 26214400 bytes; UNVERIFIED):
+  no file above 20 MiB
+
+zip files:
+  armored-warrior-viewer.zip  32343723 bytes (30.85 MiB)  manifest inside: MANIFEST.txt
+
+how to check an extracted tree against MANIFEST.txt (tab-separated; line 1 = files=N<TAB>bytes=TOTAL):
+  tail -n +2 MANIFEST.txt | while IFS=$'\t' read -r p n h; do [ "$(stat -c %s "$p")" = "$n" ] && [ "$(sha256sum "$p" | cut -d" " -f1)" = "$h" ] || echo "BAD $p"; done
+nothing was published; vercel.json is intentionally not included.

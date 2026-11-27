@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="装甲戦士の統合モデルを正面・背面・側面から確認できる3Dビューア。">
+<title>装甲戦士 | 3Dビューア</title>
+<link rel="stylesheet" href="./viewer.css?v=12">
+<script type="importmap">
+{"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/addons/"}}
+</script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>装甲戦士</h1>
+    <button type="button" id="quality" aria-pressed="false" disabled>高精細に切替</button>
+  </header>
+  <div id="stage">
+    <img id="poster" src="./previews-v14/front.webp" alt="装甲戦士の正面プレビュー" fetchpriority="high">
+    <p id="status" role="status">3Dモデルを読み込み中</p>
+  </div>
+  <footer>
+    <nav aria-label="カメラの向き">
+      <button type="button" data-view="front" aria-pressed="true">正面</button>
+      <button type="button" data-view="rear" aria-pressed="false">背面</button>
+      <button type="button" data-view="side" aria-pressed="false">側面</button>
+      <button type="button" data-view="face" aria-pressed="false">顔</button>
+      <button type="button" data-view="chest" aria-pressed="false">胸の炉</button>
+      <button type="button" data-view="belt" aria-pressed="false">ベルト</button>
+      <button type="button" data-view="belt-rear" aria-pressed="false">ベルト背面</button>
+      <button type="button" id="reset" disabled>リセット</button>
+    </nav>
+    <p id="hint">ドラッグで回転 · <span class="zoom-hint">ピンチ／スクロールで拡大・縮小</span></p>
+  </footer>
+</main>
+<script type="module" src="./viewer.js?v=14"></script>
+</body>
+</html>

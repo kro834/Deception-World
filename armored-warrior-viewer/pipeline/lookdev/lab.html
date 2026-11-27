@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#151820}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/work/vendor/three/build/three.module.min.js","three/addons/":"/work/vendor/three/addons/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '/work/vendor/meshopt_decoder.mjs';
+const q = new URLSearchParams(location.search);
+const mode = q.get('m') || 'base';
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(innerWidth, innerHeight); document.body.append(renderer.domElement);
+renderer.setClearColor(0x151820, 1);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.01, 50);
+const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('/work/model-v10/standard-v14.glb');
+gltf.scene.traverse((o) => {
+  if (!o.isMesh) return;
+  const s = o.material;
+  const tex = mode === 'base' ? s.map : mode === 'emis' ? s.emissiveMap : mode === 'mr' ? s.metalnessMap : mode === 'nrm' ? s.normalMap : s.map;
+  o.material = new THREE.MeshBasicMaterial({ map: tex || null, color: tex ? 0xffffff : (mode === 'base' ? s.color : 0x000000), side: s.side });
+});
+scene.add(gltf.scene);
+const box = new THREE.Box3().setFromObject(gltf.scene); const c = box.getCenter(new THREE.Vector3()); const size = box.getSize(new THREE.Vector3());
+const az = Number(q.get('az') || 0) * Math.PI / 180; const zoom = Number(q.get('z') || 1); const ty = Number(q.get('ty') || 0.5);
+const target = new THREE.Vector3(c.x, box.min.y + size.y * ty, c.z);
+const dist = size.y * 1.75 / zoom;
+camera.position.set(target.x + Math.sin(az) * dist, target.y + 0.05, target.z + Math.cos(az) * dist); camera.lookAt(target);
+renderer.render(scene, camera);
+document.title = 'done ' + JSON.stringify({ min: box.min.toArray(), max: box.max.toArray() });
+</script>

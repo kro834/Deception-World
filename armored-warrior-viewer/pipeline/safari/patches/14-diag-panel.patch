@@ -1,0 +1,314 @@
+diff --git a/diag.js b/diag.js
+new file mode 100644
+index 0000000..af74488
+--- /dev/null
++++ b/diag.js
+@@ -0,0 +1,225 @@
++// ?diag=1 diagnostics panel, for tests on real devices (loaded by viewer.js only with that parameter).
++// Plain DOM text, refreshed about once a second and shortly after the last frame. Every probe is
++// guarded: a probe that fails prints n/a, and the panel still shows in the error state and without WebGL2.
++// `state` is filled by viewer.js: states, lastError, and (once the renderer exists) renderer, look, scene.
++
++const MB = 1e6;
++const fmt = (bytes) => `${(bytes / MB).toFixed(1)} MB`;
++const probe = (fn) => { try { const value = fn(); return value === undefined || value === null || value === '' ? 'n/a' : value; } catch (error) { return 'n/a'; } };
++
++export function startDiag(state) {
++  // ---- frame timing (viewer.js calls state.frame after each look.render) ------------------------
++  const frames = { full: null, drag: null, intervals: [], lastDragAt: 0 };
++  const pixel = new Uint8Array(4);
++  state.frame = (full, started) => {
++    try {
++      // Wait for the GPU so the time is the frame's real cost (stalls the pipeline: diag only). A one-pixel
++      // readback of the canvas forces completion everywhere; gl.finish() alone returned before the
++      // raster was done in Chromium.
++      const gl = state.renderer?.getContext();
++      if (gl && !gl.isContextLost()) gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
++      const now = performance.now();
++      const ms = now - started;
++      // A full frame ends a drag; intervals are taken between consecutive moving frames only.
++      if (full) { frames.full = ms; frames.lastDragAt = 0; } else {
++        frames.drag = ms;
++        if (frames.lastDragAt && now - frames.lastDragAt < 5000) {
++          frames.intervals.push(now - frames.lastDragAt);
++          if (frames.intervals.length > 30) frames.intervals.shift();
++        }
++        frames.lastDragAt = now;
++      }
++    } catch (error) { /* timing is best effort */ }
++    schedule();
++  };
++
++  // ---- context loss counts ------------------------------------------------------------------------
++  const context = { lost: 0, restored: 0, watched: null };
++  const watchCanvas = () => {
++    const canvas = state.renderer?.domElement;
++    if (!canvas || context.watched === canvas) return;
++    context.watched = canvas;
++    canvas.addEventListener('webglcontextlost', () => { context.lost++; schedule(); });
++    canvas.addEventListener('webglcontextrestored', () => { context.restored++; schedule(); });
++  };
++
++  // ---- WebGL facts, from the renderer's context, or from a probe context when there is none -------
++  let probeInfo = null;
++  function glFacts() {
++    const gl = state.renderer?.getContext();
++    if (gl) return describe(gl, 'renderer');
++    if (probeInfo) return probeInfo;
++    try {
++      const canvas = document.createElement('canvas');
++      const gl2 = canvas.getContext('webgl2');
++      if (gl2) probeInfo = describe(gl2, 'probe');
++      else {
++        const gl1 = canvas.getContext('webgl');
++        probeInfo = { lines: [`gl    WebGL2 unavailable; WebGL1 ${gl1 ? probe(() => gl1.getParameter(gl1.VERSION)) : 'unavailable'}`] };
++        if (gl1) { const more = describe(gl1, 'probe'); probeInfo.lines.push(...more.lines.slice(1)); }
++      }
++      canvas.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();
++    } catch (error) { probeInfo = { lines: ['gl    n/a'] }; }
++    return probeInfo;
++  }
++  function describe(gl, source) {
++    const lines = [];
++    const lost = probe(() => gl.isContextLost());
++    lines.push(`gl    ${probe(() => gl.getParameter(gl.VERSION))} (${source}${lost === true ? ', LOST' : ''})`);
++    lines.push(`gpu   ${probe(() => { const ext = gl.getExtension('WEBGL_debug_renderer_info'); return ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : 'no debug_renderer_info'; })}`);
++    const isGL2 = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
++    lines.push(`max   tex ${probe(() => gl.getParameter(gl.MAX_TEXTURE_SIZE))} · drawbuf ${isGL2 ? probe(() => gl.getParameter(gl.MAX_DRAW_BUFFERS)) : 'n/a'} · colatt ${isGL2 ? probe(() => gl.getParameter(gl.MAX_COLOR_ATTACHMENTS)) : 'n/a'} · fhigh ${probe(() => gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision)}`);
++    lines.push(`ext   ${probe(() => {
++      const supported = gl.getSupportedExtensions() || [];
++      const names = [['aniso', 'EXT_texture_filter_anisotropic'], ['parallel', 'KHR_parallel_shader_compile'], ['cbfloat', 'EXT_color_buffer_float'], ['cbhalf', 'EXT_color_buffer_half_float'], ['floatlin', 'OES_texture_float_linear'], ['lose', 'WEBGL_lose_context']];
++      return names.map(([label, name]) => (supported.includes(name) ? '+' : '-') + label).join(' ');
++    })}`);
++    return { lines };
++  }
++
++  // ---- memory estimates (bytes of the images the scene's materials use; not a measurement) -------
++  function memory() {
++    const scene = state.scene;
++    if (!scene) return 'n/a (no scene)';
++    const sources = new Map();
++    let geometry = 0;
++    const geometries = new Set();
++    scene.traverse((object) => {
++      if (object.geometry && !geometries.has(object.geometry)) {
++        geometries.add(object.geometry);
++        for (const attribute of Object.values(object.geometry.attributes)) geometry += attribute.array?.byteLength || 0;
++        geometry += object.geometry.index?.array?.byteLength || 0;
++      }
++      const material = object.material;
++      if (!material?.uniforms) return;
++      for (const { value } of Object.values(material.uniforms)) {
++        if (!value?.isTexture || !value.image) continue;
++        const width = value.image.width || 0;
++        const height = value.image.height || 0;
++        const mips = value.generateMipmaps && value.minFilter !== 1006 && value.minFilter !== 1003 ? 4 / 3 : 1;
++        sources.set(value.source || value, width * height * 4 * mips);
++      }
++    });
++    let textures = 0;
++    for (const bytes of sources.values()) textures += bytes;
++    const info = probe(() => state.renderer.info.memory.textures);
++    const look = probe(() => state.look.diagnostics());
++    const targets = look === 'n/a' ? 'n/a' : `${look.targets} ≈ ${fmt(look.targetBytes)}`;
++    return `tex ${sources.size} (gpu ${info}) ≈ ${fmt(textures)} · targets ${targets} · geom ≈ ${fmt(geometry)} (estimate)`;
++  }
++
++  // ---- the panel ------------------------------------------------------------------------------------
++  const panel = document.createElement('div');
++  panel.id = 'diag';
++  panel.setAttribute('aria-hidden', 'true');
++  panel.style.cssText = 'position:fixed;left:4px;right:4px;top:4px;z-index:2147483647;max-height:46vh;overflow:auto;'
++    + 'background:rgba(0,0,0,.82);color:#b8f7b0;font:11px/1.35 ui-monospace,Menlo,monospace;border:1px solid #3a5;'
++    + 'border-radius:6px;padding:6px 8px;-webkit-text-size-adjust:100%;pointer-events:auto';
++  const bar = document.createElement('div');
++  bar.style.cssText = 'display:flex;gap:6px;margin-bottom:4px';
++  const button = (label) => {
++    const element = document.createElement('button');
++    element.type = 'button';
++    element.textContent = label;
++    element.style.cssText = 'font:12px system-ui,sans-serif;padding:3px 10px;border-radius:4px;border:1px solid #3a5;background:#132;color:#cfc';
++    bar.append(element);
++    return element;
++  };
++  const copy = button('コピー');
++  const toggle = button('–');
++  const note = document.createElement('span');
++  note.style.cssText = 'font:11px system-ui,sans-serif;color:#9c9;align-self:center';
++  bar.append(note);
++  const text = document.createElement('pre');
++  text.style.cssText = 'margin:0;white-space:pre-wrap;word-break:break-all;user-select:text;-webkit-user-select:text';
++  panel.append(bar, text);
++  document.body.append(panel);
++
++  toggle.addEventListener('click', () => {
++    const hidden = text.hidden = !text.hidden;
++    toggle.textContent = hidden ? 'diag' : '–';
++    panel.style.right = hidden ? 'auto' : '4px';
++  });
++  copy.addEventListener('click', async () => {
++    const content = render();
++    try {
++      await navigator.clipboard.writeText(content);
++      note.textContent = 'copied';
++    } catch (error) {
++      // No clipboard permission: select the text so a long press offers Copy.
++      try {
++        const range = document.createRange();
++        range.selectNodeContents(text);
++        const selection = getSelection();
++        selection.removeAllRanges();
++        selection.addRange(range);
++        note.textContent = document.execCommand && document.execCommand('copy') ? 'copied' : 'selected: long-press → Copy';
++      } catch (inner) { note.textContent = 'copy failed'; }
++    }
++  });
++
++  function userAgent() {
++    const ua = navigator.userAgent;
++    const os = /iPhone OS ([\d_]+)/.exec(ua) ? `iOS ${/iPhone OS ([\d_]+)/.exec(ua)[1].replace(/_/g, '.')}`
++      : /iPad.*OS ([\d_]+)/.exec(ua) ? `iPadOS ${/OS ([\d_]+)/.exec(ua)[1].replace(/_/g, '.')}`
++        : /Mac OS X ([\d_]+)/.exec(ua) ? `macOS ${/Mac OS X ([\d_]+)/.exec(ua)[1].replace(/_/g, '.')}`
++          : /Android ([\d.]+)/.exec(ua) ? `Android ${/Android ([\d.]+)/.exec(ua)[1]}`
++            : /Windows NT ([\d.]+)/.exec(ua) ? `Windows NT ${/Windows NT ([\d.]+)/.exec(ua)[1]}` : 'os ?';
++    const browser = /CriOS\/([\d.]+)/.exec(ua) ? `Chrome iOS ${/CriOS\/([\d.]+)/.exec(ua)[1]}`
++      : /FxiOS\/([\d.]+)/.exec(ua) ? `Firefox iOS ${/FxiOS\/([\d.]+)/.exec(ua)[1]}`
++        : /Edg\/([\d.]+)/.exec(ua) ? `Edge ${/Edg\/([\d.]+)/.exec(ua)[1]}`
++          : /Chrome\/([\d.]+)/.exec(ua) ? `Chrome ${/Chrome\/([\d.]+)/.exec(ua)[1]}`
++            : /Firefox\/([\d.]+)/.exec(ua) ? `Firefox ${/Firefox\/([\d.]+)/.exec(ua)[1]}`
++              : /Version\/([\d.]+).*Safari/.exec(ua) ? `Safari ${/Version\/([\d.]+)/.exec(ua)[1]}` : 'browser ?';
++    return `${os} · ${browser}${/Mobile/.test(ua) ? ' · mobile' : ''}`;
++  }
++
++  function render() {
++    watchCanvas();
++    const root = document.documentElement;
++    const lines = [];
++    const look = probe(() => state.look.diagnostics());
++    const tier = look === 'n/a' ? 'n/a' : `${look.tier}${look.tier !== look.initialTier ? ` (LOWERED from ${look.initialTier})` : ''}`;
++    lines.push(`view  ${probe(() => root.dataset.viewer)} · ${probe(() => root.dataset.mode)} · tier ${tier}`);
++    lines.push(`fail  ${probe(() => {
++      if (look === 'n/a') return state.renderer ? 'n/a' : 'no renderer (3D not started)';
++      const parts = [];
++      if (look.fatal) parts.push(`FATAL ${look.fatal}`);
++      if (look.off.length) parts.push(`off: ${look.off.join(',')}`);
++      if (look.failures.length) parts.push(look.failures.join(' | '));
++      if (look.shaderError) parts.push(`shader log: ${look.shaderError.replace(/\s+/g, ' ').slice(0, 160)}`);
++      return parts.length ? parts.join(' · ') : 'none';
++    })}`);
++    lines.push(`ua    ${probe(userAgent)}`);
++    lines.push(`dpr   ${probe(() => devicePixelRatio)} · stage ${probe(() => { const stage = document.querySelector('#stage'); return `${stage.clientWidth}x${stage.clientHeight}`; })} css · buffer ${probe(() => { const gl = state.renderer.getContext(); return `${gl.drawingBufferWidth}x${gl.drawingBufferHeight}`; })} · ratio ${probe(() => state.renderer.getPixelRatio().toFixed(2))}`);
++    const gl = probe(() => glFacts().lines);
++    lines.push(...(gl === 'n/a' ? ['gl    n/a'] : gl));
++    lines.push(`ctx   lost ${context.lost} · restored ${context.restored}`);
++    lines.push(`time  ${probe(() => {
++      const ready = state.states.find(([name]) => name === 'ready');
++      const resources = performance.getEntriesByType('resource');
++      const sum = (part) => resources.filter((entry) => entry.name.includes(part)).reduce((total, entry) => total + (entry.encodedBodySize || entry.transferSize || 0), 0);
++      return `ready ${ready ? `${(ready[1] / 1000).toFixed(1)} s` : 'not yet'} · model ${fmt(sum('/model-v10/'))} · maps ${fmt(sum('/model-v15/'))}`;
++    })}`);
++    lines.push(`frame ${probe(() => {
++      const average = frames.intervals.length ? frames.intervals.reduce((a, b) => a + b, 0) / frames.intervals.length : 0;
++      const ms = (value) => (value === null ? '-' : `${value.toFixed(1)} ms`);
++      return `full ${ms(frames.full)} · drag ${ms(frames.drag)} · drag interval ${average ? `${average.toFixed(1)} ms (n=${frames.intervals.length})` : '-'} (GPU wait: 1-px readback)`;
++    })}`);
++    lines.push(`mem   ${probe(memory)}`);
++    lines.push(`err   ${state.lastError || 'none'}`);
++    lines.push(`at    ${(performance.now() / 1000).toFixed(1)} s · ${probe(() => location.pathname + location.search)}`);
++    return lines.join('\n');
++  }
++
++  let pending = 0;
++  function schedule() {
++    clearTimeout(pending);
++    pending = setTimeout(update, 300); // shortly after the last frame, so the settled frame is in
++  }
++  function update() {
++    try { if (!text.hidden) text.textContent = render(); } catch (error) { text.textContent = `diag failed: ${error.message}`; }
++  }
++  update();
++  setInterval(update, 1000);
++}
+diff --git a/look/look.js b/look/look.js
+index e1ac789..1cdbe0f 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -57,4 +57,5 @@ export function createLook({ renderer, camera }) {
+   const broken = new Set();
+   let fatal = ''; // set when the figure itself (painted material, final pass) cannot be drawn
++  let lastShaderError = '';
+   let manifest = null;
+   let maps = null;
+@@ -67,4 +68,5 @@ export function createLook({ renderer, camera }) {
+   renderer.debug.onShaderError = (gl, program, vertexShader, fragmentShader) => {
+     const log = gl.getShaderInfoLog(fragmentShader) || gl.getShaderInfoLog(vertexShader) || gl.getProgramInfoLog(program) || '';
++    lastShaderError = log.slice(0, 300);
+     console.error('Look shader failed to compile:', log.slice(0, 600));
+   };
+@@ -441,4 +443,8 @@ export function createLook({ renderer, camera }) {
+     get paintable() { return paintOn(); },
+     get failed() { return fatal; },
++    // For ?diag=1: tier history, passes switched off, failure records, render-target estimate.
++    diagnostics() {
++      return { tier, initialTier, fatal, off: pipeline.off, failures: notes.filter((note) => / -> |failed|stalled|missing/.test(note)), shaderError: lastShaderError, targets: pipeline.targetCount, targetBytes: pipeline.targetBytes() };
++    },
+     settings: LOOK,
+     state() {
+diff --git a/look/post.js b/look/post.js
+index 673c84b..5732fcb 100644
+--- a/look/post.js
++++ b/look/post.js
+@@ -637,4 +637,14 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+     },
+     resetPrograms() { off.backdrop = off.bloom = off.stars = false; },
++    get off() { return Object.keys(off).filter((key) => off[key]); },
++    // For ?diag=1: render targets now allocated, and their estimated size (RGBA8; depth as 4 B/px).
++    get targetCount() { return targets ? targets.all.length : 0; },
++    targetBytes() {
++      if (!targets) return 0;
++      let bytes = 0;
++      for (const target of targets.all) bytes += target.width * target.height * 4 * (target.textures?.length || 1);
++      if (targets.g.depthTexture) bytes += targets.g.width * targets.g.height * 4;
++      return bytes;
++    },
+     get hasPaint() { return hasPaint; },
+     get size() { return size; },
+diff --git a/viewer.js b/viewer.js
+index 3edef8d..ffcb24a 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -36,7 +36,20 @@ function showStatus(message = '') {
+ }
+ 
++// ?diag=1: a diagnostics panel for tests on devices (diag.js, loaded only then; nothing otherwise).
++// Errors are collected from the start, before diag.js has arrived.
++const diag = new URLSearchParams(location.search).get('diag') === '1' ? { states: [], lastError: '' } : null;
++if (diag) {
++  const keep = (text) => { diag.lastError = `${(performance.now() / 1000).toFixed(1)} s: ${String(text).slice(0, 300)}`; };
++  addEventListener('error', (event) => keep(event.message || event.error));
++  addEventListener('unhandledrejection', (event) => keep(event.reason?.message || event.reason));
++  const consoleError = console.error.bind(console);
++  console.error = (...args) => { keep(args.map((arg) => arg?.message || arg).join(' ')); consoleError(...args); };
++  import('./diag.js').then((module) => module.startDiag(diag)).catch((error) => keep(`diag.js: ${error.message}`));
++}
++
+ // Page-facing state: html[data-viewer] = loading | ready | error | lost, html[data-mode], --load-progress.
+ function setState(state) {
+   root.dataset.viewer = state;
++  if (diag) diag.states.push([state, performance.now()]);
+ }
+ 
+@@ -132,4 +145,5 @@ function startViewer() {
+   const camera = new THREE.PerspectiveCamera(34, 1, 0.005, 50);
+   const look = createLook({ renderer, camera });
++  if (diag) Object.assign(diag, { renderer, look, scene });
+   const settings = look.settings;
+   const controls = new OrbitControls(camera, renderer.domElement);
+@@ -188,5 +202,7 @@ function startViewer() {
+   let failed3D = false;
+   function draw(options) {
++    const started = diag ? performance.now() : 0;
+     look.render(scene, options);
++    if (diag) diag.frame?.(options.full, started);
+     if (!look.failed || failed3D) return;
+     failed3D = true;

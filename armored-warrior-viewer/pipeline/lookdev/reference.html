@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/work/vendor/three/build/three.module.min.js","three/addons/":"/work/vendor/three/addons/"}}</script>
+<script type="module">
+// Independent reference for "the unlit base colour": three.js MeshBasicMaterial (map x colour factor, no
+// lights, no tone mapping), the viewer's front framing, magenta background. ?w=&h=&bw=&bh= give the size.
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '/work/vendor/meshopt_decoder.mjs';
+const q = new URLSearchParams(location.search);
+const cw = Number(q.get('w')), ch = Number(q.get('h')), bw = Number(q.get('bw'));
+const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true });
+renderer.setPixelRatio(bw / cw); renderer.setSize(cw, ch); document.body.append(renderer.domElement);
+renderer.setClearColor(0xff00ff, 1);
+const scene = new THREE.Scene();
+const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('/work/model-v10/standard-v14.glb');
+const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());   // same texture filtering as the viewer
+gltf.scene.traverse((o) => { if (o.isMesh) { const s = o.material; if (s.map) { s.map.anisotropy = anisotropy; s.map.needsUpdate = true; } o.material = new THREE.MeshBasicMaterial({ map: s.map, color: s.color, side: s.side }); } });
+scene.add(gltf.scene);
+const camera = new THREE.PerspectiveCamera(34, cw / ch, 0.005, 50);
+const bounds = new THREE.Box3().setFromObject(gltf.scene);
+const center = bounds.getCenter(new THREE.Vector3()); const extent = bounds.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+const radius = extent.length(); const direction = new THREE.Vector3(0, 0.09, 1).normalize();
+const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize(); const up = new THREE.Vector3().crossVectors(direction, right);
+const vertical = Math.tan(THREE.MathUtils.degToRad(17)); const horizontal = vertical * camera.aspect; const corner = new THREE.Vector3(); let distance = radius;
+for (const x of [-extent.x, extent.x]) for (const y of [-extent.y, extent.y]) for (const z of [-extent.z, extent.z]) { corner.set(x, y, z); const fit = Math.max(Math.abs(corner.dot(right)) / horizontal, Math.abs(corner.dot(up)) / vertical); distance = Math.max(distance, corner.dot(direction) + 1.12 * fit); }
+camera.position.copy(center).addScaledVector(direction, distance); camera.lookAt(center);
+const sphere = bounds.getBoundingSphere(new THREE.Sphere()); const d = camera.position.distanceTo(sphere.center);
+camera.near = Math.max(d - sphere.radius * 1.05, sphere.radius * 0.004); camera.far = d + sphere.radius * 1.6; camera.updateProjectionMatrix();
+renderer.render(scene, camera); document.title = 'done';
+</script>

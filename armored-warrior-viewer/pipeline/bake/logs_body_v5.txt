@@ -1,0 +1,8 @@
+body area share armour 0.534 gold 0.176 crystal 0.290 device 0.000 1490s
+body detail 2048 1648 KB covered share gold 0.186 crystal 0.271 device 0.000
+body standard 1024 663 KB covered share gold 0.186 crystal 0.272 device 0.000
+body 308s
+body    1024: lost hue-gold split: below-belt drape/legs zone 0.081, within 2 texels of a mask edge 0.009, other 0.003
+body    1024: hue-gold texels 94192: mask gold 0.908, crystal 0.005, armour 0.088; mask-gold not hue-gold 0.156
+/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/pipeline/bake/proofs/mask_detail_ring_0.png
+BODYDONE

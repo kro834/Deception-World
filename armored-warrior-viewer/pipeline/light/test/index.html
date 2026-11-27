@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matcap test bench</title>
+<style>
+  :root { --stage-edge: #0b0d14; --stage-center: #232a40; }
+  html, body { margin: 0; height: 100%; background: var(--stage-edge); color: #ccd; font: 12px system-ui, sans-serif; }
+  #stage { position: fixed; inset: 0; background: radial-gradient(ellipse at 50% 45%, var(--stage-center) 0%, var(--stage-edge) 72%); }
+  canvas { display: block; width: 100%; height: 100%; }
+  #info { position: fixed; left: 8px; bottom: 6px; opacity: .6; }
+</style>
+<script type="importmap">
+{"imports":{"three":"/work/vendor/three/build/three.module.min.js","three/addons/":"/work/vendor/three/addons/"}}
+</script>
+</head>
+<body>
+<div id="stage"></div>
+<div id="info"></div>
+<script type="module">
+// Private feedback loop for the lighting agent: applies the matcaps "the obvious way".
+// URL params: view=front|rear|side|chest|face|knee  az=deg  pol=deg  set=<matcap dir under /pipeline/light/>
+//             debug=mask  noemis=1  ramp=1 (multiply a 2-step key toon ramp, to preview that combination)
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from '/work/vendor/meshopt_decoder.mjs';
+
+const P = new URLSearchParams(location.search);
+const set = P.get('set') || 'out/matcaps';
+const stage = document.querySelector('#stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.setClearColor(0, 0);
+stage.append(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, 1, 0.005, 50);
+
+const tl = new THREE.TextureLoader();
+const loadTex = (name) => new Promise((res, rej) => tl.load(`/pipeline/light/${set}/${name}?t=${Date.now()}`, (t) => {
+  t.colorSpace = THREE.SRGBColorSpace; // matcaps are sRGB; flipY stays true (TextureLoader default) so image top = +Y normal
+  t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
+  res(t);
+}, undefined, rej));
+const rigP = fetch(`/pipeline/light/${P.get('rig') || set + '/lightrig.json'}?t=${Date.now()}`).then((r) => r.json());
+
+const [gold, armor, crystal, rig] = await Promise.all([loadTex('gold.webp'), loadTex('armor.webp'), loadTex('crystal.webp'), rigP]);
+
+const vert = /* glsl */`
+  varying vec2 vUv; varying vec3 vN; varying vec3 vViewPos;
+  void main() {
+    vUv = uv;
+    vN = normalize(normalMatrix * normal);
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vViewPos = mv.xyz;
+    gl_Position = projectionMatrix * mv;
+  }`;
+const frag = /* glsl */`
+  uniform sampler2D map, mrMap, emissiveMap, normalMap, mcGold, mcArmor, mcCrystal;
+  uniform bool hasMap, hasMR, hasEm, hasNM;
+  uniform vec3 baseFactor, emissiveFactor; uniform float metalFactor;
+  uniform int debugMode; uniform float nmScale; uniform bool useEmis, useRamp; uniform vec3 keyDir;
+  varying vec2 vUv; varying vec3 vN; varying vec3 vViewPos;
+  vec3 perturb(vec3 n, vec3 p, vec2 uv, vec3 mapN) {
+    vec3 q0 = dFdx(p), q1 = dFdy(p); vec2 st0 = dFdx(uv), st1 = dFdy(uv);
+    vec3 q1perp = cross(q1, n), q0perp = cross(n, q0);
+    vec3 T = q1perp * st0.x + q0perp * st1.x; vec3 B = q1perp * st0.y + q0perp * st1.y;
+    float det = max(dot(T, T), dot(B, B)); float s = det == 0.0 ? 0.0 : inversesqrt(det);
+    return normalize(T * (mapN.x * s) + B * (mapN.y * s) + n * mapN.z);
+  }
+  void main() {
+    vec3 n = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0);
+    if (hasNM) { vec3 t = texture2D(normalMap, vUv).xyz * 2.0 - 1.0; t.xy *= nmScale; n = perturb(n, vViewPos, vUv, normalize(t)); }
+    vec3 bc = baseFactor * (hasMap ? texture2D(map, vUv).rgb : vec3(1.0));   // linear
+    float metal = metalFactor * (hasMR ? texture2D(mrMap, vUv).b : 1.0);
+    vec3 em = emissiveFactor * (hasEm ? texture2D(emissiveMap, vUv).rgb : vec3(0.0));
+    // masks from base colour (sRGB-ish via sqrt); the metallic channel alone does not separate gold from crystal
+    vec3 s = sqrt(bc);
+    float warm = s.r - s.b, cool = s.b - s.r, peak = max(s.r, max(s.g, s.b));
+    float wGold = smoothstep(0.06, 0.16, warm) * smoothstep(0.28, 0.42, peak);
+    float eLum = max(em.r, max(em.g, em.b));
+    float wCrys = max(smoothstep(0.08, 0.2, cool) * smoothstep(0.25, 0.4, peak), smoothstep(0.15, 0.6, eLum));
+    wGold *= 1.0 - wCrys;
+    float wArm = 1.0 - max(wGold, wCrys);
+    vec2 muv = n.xy * 0.5 + 0.5;
+    vec3 cG = texture2D(mcGold, muv).rgb, cA = texture2D(mcArmor, muv).rgb, cC = texture2D(mcCrystal, muv).rgb;
+    // keep a little of the texture's paint detail on gold (luma ratio, clamped)
+    float bl = dot(bc, vec3(0.2126, 0.7152, 0.0722));
+    cG *= clamp(0.55 + 2.2 * bl, 0.7, 1.15);
+    vec3 eCol = useEmis ? (1.0 - exp(-em * 0.9)) : vec3(0.0);
+    vec3 crysBase = mix(bc * 0.35, eCol, step(0.02, eLum));
+    vec3 col = cG * wGold + cA * wArm + (crysBase + cC) * wCrys;
+    if (useRamp) { float k = dot(n, normalize(keyDir)); col *= mix(0.72, 1.0, smoothstep(-0.02, 0.06, k)); }
+    if (debugMode == 1) col = vec3(wGold, wCrys, wArm * 0.3);
+    gl_FragColor = vec4(col, 1.0);
+    #include <colorspace_fragment>
+  }`;
+
+const kd = rig.key.dir;
+function toonMaterial(src) {
+  const u = {
+    map: { value: src.map }, mrMap: { value: src.metalnessMap }, emissiveMap: { value: src.emissiveMap },
+    normalMap: { value: src.normalMap }, mcGold: { value: gold }, mcArmor: { value: armor }, mcCrystal: { value: crystal },
+    hasMap: { value: !!src.map }, hasMR: { value: !!src.metalnessMap }, hasEm: { value: !!src.emissiveMap }, hasNM: { value: !!src.normalMap },
+    baseFactor: { value: new THREE.Vector3(src.color.r, src.color.g, src.color.b) },
+    emissiveFactor: { value: new THREE.Vector3(src.emissive.r, src.emissive.g, src.emissive.b).multiplyScalar(src.emissiveIntensity) },
+    metalFactor: { value: src.metalness },
+    nmScale: { value: +(P.get('nm') ?? 0.6) }, debugMode: { value: P.get('debug') === 'mask' ? 1 : 0 }, useEmis: { value: P.get('noemis') !== '1' }, useRamp: { value: P.get('ramp') === '1' },
+    keyDir: { value: new THREE.Vector3(...kd) },
+  };
+  return new THREE.ShaderMaterial({ uniforms: u, vertexShader: vert, fragmentShader: frag, side: src.side });
+}
+
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+const gltf = await loader.loadAsync('/work/model-v10/standard-v14.glb');
+const model = gltf.scene;
+const cache = new Map();
+model.traverse((o) => {
+  if (!o.isMesh) return;
+  const mats = [].concat(o.material).map((m) => { if (!cache.has(m)) cache.set(m, toonMaterial(m)); return cache.get(m); });
+  o.material = Array.isArray(o.material) ? mats : mats[0];
+});
+scene.add(model);
+const bounds = new THREE.Box3().setFromObject(model);
+
+const views = {
+  front: { dir: [0, 0.09, 1] }, rear: { dir: [0, 0.09, -1] }, side: { dir: [1, 0.06, 0] },
+  face: { dir: [0, 0, 1], focus: [0.875, 0.097, 0.107, 0.116] },
+  chest: { dir: [0, 0, 1], focus: [0.703, 0.126, 0.109, 0.102] },
+  shoulder: { dir: [0.35, 0.15, 1], focus: [0.72, 0.06, 0.17, 0.12] },
+  knee: { dir: [0, 0.05, 1], focus: [0.36, 0.07, 0.15, 0.13] },
+  back: { dir: [0, 0.1, -1], focus: [0.66, -0.06, 0.15, 0.15] },
+};
+function fit() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setPixelRatio(1); renderer.setSize(w, h, false); camera.aspect = w / h;
+  const v = views[P.get('view') || 'front'];
+  let dir = new THREE.Vector3(...v.dir);
+  if (P.has('az')) {
+    const az = THREE.MathUtils.degToRad(+P.get('az')), po = THREE.MathUtils.degToRad(+(P.get('pol') || 82));
+    dir.set(Math.sin(po) * Math.sin(az), Math.cos(po), Math.sin(po) * Math.cos(az));
+  }
+  dir.normalize();
+  const center = bounds.getCenter(new THREE.Vector3());
+  const extent = bounds.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+  if (v.focus) {
+    const [ty, tz, hw, hh] = v.focus, height = extent.y * 2;
+    center.y = bounds.min.y + height * ty; center.z += height * tz * Math.sign(dir.z || 1);
+    extent.set(height * hw, height * hh, height * 0.065);
+  }
+  const right = new THREE.Vector3().crossVectors(camera.up, dir).normalize();
+  const up = new THREE.Vector3().crossVectors(dir, right);
+  const vt = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), hz = vt * camera.aspect;
+  let dist = extent.length(); const c = new THREE.Vector3();
+  for (const x of [-extent.x, extent.x]) for (const y of [-extent.y, extent.y]) for (const z of [-extent.z, extent.z]) {
+    c.set(x, y, z); dist = Math.max(dist, c.dot(dir) + 1.12 * Math.max(Math.abs(c.dot(right)) / hz, Math.abs(c.dot(up)) / vt));
+  }
+  camera.position.copy(center).addScaledVector(dir, dist); camera.lookAt(center);
+  camera.near = dist / 200; camera.far = dist * 10; camera.updateProjectionMatrix();
+  renderer.render(scene, camera);
+  document.querySelector('#info').textContent = `set=${set} view=${P.get('view') || 'front'}`;
+}
+fit();
+addEventListener('resize', fit);
+requestAnimationFrame(() => requestAnimationFrame(() => { document.documentElement.dataset.ready = '1'; }));
+</script>
+</body>
+</html>

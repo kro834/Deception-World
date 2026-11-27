@@ -1,0 +1,82 @@
+{
+ "_doc": "Single source of truth for the rig. Directions are VIEW space, pointing FROM the surface TOWARDS the light (x right, y up, z towards viewer). rig.py builds Blender from this; paint.py and lightrig.json are derived from it.",
+ "key": {
+  "dir": [
+   -0.42,
+   0.56,
+   0.71
+  ],
+  "color": "#fff0de",
+  "intensity": 1.0,
+  "blender_strength": 3.0,
+  "angle_deg": 20
+ },
+ "fill": {
+  "dir": [
+   0.66,
+   -0.08,
+   0.75
+  ],
+  "color": "#aebfff",
+  "intensity": 0.32,
+  "blender_strength": 0.96,
+  "angle_deg": 30
+ },
+ "rim": {
+  "dir": [
+   0.58,
+   0.36,
+   -0.73
+  ],
+  "color": "#d6e4ff",
+  "intensity": 0.8,
+  "blender_strength": 2.4,
+  "angle_deg": 12
+ },
+ "env": {
+  "strength": 1.0,
+  "gloss_roughness": 0.06,
+  "bands": [
+   [
+    -90,
+    0.22
+   ],
+   [
+    -72,
+    0.03
+   ],
+   [
+    -42,
+    0.42
+   ],
+   [
+    30,
+    1.0
+   ],
+   [
+    60,
+    0.62
+   ]
+  ],
+  "strips": [
+   [
+    -1,
+    0.5
+   ],
+   [
+    -0.78,
+    1.0
+   ],
+   [
+    -0.42,
+    0.5
+   ],
+   [
+    0.5,
+    0.3
+   ]
+  ],
+  "_strips_doc": "[view-x lower edge, multiplier/2] along the reflected direction; bright softbox strip on the key side, dark flag on the right",
+  "_bands_doc": "[elevation lower edge (deg) of the reflected ray, radiance]; constant interpolation = hard strip edges"
+ }
+}

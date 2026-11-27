@@ -1,0 +1,23 @@
+diff --git a/viewer.js b/viewer.js
+index fcb9a33..71fead0 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -140,4 +140,18 @@ function startViewer() {
+   const manager = new THREE.LoadingManager();
+   const loader = new GLTFLoader(manager).setMeshoptDecoder(MeshoptDecoder);
++  // The painted materials read only the base colour and the emissive map. Remove the references to the
++  // normal, metallic-roughness and occlusion maps before loading, so they are neither fetched (the
++  // detail model's are separate files, 38 MB) nor decoded (about 260 MB of bitmaps in detail mode).
++  loader.register((parser) => ({
++    name: 'viewer-unused-maps',
++    beforeRoot() {
++      for (const material of parser.json.materials || []) {
++        delete material.normalTexture;
++        delete material.occlusionTexture;
++        if (material.pbrMetallicRoughness) delete material.pbrMetallicRoughness.metallicRoughnessTexture;
++      }
++      return null;
++    },
++  }));
+   const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+   let model = null;

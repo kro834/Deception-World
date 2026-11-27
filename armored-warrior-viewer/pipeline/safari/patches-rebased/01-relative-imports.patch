@@ -1,0 +1,101 @@
+diff --git a/look/look.js b/look/look.js
+index bdf6ea7..e413f1d 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -11,5 +11,5 @@
+ //   full     everything                      lite     no brush pass
+ //   forward  materials straight to the canvas (no outline, no bloom)
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ import { LOOK, LAYERS } from './tunables.js';
+ import { createSharedUniforms, createMaterialFactory } from './material.js';
+diff --git a/look/material.js b/look/material.js
+index e7e40d8..1e04dc5 100644
+--- a/look/material.js
++++ b/look/material.js
+@@ -19,5 +19,5 @@
+ //   1  rg  = smoothed view-space normal xy (debug only), b = how much the finish pass should flatten
+ //            here (smeared paint, crystal interiors), a = sparkle seed
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ 
+ export const vertexShader = /* glsl */ `
+diff --git a/look/post.js b/look/post.js
+index e26ff2b..b3596b4 100644
+--- a/look/post.js
++++ b/look/post.js
+@@ -11,5 +11,5 @@
+ // While the camera moves the tensor and paint passes are skipped; the final pass then reads the raw
+ // frame. All targets are 8-bit, so nothing here depends on float render-target support.
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ import { hexToVec3 } from './material.js';
+ 
+diff --git a/look/shadow.js b/look/shadow.js
+index 06e33c5..f021280 100644
+--- a/look/shadow.js
++++ b/look/shadow.js
+@@ -5,5 +5,5 @@
+ // pass fitted to the figure's bounding sphere; the material compares its own depth along the light
+ // with the map to find what another part of the figure hides from the light.
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ 
+ export function createShadowMap({ renderer, size }) {
+diff --git a/vendor/three/addons/controls/OrbitControls.js b/vendor/three/addons/controls/OrbitControls.js
+index eea2670..a56c272 100644
+--- a/vendor/three/addons/controls/OrbitControls.js
++++ b/vendor/three/addons/controls/OrbitControls.js
+@@ -10,5 +10,5 @@ import {
+ 	Ray,
+ 	MathUtils
+-} from 'three';
++} from '../../build/three.module.min.js';
+ 
+ /**
+diff --git a/vendor/three/addons/environments/RoomEnvironment.js b/vendor/three/addons/environments/RoomEnvironment.js
+index 2f2bedd..ee4d08c 100644
+--- a/vendor/three/addons/environments/RoomEnvironment.js
++++ b/vendor/three/addons/environments/RoomEnvironment.js
+@@ -9,5 +9,5 @@ import {
+  	Scene,
+  	Object3D,
+-} from 'three';
++} from '../../build/three.module.min.js';
+ 
+ /**
+diff --git a/vendor/three/addons/loaders/GLTFLoader.js b/vendor/three/addons/loaders/GLTFLoader.js
+index 38f8c14..e8d60f5 100644
+--- a/vendor/three/addons/loaders/GLTFLoader.js
++++ b/vendor/three/addons/loaders/GLTFLoader.js
+@@ -65,5 +65,5 @@ import {
+ 	SRGBColorSpace,
+ 	InstancedBufferAttribute
+-} from 'three';
++} from '../../build/three.module.min.js';
+ import { toTrianglesDrawMode } from '../utils/BufferGeometryUtils.js';
+ 
+diff --git a/vendor/three/addons/utils/BufferGeometryUtils.js b/vendor/three/addons/utils/BufferGeometryUtils.js
+index c84dc7b..3fcd385 100644
+--- a/vendor/three/addons/utils/BufferGeometryUtils.js
++++ b/vendor/three/addons/utils/BufferGeometryUtils.js
+@@ -10,5 +10,5 @@ import {
+ 	TrianglesDrawMode,
+ 	Vector3,
+-} from 'three';
++} from '../../build/three.module.min.js';
+ 
+ /**
+diff --git a/viewer.js b/viewer.js
+index ff01e27..7e35114 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -1,5 +1,5 @@
+-import * as THREE from 'three';
+-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
++import * as THREE from './vendor/three/build/three.module.min.js';
++import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
++import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';
+ import { MeshoptDecoder } from './vendor/meshopt_decoder.mjs';
+ import { createLook } from './look/look.js';

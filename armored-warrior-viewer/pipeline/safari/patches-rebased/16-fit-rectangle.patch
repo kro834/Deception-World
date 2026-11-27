@@ -1,0 +1,128 @@
+diff --git a/diag.js b/diag.js
+index af74488..f2ff4e0 100644
+--- a/diag.js
++++ b/diag.js
+@@ -191,4 +191,5 @@ export function startDiag(state) {
+       return parts.length ? parts.join(' · ') : 'none';
+     })}`);
++    lines.push(`fit   ${probe(() => { const fit = window.__viewer.state().fit; return fit ? `${fit.x},${fit.y} ${fit.width}x${fit.height} of stage ${fit.stage}` : 'whole stage'; })}`);
+     lines.push(`ua    ${probe(userAgent)}`);
+     lines.push(`dpr   ${probe(() => devicePixelRatio)} · stage ${probe(() => { const stage = document.querySelector('#stage'); return `${stage.clientWidth}x${stage.clientHeight}`; })} css · buffer ${probe(() => { const gl = state.renderer.getContext(); return `${gl.drawingBufferWidth}x${gl.drawingBufferHeight}`; })} · ratio ${probe(() => state.renderer.getPixelRatio().toFixed(2))}`);
+diff --git a/look/look.js b/look/look.js
+index 20de55f..5056d6c 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -363,4 +363,13 @@ export function createLook({ renderer, camera }) {
+   }
+ 
++  // The part of the stage the figure is framed in ({ x, y, width, height } in CSS px of a stage of
++  // stageWidth x stageHeight), or null for the whole stage. The backdrop's centre follows it, at the
++  // same relative point (stage.poolCenter, y up); its radii stay relative to the whole stage.
++  function setFit(rect, stageWidth, stageHeight) {
++    if (!rect) { pipeline.setPoolCenter(null); return; }
++    const [u, v] = LOOK.stage.poolCenter;
++    pipeline.setPoolCenter((rect.x + u * rect.width) / stageWidth, 1 - (rect.y + (1 - v) * rect.height) / stageHeight);
++  }
++
+   // Tight near/far around the figure: far more depth precision for the outline.
+   function fitDepthRange() {
+@@ -472,4 +481,5 @@ export function createLook({ renderer, camera }) {
+     setBounds,
+     setSize,
++    setFit,
+     render,
+     composite,
+diff --git a/look/post.js b/look/post.js
+index 1d3bf45..b8f3f55 100644
+--- a/look/post.js
++++ b/look/post.js
+@@ -622,4 +622,9 @@ export function createPipeline({ renderer, LOOK, brushEnabled = () => true, brus
+     setSize,
+     setOpaqueBackdrop(value) { backdrop.uniforms.uOpaque.value = value ? 1 : 0; },
++    // Centre of the backdrop gradient in uv (y up); null puts back the tunable's value.
++    setPoolCenter(x, y) {
++      if (x === null) backdrop.uniforms.uPoolCenter.value.set(...stage.poolCenter);
++      else backdrop.uniforms.uPoolCenter.value.set(x, y);
++    },
+     drawBackdrop,
+     renderGeometry,
+diff --git a/viewer.js b/viewer.js
+index d57b8ff..fa8d154 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -285,6 +285,8 @@ function startViewer() {
+     const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+     const up = new THREE.Vector3().crossVectors(direction, right);
+-    const vertical = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+-    const horizontal = vertical * camera.aspect;
++    // With a fit area the figure must fit that part of the frustum; the view offset puts its centre there.
++    const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
++    const vertical = fitArea ? tangent * fitArea.height / fitArea.stageHeight : tangent;
++    const horizontal = fitArea ? tangent * camera.aspect * fitArea.width / fitArea.stageWidth : vertical * camera.aspect;
+     const corner = new THREE.Vector3();
+     let distance = radius;
+@@ -315,4 +317,37 @@ function startViewer() {
+   };
+ 
++  // Optional #fit inside #stage: the part of the stage the figure may occupy (controls float over the
++  // rest). The figure is framed inside it and the picture is moved there with the camera's view offset,
++  // a shift of the principal point, so orbit and zoom still turn about the figure. No element, a
++  // zero-size one (?capture hides it) or one covering the whole stage: the whole stage, as before.
++  let fitArea = null; // { x, y, width, height, stageWidth, stageHeight } in CSS px, or null
++  function measureFit(width, height) {
++    const element = stage.querySelector('#fit');
++    if (!element) return null;
++    const box = element.getBoundingClientRect();
++    const outer = stage.getBoundingClientRect();
++    const left = outer.left + stage.clientLeft;
++    const top = outer.top + stage.clientTop;
++    const x0 = Math.max(0, box.left - left);
++    const y0 = Math.max(0, box.top - top);
++    const x1 = Math.min(width, box.right - left);
++    const y1 = Math.min(height, box.bottom - top);
++    if (x1 - x0 < 1 || y1 - y0 < 1) return null;
++    if (x0 < 0.5 && y0 < 0.5 && x1 > width - 0.5 && y1 > height - 0.5) return null;
++    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0, stageWidth: width, stageHeight: height };
++  }
++  function applyFit(width, height) {
++    const next = measureFit(width, height);
++    const changed = JSON.stringify(next) !== JSON.stringify(fitArea);
++    fitArea = next;
++    if (fitArea) {
++      const centerX = fitArea.x + fitArea.width / 2;
++      const centerY = fitArea.y + fitArea.height / 2;
++      camera.setViewOffset(width, height, width / 2 - centerX, height / 2 - centerY, width, height);
++    } else if (camera.view?.enabled) camera.clearViewOffset();
++    look.setFit(fitArea, width, height);
++    return changed;
++  }
++
+   function resize() {
+     const width = Math.max(stage.clientWidth, 1);
+@@ -326,7 +361,8 @@ function startViewer() {
+     renderer.setSize(width, height, false);
+     look.setSize(width, height, pixelRatio);
++    const fitChanged = applyFit(width, height);
+     camera.updateProjectionMatrix();
+     // While the window is being resized: cheap frames, then one full frame when it rests.
+-    if (bounds && Math.abs(previous - camera.aspect) > 0.01) fitView(false);
++    if (bounds && (Math.abs(previous - camera.aspect) > 0.01 || fitChanged)) fitView(false);
+     else requestRender(false);
+   }
+@@ -509,5 +545,8 @@ function startViewer() {
+   });
+   quality.addEventListener('click', () => void load(model && mode === 'standard' ? 'detail' : 'standard'));
+-  new ResizeObserver(resize).observe(stage);
++  const resizeObserver = new ResizeObserver(resize);
++  resizeObserver.observe(stage);
++  const fitElement = stage.querySelector('#fit');
++  if (fitElement) resizeObserver.observe(fitElement);
+   renderer.domElement.hidden = false;
+   revealModel(false);
+@@ -542,5 +581,5 @@ function startViewer() {
+     },
+     state() {
+-      return { mode, view, free: !onPreset, viewer: root.dataset.viewer, pixelRatio: renderer.getPixelRatio(), coarse, ...look.state() };
++      return { mode, view, free: !onPreset, viewer: root.dataset.viewer, pixelRatio: renderer.getPixelRatio(), coarse, fit: fitArea && { x: Math.round(fitArea.x), y: Math.round(fitArea.y), width: Math.round(fitArea.width), height: Math.round(fitArea.height), stage: `${fitArea.stageWidth}x${fitArea.stageHeight}` }, ...look.state() };
+     },
+   };

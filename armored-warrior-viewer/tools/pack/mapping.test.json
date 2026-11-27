@@ -1,0 +1,11 @@
+{
+  "_note": "Stand-in textures for the packaging test. Final textures (paintcel_*) will replace these; paths are read at run time.",
+  "standard": {
+    "Armored Warrior · merged PBR": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintfix_body_2048.webp",
+    "tripo_material_1b072094-c364-4f28-972a-07e61327bf9a": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintfix_helmet_2048.webp"
+  },
+  "detail": {
+    "Armored Warrior · merged PBR": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintfix_body_2560.webp",
+    "tripo_material_1b072094-c364-4f28-972a-07e61327bf9a": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintfix_helmet_2560.webp"
+  }
+}

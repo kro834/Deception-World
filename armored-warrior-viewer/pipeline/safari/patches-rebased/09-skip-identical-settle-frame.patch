@@ -1,0 +1,12 @@
+diff --git a/viewer.js b/viewer.js
+index 4b9ad8c..bf18f91 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -217,4 +217,7 @@ function startViewer() {
+     settleTimer = 0;
+     if (contextLost || failed3D || !model) return;
++    // When the settled frame would equal the last moving frame (no brush pass, no rest-only cast
++    // shadows), there is nothing to redraw.
++    if (!look.settledFrameDiffers) { flushWaiters(); return; }
+     if (!look.paintable || matchMedia('(prefers-reduced-motion: reduce)').matches) { renderFull(); return; }
+     draw({ full: true, paint: 0 });

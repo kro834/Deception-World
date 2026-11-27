@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "maps": {
+    "Armored Warrior · merged PBR": {
+      "standard": {
+        "style": "style_body_1024.webp",
+        "toonNormal": "toonnormal_body_1024.webp",
+        "mask": "mask_body_1024.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_body_1024.webp",
+        "paint": "paint_body_2048.webp"
+      },
+      "detail": {
+        "style": "style_body_2048.webp",
+        "toonNormal": "toonnormal_body_2048.webp",
+        "mask": "mask_body_2048.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_body_1024.webp",
+        "paint": "paint_body_2048.webp"
+      }
+    },
+    "Chest original Tripo PBR": {
+      "standard": {
+        "style": "style_chest_1024.webp",
+        "toonNormal": "toonnormal_chest_1024.webp",
+        "mask": "mask_chest_1024.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_chest_1024.webp"
+      },
+      "detail": {
+        "style": "style_chest_2048.webp",
+        "toonNormal": "toonnormal_chest_2048.webp",
+        "mask": "mask_chest_2048.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_chest_1024.webp"
+      }
+    },
+    "tripo_material_fc7ca595-e832-49b0-a494-0c4cb902f233": {
+      "standard": {
+        "style": "style_buckle_1024.webp",
+        "toonNormal": "toonnormal_buckle_1024.webp",
+        "mask": "mask_buckle_1024.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_buckle_1024.webp",
+        "paint": "paint_buckle_2048.webp"
+      },
+      "detail": {
+        "style": "style_buckle_2048.webp",
+        "toonNormal": "toonnormal_buckle_2048.webp",
+        "mask": "mask_buckle_2048.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_buckle_1024.webp",
+        "paint": "paint_buckle_2048.webp"
+      }
+    },
+    "tripo_material_8c3e6a8a-4f94-49cb-8559-448864942d9f": {
+      "standard": {
+        "style": "style_clasp_1024.webp",
+        "toonNormal": "toonnormal_clasp_1024.webp",
+        "mask": "mask_clasp_1024.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_clasp_1024.webp",
+        "paint": "paint_clasp_2048.webp"
+      },
+      "detail": {
+        "style": "style_clasp_2048.webp",
+        "toonNormal": "toonnormal_clasp_2048.webp",
+        "mask": "mask_clasp_2048.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_clasp_1024.webp",
+        "paint": "paint_clasp_2048.webp"
+      }
+    },
+    "tripo_material_1b072094-c364-4f28-972a-07e61327bf9a": {
+      "standard": {
+        "style": "style_helmet_1024.webp",
+        "toonNormal": "toonnormal_helmet_1024.webp",
+        "mask": "mask_helmet_1024.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_helmet_1024.webp",
+        "paint": "paint_helmet_2048.webp"
+      },
+      "detail": {
+        "style": "style_helmet_2048.webp",
+        "toonNormal": "toonnormal_helmet_2048.webp",
+        "mask": "mask_helmet_2048.webp",
+        "maskSpread": 4.0,
+        "conf": "conf_helmet_1024.webp",
+        "paint": "paint_helmet_2048.webp"
+      }
+    }
+  }
+}

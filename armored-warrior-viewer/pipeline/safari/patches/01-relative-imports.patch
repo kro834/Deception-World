@@ -1,0 +1,90 @@
+diff --git a/look/look.js b/look/look.js
+index f60750b..1346833 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -11,5 +11,5 @@
+ //   full     everything                      lite     no brush pass
+ //   forward  materials straight to the canvas (no outline, no bloom)
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ import { LOOK, LAYERS } from './tunables.js';
+ import { createSharedUniforms, createMaterialFactory } from './material.js';
+diff --git a/look/material.js b/look/material.js
+index a7f5950..53d522e 100644
+--- a/look/material.js
++++ b/look/material.js
+@@ -16,5 +16,5 @@
+ //   1  rg  = smoothed view-space normal xy (debug only), b = how much the finish pass should flatten
+ //            here (smeared paint, crystal interiors), a = sparkle seed
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ 
+ export const vertexShader = /* glsl */ `
+diff --git a/look/post.js b/look/post.js
+index a522e73..cf17d03 100644
+--- a/look/post.js
++++ b/look/post.js
+@@ -11,5 +11,5 @@
+ // While the camera moves the tensor and paint passes are skipped; the final pass then reads the raw
+ // frame. All targets are 8-bit, so nothing here depends on float render-target support.
+-import * as THREE from 'three';
++import * as THREE from '../vendor/three/build/three.module.min.js';
+ import { hexToVec3 } from './material.js';
+ 
+diff --git a/vendor/three/addons/controls/OrbitControls.js b/vendor/three/addons/controls/OrbitControls.js
+index eea2670..a56c272 100644
+--- a/vendor/three/addons/controls/OrbitControls.js
++++ b/vendor/three/addons/controls/OrbitControls.js
+@@ -10,5 +10,5 @@ import {
+ 	Ray,
+ 	MathUtils
+-} from 'three';
++} from '../../build/three.module.min.js';
+ 
+ /**
+diff --git a/vendor/three/addons/environments/RoomEnvironment.js b/vendor/three/addons/environments/RoomEnvironment.js
+index 2f2bedd..ee4d08c 100644
+--- a/vendor/three/addons/environments/RoomEnvironment.js
++++ b/vendor/three/addons/environments/RoomEnvironment.js
+@@ -9,5 +9,5 @@ import {
+  	Scene,
+  	Object3D,
+-} from 'three';
++} from '../../build/three.module.min.js';
+ 
+ /**
+diff --git a/vendor/three/addons/loaders/GLTFLoader.js b/vendor/three/addons/loaders/GLTFLoader.js
+index 38f8c14..e8d60f5 100644
+--- a/vendor/three/addons/loaders/GLTFLoader.js
++++ b/vendor/three/addons/loaders/GLTFLoader.js
+@@ -65,5 +65,5 @@ import {
+ 	SRGBColorSpace,
+ 	InstancedBufferAttribute
+-} from 'three';
++} from '../../build/three.module.min.js';
+ import { toTrianglesDrawMode } from '../utils/BufferGeometryUtils.js';
+ 
+diff --git a/vendor/three/addons/utils/BufferGeometryUtils.js b/vendor/three/addons/utils/BufferGeometryUtils.js
+index c84dc7b..3fcd385 100644
+--- a/vendor/three/addons/utils/BufferGeometryUtils.js
++++ b/vendor/three/addons/utils/BufferGeometryUtils.js
+@@ -10,5 +10,5 @@ import {
+ 	TrianglesDrawMode,
+ 	Vector3,
+-} from 'three';
++} from '../../build/three.module.min.js';
+ 
+ /**
+diff --git a/viewer.js b/viewer.js
+index ff01e27..7e35114 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -1,5 +1,5 @@
+-import * as THREE from 'three';
+-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
++import * as THREE from './vendor/three/build/three.module.min.js';
++import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
++import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';
+ import { MeshoptDecoder } from './vendor/meshopt_decoder.mjs';
+ import { createLook } from './look/look.js';

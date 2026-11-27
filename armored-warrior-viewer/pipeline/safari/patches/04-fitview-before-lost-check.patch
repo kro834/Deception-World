@@ -1,0 +1,29 @@
+diff --git a/viewer.js b/viewer.js
+index b629a3d..fcb9a33 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -146,4 +146,5 @@ function startViewer() {
+   let loading = false;
+   let contextLost = false;
++  let framedModel = null; // the model the camera was last fitted to
+ 
+   // ---- render on demand ----------------------------------------------------------------------
+@@ -390,6 +391,9 @@ function startViewer() {
+       succeeded = true;
+       loading = false;
++      // Frame the camera even while the context is lost (frame() draws nothing then), so a restore
++      // shows the figure instead of the view from the origin.
++      fitView();
++      framedModel = model;
+       if (!contextLost) {
+-        fitView();
+         revealModel(true);
+         showStatus();
+@@ -433,5 +437,6 @@ function startViewer() {
+     showStatus(model ? '' : '3D表示を再試行できます。');
+     setState(model ? 'ready' : loading ? 'loading' : 'error');
+-    requestRender(true);
++    // Keep the visitor's camera; fit it only if this model was never framed.
++    if (model && framedModel !== model) { fitView(); framedModel = model; } else requestRender(true);
+   });
+   quality.addEventListener('click', () => void load(model && mode === 'standard' ? 'detail' : 'standard'));

@@ -1,0 +1,13 @@
+{
+ "_note": "generated from /tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/manifest.json",
+ "standard": {
+  "Armored Warrior · merged PBR": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintcel5_body_2048.webp",
+  "Chest original Tripo PBR": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintcel_chest_2048.webp",
+  "tripo_material_1b072094-c364-4f28-972a-07e61327bf9a": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintcel2_helmet_2048.webp"
+ },
+ "detail": {
+  "Armored Warrior · merged PBR": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintcel5_body_2560.webp",
+  "Chest original Tripo PBR": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintcel_chest_2560.webp",
+  "tripo_material_1b072094-c364-4f28-972a-07e61327bf9a": "/tmp/claude-0/-home-user-Deception-World/e3b46e06-f0d8-552d-88dc-50400a3b44dc/scratchpad/work/model-v15/paintcel2_helmet_2560.webp"
+ }
+}

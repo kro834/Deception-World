@@ -1,0 +1,586 @@
+import * as THREE from './vendor/three/build/three.module.min.js';
+import { OrbitControls } from './vendor/three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from './vendor/three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from './vendor/meshopt_decoder.mjs';
+import { createLook } from './look/look.js';
+
+// Poster stills shown before / instead of the 3D canvas: `${folder}/${view}.webp`, framed exactly like
+// the matching 3D view. Square stills by default; on a clearly portrait stage the portrait set is
+// used (`ratio` = its width / height) so the figure does not change size when the canvas takes over.
+const POSTERS = { folder: 'previews-v15', portrait: { folder: 'previews-v15p', ratio: 0.625, below: 0.85 } };
+const MODELS = { folder: 'model-v10', standard: 'standard-v14.glb', detail: 'detail-v14.gltf' };
+
+const root = document.documentElement;
+const stage = document.querySelector('#stage');
+const poster = document.querySelector('#poster');
+const status = document.querySelector('#status');
+const quality = document.querySelector('#quality');
+const reset = document.querySelector('#reset');
+const progress = document.querySelector('#progress');
+const viewButtons = [...document.querySelectorAll('[data-view]')];
+const views = {
+  front: { name: '正面', direction: [0, 0.09, 1] },
+  rear: { name: '背面', direction: [0, 0.09, -1] },
+  side: { name: '側面', direction: [1, 0.06, 0] },
+  face: { name: '顔', direction: [0, 0, 1], focus: [0.875, 0.097, 0.107, 0.116] },
+  chest: { name: '胸のリアクター', direction: [0, 0, 1], focus: [0.703, 0.126, 0.109, 0.102] },
+  belt: { name: 'ベルト正面', direction: [0, 0, 1], focus: [0.568, 0.131, 0.113, 0.085] },
+  'belt-rear': { name: 'ベルト背面', direction: [0, 0, -1], focus: [0.570, 0.004, 0.121, 0.082] },
+};
+let view = 'front';
+let fitView = null;
+
+function showStatus(message = '') {
+  status.textContent = message;
+  status.hidden = !message;
+}
+
+// ?diag=1: a diagnostics panel for tests on devices (diag.js, loaded only then; nothing otherwise).
+// Errors are collected from the start, before diag.js has arrived.
+const diag = new URLSearchParams(location.search).get('diag') === '1' ? { states: [], lastError: '' } : null;
+if (diag) {
+  const keep = (text) => { diag.lastError = `${(performance.now() / 1000).toFixed(1)} s: ${String(text).slice(0, 300)}`; };
+  addEventListener('error', (event) => keep(event.message || event.error));
+  addEventListener('unhandledrejection', (event) => keep(event.reason?.message || event.reason));
+  const consoleError = console.error.bind(console);
+  console.error = (...args) => { keep(args.map((arg) => arg?.message || arg).join(' ')); consoleError(...args); };
+  import('./diag.js').then((module) => module.startDiag(diag)).catch((error) => keep(`diag.js: ${error.message}`));
+}
+
+// Page-facing state: html[data-viewer] = loading | ready | error | lost, html[data-mode], --load-progress.
+function setState(state) {
+  root.dataset.viewer = state;
+  if (diag) diag.states.push([state, performance.now()]);
+}
+
+// `--load-progress` runs 0 -> 1 during a download and stays at 1 once the model is in (it is removed
+// if the download fails); the optional #progress element shows the percentage only while loading.
+function setProgress(value) {
+  if (value === null) {
+    stage.style.removeProperty('--load-progress');
+    if (progress) progress.textContent = '';
+    return;
+  }
+  const clamped = Math.min(1, Math.max(0, value));
+  stage.style.setProperty('--load-progress', clamped.toFixed(3));
+  if (progress) progress.textContent = `${Math.round(clamped * 100)}%`;
+}
+
+// A preset button is pressed only while the camera sits on that preset. Once the user drags, zooms
+// or pans (or a test moves the camera) no button is pressed, and the page can call it a free view.
+let onPreset = true;
+function showPreset(on) {
+  onPreset = on;
+  for (const button of viewButtons) {
+    button.setAttribute('aria-pressed', String(on && button.dataset.view === view));
+  }
+}
+
+function setView(key) {
+  view = key;
+  showPreset(true);
+  updatePoster();
+  fitView?.();
+}
+
+// Pick the square or the portrait still for the current stage shape. A missing portrait file turns
+// the portrait set off for good, so the square still shows instead of a broken image.
+let portraitPosters = !!POSTERS.portrait;
+function updatePoster() {
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  const portrait = portraitPosters && height > 0 && width / height < POSTERS.portrait.below;
+  const folder = portrait ? POSTERS.portrait.folder : POSTERS.folder;
+  const url = new URL(`./${folder}/${view}.webp`, import.meta.url).href;
+  if (poster.src !== url) poster.src = url;
+  poster.alt = `装甲戦士の${views[view].name}プレビュー`;
+  poster.style.setProperty('--poster-ratio', String(portrait ? POSTERS.portrait.ratio : 1));
+}
+poster.addEventListener('error', () => {
+  if (!portraitPosters || !poster.src.includes(`/${POSTERS.portrait.folder}/`)) return;
+  portraitPosters = false;
+  updatePoster();
+});
+if (typeof ResizeObserver === 'function') new ResizeObserver(() => { if (!poster.hidden) updatePoster(); }).observe(stage);
+updatePoster();
+
+for (const button of viewButtons) {
+  button.addEventListener('click', () => setView(button.dataset.view));
+}
+reset.addEventListener('click', () => setView('front'));
+
+// Poster capture: ?capture=720 (square) or ?capture=450x720 (width x height) pins the stage to that
+// many CSS pixels in the top-left corner and hides everything in it but the canvas, so a screenshot
+// of #stage is a clean, repeatable frame with exactly the 3D framing of that stage shape.
+const capture = /^(\d{2,4})(?:x(\d{2,4}))?$/.exec(new URLSearchParams(location.search).get('capture') || '');
+if (capture) {
+  const style = document.createElement('style');
+  style.textContent = `#stage{position:fixed!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;`
+    + `width:${capture[1]}px!important;height:${capture[2] || capture[1]}px!important;min-height:0!important;margin:0!important;border:0!important;`
+    + `border-radius:0!important;z-index:2147483647!important;pointer-events:none!important}`
+    + `#stage>:not(canvas){display:none!important}#stage canvas{animation:none!important;opacity:1!important}`;
+  document.head.append(style);
+}
+
+setState('loading');
+root.dataset.mode = 'standard';
+try {
+  startViewer();
+} catch (error) {
+  console.error(error);
+  window.__earlyModel?.controller.abort(); // the model download index.html started is not needed now
+  setState('error');
+  showStatus('このブラウザでは3Dを表示できません。画像で各方向を確認できます。');
+}
+
+function startViewer() {
+  const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.domElement.tabIndex = 0;
+  renderer.domElement.setAttribute('aria-label', '装甲戦士の3Dモデル');
+  renderer.domElement.setAttribute('aria-describedby', 'hint');
+  renderer.domElement.hidden = true;
+  stage.append(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.005, 50);
+  const look = createLook({ renderer, camera });
+  if (diag) Object.assign(diag, { renderer, look, scene });
+  const settings = look.settings;
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enabled = false;
+  controls.zoomToCursor = true;
+  controls.listenToKeyEvents(renderer.domElement);
+
+  const manager = new THREE.LoadingManager();
+  const loader = new GLTFLoader(manager).setMeshoptDecoder(MeshoptDecoder);
+  // The painted materials read only the base colour and the emissive map. Remove the references to the
+  // normal, metallic-roughness and occlusion maps before loading, so they are neither fetched (the
+  // detail model's are separate files, 38 MB) nor decoded (about 260 MB of bitmaps in detail mode).
+  loader.register((parser) => ({
+    name: 'viewer-unused-maps',
+    beforeRoot() {
+      for (const material of parser.json.materials || []) {
+        delete material.normalTexture;
+        delete material.occlusionTexture;
+        if (material.pbrMetallicRoughness) delete material.pbrMetallicRoughness.metallicRoughnessTexture;
+      }
+      return null;
+    },
+  }));
+  const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+  let model = null;
+  let bounds = null;
+  let mode = 'standard';
+  let loading = false;
+  let contextLost = false;
+  let framedModel = null; // the model the camera was last fitted to
+
+  // ---- render on demand ----------------------------------------------------------------------
+  // While the camera moves: the cheap frame (no brush pass). Once it rests: the full frame, with the
+  // brush pass faded in. Programmatic jumps (view buttons, load, resize end) draw the full frame at once.
+  let frameId = 0;
+  let settleTimer = 0;
+  let fade = null;
+  let pendingFull = false;
+  const waiters = [];
+
+  const busy = () => frameId !== 0 || settleTimer !== 0 || fade !== null || loading || !model;
+  function flushWaiters() {
+    if (busy()) return;
+    for (const resolve of waiters.splice(0)) resolve();
+  }
+
+  function cancelPending() {
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = 0;
+    clearTimeout(settleTimer);
+    settleTimer = 0;
+    fade = null;
+  }
+
+  // A shader the figure needs did not compile or link: keep the posters, as when WebGL is missing.
+  let failed3D = false;
+  function draw(options) {
+    const started = diag ? performance.now() : 0;
+    look.render(scene, options);
+    if (diag) diag.frame?.(options.full, started);
+    if (!look.failed || failed3D) return;
+    failed3D = true;
+    cancelPending();
+    revealModel(false);
+    setState('error');
+    showStatus('このブラウザでは3Dを表示できません。画像で各方向を確認できます。');
+    quality.disabled = true;
+  }
+
+  function renderFull() {
+    cancelPending();
+    if (contextLost || failed3D || !model) return;
+    draw({ full: true, paint: 1 });
+    flushWaiters();
+  }
+
+  function fadeStep(now) {
+    frameId = 0;
+    if (!fade || contextLost) { fade = null; flushWaiters(); return; }
+    const t = Math.min(1, (now - fade.start) / fade.duration);
+    look.composite(t * t * (3 - 2 * t));
+    if (t < 1) frameId = requestAnimationFrame(fadeStep);
+    else { fade = null; flushWaiters(); }
+  }
+
+  function settle() {
+    settleTimer = 0;
+    if (contextLost || failed3D || !model) return;
+    // When the settled frame would equal the last moving frame (no brush pass, no rest-only cast
+    // shadows), there is nothing to redraw.
+    if (!look.settledFrameDiffers) { flushWaiters(); return; }
+    if (!look.paintable || matchMedia('(prefers-reduced-motion: reduce)').matches) { renderFull(); return; }
+    draw({ full: true, paint: 0 });
+    if (failed3D) return;
+    fade = { start: performance.now(), duration: settings.paint.fadeMs };
+    frameId = requestAnimationFrame(fadeStep);
+  }
+
+  function renderFast() {
+    frameId = 0;
+    if (contextLost || failed3D || !model) return;
+    if (pendingFull) { pendingFull = false; renderFull(); return; }
+    draw({ full: false, paint: 0 });
+    if (failed3D) return;
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(settle, settings.paint.settleMs);
+  }
+
+  function requestRender(full = false) {
+    if (contextLost || failed3D) return;
+    pendingFull = pendingFull || full;
+    fade = null;
+    clearTimeout(settleTimer);
+    settleTimer = 0;
+    if (!frameId) frameId = requestAnimationFrame(renderFast);
+  }
+
+  // `framing` is true while this code places the camera itself; any other change comes from the user.
+  let framing = false;
+  controls.addEventListener('change', () => {
+    if (!framing && onPreset) showPreset(false);
+    requestRender(false);
+  });
+
+  // ---- framing (unchanged maths) -------------------------------------------------------------
+  function frame(directionArray, focus, immediate = true) {
+    const center = bounds.getCenter(new THREE.Vector3());
+    const extent = bounds.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+    if (focus) {
+      const [targetY, targetZ, halfWidth, halfHeight] = focus;
+      const height = extent.y * 2;
+      center.y = bounds.min.y + height * targetY;
+      center.z += height * targetZ;
+      extent.set(height * halfWidth, height * halfHeight, height * 0.065);
+    }
+    const radius = extent.length();
+    const direction = new THREE.Vector3(...directionArray).normalize();
+    const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+    const up = new THREE.Vector3().crossVectors(direction, right);
+    // With a fit area the figure must fit that part of the frustum; the view offset puts its centre there.
+    const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const vertical = fitArea ? tangent * fitArea.height / fitArea.stageHeight : tangent;
+    const horizontal = fitArea ? tangent * camera.aspect * fitArea.width / fitArea.stageWidth : vertical * camera.aspect;
+    const corner = new THREE.Vector3();
+    let distance = radius;
+    for (const x of [-extent.x, extent.x]) {
+      for (const y of [-extent.y, extent.y]) {
+        for (const z of [-extent.z, extent.z]) {
+          corner.set(x, y, z);
+          const fit = Math.max(Math.abs(corner.dot(right)) / horizontal, Math.abs(corner.dot(up)) / vertical);
+          distance = Math.max(distance, corner.dot(direction) + 1.12 * fit);
+        }
+      }
+    }
+    controls.minDistance = radius * 0.2;
+    controls.maxDistance = Math.max(distance * 6, radius * 8);
+    controls.target.copy(center);
+    camera.position.copy(center).addScaledVector(direction, distance);
+    framing = true;
+    controls.update();
+    framing = false;
+    if (immediate) renderFull();
+    else requestRender(false);
+  }
+
+  fitView = (immediate = true) => {
+    if (!bounds) return;
+    frame(views[view].direction, views[view].focus, immediate);
+    showPreset(true);
+  };
+
+  // Optional #fit inside #stage: the part of the stage the figure may occupy (controls float over the
+  // rest). The figure is framed inside it and the picture is moved there with the camera's view offset,
+  // a shift of the principal point, so orbit and zoom still turn about the figure. No element, a
+  // zero-size one (?capture hides it) or one covering the whole stage: the whole stage, as before.
+  let fitArea = null; // { x, y, width, height, stageWidth, stageHeight } in CSS px, or null
+  function measureFit(width, height) {
+    const element = stage.querySelector('#fit');
+    if (!element) return null;
+    const box = element.getBoundingClientRect();
+    const outer = stage.getBoundingClientRect();
+    const left = outer.left + stage.clientLeft;
+    const top = outer.top + stage.clientTop;
+    const x0 = Math.max(0, box.left - left);
+    const y0 = Math.max(0, box.top - top);
+    const x1 = Math.min(width, box.right - left);
+    const y1 = Math.min(height, box.bottom - top);
+    if (x1 - x0 < 1 || y1 - y0 < 1) return null;
+    if (x0 < 0.5 && y0 < 0.5 && x1 > width - 0.5 && y1 > height - 0.5) return null;
+    return { x: x0, y: y0, width: x1 - x0, height: y1 - y0, stageWidth: width, stageHeight: height };
+  }
+  function applyFit(width, height) {
+    const next = measureFit(width, height);
+    const changed = JSON.stringify(next) !== JSON.stringify(fitArea);
+    fitArea = next;
+    if (fitArea) {
+      const centerX = fitArea.x + fitArea.width / 2;
+      const centerY = fitArea.y + fitArea.height / 2;
+      camera.setViewOffset(width, height, width / 2 - centerX, height / 2 - centerY, width, height);
+    } else if (camera.view?.enabled) camera.clearViewOffset();
+    look.setFit(fitArea, width, height);
+    return changed;
+  }
+
+  function resize() {
+    const width = Math.max(stage.clientWidth, 1);
+    const height = Math.max(stage.clientHeight, 1);
+    const previous = camera.aspect;
+    camera.aspect = width / height;
+    const budget = coarse ? settings.pixels.mobile : settings.pixels.desktop;
+    const wanted = coarse ? (devicePixelRatio || 1) : Math.max(devicePixelRatio || 1, settings.pixels.desktopMinRatio);
+    const pixelRatio = Math.min(wanted, settings.pixels.maxRatio, Math.sqrt(budget / (width * height)));
+    renderer.setPixelRatio(pixelRatio);
+    renderer.setSize(width, height, false);
+    look.setSize(width, height, pixelRatio);
+    const fitChanged = applyFit(width, height);
+    camera.updateProjectionMatrix();
+    // While the window is being resized: cheap frames, then one full frame when it rests.
+    if (bounds && (Math.abs(previous - camera.aspect) > 0.01 || fitChanged)) fitView(false);
+    else requestRender(false);
+  }
+
+  function revealModel(visible) {
+    renderer.domElement.style.visibility = visible ? 'visible' : 'hidden';
+    poster.hidden = visible;
+    if (!visible) updatePoster();
+    controls.enabled = visible;
+    reset.disabled = !visible;
+  }
+
+  // Downloads give up only when nothing has arrived for this long, never after a fixed total time
+  // (a 25 MB model on a slow phone connection can take minutes and still be making progress).
+  const STALL_MS = 45_000;
+  let transfer = null; // { signal, poke } of the load in progress
+
+  // External buffers (the detail model's .bin) stream through download() as well, so the watchdog
+  // sees each chunk and can cancel them; GLTFLoader would fetch them with neither.
+  loader.register((parser) => ({
+    name: 'viewer-buffers',
+    beforeRoot() {
+      const loadBuffer = parser.loadBuffer.bind(parser);
+      parser.loadBuffer = (index) => {
+        const definition = parser.json.buffers?.[index];
+        if (!transfer || !definition?.uri || definition.uri.startsWith('data:')) return loadBuffer(index);
+        return download(new URL(definition.uri, parser.options.path).href, transfer.signal, transfer.poke);
+      };
+      return null;
+    },
+  }));
+
+  // Download with real progress: onChunk(received, total) after every chunk (total 0 when unknown).
+  async function download(url, signal, onChunk) {
+    // The standard model may already be on its way (index.html starts it early): take that response once.
+    const early = window.__earlyModel;
+    let response;
+    if (early && !early.taken && early.url === String(url)) {
+      early.taken = true;
+      signal.addEventListener('abort', () => early.controller.abort(), { once: true });
+      response = await early.start();
+    } else {
+      response = await fetch(url, { signal });
+    }
+    if (!response.ok) throw new Error(`Model request failed (${response.status})`);
+    const total = Number(response.headers.get('content-length')) || 0;
+    if (!response.body) return response.arrayBuffer();
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+      onChunk(received, total);
+    }
+    const data = new Uint8Array(received);
+    let offset = 0;
+    for (const chunk of chunks) { data.set(chunk, offset); offset += chunk.length; }
+    return data.buffer;
+  }
+
+  async function load(nextMode) {
+    if (loading || contextLost) return;
+    const controller = new AbortController();
+    let watchdog = 0;
+    const poke = () => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => { controller.abort(); manager.abort(); }, STALL_MS);
+    };
+    // Whatever cannot be cancelled (images on Safari < 17) is no longer waited for once it stalls.
+    const stalled = new Promise((resolve, reject) => controller.signal.addEventListener('abort', () => reject(new Error(`Download stalled for ${STALL_MS / 1000} s`)), { once: true }));
+    stalled.catch(() => {});
+    poke();
+    transfer = { signal: controller.signal, poke };
+    let succeeded = false;
+    loading = true;
+    quality.disabled = true;
+    setState('loading');
+    setProgress(0);
+    stage.setAttribute('aria-busy', 'true');
+    showStatus(nextMode === 'detail' ? '高精細モデルを読み込み中' : '3Dモデルを読み込み中');
+    try {
+      const url = new URL(`./${MODELS.folder}/${MODELS[nextMode]}`, import.meta.url);
+      // The .glb carries everything; the .gltf is small and pulls its buffer and textures afterwards.
+      const share = nextMode === 'detail' ? 0.04 : 0.9;
+      manager.onProgress = (item, loaded, total) => { poke(); setProgress(share + (0.97 - share) * (loaded / Math.max(total, 1))); };
+      const data = await download(url, controller.signal, (received, total) => { poke(); if (total) setProgress(share * Math.min(1, received / total)); });
+      const asset = await Promise.race([loader.parseAsync(data, new URL('./', url).href), stalled]);
+      // Every model byte is in. The helper maps are optional: prepareModel stops waiting for any that stall.
+      clearTimeout(watchdog);
+      transfer = null;
+      const nextBounds = new THREE.Box3().setFromObject(asset.scene);
+      if (!Number.isFinite(nextBounds.getSize(new THREE.Vector3()).length()) || nextBounds.isEmpty()) {
+        look.disposeModel(asset.scene);
+        throw new Error('Model geometry has no valid bounds');
+      }
+      await look.prepareModel(asset.scene, { mode: nextMode, stallMs: STALL_MS });
+      if (model) {
+        scene.remove(model);
+        look.disposeModel(model);
+      }
+      model = asset.scene;
+      bounds = nextBounds;
+      mode = nextMode;
+      root.dataset.mode = mode;
+      look.setBounds(bounds);
+      scene.add(model);
+      setProgress(1);
+      succeeded = true;
+      loading = false;
+      // Frame the camera even while the context is lost (frame() draws nothing then), so a restore
+      // shows the figure instead of the view from the origin.
+      fitView();
+      framedModel = model;
+      if (!contextLost && !failed3D) {
+        revealModel(true);
+        showStatus();
+        setState('ready');
+      }
+    } catch (error) {
+      console.error(error);
+      if (!contextLost) {
+        showStatus(model ? '切替に失敗しました。現在のモデルを表示しています。' : '3Dを読み込めませんでした。画像で確認するか、再試行できます。');
+        setState(model ? 'ready' : 'error');
+      }
+    } finally {
+      clearTimeout(watchdog);
+      transfer = null;
+      manager.onProgress = undefined;
+      loading = false;
+      if (!succeeded) setProgress(null);
+      else if (progress) progress.textContent = '';
+      stage.removeAttribute('aria-busy');
+      quality.disabled = contextLost || failed3D;
+      quality.textContent = model ? (mode === 'detail' ? '標準に切替' : '高精細に切替') : '3D表示を再試行';
+      quality.setAttribute('aria-pressed', String(mode === 'detail'));
+      flushWaiters();
+    }
+  }
+
+  // If the context does not come back, stop promising recovery. Only visible time counts: iOS gives a
+  // backgrounded tab its context back when it returns to the foreground, and restores take a second
+  // or two once visible, so 10 s of visible time without one means it is not coming.
+  const RESTORE_MS = 10_000;
+  let restoreTimer = 0;
+  function awaitRestore() {
+    clearTimeout(restoreTimer);
+    restoreTimer = setTimeout(() => {
+      if (!contextLost) return;
+      if (document.hidden) { document.addEventListener('visibilitychange', awaitRestore, { once: true }); return; }
+      setState('error');
+      showStatus('このブラウザでは3Dを表示できません。画像で各方向を確認できます。');
+    }, RESTORE_MS);
+  }
+
+  renderer.domElement.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    contextLost = true;
+    if (failed3D) return; // already showing the posters with the error message
+    cancelPending();
+    quality.disabled = true;
+    revealModel(false);
+    setState('lost');
+    showStatus('3D表示を復旧中。各方向の画像を確認できます。');
+    awaitRestore();
+  });
+  renderer.domElement.addEventListener('webglcontextrestored', () => {
+    contextLost = false;
+    clearTimeout(restoreTimer);
+    look.onContextRestored();
+    if (failed3D) return; // the posters stay
+    quality.disabled = loading;
+    revealModel(!!model);
+    showStatus(model ? '' : '3D表示を再試行できます。');
+    setState(model ? 'ready' : loading ? 'loading' : 'error');
+    // Keep the visitor's camera; fit it only if this model was never framed.
+    if (model && framedModel !== model) { fitView(); framedModel = model; } else requestRender(true);
+  });
+  quality.addEventListener('click', () => void load(model && mode === 'standard' ? 'detail' : 'standard'));
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(stage);
+  const fitElement = stage.querySelector('#fit');
+  if (fitElement) resizeObserver.observe(fitElement);
+  renderer.domElement.hidden = false;
+  revealModel(false);
+  resize();
+  void load('standard');
+
+  // ---- test hooks (used by the screenshot harness and for poster capture) -------------------
+  window.__viewer = {
+    // Resolves once the full-quality frame for the current camera is on screen and CSS has stopped
+    // animating the canvas.
+    async whenSettled() {
+      if (busy()) await new Promise((resolve) => waiters.push(resolve));
+      await Promise.allSettled(renderer.domElement.getAnimations().map((animation) => animation.finished));
+      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+    },
+    // Camera on the fitted full-body orbit. Azimuth about +Y from +Z towards +X (0 front, 90 side,
+    // 180 rear); polar from +Y. Optional extras for close studies: zoom (2 = twice as close) and
+    // height (0 feet .. 1 top of the figure) of the point looked at.
+    setOrbit(azimuthDeg, polarDeg = 82, zoom = 1, height = null) {
+      if (!bounds) return;
+      const azimuth = THREE.MathUtils.degToRad(azimuthDeg);
+      const polar = THREE.MathUtils.degToRad(polarDeg);
+      frame([Math.sin(polar) * Math.sin(azimuth), Math.cos(polar), Math.sin(polar) * Math.cos(azimuth)], null, false);
+      const offset = camera.position.clone().sub(controls.target).divideScalar(Math.max(zoom, 0.05));
+      if (height !== null) controls.target.y = bounds.min.y + (bounds.max.y - bounds.min.y) * height;
+      camera.position.copy(controls.target).add(offset);
+      framing = true;
+      controls.update();
+      framing = false;
+      showPreset(false);
+      renderFull();
+    },
+    state() {
+      return { mode, view, free: !onPreset, viewer: root.dataset.viewer, pixelRatio: renderer.getPixelRatio(), coarse, fit: fitArea && { x: Math.round(fitArea.x), y: Math.round(fitArea.y), width: Math.round(fitArea.width), height: Math.round(fitArea.height), stage: `${fitArea.stageWidth}x${fitArea.stageHeight}` }, ...look.state() };
+    },
+  };
+}

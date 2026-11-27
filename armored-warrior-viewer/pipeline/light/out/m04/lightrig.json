@@ -1,0 +1,30 @@
+{
+ "key": {
+  "dir": [
+   -0.4212,
+   0.5617,
+   0.7121
+  ],
+  "color": "#fff0de",
+  "intensity": 1.0
+ },
+ "fill": {
+  "dir": [
+   0.6585,
+   -0.0798,
+   0.7483
+  ],
+  "color": "#aebfff",
+  "intensity": 0.32
+ },
+ "rim": {
+  "dir": [
+   0.5803,
+   0.3602,
+   -0.7304
+  ],
+  "color": "#d6e4ff",
+  "intensity": 0.8
+ },
+ "_note": "View space (x right, y up, z towards viewer); dir points from the surface TO the light. Same rig that was rendered in Blender (pipeline/light/rig.blend) to make the matcaps, which already contain key/fill/rim for gold, armor and crystal. Toon ramp suggestion: lit = smoothstep(-0.02, 0.06, dot(N, key.dir)); shadow tint multiplies by fill colour."
+}

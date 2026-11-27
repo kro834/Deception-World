@@ -1,0 +1,11 @@
+diff --git a/look/tunables.js b/look/tunables.js
+index 9b6f396..855d55f 100644
+--- a/look/tunables.js
++++ b/look/tunables.js
+@@ -173,5 +173,5 @@ export const LOOK = {
+ 
+   // Pixel budget for the drawing buffer. Desktop supersamples a little for antialiasing.
+-  pixels: { desktop: 3.2e6, mobile: 2.1e6, desktopMinRatio: 1.5, maxRatio: 3 },
++  pixels: { desktop: 3.2e6, mobile: 1.2e6, desktopMinRatio: 1.5, maxRatio: 3 }, // mobile: about DPR 2.25 on a phone stage (was 2.1e6, the full DPR 3)
+ };
+ 

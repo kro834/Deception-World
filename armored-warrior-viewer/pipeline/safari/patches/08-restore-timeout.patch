@@ -1,0 +1,34 @@
+diff --git a/viewer.js b/viewer.js
+index b1e5e3d..4b9ad8c 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -450,4 +450,19 @@ function startViewer() {
+   }
+ 
++  // If the context does not come back, stop promising recovery. Only visible time counts: iOS gives a
++  // backgrounded tab its context back when it returns to the foreground, and restores take a second
++  // or two once visible, so 10 s of visible time without one means it is not coming.
++  const RESTORE_MS = 10_000;
++  let restoreTimer = 0;
++  function awaitRestore() {
++    clearTimeout(restoreTimer);
++    restoreTimer = setTimeout(() => {
++      if (!contextLost) return;
++      if (document.hidden) { document.addEventListener('visibilitychange', awaitRestore, { once: true }); return; }
++      setState('error');
++      showStatus('このブラウザでは3Dを表示できません。画像で各方向を確認できます。');
++    }, RESTORE_MS);
++  }
++
+   renderer.domElement.addEventListener('webglcontextlost', (event) => {
+     event.preventDefault();
+@@ -459,7 +474,9 @@ function startViewer() {
+     setState('lost');
+     showStatus('3D表示を復旧中。各方向の画像を確認できます。');
++    awaitRestore();
+   });
+   renderer.domElement.addEventListener('webglcontextrestored', () => {
+     contextLost = false;
++    clearTimeout(restoreTimer);
+     look.onContextRestored();
+     if (failed3D) return; // the posters stay

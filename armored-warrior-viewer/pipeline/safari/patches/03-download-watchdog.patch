@@ -1,0 +1,136 @@
+diff --git a/look/look.js b/look/look.js
+index 1346833..8df7203 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -164,8 +164,22 @@ export function createLook({ renderer, camera }) {
+ 
+   // Swap every mesh's glTF material for a painted material.
+-  async function prepareModel(root, { mode = 'standard' } = {}) {
+-    await ready;
++  // Resolves true once every job has settled, or false as soon as none has settled for stallMs.
++  function settleUnlessStalled(jobs, stallMs) {
++    return new Promise((resolve) => {
++      let left = jobs.length;
++      let timer = 0;
++      const arm = () => { clearTimeout(timer); timer = setTimeout(() => resolve(false), stallMs); };
++      if (!left) { resolve(true); return; }
++      arm();
++      for (const job of jobs) job.finally(() => { if (--left === 0) { clearTimeout(timer); resolve(true); } else arm(); });
++    });
++  }
++
++  async function prepareModel(root, { mode = 'standard', stallMs = 45_000 } = {}) {
++    // Matcaps, light rig and manifest are optional too: a stalled one does not hold the model back.
++    await Promise.race([ready, new Promise((resolve) => setTimeout(resolve, stallMs))]);
+     const cache = new Map();
+     const jobs = [];
++    let waiting = true;
+     const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+     root.traverse((object) => {
+@@ -209,4 +223,5 @@ export function createLook({ renderer, camera }) {
+           if (!entry?.[key]) return;
+           jobs.push(loadTexture(entry[key], { flipY: false, ...options }).then((texture) => {
++            if (!waiting) { texture.dispose(); return; } // arrived after prepareModel stopped waiting
+             texture.anisotropy = anisotropy;
+             owned.push(texture);
+@@ -231,5 +246,7 @@ export function createLook({ renderer, camera }) {
+       object.material = material;
+     });
+-    await Promise.all(jobs);
++    // The helper maps are optional: one that has stopped arriving does not hold the model back.
++    if (!(await settleUnlessStalled(jobs, stallMs))) notes.push('helper maps stalled: shown without the missing ones');
++    waiting = false;
+     root.userData.lookMaterials = [...cache.values()];
+     const count = (test) => root.userData.lookMaterials.filter(test).length;
+diff --git a/viewer.js b/viewer.js
+index 865a41f..b629a3d 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -290,6 +290,26 @@ function startViewer() {
+   }
+ 
+-  // Download with real progress: bytes of the main file, then the files the glTF references.
+-  async function download(url, signal, share) {
++  // Downloads give up only when nothing has arrived for this long, never after a fixed total time
++  // (a 25 MB model on a slow phone connection can take minutes and still be making progress).
++  const STALL_MS = 45_000;
++  let transfer = null; // { signal, poke } of the load in progress
++
++  // External buffers (the detail model's .bin) stream through download() as well, so the watchdog
++  // sees each chunk and can cancel them; GLTFLoader would fetch them with neither.
++  loader.register((parser) => ({
++    name: 'viewer-buffers',
++    beforeRoot() {
++      const loadBuffer = parser.loadBuffer.bind(parser);
++      parser.loadBuffer = (index) => {
++        const definition = parser.json.buffers?.[index];
++        if (!transfer || !definition?.uri || definition.uri.startsWith('data:')) return loadBuffer(index);
++        return download(new URL(definition.uri, parser.options.path).href, transfer.signal, transfer.poke);
++      };
++      return null;
++    },
++  }));
++
++  // Download with real progress: onChunk(received, total) after every chunk (total 0 when unknown).
++  async function download(url, signal, onChunk) {
+     // The standard model may already be on its way (index.html starts it early): take that response once.
+     const early = window.__earlyModel;
+@@ -304,5 +324,5 @@ function startViewer() {
+     if (!response.ok) throw new Error(`Model request failed (${response.status})`);
+     const total = Number(response.headers.get('content-length')) || 0;
+-    if (!response.body || !total) return response.arrayBuffer();
++    if (!response.body) return response.arrayBuffer();
+     const reader = response.body.getReader();
+     const chunks = [];
+@@ -313,5 +333,5 @@ function startViewer() {
+       chunks.push(value);
+       received += value.length;
+-      setProgress(share * Math.min(1, received / total));
++      onChunk(received, total);
+     }
+     const data = new Uint8Array(received);
+@@ -324,5 +344,14 @@ function startViewer() {
+     if (loading || contextLost) return;
+     const controller = new AbortController();
+-    const timeout = setTimeout(() => controller.abort(), 45_000);
++    let watchdog = 0;
++    const poke = () => {
++      clearTimeout(watchdog);
++      watchdog = setTimeout(() => { controller.abort(); manager.abort(); }, STALL_MS);
++    };
++    // Whatever cannot be cancelled (images on Safari < 17) is no longer waited for once it stalls.
++    const stalled = new Promise((resolve, reject) => controller.signal.addEventListener('abort', () => reject(new Error(`Download stalled for ${STALL_MS / 1000} s`)), { once: true }));
++    stalled.catch(() => {});
++    poke();
++    transfer = { signal: controller.signal, poke };
+     let succeeded = false;
+     loading = true;
+@@ -336,7 +365,10 @@ function startViewer() {
+       // The .glb carries everything; the .gltf is small and pulls its buffer and textures afterwards.
+       const share = nextMode === 'detail' ? 0.04 : 0.9;
+-      manager.onProgress = (item, loaded, total) => setProgress(share + (0.97 - share) * (loaded / Math.max(total, 1)));
+-      const data = await download(url, controller.signal, share);
+-      const asset = await loader.parseAsync(data, new URL('./', url).href);
++      manager.onProgress = (item, loaded, total) => { poke(); setProgress(share + (0.97 - share) * (loaded / Math.max(total, 1))); };
++      const data = await download(url, controller.signal, (received, total) => { poke(); if (total) setProgress(share * Math.min(1, received / total)); });
++      const asset = await Promise.race([loader.parseAsync(data, new URL('./', url).href), stalled]);
++      // Every model byte is in. The helper maps are optional: prepareModel stops waiting for any that stall.
++      clearTimeout(watchdog);
++      transfer = null;
+       const nextBounds = new THREE.Box3().setFromObject(asset.scene);
+       if (!Number.isFinite(nextBounds.getSize(new THREE.Vector3()).length()) || nextBounds.isEmpty()) {
+@@ -344,5 +376,5 @@ function startViewer() {
+         throw new Error('Model geometry has no valid bounds');
+       }
+-      await look.prepareModel(asset.scene, { mode: nextMode });
++      await look.prepareModel(asset.scene, { mode: nextMode, stallMs: STALL_MS });
+       if (model) {
+         scene.remove(model);
+@@ -371,5 +403,6 @@ function startViewer() {
+       }
+     } finally {
+-      clearTimeout(timeout);
++      clearTimeout(watchdog);
++      transfer = null;
+       manager.onProgress = undefined;
+       loading = false;

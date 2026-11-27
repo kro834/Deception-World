@@ -1,0 +1,25 @@
+diff --git a/vercel.json b/vercel.json
+index c29dbeb..ee4fd14 100644
+--- a/vercel.json
++++ b/vercel.json
+@@ -67,5 +67,5 @@
+     },
+     {
+-      "source": "/(model-v[0-9]+/.*)",
++      "source": "/(model-v[0-9]+/.*\\.(?:glb|gltf|bin|jpg|png|webp))",
+       "headers": [
+         {
+@@ -75,4 +75,13 @@
+       ]
+     },
++    {
++      "source": "/(model-v[0-9]+/.*\\.json)",
++      "headers": [
++        {
++          "key": "Cache-Control",
++          "value": "public, max-age=0, must-revalidate"
++        }
++      ]
++    },
+     {
+       "source": "/(previews-[^/]+/.*)",

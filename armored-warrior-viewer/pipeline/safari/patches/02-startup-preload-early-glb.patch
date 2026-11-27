@@ -1,0 +1,63 @@
+diff --git a/index.html b/index.html
+index 6e2ddfc..7400734 100644
+--- a/index.html
++++ b/index.html
+@@ -21,4 +21,15 @@
+ {"imports":{"three":"./vendor/three/build/three.module.min.js","three/addons/":"./vendor/three/addons/"}}
+ </script>
++<!-- The module graph, fetched in parallel instead of three levels deep (same URLs as the imports). -->
++<link rel="modulepreload" href="./vendor/three/build/three.module.min.js">
++<link rel="modulepreload" href="./vendor/three/build/three.core.min.js">
++<link rel="modulepreload" href="./vendor/three/addons/loaders/GLTFLoader.js">
++<link rel="modulepreload" href="./vendor/three/addons/utils/BufferGeometryUtils.js">
++<link rel="modulepreload" href="./vendor/three/addons/controls/OrbitControls.js">
++<link rel="modulepreload" href="./vendor/meshopt_decoder.mjs">
++<link rel="modulepreload" href="./look/look.js">
++<link rel="modulepreload" href="./look/tunables.js">
++<link rel="modulepreload" href="./look/material.js">
++<link rel="modulepreload" href="./look/post.js">
+ </head>
+ <body>
+@@ -64,4 +75,22 @@
+   </footer>
+ </main>
++<script>
++// Start the standard model download as soon as the poster is in, while the scripts still load.
++// viewer.js takes this response instead of fetching the file again (window.__earlyModel).
++(function () {
++  if (typeof WebGL2RenderingContext === 'undefined' || typeof AbortController === 'undefined') return;
++  var early = window.__earlyModel = { url: new URL('./model-v10/standard-v14.glb', document.baseURI).href, controller: new AbortController(), response: null, taken: false };
++  early.start = function () {
++    if (!early.response) {
++      early.response = fetch(early.url, { signal: early.controller.signal });
++      early.response.catch(function () {});
++    }
++    return early.response;
++  };
++  var poster = document.getElementById('poster');
++  if (poster.complete) early.start();
++  else { poster.addEventListener('load', early.start, { once: true }); poster.addEventListener('error', early.start, { once: true }); }
++})();
++</script>
+ <script type="module" src="./viewer.js?v=15"></script>
+ <script src="./ui.js?v=1" defer></script>
+diff --git a/viewer.js b/viewer.js
+index 7e35114..865a41f 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -292,5 +292,14 @@ function startViewer() {
+   // Download with real progress: bytes of the main file, then the files the glTF references.
+   async function download(url, signal, share) {
+-    const response = await fetch(url, { signal });
++    // The standard model may already be on its way (index.html starts it early): take that response once.
++    const early = window.__earlyModel;
++    let response;
++    if (early && !early.taken && early.url === String(url)) {
++      early.taken = true;
++      signal.addEventListener('abort', () => early.controller.abort(), { once: true });
++      response = await early.start();
++    } else {
++      response = await fetch(url, { signal });
++    }
+     if (!response.ok) throw new Error(`Model request failed (${response.status})`);
+     const total = Number(response.headers.get('content-length')) || 0;

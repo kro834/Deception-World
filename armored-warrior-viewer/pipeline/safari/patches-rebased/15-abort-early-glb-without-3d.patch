@@ -1,0 +1,10 @@
+diff --git a/viewer.js b/viewer.js
+index c9dfc19..d57b8ff 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -129,4 +129,5 @@ try {
+ } catch (error) {
+   console.error(error);
++  window.__earlyModel?.controller.abort(); // the model download index.html started is not needed now
+   setState('error');
+   showStatus('このブラウザでは3Dを表示できません。画像で各方向を確認できます。');

@@ -1,0 +1,41 @@
+diff --git a/look/look.js b/look/look.js
+index 06d64d6..43ea48c 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -51,5 +51,6 @@ export function createLook({ renderer, camera }) {
+   const scratch = new THREE.Vector3();
+   const coarse = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+-  let tier = TIERS.includes(params.get('tier')) ? params.get('tier') : 'full';
++  const initialTier = TIERS.includes(params.get('tier')) ? params.get('tier') : 'full';
++  let tier = initialTier;
+   // Materials whose program failed to compile or link: sticky, because three reports a broken program
+   // only on its first use and a later attempt would otherwise "succeed" with it.
+@@ -367,5 +368,6 @@ export function createLook({ renderer, camera }) {
+   // Draw one frame. `full` runs the brush pass; `paint` (0..1) is how much of it shows.
+   function render(scene, { full = false, paint = 1 } = {}) {
+-    if (fatal) return;
++    // A lost context makes every check fail (incomplete framebuffer): never lower the tier for that.
++    if (fatal || renderer.getContext().isContextLost()) return;
+     fitDepthRange();
+     const started = performance.now();
+@@ -395,5 +397,5 @@ export function createLook({ renderer, camera }) {
+   // Re-run only the final pass with a different paint mix (used for the settle cross-fade).
+   function composite(paint) {
+-    if (tier === 'forward' || fatal) return;
++    if (tier === 'forward' || fatal || renderer.getContext().isContextLost()) return;
+     try {
+       pipeline.renderFinal(camera, paint);
+@@ -419,5 +421,12 @@ export function createLook({ renderer, camera }) {
+       return { tier, plain: plain ? `plain, kept: ${keep.filter((name) => own(LAYERS, name)).join(' ') || 'nothing'}` : false, size: { ...pipeline.size }, lastFullMs: Math.round(lastFullMs), manifest: !!manifest, maps, brush: paintOn() ? (coarse ? LOOK.paint.mobileScale : LOOK.paint.scale) : false, notes: notes.slice(-6) };
+     },
+-    onContextRestored() { pipeline.reset(); },
++    // Everything is recompiled and reallocated on the new context: start again from the first tier.
++    onContextRestored() {
++      pipeline.reset();
++      pipeline.resetPrograms();
++      broken.clear();
++      if (tier !== initialTier) notes.push(`context restored -> ${initialTier}`);
++      tier = initialTier;
++    },
+     dispose() {
+       pipeline.dispose();

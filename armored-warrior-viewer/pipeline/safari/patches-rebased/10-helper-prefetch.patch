@@ -1,0 +1,40 @@
+diff --git a/look/look.js b/look/look.js
+index 1c37cfd..efb5263 100644
+--- a/look/look.js
++++ b/look/look.js
+@@ -163,4 +163,28 @@ export function createLook({ renderer, camera }) {
+   const ready = Promise.all([loadMatcaps(), loadRig(), loadManifest()]).then(() => undefined);
+ 
++  // The standard helper maps do not depend on the model, so they are fetched while the model downloads
++  // instead of after it is parsed. prepareModel takes each one once (same key, same URL); paint maps
++  // still wait for the model, because whether they are used depends on its geometry.
++  const prefetched = new Map();
++  function prefetchHelpers() {
++    const keys = [needs.toonNormal && 'toonNormal', needs.style && 'style', LOOK.paint.confidenceMap > 0 && ((paintOn() && LOOK.paint.smeared > 0) || LOOK.paint.smearBlur > 0) && 'conf'].filter(Boolean);
++    for (const modes of Object.values(manifest || {})) {
++      const entry = (LOOK.detailHelpers > 0 && !coarse ? null : modes.standard) ?? null;
++      for (const key of keys) {
++        if (!entry?.[key] || prefetched.has(`${key} ${entry[key]}`)) continue;
++        const job = loadTexture(entry[key], { flipY: false });
++        job.catch(() => {});
++        prefetched.set(`${key} ${entry[key]}`, job);
++      }
++    }
++  }
++  ready.then(prefetchHelpers);
++  function takeTexture(key, url, options) {
++    const job = prefetched.get(`${key} ${url}`);
++    if (!job) return loadTexture(url, options);
++    prefetched.delete(`${key} ${url}`);
++    return job;
++  }
++
+   // Release a glTF texture before it ever reaches the GPU.
+   function drop(source, key) {
+@@ -236,5 +260,5 @@ export function createLook({ renderer, camera }) {
+           const entry = key.startsWith('paint') ? paintEntry : helperEntry;
+           if (!entry?.[key]) return;
+-          jobs.push(loadTexture(entry[key], { flipY: false, ...options }).then((texture) => {
++          jobs.push(takeTexture(key, entry[key], { flipY: false, ...options }).then((texture) => {
+             if (!waiting) { texture.dispose(); return; } // arrived after prepareModel stopped waiting
+             texture.anisotropy = anisotropy;

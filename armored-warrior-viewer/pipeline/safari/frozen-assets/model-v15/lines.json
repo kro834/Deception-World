@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "maps": {
+    "Armored Warrior · merged PBR": {
+      "standard": {
+        "lines": "lines_body_1024.webp",
+        "linesSpread": 2.34
+      },
+      "detail": {
+        "lines": "lines_body_2048.webp",
+        "linesSpread": 4.68
+      }
+    },
+    "tripo_material_1b072094-c364-4f28-972a-07e61327bf9a": {
+      "standard": {
+        "lines": "lines_helmet_1024.webp",
+        "linesSpread": 6.06
+      },
+      "detail": {
+        "lines": "lines_helmet_2048.webp",
+        "linesSpread": 12.12
+      }
+    },
+    "Chest original Tripo PBR": {
+      "standard": {
+        "lines": "lines_chest_1024.webp",
+        "linesSpread": 1.57
+      },
+      "detail": {
+        "lines": "lines_chest_2048.webp",
+        "linesSpread": 3.13
+      }
+    }
+  }
+}
