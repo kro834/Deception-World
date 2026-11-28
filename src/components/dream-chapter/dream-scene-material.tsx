@@ -29,7 +29,7 @@ export function DreamSceneMaterial() {
         ref={trigger}
         type="button"
         aria-expanded={open}
-        aria-controls="dream-main-scene-ciel"
+        aria-controls={open ? "dream-main-scene-ciel" : undefined}
         onClick={() => {
           if (open) close();
           else {

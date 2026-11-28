@@ -1664,7 +1664,7 @@ export function GalleryPage() {
         data-gallery-background={display.preferences.background}
         ref={dialogRef}
         tabIndex={-1}
-        aria-labelledby="gallery-viewer-title"
+        aria-labelledby={selected ? "gallery-viewer-title" : undefined}
         onClose={(event) => {
           // A close event can arrive after Forward has requested a fresh modal.
           if (!event.currentTarget.open && viewerActiveRef.current && !finishReturnRef.current)
