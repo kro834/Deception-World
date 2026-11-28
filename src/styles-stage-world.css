@@ -2448,6 +2448,21 @@ html[data-family="world"]:root
   border-bottom: 1px solid rgb(var(--sw-light-rgb) / 16%);
 }
 
+/* 2026-11-28 (owner: iPhoneでのep文字表示が途切れている): on phones the card's
+   grid gives the picture a 182px row (styles-world/31.css), but the 16 / 10
+   ratio above made it about 200px tall, so the copy row overlapped its foot
+   and hid the lower half of the EP.0N plate. The picture fills its row. */
+@media (max-width: 760px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-thumbnail {
+    aspect-ratio: auto;
+    height: 182px;
+  }
+}
+
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
