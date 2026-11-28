@@ -77,6 +77,9 @@ function DreamGpuDeskCanvas({
     const canvas = ref.current;
     const element = canvas?.firstElementChild as HTMLElement | null;
     if (!canvas || !element) return;
+    // Chrome 158 asks the child to carry `drawable` too (the canvas side is `content="drawable"`);
+    // without it drawElementImageToTexture throws on every paint.
+    element.setAttribute("drawable", "");
     // The canvas takes the height of the live desk it carries.
     // Inside the canvas the desk is laid out at the canvas origin with its flow width.
     element.style.setProperty("width", `${box.width}px`, "important");
@@ -102,6 +105,7 @@ function DreamGpuDeskCanvas({
       alive = false;
       sizer.disconnect();
       stop?.();
+      element.removeAttribute("drawable");
       element.style.removeProperty("width");
       element.style.removeProperty("margin");
     };
@@ -119,7 +123,7 @@ function DreamGpuDeskCanvas({
         } as CSSProperties
       }
       data-ready={ready ? "true" : "false"}
-      {...{ layoutsubtree: "" }}
+      {...{ layoutsubtree: "", content: "drawable" }}
     >
       {children}
     </canvas>
