@@ -44,20 +44,27 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
   border-radius: 50%;
   -webkit-mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 2.6px),
+    transparent calc(100% - 3px),
     #000 calc(100% - 2px)
   );
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
 }
 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring::before {
-  background: rgb(255 255 255 / 0.34);
+  background: conic-gradient(
+    from 0deg,
+    rgb(255 255 255 / 0.44),
+    rgb(var(--ring-gold-rgb) / 0.42) 0.35turn,
+    rgb(var(--ring-key-rgb) / 0.48) 0.7turn,
+    rgb(255 255 255 / 0.44)
+  );
 }
 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
   background: conic-gradient(
     from 0deg,
-    var(--ring-key) 0turn,
+    #ffffff 0turn,
+    var(--ring-key) 0.04turn,
     var(--ring-tone) calc(var(--ring-turn) * 0.125turn),
     transparent calc(var(--ring-turn) * 0.125turn)
   );
@@ -73,32 +80,268 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring > i {
 html[data-family="world"] body .rider-console .rider-ring-dial-ring > i::before {
   content: "";
   position: absolute;
-  top: -3px;
+  top: -3.5px;
   left: calc(50% - 4px);
   width: 8px;
   height: 8px;
   /* Unlit nodes are quiet ticks: they may cross the artwork, so they carry
      no fill and never read as a mark on a face. */
-  border: 1px solid rgb(255 255 255 / 0.6);
+  border: 1.5px solid rgb(255 255 255 / 0.72);
   border-radius: 50%;
-  background: none;
+  background: rgb(6 14 24 / 0.6);
+  box-shadow: 0 0 8px rgb(var(--ring-key-rgb) / 0.32);
   box-sizing: border-box;
 }
 
 html[data-family="world"] body .rider-console .rider-ring-dial-ring > i.is-on::before {
-  border-color: #fff;
-  background: var(--ring-tone);
-  scale: 2.5;
+  border-color: #ffffff;
+  background: radial-gradient(circle at 38% 34%, #ffffff 0%, var(--ring-tone) 58%);
+  scale: 2.75;
   box-shadow:
-    0 0 0 3px rgb(6 16 27 / 0.72),
-    0 0 0 5px color-mix(in srgb, var(--ring-tone) 46%, transparent),
-    0 0 16px 2px color-mix(in srgb, var(--ring-tone) 72%, transparent);
+    0 0 0 2.5px rgb(4 10 20 / 0.88),
+    0 0 0 4.5px color-mix(in srgb, var(--ring-tone) 76%, #ffffff),
+    0 0 18px 4px color-mix(in srgb, var(--ring-tone) 88%, transparent),
+    0 0 36px 8px color-mix(in srgb, var(--ring-tone) 46%, transparent);
 }
 
 /* The rail's markers: a ring instead of a diamond (paint only). */
 html[data-family="world"] body .rider-console .rider-tabs > button > i {
   border-radius: 50%;
   transform: none;
+}
+
+/* Wave-8 Dark-Luxury Rider Console: replace glaring bright-white selected tab
+   with rider-tone (--tab-tone) obsidian-metallic bevels, luminous rims, and
+   high-contrast typography; keep rail dimensions, ids & slide gestures intact. */
+@media (forced-colors: none) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > #riders
+    > .section-title
+    h2 {
+    color: transparent;
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #edf6ff 42%,
+      #b8d0e8 80%,
+      #e6f2ff 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 6px 22px rgb(122 232 255 / 0.24));
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > #riders
+    > .rider-console {
+    border-color: rgb(186 218 242 / 0.36);
+    border-top: 2px solid rgb(240 207 134 / 0.82);
+    background:
+      radial-gradient(ellipse 64% 46% at 14% 0%, rgb(122 232 255 / 0.14), transparent 68%),
+      radial-gradient(ellipse 56% 42% at 90% 100%, rgb(255 95 200 / 0.14), transparent 70%),
+      linear-gradient(156deg, #121c2a 0%, #09101a 56%, #050910 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.32),
+      inset 0 0 0 1px rgb(168 214 236 / 0.14),
+      0 38px 80px -24px rgb(0 0 0 / 0.92),
+      0 0 46px -18px rgb(122 232 255 / 0.22);
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #riders
+    .rider-tabs.liquid-swipe-tabs {
+    border-color: rgb(168 214 236 / 0.32) !important;
+    background:
+      linear-gradient(180deg, rgb(122 232 255 / 0.06) 0%, transparent 40%),
+      #040912 !important;
+    box-shadow:
+      inset 0 2px 14px rgb(0 0 0 / 0.78),
+      inset 0 1px 0 rgb(232 248 255 / 0.14) !important;
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #riders
+    .rider-tabs
+    .liquid-selection-surface {
+    border-color: rgb(168 228 255 / 0.44) !important;
+    background:
+      radial-gradient(110% 90% at 14% 0%, rgb(122 232 255 / 0.22), transparent 62%),
+      linear-gradient(158deg, #16283e 0%, #0b1625 56%, #060d18 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      inset 0 0 0 1px rgb(122 232 255 / 0.36),
+      0 10px 24px -8px rgb(0 0 0 / 0.82),
+      0 0 22px -6px rgb(122 232 255 / 0.28) !important;
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #riders
+    .rider-tabs
+    > button[role="tab"][aria-selected="true"] {
+    border-color: color-mix(in srgb, var(--tab-tone, #7ae8ff) 78%, #ffffff) !important;
+    background:
+      radial-gradient(
+        115% 140% at 6% 50%,
+        color-mix(in srgb, var(--tab-tone, #7ae8ff) 40%, transparent) 0%,
+        transparent 68%
+      ),
+      radial-gradient(
+        80% 90% at 96% 10%,
+        rgb(255 255 255 / 0.12) 0%,
+        transparent 64%
+      ),
+      linear-gradient(
+        156deg,
+        color-mix(in srgb, var(--tab-tone, #7ae8ff) 24%, #132134) 0%,
+        color-mix(in srgb, var(--tab-tone, #7ae8ff) 11%, #09121f) 58%,
+        #050a12 100%
+      ) !important;
+    box-shadow:
+      inset 4px 0 0 var(--tab-tone, #7ae8ff),
+      inset 0 1px 0 rgb(255 255 255 / 0.44),
+      inset 0 0 24px -6px color-mix(in srgb, var(--tab-tone, #7ae8ff) 52%, transparent),
+      0 8px 22px -6px rgb(0 0 0 / 0.8),
+      0 0 26px -6px color-mix(in srgb, var(--tab-tone, #7ae8ff) 58%, transparent) !important;
+    color: #f8fcff !important;
+    text-shadow:
+      0 0 14px color-mix(in srgb, var(--tab-tone, #7ae8ff) 50%, transparent),
+      0 1px 4px rgb(0 0 0 / 0.84);
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #riders
+    .rider-tabs
+    > button[role="tab"][aria-selected="true"]
+    > small {
+    color: color-mix(in srgb, var(--tab-tone, #7ae8ff) 58%, #ffffff) !important;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--tab-tone, #7ae8ff) 64%, transparent);
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #riders
+    .rider-tabs
+    > button[role="tab"][aria-selected="true"]
+    > i {
+    border-color: #ffffff;
+    background: var(--tab-tone, #7ae8ff);
+    box-shadow:
+      0 0 0 2px rgb(6 14 24 / 0.84),
+      0 0 12px 1px var(--tab-tone, #7ae8ff);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    #riders
+    .rider-detail {
+    background:
+      radial-gradient(
+        ellipse 66% 68% at 76% 18%,
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 28%, transparent) 0%,
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 10%, transparent) 44%,
+        transparent 72%
+      ),
+      radial-gradient(ellipse 52% 44% at 14% 92%, rgb(240 207 134 / 0.12), transparent 72%),
+      linear-gradient(132deg, #101926 0%, #070c14 58%, #04070d 100%);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    #riders
+    .rider-copy-block {
+    border: 1px solid color-mix(in srgb, var(--rider-tone, #7ae8ff) 36%, rgb(210 232 248 / 0.28));
+    border-left: 3px solid var(--rider-tone, #7ae8ff);
+    border-radius: 18px;
+    background:
+      linear-gradient(
+          90deg,
+          var(--rider-tone, #7ae8ff) 0%,
+          rgb(240 207 134 / 0.72) 54%,
+          transparent 100%
+        )
+        0 0 / 74% 1.5px no-repeat,
+      radial-gradient(
+        ellipse 80% 56% at 8% 0%,
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 22%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(ellipse 62% 52% at 96% 100%, rgb(240 207 134 / 0.12), transparent 70%),
+      linear-gradient(154deg, rgb(16 26 40 / 0.94) 0%, rgb(8 13 22 / 0.97) 58%, rgb(4 7 14 / 0.99) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      inset 0 0 0 1px color-mix(in srgb, var(--rider-tone, #7ae8ff) 16%, transparent),
+      0 28px 56px -18px rgb(0 0 0 / 0.92),
+      0 0 38px -14px color-mix(in srgb, var(--rider-tone, #7ae8ff) 34%, transparent);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    #riders
+    .rider-copy-block
+    > .rider-person {
+    color: #e6eff8;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--rider-tone, #e6c786) 40%,
+      rgb(240 207 134 / 0.36)
+    );
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    #riders
+    .rider-copy-block
+    > h3 {
+    color: transparent;
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #f2f8ff 44%,
+      color-mix(in srgb, var(--rider-tone, #7ae8ff) 48%, #ffffff) 88%,
+      #ffffff 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 16px color-mix(in srgb, var(--rider-tone, #7ae8ff) 32%, transparent));
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    #riders
+    .rider-copy-block
+    > .rider-description {
+    color: #cddbe8;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -166,10 +409,19 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-conte
   margin: calc(var(--ws-ring-size) / 2 - 0.9em) 0 0;
   padding: 0 0 12px;
   background-position: 50% 100%;
-  background-size: 56px 2px;
+  background-size: 72px 2px;
   font-size: clamp(24px, 2.8vw, 42px);
   text-align: center;
   pointer-events: none;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > h2 {
+    text-shadow:
+      0 0 24px rgb(var(--ring-key-rgb) / 0.44),
+      0 0 42px rgb(var(--ring-gold-rgb) / 0.24),
+      0 4px 16px rgb(0 0 0 / 0.86);
+  }
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > .ws-map {
@@ -201,36 +453,57 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   .ws-contents
   > .ws-map::before {
   inset: 12%;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.34);
+  border: 1.5px solid rgb(var(--ring-key-rgb) / 0.46);
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(92% - 1px),
+      rgb(var(--ring-gold-rgb) / 0.28) calc(92% - 1px) 92%,
+      transparent 92%
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-key-rgb) / 0.12) 0%,
+      rgb(var(--ring-pink-rgb) / 0.08) 46%,
+      transparent 76%
+    );
   box-shadow:
-    inset 0 0 28px -12px rgb(var(--ring-key-rgb) / 0.24),
-    0 0 28px -12px rgb(var(--ring-key-rgb) / 0.24);
+    inset 0 0 38px -10px rgb(var(--ring-key-rgb) / 0.34),
+    0 0 42px -12px rgb(var(--ring-key-rgb) / 0.34);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .ws-contents
   > .ws-map::after {
-  inset: 31%;
+  inset: 30%;
   background:
     radial-gradient(
       closest-side,
       transparent calc(100% - 1.5px),
-      rgb(var(--ring-gold-rgb) / 0.44) calc(100% - 1.5px) 100%,
+      rgb(var(--ring-gold-rgb) / 0.62) calc(100% - 1.5px) 100%,
       transparent 100%
     ),
     radial-gradient(
       closest-side,
-      transparent calc(76% - 1.25px),
-      rgb(var(--ring-pink-rgb) / 0.32) calc(76% - 1.25px) 76%,
-      transparent 76%
+      transparent calc(78% - 1.25px),
+      rgb(var(--ring-pink-rgb) / 0.46) calc(78% - 1.25px) 78%,
+      transparent 78%
     ),
     radial-gradient(
       closest-side,
-      rgb(var(--ring-key-rgb) / 0.16) 0%,
-      rgb(var(--ring-pink-rgb) / 0.08) 48%,
-      transparent 76%
+      transparent calc(58% - 1px),
+      rgb(var(--ring-key-rgb) / 0.32) calc(58% - 1px) 58%,
+      transparent 58%
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-key-rgb) / 0.24) 0%,
+      rgb(var(--ring-gold-rgb) / 0.14) 40%,
+      rgb(var(--ring-pink-rgb) / 0.1) 66%,
+      transparent 84%
     );
+  box-shadow: 0 0 48px -14px rgb(var(--ring-gold-rgb) / 0.28);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > :nth-child(2) {
@@ -279,11 +552,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   border-image: none;
   border-radius: 50%;
   background:
-    radial-gradient(120% 120% at 22% 12%, rgb(var(--ws-card-tone-rgb) / 0.34), transparent 58%),
-    #07101c;
+    radial-gradient(120% 120% at 22% 12%, rgb(var(--ws-card-tone-rgb) / 0.42), transparent 58%),
+    #060d18;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    0 20px 44px -16px rgb(0 0 0 / 0.86);
+    inset 0 1.5px 0 rgb(255 255 255 / 0.32),
+    0 0 0 2px rgb(5 10 18 / 0.9),
+    0 24px 50px -16px rgb(0 0 0 / 0.92),
+    0 0 34px -10px rgb(var(--ws-card-tone-rgb) / 0.42);
 }
 
 /* Chapters 04, 05, 06 (no picture): a jewel-like double concentric optical
@@ -404,9 +679,16 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   content: "";
   position: absolute;
   inset: -7px;
-  padding: 2px;
+  padding: 2.5px;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: conic-gradient(
+    from 210deg,
+    #ffffff 0turn,
+    rgb(var(--ws-card-tone-rgb) / 0.95) 0.16turn,
+    var(--ring-pink) 0.44turn,
+    var(--ring-gold) 0.72turn,
+    #ffffff 1turn
+  );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -457,9 +739,15 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   place-items: center;
   width: 30px;
   height: 30px;
-  border: 1px solid rgb(var(--ws-card-tone-rgb) / 0.8);
+  border: 1px solid rgb(var(--ws-card-tone-rgb) / 0.88);
   border-radius: 50%;
-  background: #07101c;
+  background:
+    radial-gradient(circle at 32% 24%, rgb(255 255 255 / 0.24), transparent 58%),
+    #060e1a;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.34),
+    0 6px 14px -4px rgb(0 0 0 / 0.86),
+    0 0 14px -3px rgb(var(--ws-card-tone-rgb) / 0.48);
   translate: -50% 0;
   font-size: 9px;
   line-height: 1;
@@ -678,6 +966,91 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
 }
 
 /* ---------- 2. 六詠: the six on one ring, their heading at its centre ---------- */
+/* Wave-8 Sovereign Sanctuary (#manager-archive): deep royal violet x sovereign
+   gold x ice-cyan celestial lighting, astrolabe compass, platinum-gold heading,
+   and relic-grade circular medallions (forced-colors safe). */
+@media (forced-colors: none) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    #manager-archive {
+    border-color: rgb(206 168 255 / 0.36);
+    border-top: 2px solid rgb(240 207 134 / 0.86);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(122 232 255 / 0.85) 24%,
+          #f0cf86 50%,
+          rgb(255 110 199 / 0.85) 76%,
+          transparent 96%
+        )
+        0 0 / 100% 2px no-repeat,
+      radial-gradient(
+        circle 52% at 50% 54%,
+        rgb(240 207 134 / 0.16) 0%,
+        rgb(122 232 255 / 0.11) 36%,
+        rgb(168 104 255 / 0.16) 64%,
+        transparent 100%
+      ),
+      radial-gradient(ellipse 68% 44% at 14% 4%, rgb(164 102 255 / 0.28), transparent 68%),
+      radial-gradient(ellipse 60% 42% at 88% 96%, rgb(255 104 166 / 0.2), transparent 70%),
+      linear-gradient(164deg, #170c2b 0%, #0b0617 54%, #05030b 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 224 / 0.34),
+      inset 0 0 0 1px rgb(200 163 255 / 0.16),
+      0 36px 78px -24px rgb(0 0 0 / 0.94),
+      0 0 56px -18px rgb(168 104 255 / 0.34);
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #manager-archive
+    .manager-archive-tabs.liquid-swipe-tabs {
+    border-color: rgb(206 168 255 / 0.34) !important;
+    background:
+      linear-gradient(180deg, rgb(240 207 134 / 0.08) 0%, transparent 48%),
+      #06040e !important;
+    box-shadow:
+      inset 0 2px 12px rgb(0 0 0 / 0.78),
+      inset 0 1px 0 rgb(255 244 224 / 0.14) !important;
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #manager-archive
+    .manager-archive-tabs
+    .liquid-selection-surface {
+    border-color: rgb(240 207 134 / 0.72) !important;
+    background:
+      radial-gradient(120% 100% at 20% 0%, rgb(240 207 134 / 0.26), transparent 62%),
+      linear-gradient(156deg, #281946 0%, #150d28 56%, #0b0616 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 0.44),
+      inset 0 0 0 1px rgb(240 207 134 / 0.38),
+      0 8px 22px -6px rgb(0 0 0 / 0.82),
+      0 0 22px -6px rgb(240 207 134 / 0.38) !important;
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #manager-archive
+    .manager-archive-tabs
+    button[aria-selected="true"] {
+    color: #fff6e2 !important;
+    text-shadow: 0 0 14px rgb(240 207 134 / 0.48);
+  }
+}
+
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   #manager-archive
@@ -709,24 +1082,57 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   content: "";
   position: absolute;
   inset: 12%;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.34);
+  border: 1.5px solid rgb(var(--ring-gold-rgb) / 0.5);
   border-radius: 50%;
   background:
+    linear-gradient(
+        180deg,
+        transparent 6%,
+        rgb(var(--ring-gold-rgb) / 0.24) 24%,
+        transparent 40%,
+        transparent 60%,
+        rgb(var(--ring-gold-rgb) / 0.24) 76%,
+        transparent 94%
+      )
+      50% 0 / 1px 100% no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(var(--ring-key-rgb) / 0.24) 24%,
+        transparent 40%,
+        transparent 60%,
+        rgb(var(--ring-key-rgb) / 0.24) 76%,
+        transparent 94%
+      )
+      0 50% / 100% 1px no-repeat,
     radial-gradient(
       closest-side,
-      transparent calc(72% - 1.25px),
-      rgb(var(--ring-gold-rgb) / 0.28) calc(72% - 1.25px) 72%,
-      transparent 72%
+      transparent calc(84% - 1.25px),
+      rgb(var(--ring-key-rgb) / 0.44) calc(84% - 1.25px) 84%,
+      transparent 84%
     ),
     radial-gradient(
       closest-side,
-      rgb(var(--ring-pink-rgb) / 0.1) 0%,
-      rgb(var(--ring-key-rgb) / 0.08) 46%,
-      transparent 72%
+      transparent calc(68% - 1.5px),
+      rgb(var(--ring-gold-rgb) / 0.56) calc(68% - 1.5px) 68%,
+      transparent 68%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(52% - 1px),
+      rgb(var(--ring-pink-rgb) / 0.36) calc(52% - 1px) 52%,
+      transparent 52%
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-gold-rgb) / 0.22) 0%,
+      rgb(var(--ring-pink-rgb) / 0.16) 36%,
+      rgb(var(--ring-key-rgb) / 0.14) 60%,
+      transparent 88%
     );
   box-shadow:
-    inset 0 0 28px -12px rgb(var(--ring-key-rgb) / 0.22),
-    0 0 28px -12px rgb(var(--ring-key-rgb) / 0.22);
+    inset 0 0 42px -10px rgb(var(--ring-gold-rgb) / 0.32),
+    0 0 46px -12px rgb(var(--ring-key-rgb) / 0.34);
   pointer-events: none;
 }
 
@@ -792,8 +1198,12 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   border-image: none;
   border-radius: 50%;
   overflow: visible;
-  background: #07101c;
-  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
+  background: #060410;
+  box-shadow:
+    0 0 0 2px rgb(6 4 14 / 0.92),
+    0 0 0 9px rgb(240 207 134 / 0.14),
+    0 24px 52px -14px rgb(0 0 0 / 0.94),
+    0 0 38px -8px rgb(196 154 255 / 0.44);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -816,9 +1226,17 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   inset: -7px;
   width: auto;
   height: auto;
-  padding: 2px;
+  padding: 2.5px;
   border-radius: 50%;
-  background: var(--ring-prism);
+  background: conic-gradient(
+    from 210deg,
+    #fff6dc 0turn,
+    #f0cf86 0.18turn,
+    #ff74c6 0.44turn,
+    #7ae8ff 0.7turn,
+    #c89bff 0.86turn,
+    #fff6dc 1turn
+  );
   box-shadow: none;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -862,14 +1280,17 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   width: 36px;
   height: 36px;
   padding: 0;
+  border: 1px solid rgb(240 207 134 / 0.82);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.22), transparent 64%),
-    #07101c;
+    radial-gradient(circle at 30% 24%, rgb(255 246 218 / 0.38), transparent 58%),
+    linear-gradient(156deg, #23163b 0%, #0e081b 64%, #06040e 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.24),
-    inset 0 0 0 1px rgb(var(--ring-gold-rgb) / 0.48),
-    0 6px 16px -4px rgb(0 0 0 / 0.8);
+    inset 0 1px 0 rgb(255 255 255 / 0.44),
+    inset 0 0 0 1px rgb(240 207 134 / 0.34),
+    0 8px 18px -4px rgb(0 0 0 / 0.9),
+    0 0 16px -4px rgb(240 207 134 / 0.5);
+  color: #fff5d8;
   translate: -50% 0;
   font-size: 14px;
   line-height: 1;
@@ -889,6 +1310,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   max-width: 150%;
   padding: 0;
   translate: -50% 0;
+  color: #f8f4ff;
+  text-shadow:
+    0 2px 10px rgb(0 0 0 / 0.92),
+    0 0 16px rgb(206 168 255 / 0.36);
   font-size: clamp(12px, 1.2vw, 16px);
   line-height: 1.35;
   text-align: center;
@@ -985,6 +1410,28 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   line-height: 1.12;
 }
 
+@media (forced-colors: none) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive:has(.manager-archive-panel.is-managers)
+    > .threat-copy
+    > h3 {
+    color: transparent;
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fff5da 34%,
+      #f0cf86 68%,
+      #c99c48 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 18px rgb(240 207 134 / 0.4)) drop-shadow(0 4px 12px rgb(0 0 0 / 0.88));
+  }
+}
+
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   #manager-archive:has(.manager-archive-panel.is-managers)
@@ -993,6 +1440,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   margin: 0;
   padding: 0;
   border: 0;
+  color: #e4dbf2;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 0.86);
   font-size: clamp(11px, 1vw, 13px);
   line-height: 1.6;
 }
@@ -1093,17 +1542,31 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   content: "";
   position: absolute;
   inset: 9%;
-  border: 1px solid rgb(var(--ring-gold-rgb) / 0.36);
+  border: 1.5px solid rgb(var(--ring-gold-rgb) / 0.54);
   border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    transparent calc(58% - 1.25px),
-    rgb(var(--ring-key-rgb) / 0.24) calc(58% - 1.25px) 58%,
-    transparent 58%
-  );
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(84% - 1.25px),
+      rgb(var(--ring-pink-rgb) / 0.34) calc(84% - 1.25px) 84%,
+      transparent 84%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(58% - 1.5px),
+      rgb(var(--ring-key-rgb) / 0.44) calc(58% - 1.5px) 58%,
+      transparent 58%
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-gold-rgb) / 0.2) 0%,
+      rgb(var(--ring-key-rgb) / 0.12) 44%,
+      rgb(var(--ring-pink-rgb) / 0.1) 70%,
+      transparent 92%
+    );
   box-shadow:
-    inset 0 0 32px -12px rgb(var(--ring-gold-rgb) / 0.22),
-    0 0 32px -12px rgb(var(--ring-gold-rgb) / 0.22);
+    inset 0 0 42px -10px rgb(var(--ring-gold-rgb) / 0.34),
+    0 0 48px -12px rgb(var(--ring-gold-rgb) / 0.34);
   pointer-events: none;
 }
 
@@ -1151,10 +1614,12 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   border: 0;
   border-radius: 50%;
   overflow: visible;
-  background: #07101c;
+  background: #060b14;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.24),
-    0 20px 44px -16px rgb(0 0 0 / 0.86);
+    inset 0 1.5px 0 rgb(255 255 255 / 0.32),
+    0 0 0 2px rgb(5 8 15 / 0.92),
+    0 24px 52px -14px rgb(0 0 0 / 0.92),
+    0 0 34px -8px rgb(var(--ws-door-rgb) / 0.48);
   clip-path: none;
 }
 
@@ -1179,15 +1644,15 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   inset: -7px;
   width: auto;
   height: auto;
-  padding: 2px;
+  padding: 2.5px;
   border-radius: 50%;
   background: conic-gradient(
     from 210deg,
-    var(--ws-door),
-    #fff8 0.2turn,
-    var(--ws-door-2) 0.5turn,
+    #ffffff 0turn,
+    var(--ws-door) 0.14turn,
+    var(--ws-door-2) 0.48turn,
     var(--ring-gold) 0.78turn,
-    var(--ws-door)
+    #ffffff 1turn
   );
   opacity: 1;
   transform: none;
@@ -1245,8 +1710,14 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > .ws-doors
   > a.is-far-from {
   --ws-door-size: 27%;
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.36);
-  outline-offset: 12px;
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.56);
+  outline-offset: 13px;
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.38),
+    0 0 0 2px rgb(6 6 16 / 0.94),
+    0 0 0 12px rgb(201 155 255 / 0.14),
+    0 28px 60px -14px rgb(0 0 0 / 0.94),
+    0 0 46px -8px rgb(201 155 255 / 0.54);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -1597,12 +2068,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   width: 1.5em;
   height: 1.5em;
   margin: -0.75em 0 0 -0.75em;
-  padding: 2px;
+  padding: 2.5px;
   border-radius: 50%;
   background: var(--ring-prism);
   /* The outer ring: an outline, so it takes no layout. */
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.4);
+  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.56);
   outline-offset: 10px;
+  box-shadow: 0 0 28px -6px rgb(var(--ring-key-rgb) / 0.42);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -1744,7 +2216,10 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   margin: 22px auto 6px;
   border: 0;
   border-radius: 50%;
-  background: #07101c;
+  background: #060e18;
+  box-shadow:
+    0 18px 38px -14px rgb(0 0 0 / 0.88),
+    0 0 28px -10px rgb(109 223 186 / 0.34);
 }
 
 html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -2073,5 +2548,65 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     > .threat-copy
     > h3 {
     font-size: 12px;
+  }
+}
+
+/* Wave-8 fine-pointer hover luminescence on rings (paint only, forced-colors safe). */
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    .ws-map
+    > li
+    > a:hover {
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 0.48),
+      0 0 0 2px rgb(5 10 18 / 0.92),
+      0 28px 56px -14px rgb(0 0 0 / 0.94),
+      0 0 44px -6px rgb(var(--ws-card-tone-rgb) / 0.66);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:hover {
+    box-shadow:
+      0 0 0 2px rgb(6 4 14 / 0.94),
+      0 0 0 10px rgb(240 207 134 / 0.24),
+      0 28px 58px -14px rgb(0 0 0 / 0.96),
+      0 0 52px -6px rgb(240 207 134 / 0.62);
+  }
+
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:hover {
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 0.48),
+      0 0 0 2px rgb(5 8 15 / 0.94),
+      0 28px 58px -14px rgb(0 0 0 / 0.96),
+      0 0 48px -6px rgb(var(--ws-door-rgb) / 0.72);
+  }
+
+  html[data-family="world"]:not([data-button-style="liquid"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    #riders
+    .rider-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover {
+    border-color: color-mix(in srgb, var(--tab-tone, #7ae8ff) 64%, transparent);
+    background:
+      radial-gradient(
+        100% 120% at 8% 50%,
+        color-mix(in srgb, var(--tab-tone, #7ae8ff) 22%, transparent) 0%,
+        transparent 68%
+      ),
+      rgb(12 22 36 / 0.84);
+    color: #f4f9ff;
   }
 }

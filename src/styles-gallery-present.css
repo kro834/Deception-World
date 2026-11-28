@@ -1,99 +1,140 @@
-/* Gallery present — a current night exhibition.
+/* Gallery present — World-class Night Museum edition (Wave-8).
 
-   Last sheet on /gallery. Wall-washer illumination, stepped conservation mats,
-   double-hairline exhibition plaques, and optical rim consoles frame each
-   work while keeping every pixel of the original art untouched. Controls stay
-   at least 12px with their existing hit areas. No new words, images, or
-   looping motion. */
+   Architectural downlight cones, gilded brass double-bevel vitrines, metallic
+   display typography, and deep obsidian-glass consoles frame each work while
+   keeping every pixel of the original art untouched. Controls stay at least
+   12px with their existing hit areas. No !important, keyframes, animation, or url(). */
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] {
-  --gallery-ink: #06090f;
-  --gallery-ink-soft: #0f1622;
-  --gallery-ivory: #f5f2ea;
-  --gallery-muted: #b8bfca;
-  --gallery-brass: #e4cca0;
-  --gallery-gold: #eed7ab;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page] {
+  --gallery-ink: #04070d;
+  --gallery-ink-soft: #0d1523;
+  --gallery-ivory: #faf6ee;
+  --gallery-muted: #c4ccd8;
+  --gallery-brass: #efd6a4;
+  --gallery-gold: #fae5b8;
   --gallery-cyan-rim: #9ee8fa;
-  --gallery-rule: rgb(232 208 164 / 22%);
-  --gallery-rule-cool: rgb(158 232 250 / 22%);
+  --gallery-rule: rgb(242 216 164 / 32%);
+  --gallery-rule-cool: rgb(158 232 250 / 26%);
   --gallery-console-plate:
-    linear-gradient(180deg, rgb(255 252 244 / 9%), transparent 36%),
-    radial-gradient(ellipse 84% 58% at 50% -4%, rgb(248 224 176 / 20%), transparent 68%),
-    radial-gradient(ellipse 72% 48% at 86% 0%, rgb(158 232 250 / 12%), transparent 70%),
-    linear-gradient(180deg, #172336 0%, #0d1522 56%, #070b13 100%);
+    linear-gradient(180deg, rgb(255 253 245 / 12%), transparent 32%),
+    radial-gradient(ellipse 86% 62% at 44% -6%, rgb(254 230 178 / 28%), transparent 68%),
+    radial-gradient(ellipse 70% 52% at 88% 0%, rgb(158 232 250 / 16%), transparent 70%),
+    linear-gradient(172deg, #18253a 0%, #0c1422 52%, #050911 100%);
   background:
-    radial-gradient(ellipse 72% 440px at 38% -2%, rgb(248 218 160 / 26%), transparent 76%),
-    radial-gradient(ellipse 54% 380px at 88% 4%, rgb(138 224 250 / 18%), transparent 70%),
-    radial-gradient(ellipse 48% 340px at 14% 18%, rgb(232 198 142 / 11%), transparent 68%),
-    linear-gradient(180deg, #0f1724 0%, #070c15 38%, #04070d 100%);
-  color: #f8f3e8;
+    conic-gradient(
+      from 156deg at 36% -8%,
+      transparent 0deg,
+      rgb(255 234 186 / 16%) 24deg,
+      transparent 48deg
+    ),
+    radial-gradient(
+      ellipse 76% 520px at 36% -3%,
+      rgb(255 228 170 / 34%),
+      rgb(206 162 94 / 12%) 52%,
+      transparent 78%
+    ),
+    radial-gradient(ellipse 58% 440px at 90% 3%, rgb(142 228 252 / 22%), transparent 72%),
+    radial-gradient(ellipse 54% 420px at 12% 28%, rgb(242 206 146 / 13%), transparent 70%),
+    linear-gradient(180deg, #111b2c 0%, #070c16 36%, #03050a 100%);
+  color: #faf6ee;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-topbar {
-  --world-atmosphere-base: #080c14;
-  border-bottom-color: rgb(236 212 166 / 32%);
-  background-color: #080c14;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-topbar {
+  --world-atmosphere-base: #070d17;
+  border-bottom-color: rgb(246 220 168 / 48%);
+  background-color: #070d17;
   background-image:
     linear-gradient(
       90deg,
-      #e8d1a4 0 3px,
-      transparent 3px,
-      rgb(236 212 166 / 34%) 20%,
-      rgb(158 232 250 / 30%) 54%,
-      transparent 94%
+      #fae3b4 0 4px,
+      transparent 4px,
+      rgb(246 220 168 / 42%) 22%,
+      rgb(158 232 250 / 36%) 56%,
+      transparent 95%
     ),
-    linear-gradient(180deg, rgb(255 248 232 / 10%), transparent 68%);
+    radial-gradient(ellipse 68% 130% at 42% 0%, rgb(252 226 174 / 20%), transparent 72%),
+    linear-gradient(180deg, rgb(255 251 240 / 13%), transparent 68%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 12%),
-    inset 0 -1px 0 rgb(158 232 250 / 16%),
-    0 12px 32px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 253 246 / 22%),
+    inset 0 -1px 0 rgb(158 232 250 / 22%),
+    0 14px 36px rgb(0 0 0 / 62%);
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-brand {
-  color: #f6f2ea;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-brand {
+  color: #fbf8f1;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-style: normal;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.065em;
+  text-shadow: 0 1px 14px rgb(246 218 162 / 28%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-brand
   span {
-  color: #dec8a1;
+  color: #f3dba8;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-refresh-status,
-html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-topbar-actions
-  > a {
-  color: #cbd3de;
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  :is(.gallery-refresh-status, .gallery-topbar-actions > a) {
+  color: #e4ebf4;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-eyebrow {
-  color: #dec8a1;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-eyebrow {
+  color: #f0d7a4;
   letter-spacing: 0.2em;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-intro h1,
+/* Metallic platinum × champagne spotlight typography on the gallery hero heading */
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-intro
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-heading {
+  border-bottom: 1px solid rgb(246 220 168 / 48%);
+  box-shadow: inset 0 -3px 0 -2px rgb(158 232 250 / 26%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-heading
+  h1 {
+  color: #fcf9f2;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.24;
+  filter: drop-shadow(0 4px 26px rgb(248 218 158 / 28%));
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-heading
   h1
-  span,
+  span {
+  background: linear-gradient(180deg, #ffffff 0%, #f9f2e3 48%, #dfc38d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-intro
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-heading
   h1
   .gallery-title-opening {
-  color: #f8f5ee;
-  font-weight: 500;
-  letter-spacing: 0.025em;
-  line-height: 1.25;
+  background: linear-gradient(180deg, #fffdf7 0%, #fae6bc 52%, #dfb976 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-intro h1 {
@@ -102,44 +143,42 @@ html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] 
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-intro-description {
-  color: #d2cec4;
-  font-size: 16px;
-  letter-spacing: 0.015em;
-  line-height: 1.85;
+  color: #e2dcd0;
+  font-size: clamp(14px, 1.35vw, 16px);
+  letter-spacing: 0.03em;
+  line-height: 1.8;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 65%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-enter {
   min-height: 48px;
   margin-top: 22px;
   padding: 0 22px;
-  border: 1px solid rgb(238 214 168 / 60%);
-  border-top-color: rgb(250 232 192 / 78%);
+  border: 1px solid #fae5ba;
+  border-top-color: #ffffff;
   border-radius: 2px;
-  background:
-    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(246 222 174 / 22%), transparent 68%),
-    linear-gradient(180deg, rgb(255 250 238 / 14%), transparent 52%),
-    linear-gradient(180deg, #1d293b 0%, #111926 56%, #0b111b 100%);
+  background: linear-gradient(180deg, #fffcf4 0%, #f2daa6 50%, #d4af70 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 38%),
-    inset 0 -1px 0 rgb(158 232 250 / 24%),
-    0 12px 28px rgb(0 0 0 / 44%),
-    0 0 24px -8px rgb(236 210 160 / 24%);
-  color: #fcf9f2;
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(92 66 24 / 36%),
+    0 12px 30px rgb(0 0 0 / 54%),
+    0 0 30px -6px rgb(246 216 156 / 48%);
+  color: #10141e;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-size: 14px;
-  font-weight: 550;
+  font-weight: 700;
   letter-spacing: 0.07em;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-enter
   span {
-  color: #ebd3a4;
+  color: #10141e;
   font-size: 16px;
 }
 
@@ -150,7 +189,13 @@ html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] 
   color: #f8f5ee;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-feature::before,
+html[data-family="gallery"] .gallery-page .gallery-feature::before {
+  content: none;
+  display: none;
+  border: 0;
+  background: none;
+}
+
 html[data-family="gallery"] .gallery-page .gallery-feature-open::after {
   content: none;
   display: none;
@@ -161,6 +206,85 @@ html[data-family="gallery"] .gallery-page .gallery-feature-open::after {
 html[data-family="gallery"] .gallery-page .gallery-work-frame::after {
   border: 0;
   box-shadow: none;
+}
+
+/* Night Museum Grand Vitrine — architectural downlight cone + double brass frame */
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-artwork-intro
+  .artwork-stage {
+  border: 1px solid rgb(248 222 168 / 70%);
+  border-top: 2px solid #fff3d4;
+  background:
+    radial-gradient(ellipse 74% 58% at 32% -6%, rgb(255 232 182 / 30%), transparent 68%),
+    radial-gradient(ellipse 56% 50% at 90% 8%, rgb(158 232 250 / 16%), transparent 70%),
+    linear-gradient(164deg, #19263b 0%, #0b121f 54%, #050810 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 254 248 / 52%),
+    inset 0 -1px 0 rgb(158 232 250 / 26%),
+    0 0 0 5px #04070e,
+    0 0 0 6px rgb(244 216 162 / 42%),
+    0 42px 104px -10px rgb(0 0 0 / 88%),
+    0 0 88px -14px rgb(248 216 152 / 40%),
+    0 0 58px -18px rgb(158 232 250 / 22%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-artwork-intro
+  .artwork-stage
+  .artwork-stage__aperture {
+  background:
+    conic-gradient(
+      from 152deg at 50% -18%,
+      transparent 0deg,
+      rgb(255 238 196 / 26%) 28deg,
+      transparent 56deg
+    ),
+    radial-gradient(
+      ellipse 74% 62% at 50% -4%,
+      rgb(255 236 190 / 48%),
+      rgb(218 178 110 / 18%) 48%,
+      transparent 76%
+    ),
+    radial-gradient(ellipse 58% 52% at 86% 16%, rgb(158 232 250 / 16%), transparent 68%),
+    radial-gradient(ellipse 78% 70% at 50% 34%, #253650 0%, #0a101b 66%, #04070d 94%);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 254 248 / 48%),
+    inset 0 0 0 8px #04070d,
+    inset 0 0 0 9.5px rgb(246 220 168 / 58%),
+    inset 0 0 0 15px #09101c,
+    inset 0 0 0 16px rgb(158 232 250 / 30%),
+    inset 0 -22px 48px rgb(0 0 0 / 70%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-artwork-intro
+  .artwork-stage[data-format]
+  .artwork-stage__information {
+  border-inline-start: 1px solid rgb(246 220 168 / 52%);
+  background:
+    radial-gradient(ellipse 92% 64% at 50% -4%, rgb(254 230 180 / 28%), transparent 70%),
+    radial-gradient(ellipse 72% 54% at 88% 100%, rgb(158 232 250 / 14%), transparent 72%),
+    linear-gradient(158deg, #213048 0%, #111a2a 54%, #070c15 100%);
+  box-shadow:
+    inset 2px 0 0 rgb(246 220 168 / 34%),
+    inset 0 1px 0 rgb(255 253 246 / 26%),
+    inset 0 -18px 36px -14px rgb(0 0 0 / 56%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-stage-controls {
+  border-top: 1px solid rgb(246 220 168 / 58%);
+  background:
+    radial-gradient(ellipse 82% 88% at 50% 0%, rgb(252 228 178 / 26%), transparent 72%),
+    linear-gradient(180deg, #162235 0%, #0b121e 58%, #050911 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 38%),
+    inset 0 12px 28px rgb(0 0 0 / 58%);
 }
 
 html[data-family="gallery"]
@@ -181,41 +305,50 @@ html[data-family="gallery"]
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-feature
   figcaption {
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  color: #ddd7cb;
+  color: #f6f1e6;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 65%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-collection-heading {
-  border-top: 1px solid rgb(236 212 166 / 40%);
-  box-shadow: inset 0 3px 0 -2px rgb(158 232 250 / 22%);
+  border-top: 1px solid rgb(246 220 168 / 54%);
+  box-shadow: inset 0 3px 0 -2px rgb(158 232 250 / 28%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-collection-heading
   h2 {
-  color: #f8f5ee;
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, #f8eed9 52%, #dec088 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  font-size: clamp(22px, 2vw, 28px);
-  font-weight: 500;
+  font-size: clamp(23px, 2.2vw, 32px);
+  font-weight: 600;
   letter-spacing: 0.08em;
+  filter: drop-shadow(0 2px 18px rgb(246 216 156 / 26%));
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-browse-panel {
-  border: 1px solid rgb(232 208 162 / 30%);
-  border-top: 1px solid rgb(246 224 182 / 58%);
+  border: 1px solid rgb(244 218 166 / 54%);
+  border-top: 2px solid #fae4b6;
   background: var(--gallery-console-plate);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 242 / 24%),
-    inset 0 0 0 1px rgb(158 232 250 / 10%),
-    0 22px 52px -8px rgb(0 0 0 / 52%);
+    inset 0 1.5px 0 rgb(255 253 246 / 44%),
+    inset 0 0 0 1px rgb(158 232 250 / 16%),
+    0 0 0 4px #050810,
+    0 0 0 5px rgb(242 216 164 / 26%),
+    0 30px 70px -8px rgb(0 0 0 / 74%),
+    0 0 48px -14px rgb(246 216 156 / 28%);
 }
 
 html[data-family="gallery"]
@@ -402,56 +535,63 @@ html[data-family="gallery"]
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-work-frame {
   padding: var(--gallery-mat);
-  border: 1px solid rgb(236 212 166 / 38%);
-  border-top-color: rgb(248 228 186 / 54%);
+  border: 1px solid rgb(244 218 166 / 52%);
+  border-top-color: rgb(255 240 202 / 76%);
   background:
-    radial-gradient(ellipse 84% 58% at 50% -8%, rgb(248 228 188 / 20%), transparent 64%),
-    radial-gradient(ellipse 68% 42% at 50% 106%, rgb(158 232 250 / 7%), transparent 66%),
-    linear-gradient(180deg, #101723 0%, #080c14 62%, #05080e 100%);
+    conic-gradient(
+      from 156deg at 50% -18%,
+      transparent 0deg,
+      rgb(255 236 194 / 18%) 24deg,
+      transparent 48deg
+    ),
+    radial-gradient(ellipse 88% 62% at 50% -8%, rgb(254 234 190 / 28%), transparent 66%),
+    radial-gradient(ellipse 68% 46% at 50% 106%, rgb(158 232 250 / 11%), transparent 68%),
+    linear-gradient(180deg, #131d2d 0%, #090e18 60%, #04070d 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 242 / 26%),
-    inset 0 0 0 3px rgb(6 9 15 / 82%),
-    inset 0 0 0 4px rgb(236 212 166 / 16%),
-    inset 0 10px 26px rgb(0 0 0 / 60%),
-    0 20px 46px -8px rgb(0 0 0 / 58%);
+    inset 0 1px 0 rgb(255 253 246 / 38%),
+    inset 0 0 0 3px #04070d,
+    inset 0 0 0 4px rgb(242 216 164 / 28%),
+    inset 0 12px 28px rgb(0 0 0 / 64%),
+    0 24px 54px -8px rgb(0 0 0 / 72%),
+    0 0 28px -12px rgb(244 214 156 / 22%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-work-frame::before {
   background: radial-gradient(
-    ellipse 80% 52% at 50% -10%,
-    rgb(250 232 192 / 24%),
-    rgb(158 232 250 / 8%) 44%,
-    transparent 70%
+    ellipse 84% 56% at 50% -10%,
+    rgb(255 236 196 / 32%),
+    rgb(158 232 250 / 11%) 46%,
+    transparent 72%
   );
-  opacity: 0.72;
+  opacity: 0.82;
 }
 
 html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page]
   .gallery-work-frame
   img {
-  background: #06090f;
+  background: #05080f;
   filter: none;
   transform: none;
 }
 
-/* Exhibition Plaque — double-hairline curatorial label beneath the mat. */
+/* Exhibition Plaque — gilded brass double-hairline curatorial nameplate. */
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-work
   figcaption {
   margin-top: 10px;
-  padding: 13px 2px 6px;
-  border-top: 1px solid rgb(236 212 166 / 34%);
-  border-bottom: 1px solid rgb(232 208 162 / 22%);
+  padding: 13px 4px 8px;
+  border-top: 1px solid rgb(244 218 166 / 46%);
+  border-bottom: 1px solid rgb(236 210 160 / 28%);
   background-image:
-    linear-gradient(90deg, rgb(242 218 172 / 64%) 0 34px, rgb(158 232 250 / 22%) 34px 100%),
-    linear-gradient(90deg, rgb(236 212 166 / 22%), transparent 88%);
+    linear-gradient(90deg, #fae2b2 0 42px, rgb(158 232 250 / 30%) 42px 100%),
+    linear-gradient(90deg, rgb(242 216 164 / 30%), transparent 88%);
   background-size:
     100% 1px,
     100% 1px;
@@ -463,62 +603,72 @@ html[data-family="gallery"]
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-work
   figcaption
   h3 {
-  color: #f8f5ee;
+  color: #fbf8f1;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 550;
+  letter-spacing: 0.025em;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-work-number {
-  color: #ead1a3;
+  color: #f6dfa8;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-work-hint,
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-work-hint
-  > span {
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  :is(.gallery-work-hint, .gallery-work-hint > span) {
   border: 0;
   background: none;
-  color: #bcc5d2;
+  color: #cdd6e2;
   font-size: 12px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.045em;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-work-hint
+  > span {
+  color: #f3dba8;
 }
 
 html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-favorite-toggle {
-  border-color: rgb(232 208 162 / 28%);
-  background: linear-gradient(180deg, rgb(18 26 38 / 86%), rgb(10 15 24 / 92%));
-  box-shadow: inset 0 1px 0 rgb(255 250 238 / 12%);
-  color: #ebe6db;
-}
-
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-account {
-  border-color: rgb(232 208 162 / 28%);
-  border-top-color: rgb(244 222 178 / 46%);
-  background: var(--gallery-console-plate);
-  box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 18%),
-    0 18px 42px rgb(0 0 0 / 40%);
+  border-color: rgb(240 214 164 / 38%);
+  background: linear-gradient(180deg, rgb(20 30 44 / 92%), rgb(10 15 25 / 96%));
+  box-shadow: inset 0 1px 0 rgb(255 252 244 / 20%);
+  color: #f4efe4;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-account {
+  border-color: rgb(244 218 166 / 44%);
+  border-top: 2px solid rgb(252 232 188 / 74%);
+  background: var(--gallery-console-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 32%),
+    0 0 0 4px #050810,
+    0 0 0 5px rgb(240 214 164 / 20%),
+    0 24px 56px rgb(0 0 0 / 58%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-account
   h3 {
-  color: #f7f4ee;
+  color: #fbf8f1;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 html[data-family="gallery"]
@@ -534,14 +684,14 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-personal-controls
   > .gallery-personal-add {
-  border: 1px solid #ead8b5;
+  border: 1px solid #fae5ba;
   border-radius: 2px;
-  background: linear-gradient(180deg, #f8f3e8, #e0d0b0);
+  background: linear-gradient(180deg, #fffcf4, #e8cfa0);
   box-shadow:
-    inset 0 1px 0 #fffdf8,
-    0 8px 20px rgb(0 0 0 / 34%);
+    inset 0 1px 0 #ffffff,
+    0 10px 24px rgb(0 0 0 / 42%);
   color: #10141c;
-  font-weight: 600;
+  font-weight: 700;
   transform: none;
 }
 
@@ -560,92 +710,92 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-feature-settings
   :is(a, button) {
-  border-color: rgb(232 208 162 / 34%);
+  border-color: rgb(240 214 164 / 46%);
   border-radius: 2px;
-  background: linear-gradient(180deg, #182334, #0c121c);
-  box-shadow: inset 0 1px 0 rgb(255 250 238 / 14%);
-  color: #f8f5ef;
+  background: linear-gradient(180deg, #1b283c, #0d1420);
+  box-shadow: inset 0 1px 0 rgb(255 252 244 / 22%);
+  color: #fbf8f1;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-viewer {
-  border-color: rgb(238 214 168 / 46%);
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-viewer {
+  border-color: rgb(246 220 168 / 58%);
   border-radius: 2px;
   background:
-    radial-gradient(ellipse 68% 42% at 50% -4%, rgb(244 220 174 / 12%), transparent 64%),
-    #070b12;
+    radial-gradient(ellipse 72% 46% at 50% -4%, rgb(252 228 178 / 18%), transparent 66%),
+    #060a12;
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 26%),
-    inset 0 0 0 1px rgb(158 232 250 / 14%),
-    0 32px 80px rgb(0 0 0 / 80%);
+    inset 0 1px 0 rgb(255 253 246 / 34%),
+    inset 0 0 0 1px rgb(158 232 250 / 20%),
+    0 36px 90px rgb(0 0 0 / 86%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   :is(.gallery-viewer-header, .gallery-viewer-footer) {
-  border-color: rgb(232 208 162 / 28%);
-  background: linear-gradient(180deg, #0f1724, #080d16);
+  border-color: rgb(240 214 164 / 36%);
+  background: linear-gradient(180deg, #101928, #070c15);
 }
 
 @media (hover: hover) and (pointer: fine) {
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-work-open:hover
-    .gallery-work-frame,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-work-open:focus-visible
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-work-open:is(:hover, :focus-visible)
     .gallery-work-frame {
-    border-color: rgb(246 224 180 / 82%);
+    border-color: #fae5b8;
     box-shadow:
-      inset 0 1px 0 rgb(255 253 245 / 42%),
-      inset 0 0 0 3px rgb(6 9 15 / 80%),
-      inset 0 0 0 4px rgb(158 232 250 / 32%),
-      inset 0 10px 26px rgb(0 0 0 / 48%),
-      0 24px 54px -6px rgb(0 0 0 / 64%),
-      0 0 28px -8px rgb(240 214 162 / 30%);
+      inset 0 1px 0 rgb(255 254 248 / 54%),
+      inset 0 0 0 3px #04070d,
+      inset 0 0 0 4.5px rgb(158 232 250 / 44%),
+      inset 0 12px 28px rgb(0 0 0 / 50%),
+      0 28px 64px -6px rgb(0 0 0 / 78%),
+      0 0 36px -6px rgb(246 216 156 / 44%);
   }
 
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-work-open:hover
-    .gallery-work-frame::before,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-work-open:focus-visible
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-work-open:is(:hover, :focus-visible)
     .gallery-work-frame::before {
     opacity: 1;
   }
 
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-enter:hover,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-filters
-    button:not([aria-pressed="true"]):hover,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-feature-settings
-    :is(a, button):hover,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-shuffle-start:hover {
-    border-color: rgb(246 224 180 / 78%);
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+    :is(
+      .gallery-filters button:not([aria-pressed="true"]),
+      .gallery-feature-settings :is(a, button):not([aria-pressed="true"]),
+      .gallery-shuffle-start
+    ):hover {
+    border-color: #fae4b6;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 242 / 36%),
-      0 0 0 1px rgb(158 232 250 / 26%),
-      0 10px 24px rgb(0 0 0 / 44%);
-    color: #fff;
+      inset 0 1px 0 rgb(255 253 246 / 44%),
+      0 0 0 1px rgb(158 232 250 / 32%),
+      0 12px 28px rgb(0 0 0 / 52%),
+      0 0 22px -6px rgb(246 216 156 / 34%);
+    color: #ffffff;
+  }
+
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-enter:hover {
+    border-color: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #f8e4b8 50%, #dfbe82 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 14px 32px rgb(0 0 0 / 58%),
+      0 0 34px -4px rgb(250 222 164 / 58%);
+    color: #0e121b;
   }
 
   html[data-family="gallery"]
     .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-personal-controls
     > .gallery-personal-add:hover:not(:disabled) {
-    border-color: #fff;
-    background: #fff;
-    box-shadow: 0 8px 22px rgb(0 0 0 / 34%);
+    border-color: #ffffff;
+    background: #ffffff;
+    box-shadow: 0 10px 26px rgb(0 0 0 / 42%);
     color: #10141c;
     transform: none;
   }
@@ -667,35 +817,41 @@ html[data-family="gallery"]
     background-image: none;
   }
 
-  html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page],
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-topbar,
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+    :is(
+      .gallery-screening-heading h1,
+      .gallery-screening-heading h1 span,
+      .gallery-screening-heading h1 .gallery-title-opening,
+      .gallery-collection-heading h2
+    ) {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: CanvasText;
+    color: CanvasText;
+    filter: none;
+  }
+
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-work-frame,
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page],
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-feature-open,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-filters
-    button,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-enter,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-personal-add,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-account,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-browse-panel,
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-shuffle-start {
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page][data-gallery-page]
+    :is(
+      .gallery-topbar,
+      .gallery-artwork-intro .artwork-stage,
+      .gallery-artwork-intro .artwork-stage .artwork-stage__aperture,
+      .gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information,
+      .gallery-artwork-intro .gallery-stage-controls,
+      .gallery-work-frame,
+      .gallery-feature-open,
+      .gallery-filters button,
+      .gallery-enter,
+      .gallery-personal-add,
+      .gallery-account,
+      .gallery-browse-panel,
+      .gallery-shuffle-start
+    ) {
     background: Canvas;
     background-image: none;
     box-shadow: none;

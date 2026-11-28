@@ -31,33 +31,339 @@ html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-sp
 }
 
 /* ================================================================
-   Wave-7 Optical Sovereign Polish & Ring Harmony (gold × crimson × obsidian)
-   Hero CTAs, Chapter Map doors, Spec cards, Weapon cards, Form Comparison
-   cards, Editorial & Finisher plates, and Closing CTAs. Never touches #suitup.
+   Wave-8 Cosmic Deity & Starship Bridge Holographic Optics
+   Obsidian × Celestial Sapphire × Champagne Gold × Crimson Depth.
+   Hero metallic typography & celestial orbital halos, FAR FROM DEUS!
+   holographic call console & 5-pill bar, Spec / Weapon / Form Comparison
+   starship instruments, Editorial & Finisher plates, Closing Ultra Stage.
+   Never touches #suitup.
    ================================================================ */
 
-/* Hero CTAs: clean pill geometry (no chamfer clips or boxy drop-shadows),
-   arched top specular glass reflection, sovereign gold & obsidian-crimson depth. */
+/* Hero Ambient Nebula, Celestial Astrolabe & Precision Orbital Halos */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .rxs-hero-ambient {
+  background:
+    radial-gradient(closest-side at 76% 42%, transparent calc(94% - 1px), rgb(138 232 255 / 22%) calc(94% - 1px) 94%, transparent 94.5%),
+    radial-gradient(closest-side at 76% 42%, transparent calc(74% - 1px), rgb(255 224 148 / 20%) calc(74% - 1px) 74%, transparent 74.5%),
+    radial-gradient(closest-side at 76% 42%, transparent calc(54% - 1px), rgb(196 152 255 / 16%) calc(54% - 1px) 54%, transparent 54.5%),
+    radial-gradient(2px 2px at 18% 17%, rgb(248 253 255 / 92%), transparent 60%),
+    radial-gradient(2px 2px at 73% 15%, rgb(255 238 188 / 90%), transparent 60%),
+    radial-gradient(1.5px 1.5px at 87% 27%, rgb(156 244 255 / 88%), transparent 60%),
+    radial-gradient(2px 2px at 62% 24%, rgb(222 192 255 / 82%), transparent 60%),
+    radial-gradient(1.5px 1.5px at 91% 66%, rgb(255 226 154 / 84%), transparent 60%),
+    radial-gradient(1.5px 1.5px at 68% 78%, rgb(146 238 255 / 78%), transparent 60%),
+    radial-gradient(1.5px 1.5px at 34% 80%, rgb(206 172 255 / 72%), transparent 60%),
+    radial-gradient(ellipse 50% 42% at 82% 76%, rgb(255 215 122 / 26%), rgb(127 230 255 / 14%) 42%, transparent 72%),
+    radial-gradient(ellipse 64% 56% at 74% 30%, rgb(84 152 255 / 42%), rgb(148 92 255 / 24%) 44%, transparent 74%),
+    radial-gradient(ellipse 40% 34% at 24% 16%, rgb(255 224 148 / 26%), transparent 66%),
+    radial-gradient(ellipse 68% 58% at 22% 40%, rgb(48 148 255 / 50%), rgb(24 62 172 / 34%) 42%, transparent 74%),
+    linear-gradient(132deg, #091536 0%, #050c24 44%, #030716 78%, #02040c 100%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .rxs-hero-ambient
+  .ffs-aperture {
+  opacity: 0.84;
+  filter:
+    drop-shadow(0 0 22px rgb(127 230 255 / 48%))
+    drop-shadow(0 0 42px rgb(255 215 122 / 24%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-aperture-grid {
+  stroke: rgb(146 234 255 / 24%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-aperture-phase {
+  stroke-width: 2.25;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-aperture-phase.is-ice {
+  stroke: rgb(156 242 255 / 88%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-aperture-phase.is-gold {
+  stroke: rgb(255 224 144 / 86%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-aperture-phase.is-violet {
+  stroke: rgb(212 172 255 / 80%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-aperture-graduations {
+  stroke: rgb(255 224 148 / 68%);
+}
+
+/* Precision Celestial Halo Rings behind the Hero Key Visual */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-ring.is-ice {
+  border-width: 1.5px;
+  border-color: rgb(156 242 255 / 62%);
+  box-shadow:
+    0 0 28px rgb(127 230 255 / 44%),
+    inset 0 0 28px rgb(127 230 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-ring.is-gold {
+  border-width: 1.5px;
+  border-color: rgb(255 224 148 / 66%);
+  box-shadow:
+    0 0 24px rgb(255 215 122 / 36%),
+    inset 0 0 20px rgb(255 215 122 / 16%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-ring.is-violet {
+  border-width: 1px;
+  border-color: rgb(206 160 255 / 48%);
+  box-shadow:
+    0 0 46px rgb(180 128 255 / 30%),
+    inset 0 0 34px rgb(127 230 255 / 16%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .rxs-hero-visual::after {
+  background:
+    radial-gradient(ellipse 58% 72% at 50% 42%, rgb(127 230 255 / 24%), rgb(255 215 122 / 12%) 46%, transparent 74%),
+    radial-gradient(ellipse farthest-side at 44% 108%, rgb(255 224 148 / 38%), rgb(127 230 255 / 24%) 44%, transparent 78%);
+}
+
+/* Hero Title: Nebula Crystal × Champagne Gold Forged Metallic Typography */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  h1 {
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 96%))
+    drop-shadow(0 0 26px rgb(127 230 255 / 54%))
+    drop-shadow(0 0 54px rgb(255 215 122 / 34%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  h1
+  .name-word {
+  background: linear-gradient(
+    176deg,
+    #ffffff 0%,
+    #e6f9ff 34%,
+    #9ce8ff 64%,
+    #ffe9ad 90%,
+    #ffd16e 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  h1
+  .name-word:first-of-type {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #eaf9ff 44%,
+    #9fe6ff 78%,
+    #dcf6ff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  h1
+  .name-word:last-of-type {
+  background: linear-gradient(
+    174deg,
+    #ffffff 0%,
+    #e8fbff 24%,
+    #8de6ff 50%,
+    #ffeaa8 78%,
+    #f6be52 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-mark {
+  background: linear-gradient(
+    180deg,
+    rgb(242 252 255 / 30%) 0%,
+    rgb(138 232 255 / 16%) 48%,
+    rgb(255 218 134 / 20%) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px rgb(168 242 255 / 68%);
+  filter:
+    drop-shadow(0 0 24px rgb(127 230 255 / 48%))
+    drop-shadow(0 0 48px rgb(255 215 122 / 28%));
+}
+
+/* Five-Form Telemetry Pill under the Hero Lede */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-stages-line {
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 16px 7px 12px;
+  border: 1px solid rgb(138 232 255 / 34%);
+  border-radius: var(--ring-radius-pill);
+  background:
+    radial-gradient(ellipse 80% 54% at 50% 0%, rgb(255 252 242 / 14%), transparent 68%),
+    linear-gradient(155deg, rgb(14 26 58 / 84%), rgb(5 10 24 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 30%),
+    0 10px 26px -12px rgb(0 4 18 / 86%);
+  color: #edf7ff;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .ffs-hero
+  .ffs-stages-line::before {
+  border-radius: var(--ring-radius-pill);
+}
+
+/* Chapter Headings across Non-Suitup Sections: Forged Platinum-Crystal × Champagne Gold */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .rxs-section:not(.ffs-suitup)
+  > .rxs-section-heading
+  > h2 {
+  background: linear-gradient(
+    176deg,
+    #ffffff 0%,
+    #eaf9ff 40%,
+    #a8ecff 72%,
+    #ffe8aa 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 92%))
+    drop-shadow(0 0 24px rgb(127 230 255 / 38%))
+    drop-shadow(0 0 44px rgb(255 215 122 / 20%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .rxs-section:not(.ffs-suitup)
+  > .rxs-section-heading::before {
+  -webkit-text-stroke: 1.75px #ffe298;
+  text-shadow:
+    0 0 26px rgb(255 215 122 / 36%),
+    0 0 46px rgb(127 230 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > .rxs-section:not(.ffs-suitup)
+  > .rxs-section-heading::after {
+  height: 2px;
+  border-radius: var(--ring-radius-pill);
+  background: linear-gradient(
+    90deg,
+    #9ef2ff 0%,
+    #ffffff 24%,
+    #ffd77a 58%,
+    rgb(138 232 255 / 44%) 84%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 18px rgb(127 230 255 / 58%),
+    0 0 32px rgb(255 215 122 / 34%);
+}
+
+/* Hero CTAs: jewel-cut pill geometry (no chamfer clips or boxy drop-shadows),
+   blazing top specular crest, sovereign champagne-gold & cosmic obsidian depth. */
 html[data-family="special"]
   body
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
   > .ffs-hero
   .ffs-hero-rail
   a.ffs-hero-primary {
-  border: 1px solid rgb(255 248 224 / 92%);
+  border: 1px solid rgb(255 252 238 / 96%);
   border-radius: var(--ring-radius-pill);
   clip-path: none;
-  color: #07101f;
+  color: #060f1e;
   background:
-    radial-gradient(ellipse 78% 48% at 50% 0%, rgb(255 255 255 / 86%), transparent 68%),
-    linear-gradient(180deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 6%) 46%, rgb(138 36 58 / 22%) 100%),
-    linear-gradient(112deg, #fffef8 0%, #ffe8a8 38%, #f3be56 76%, #ffe6be 100%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(255 255 255 / 92%), transparent 68%),
+    linear-gradient(180deg, rgb(255 255 255 / 66%) 0%, rgb(255 255 255 / 8%) 46%, rgb(138 42 54 / 22%) 100%),
+    linear-gradient(112deg, #ffffff 0%, #ffebb0 36%, #f4bd50 74%, #dff8ff 100%);
   box-shadow:
-    inset 0 1.5px 0 rgb(255 255 255 / 98%),
-    inset 0 -2px 0 rgb(134 38 56 / 46%),
-    inset 0 0 0 1px rgb(255 250 232 / 64%),
-    0 12px 28px -8px rgb(255 210 112 / 48%),
-    0 6px 22px -6px rgb(214 54 96 / 30%);
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -2px 0 rgb(130 42 52 / 46%),
+    inset 0 0 0 1px rgb(255 252 238 / 72%),
+    0 14px 34px -8px rgb(255 214 118 / 58%),
+    0 0 26px -6px rgb(127 230 255 / 44%);
   filter: none;
 }
 
@@ -70,31 +376,43 @@ html[data-family="special"]
   border: 1px solid transparent;
   border-radius: var(--ring-radius-pill);
   clip-path: none;
-  color: #f4f8ff;
+  color: #f6fbff;
   background:
-    radial-gradient(ellipse 78% 46% at 50% 0%, rgb(255 250 238 / 24%), transparent 66%) padding-box,
-    radial-gradient(ellipse 84% 76% at 16% 0%, rgb(127 230 255 / 24%), transparent 60%) padding-box,
-    radial-gradient(ellipse 78% 72% at 88% 100%, rgb(214 54 96 / 26%), transparent 64%) padding-box,
-    linear-gradient(180deg, rgb(20 30 62 / 92%) 0%, rgb(9 14 32 / 96%) 56%, rgb(5 8 20 / 98%) 100%) padding-box,
+    radial-gradient(ellipse 80% 48% at 50% 0%, rgb(255 252 242 / 28%), transparent 66%) padding-box,
+    radial-gradient(ellipse 84% 76% at 16% 0%, rgb(127 230 255 / 30%), transparent 60%) padding-box,
+    radial-gradient(ellipse 78% 72% at 88% 100%, rgb(255 215 122 / 22%), transparent 64%) padding-box,
+    linear-gradient(180deg, rgb(18 30 66 / 95%) 0%, rgb(8 14 34 / 98%) 56%, rgb(4 7 18 / 100%) 100%) padding-box,
     linear-gradient(
-      148deg,
-      rgb(255 246 218 / 72%) 0%,
-      rgb(138 232 255 / 62%) 38%,
-      rgb(214 54 96 / 54%) 74%,
-      rgb(255 215 122 / 60%) 100%
+      146deg,
+      rgb(255 250 232 / 86%) 0%,
+      rgb(138 232 255 / 78%) 38%,
+      rgb(255 215 122 / 72%) 76%,
+      rgb(156 242 255 / 74%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 238 / 50%),
-    inset 0 -2px 0 rgb(4 6 16 / 84%),
-    0 12px 28px -10px rgb(0 4 16 / 88%),
-    0 0 24px -8px rgb(127 230 255 / 30%);
+    inset 0 1px 0 rgb(255 252 244 / 58%),
+    inset 0 -2px 0 rgb(3 5 14 / 88%),
+    0 14px 32px -10px rgb(0 3 16 / 92%),
+    0 0 28px -6px rgb(127 230 255 / 42%);
   filter: none;
 }
 
-/* Chapter Map doors: the tall featured lead door takes a ring card radius
-   (preventing oversized stadium distortion) while the four index doors stay
-   crisp specular pills with zero square command-deck corner brackets. */
+/* Chapter Map doors: Starship Bridge orbital navigation deck */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #ffs-chapter-map {
+  border-block: 1px solid rgb(138 232 255 / 38%);
+  background:
+    radial-gradient(ellipse 68% 78% at 22% 50%, rgb(68 146 255 / 26%), transparent 68%),
+    radial-gradient(ellipse 56% 68% at 84% 24%, rgb(255 215 122 / 14%), transparent 68%),
+    linear-gradient(122deg, #091330 0%, #050b20 54%, #030614 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 26%),
+    inset 0 -1px 0 rgb(255 215 122 / 22%);
+}
+
 html[data-family="special"]
   body
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
@@ -103,22 +421,22 @@ html[data-family="special"]
   border: 1px solid transparent;
   overflow: clip;
   background:
-    radial-gradient(ellipse 76% 42% at 50% 0%, rgb(255 250 236 / 18%), transparent 68%) padding-box,
-    radial-gradient(ellipse 86% 74% at 0% 0%, rgb(127 230 255 / 14%), transparent 62%) padding-box,
-    radial-gradient(ellipse 72% 66% at 100% 100%, rgb(214 54 96 / 14%), transparent 64%) padding-box,
-    linear-gradient(156deg, rgb(16 26 56 / 92%), rgb(6 10 24 / 96%)) padding-box,
+    radial-gradient(ellipse 78% 44% at 50% 0%, rgb(255 252 242 / 22%), transparent 68%) padding-box,
+    radial-gradient(ellipse 86% 74% at 0% 0%, rgb(127 230 255 / 18%), transparent 62%) padding-box,
+    radial-gradient(ellipse 72% 66% at 100% 100%, rgb(255 215 122 / 14%), transparent 64%) padding-box,
+    linear-gradient(156deg, rgb(14 25 56 / 95%), rgb(5 9 22 / 98%)) padding-box,
     linear-gradient(
-      152deg,
-      rgb(255 244 214 / 48%) 0%,
-      rgb(138 232 255 / 38%) 42%,
-      rgb(214 54 96 / 34%) 78%,
-      rgb(255 215 122 / 40%) 100%
+      150deg,
+      rgb(255 248 228 / 62%) 0%,
+      rgb(138 232 255 / 52%) 42%,
+      rgb(255 215 122 / 48%) 78%,
+      rgb(138 232 255 / 46%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 248 232 / 34%),
-    inset 0 -1px 0 rgb(2 4 12 / 84%),
-    0 12px 26px -14px rgb(0 4 18 / 86%);
+    inset 0 1px 0 rgb(255 250 236 / 42%),
+    inset 0 -1px 0 rgb(2 4 12 / 88%),
+    0 14px 28px -14px rgb(0 2 14 / 90%);
 }
 
 html[data-family="special"]
@@ -130,24 +448,24 @@ html[data-family="special"]
   clip-path: none !important;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 78% 30% at 50% 0%, rgb(255 248 228 / 22%), transparent 66%) padding-box,
-    radial-gradient(ellipse 68% 54% at 54% 38%, rgb(96 186 255 / 30%), rgb(68 92 214 / 18%) 42%, transparent 72%) padding-box,
+    radial-gradient(ellipse 80% 30% at 50% 0%, rgb(255 252 240 / 28%), transparent 66%) padding-box,
+    radial-gradient(ellipse 70% 56% at 54% 38%, rgb(104 202 255 / 38%), rgb(68 96 226 / 22%) 42%, transparent 72%) padding-box,
     radial-gradient(ellipse 56% 42% at 24% 90%, rgb(214 54 96 / 20%), transparent 66%) padding-box,
-    radial-gradient(ellipse 52% 40% at 86% 86%, rgb(255 215 122 / 18%), transparent 66%) padding-box,
-    linear-gradient(160deg, rgb(18 30 66 / 94%), rgb(6 10 24 / 98%)) padding-box,
+    radial-gradient(ellipse 54% 42% at 86% 86%, rgb(255 215 122 / 24%), transparent 66%) padding-box,
+    linear-gradient(160deg, rgb(16 28 64 / 96%), rgb(4 8 20 / 99%)) padding-box,
     linear-gradient(
-      150deg,
-      rgb(255 246 218 / 72%) 0%,
-      rgb(138 232 255 / 58%) 36%,
-      rgb(214 54 96 / 48%) 72%,
-      rgb(255 215 122 / 64%) 100%
+      148deg,
+      rgb(255 250 232 / 84%) 0%,
+      rgb(138 232 255 / 72%) 36%,
+      rgb(255 215 122 / 72%) 72%,
+      rgb(156 242 255 / 68%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 46%),
-    inset 0 -1px 0 rgb(2 4 12 / 86%),
-    0 20px 44px -16px rgb(0 4 18 / 90%),
-    0 0 32px -12px rgb(255 215 122 / 26%);
+    inset 0 1px 0 rgb(255 252 242 / 56%),
+    inset 0 -1px 0 rgb(2 4 12 / 90%),
+    0 24px 52px -16px rgb(0 2 14 / 94%),
+    0 0 38px -10px rgb(127 230 255 / 34%);
 }
 
 html[data-family="special"]
@@ -168,8 +486,8 @@ html[data-family="special"]
   }
 }
 
-/* The two striking-power measurements form a sovereign gold-and-crimson pair
-   within obsidian specular ring plates (continuous rounded stroke, no corner seams). */
+/* The two striking-power measurements form a sovereign gold-crowned pair
+   within starship-bridge obsidian specular plates & metallic forged numerals. */
 #top.ffs-page #specs .ffs-specs {
   gap: 12px clamp(12px, 1.8vw, 22px);
 }
@@ -180,6 +498,7 @@ html[data-family="special"]
   #specs
   .ffs-specs
   > div {
+  position: relative;
   min-width: 0;
   min-height: 0;
   padding: clamp(16px, 1.8vw, 24px) clamp(16px, 2vw, 24px);
@@ -187,23 +506,24 @@ html[data-family="special"]
   border-radius: 22px;
   clip-path: none;
   background:
-    radial-gradient(ellipse 78% 36% at 50% 0%, rgb(255 250 238 / 19%), transparent 68%) padding-box,
-    linear-gradient(164deg, rgb(255 248 232 / 10%) 0%, rgb(255 255 255 / 2%) 28%, transparent 48%) padding-box,
-    radial-gradient(ellipse 76% 58% at 10% 0%, rgb(127 230 255 / 14%), transparent 60%) padding-box,
-    radial-gradient(ellipse 70% 56% at 94% 100%, rgb(214 54 96 / 14%), transparent 62%) padding-box,
-    linear-gradient(158deg, rgb(15 24 52 / 94%), rgb(6 10 24 / 97%) 64%, rgb(4 7 18 / 99%)) padding-box,
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 252 242 / 24%), transparent 66%) padding-box,
+    linear-gradient(164deg, rgb(255 250 236 / 11%) 0%, rgb(255 255 255 / 2%) 28%, transparent 48%) padding-box,
+    radial-gradient(ellipse 76% 58% at 10% 0%, rgb(127 230 255 / 20%), transparent 60%) padding-box,
+    radial-gradient(ellipse 70% 56% at 94% 100%, rgb(255 215 122 / 14%), transparent 62%) padding-box,
+    linear-gradient(158deg, rgb(12 21 48 / 96%), rgb(5 9 22 / 98%) 62%, rgb(3 5 14 / 100%)) padding-box,
     linear-gradient(
-      155deg,
-      rgb(255 246 220 / 54%) 0%,
-      rgb(138 232 255 / 44%) 36%,
-      rgb(214 54 96 / 34%) 72%,
-      rgb(255 215 122 / 42%) 100%
+      150deg,
+      rgb(255 250 232 / 72%) 0%,
+      rgb(138 232 255 / 62%) 36%,
+      rgb(255 215 122 / 58%) 72%,
+      rgb(138 232 255 / 50%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 38%),
-    inset 0 -1px 0 rgb(2 4 12 / 84%),
-    0 16px 36px -16px rgb(0 4 18 / 88%);
+    inset 0 1px 0 rgb(255 252 244 / 46%),
+    inset 0 -1px 0 rgb(2 4 12 / 88%),
+    0 18px 40px -16px rgb(0 3 16 / 92%),
+    0 0 26px -14px rgb(127 230 255 / 32%);
 }
 
 #top.ffs-page #specs .ffs-specs > div::before {
@@ -215,42 +535,89 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
   #specs
   .ffs-specs
+  > div:not([data-long])
+  dd {
+  width: fit-content;
+  background: linear-gradient(176deg, #ffffff 0%, #e4f8ff 42%, #9ee8ff 84%, #ffe5a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 92%))
+    drop-shadow(0 0 18px rgb(127 230 255 / 36%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #specs
+  .ffs-specs
   > [data-strike] {
   background:
-    radial-gradient(ellipse 82% 38% at 50% 0%, rgb(255 248 224 / 28%), transparent 68%) padding-box,
-    linear-gradient(160deg, rgb(255 240 198 / 14%) 0%, rgb(255 255 255 / 2%) 30%, transparent 50%) padding-box,
-    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 22%), transparent 60%) padding-box,
-    radial-gradient(ellipse 74% 60% at 92% 100%, rgb(214 54 96 / 24%), transparent 62%) padding-box,
-    linear-gradient(152deg, rgb(24 24 54 / 96%), rgb(10 13 30 / 98%) 66%, rgb(5 7 18 / 99%)) padding-box,
+    radial-gradient(ellipse 84% 38% at 50% 0%, rgb(255 252 238 / 34%), transparent 66%) padding-box,
+    linear-gradient(160deg, rgb(255 242 200 / 16%) 0%, rgb(255 255 255 / 3%) 30%, transparent 50%) padding-box,
+    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 28%), transparent 60%) padding-box,
+    radial-gradient(ellipse 74% 60% at 92% 100%, rgb(218 58 100 / 26%), transparent 62%) padding-box,
+    linear-gradient(152deg, rgb(22 23 52 / 97%), rgb(9 12 28 / 99%) 64%, rgb(4 6 16 / 100%)) padding-box,
     linear-gradient(
-      148deg,
-      rgb(255 250 232 / 84%) 0%,
-      rgb(255 215 122 / 78%) 34%,
-      rgb(218 58 100 / 60%) 72%,
-      rgb(138 232 255 / 44%) 100%
+      146deg,
+      rgb(255 252 240 / 94%) 0%,
+      rgb(255 218 128 / 92%) 34%,
+      rgb(224 62 106 / 64%) 72%,
+      rgb(138 232 255 / 62%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 232 / 54%),
-    inset 0 -1px 0 rgb(34 10 18 / 82%),
-    0 20px 46px -16px rgb(0 4 18 / 92%),
-    0 0 34px -12px rgb(255 215 122 / 36%),
-    0 0 26px -12px rgb(214 54 96 / 26%);
+    inset 0 1px 0 rgb(255 252 240 / 64%),
+    inset 0 -1px 0 rgb(34 10 18 / 86%),
+    0 22px 50px -16px rgb(0 3 16 / 95%),
+    0 0 42px -10px rgb(255 215 122 / 46%),
+    0 0 28px -12px rgb(214 54 96 / 32%);
 }
 
-#top.ffs-page #specs .ffs-specs > [data-strike] dd {
-  color: #fff6dc;
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #specs
+  .ffs-specs
+  > [data-strike]::before {
+  content: "";
+  position: absolute;
+  inset: 0 22px auto 22px;
+  height: 2px;
+  border-radius: var(--ring-radius-pill);
+  background: linear-gradient(90deg, transparent, #fff7dd 18%, #ffd77a 52%, #e84672 86%, transparent);
+  box-shadow: 0 0 16px rgb(255 215 122 / 64%);
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #specs
+  .ffs-specs
+  > [data-strike]
+  dd {
+  width: fit-content;
   font-size: clamp(29px, 4vw, 60px);
   font-variant-numeric: tabular-nums;
   letter-spacing: -.035em;
   line-height: 1.1;
-  text-shadow:
-    0 2px 10px rgb(3 8 24 / 82%),
-    0 0 26px rgb(255 215 122 / 48%);
+  background: linear-gradient(176deg, #ffffff 0%, #fff5d0 32%, #ffd875 68%, #f2aa3c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 26px rgb(255 215 122 / 56%));
 }
 
-/* Performance Comparison Console: rounded obsidian-gold-crimson ring chassis
-   with arched top specular sheen and corner-safe inset top rails. */
+/* Performance Comparison Console: Starship-Bridge obsidian holographic chassis
+   with blazing top plasma rail and metallic forged telemetry figures. */
 #top.ffs-page #performance .ffs-console {
   position: relative;
   padding: clamp(18px, 2.4vw, 34px);
@@ -258,53 +625,74 @@ html[data-family="special"]
   border-radius: var(--ring-radius-card);
   clip-path: none;
   background:
-    radial-gradient(ellipse 72% 24% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%) padding-box,
-    radial-gradient(ellipse 76% 54% at 14% 0%, rgb(112 214 255 / 16%), transparent 60%) padding-box,
-    radial-gradient(ellipse 68% 50% at 90% 100%, rgb(214 54 96 / 15%), transparent 62%) padding-box,
-    linear-gradient(162deg, rgb(15 24 54 / 96%) 0%, rgb(7 12 30 / 98%) 56%, rgb(4 8 20 / 99%) 100%) padding-box,
+    radial-gradient(ellipse 74% 24% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 76% 54% at 14% 0%, rgb(112 214 255 / 22%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 50% at 90% 100%, rgb(255 215 122 / 14%), transparent 62%) padding-box,
+    linear-gradient(162deg, rgb(12 21 50 / 97%) 0%, rgb(6 11 26 / 99%) 56%, rgb(3 6 16 / 100%) 100%) padding-box,
     linear-gradient(
-      155deg,
-      rgb(255 244 214 / 52%) 0%,
-      rgb(138 232 255 / 44%) 36%,
-      rgb(214 54 96 / 34%) 72%,
-      rgb(255 215 122 / 44%) 100%
+      152deg,
+      rgb(255 250 232 / 70%) 0%,
+      rgb(138 232 255 / 62%) 36%,
+      rgb(255 215 122 / 58%) 72%,
+      rgb(138 232 255 / 54%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 34%),
-    inset 0 -1px 0 rgb(2 4 12 / 86%),
-    0 24px 60px -20px rgb(0 4 18 / 92%);
+    inset 0 1px 0 rgb(255 252 244 / 42%),
+    inset 0 -1px 0 rgb(2 4 12 / 90%),
+    0 28px 68px -20px rgb(0 3 16 / 96%),
+    0 0 42px -18px rgb(127 230 255 / 32%);
 }
 
 #top.ffs-page #performance .ffs-console::before {
   inset: 0 28px auto 28px;
-  height: 2px;
+  height: 2.5px;
   border-radius: var(--ring-radius-pill);
-  background: linear-gradient(90deg, transparent, #9ef2ff 16%, #ffd77a 52%, #e84672 84%, transparent);
-  box-shadow: 0 0 16px rgb(127 230 255 / 44%);
+  background: linear-gradient(90deg, transparent, #9ef2ff 14%, #ffffff 38%, #ffd77a 66%, #e84672 88%, transparent);
+  box-shadow:
+    0 0 20px rgb(127 230 255 / 66%),
+    0 0 32px rgb(255 215 122 / 40%);
 }
 
 #top.ffs-page #performance .ffs-panel {
   position: relative;
   padding: clamp(16px, 2.2vw, 28px);
-  border: 1px solid rgb(138 232 255 / 24%);
+  border: 1px solid rgb(138 232 255 / 32%);
   border-radius: 20px;
   clip-path: none;
   background:
-    radial-gradient(ellipse 74% 28% at 50% 0%, rgb(255 250 238 / 12%), transparent 68%),
-    radial-gradient(ellipse 80% 56% at 10% 0%, rgb(127 230 255 / 11%), transparent 60%),
-    linear-gradient(164deg, rgb(12 20 46 / 92%), rgb(5 9 22 / 96%));
+    radial-gradient(ellipse 76% 28% at 50% 0%, rgb(255 252 242 / 16%), transparent 66%),
+    radial-gradient(ellipse 80% 56% at 10% 0%, rgb(127 230 255 / 15%), transparent 60%),
+    linear-gradient(164deg, rgb(10 18 42 / 95%), rgb(4 7 18 / 98%));
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 28%),
-    0 16px 40px -18px rgb(0 4 18 / 86%);
+    inset 0 1px 0 rgb(255 252 242 / 34%),
+    0 18px 44px -18px rgb(0 3 16 / 90%);
 }
 
 #top.ffs-page #performance .ffs-panel::before {
   inset: 0 20px auto 20px;
   height: 2px;
   border-radius: var(--ring-radius-pill);
-  background: linear-gradient(90deg, transparent, #7fe6ff 20%, #ffd77a 62%, #e84672 88%, transparent);
-  box-shadow: 0 0 12px rgb(127 230 255 / 34%);
+  background: linear-gradient(90deg, transparent, #9ef2ff 18%, #ffd77a 60%, #e84672 88%, transparent);
+  box-shadow: 0 0 14px rgb(127 230 255 / 46%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #performance
+  .ffs-metric:not(.ffs-metric-all)
+  > header
+  strong {
+  background: linear-gradient(176deg, #ffffff 0%, #e4f9ff 44%, #9aeaff 86%, #ffe6a8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 92%))
+    drop-shadow(0 0 16px rgb(127 230 255 / 34%));
 }
 
 #top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) {
@@ -313,39 +701,50 @@ html[data-family="special"]
   border: 1px solid transparent;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse 80% 36% at 50% 0%, rgb(255 248 224 / 26%), transparent 68%) padding-box,
-    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 20%), transparent 58%) padding-box,
-    radial-gradient(ellipse 76% 58% at 92% 100%, rgb(214 54 96 / 22%), transparent 62%) padding-box,
-    linear-gradient(148deg, rgb(24 26 56 / 95%), rgb(9 13 30 / 98%) 72%) padding-box,
+    radial-gradient(ellipse 82% 36% at 50% 0%, rgb(255 252 236 / 32%), transparent 66%) padding-box,
+    radial-gradient(ellipse 84% 62% at 14% 0%, rgb(255 215 122 / 26%), transparent 58%) padding-box,
+    radial-gradient(ellipse 76% 58% at 92% 100%, rgb(218 58 100 / 24%), transparent 62%) padding-box,
+    linear-gradient(148deg, rgb(22 24 54 / 97%), rgb(8 11 26 / 99%) 72%) padding-box,
     linear-gradient(
-      148deg,
-      rgb(255 250 232 / 78%) 0%,
-      rgb(255 215 122 / 72%) 36%,
-      rgb(218 58 100 / 56%) 74%,
-      rgb(138 232 255 / 44%) 100%
+      146deg,
+      rgb(255 252 240 / 90%) 0%,
+      rgb(255 218 128 / 88%) 36%,
+      rgb(224 62 106 / 62%) 74%,
+      rgb(138 232 255 / 58%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 232 / 50%),
-    inset 0 -1px 0 rgb(34 10 18 / 80%),
-    0 20px 48px -16px rgb(0 4 18 / 92%),
-    0 0 32px -12px rgb(255 215 122 / 34%);
+    inset 0 1px 0 rgb(255 252 240 / 60%),
+    inset 0 -1px 0 rgb(34 10 18 / 84%),
+    0 22px 52px -16px rgb(0 3 16 / 95%),
+    0 0 38px -10px rgb(255 215 122 / 44%);
 }
 
-#top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) > header strong {
-  color: #fff6dc;
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #performance
+  .ffs-metric:is([data-metric="punch"], [data-metric="kick"])
+  > header
+  strong {
   font-size: clamp(32px, 3.6vw, 54px);
   line-height: 1;
   letter-spacing: -.04em;
-  text-shadow:
-    0 2px 10px rgb(3 8 24 / 82%),
-    0 0 24px rgb(255 215 122 / 40%);
+  background: linear-gradient(176deg, #ffffff 0%, #fff5ce 32%, #ffd875 68%, #f2aa3c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 24px rgb(255 215 122 / 52%));
 }
 
 #top.ffs-page #performance .ffs-metric-result {
   text-shadow:
-    0 0 18px rgb(127 230 255 / 38%),
-    0 0 34px rgb(192 142 255 / 20%);
+    0 0 18px rgb(127 230 255 / 44%),
+    0 0 34px rgb(255 215 122 / 24%);
 }
 
 /* The full P16 dossier extends well past a phone screen. These are native
@@ -408,68 +807,323 @@ html[data-family="special"]
   transition: none;
 }
 
-/* Overview callout score & P16 ring-card geometry alignment (corner-safe top
-   rails, rounded pill tags, and arched specular gloss). */
-#top.ffs-page #overview .ffs-calls {
+/* Overview FAR FROM DEUS! Holographic Callout Console & 5-Pill Voice Array:
+   starship-bridge obsidian deck, blazing plasma top rail, metallic forged
+   opening/closing refrains, and alternating sapphire × gold command pills. */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #overview
+  .ffs-calls {
+  position: relative;
   border-radius: var(--ring-radius-card);
   border: 1px solid transparent;
+  padding: clamp(22px, 3vw, 40px) clamp(18px, 3vw, 38px);
+  gap: .75rem .9rem;
   background:
-    radial-gradient(ellipse 74% 34% at 50% 0%, rgb(255 250 236 / 16%), transparent 68%) padding-box,
-    radial-gradient(ellipse 72% 60% at 12% 0%, rgb(255 215 122 / 14%), transparent 60%) padding-box,
-    radial-gradient(ellipse 70% 60% at 88% 100%, rgb(214 54 96 / 14%), transparent 62%) padding-box,
-    linear-gradient(160deg, rgb(14 24 52 / 90%), rgb(6 10 24 / 96%)) padding-box,
+    radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 252 240 / 24%), transparent 66%) padding-box,
+    radial-gradient(ellipse 74% 62% at 10% 0%, rgb(255 215 122 / 24%), transparent 58%) padding-box,
+    radial-gradient(ellipse 72% 62% at 90% 100%, rgb(127 230 255 / 24%), transparent 60%) padding-box,
+    radial-gradient(ellipse 46% 42% at 88% 12%, rgb(218 58 100 / 16%), transparent 62%) padding-box,
+    linear-gradient(158deg, rgb(12 22 52 / 96%) 0%, rgb(6 10 26 / 98%) 54%, rgb(3 6 16 / 100%) 100%) padding-box,
     linear-gradient(
-      155deg,
-      rgb(255 246 218 / 52%) 0%,
-      rgb(138 232 255 / 40%) 40%,
-      rgb(214 54 96 / 34%) 76%,
-      rgb(255 215 122 / 46%) 100%
+      148deg,
+      rgb(255 252 238 / 86%) 0%,
+      rgb(255 218 128 / 76%) 30%,
+      rgb(138 232 255 / 72%) 68%,
+      rgb(255 215 122 / 76%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 34%),
-    0 18px 46px -20px rgb(0 4 18 / 88%);
+    inset 0 1px 0 rgb(255 252 244 / 52%),
+    inset 0 -1px 0 rgb(2 4 12 / 90%),
+    0 28px 66px -18px rgb(0 3 16 / 96%),
+    0 0 44px -14px rgb(127 230 255 / 34%),
+    0 0 36px -16px rgb(255 215 122 / 32%);
 }
 
-#top.ffs-page #overview .ffs-calls b:not(:first-child):not(:last-child),
-#top.ffs-page #finishers .ffs-calls b {
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #overview
+  .ffs-calls::before {
+  content: "";
+  position: absolute;
+  inset: 0 28px auto 28px;
+  height: 2.5px;
+  border-radius: var(--ring-radius-pill);
+  background: linear-gradient(90deg, transparent, #9ef2ff 14%, #ffffff 38%, #ffd77a 66%, #e84672 88%, transparent);
+  box-shadow:
+    0 0 22px rgb(127 230 255 / 70%),
+    0 0 36px rgb(255 215 122 / 46%);
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #overview
+  .ffs-calls
+  b:first-child {
+  background: linear-gradient(176deg, #ffffff 0%, #fff5d0 30%, #ffd978 66%, #f0ac40 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 26px rgb(255 215 122 / 56%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #overview
+  .ffs-calls
+  b:last-child {
+  background: linear-gradient(176deg, #ffffff 0%, #e4fbff 32%, #8ce8ff 64%, #ffe5a2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 28px rgb(127 230 255 / 62%))
+    drop-shadow(0 0 46px rgb(255 215 122 / 34%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #overview
+  .ffs-calls
+  b:not(:first-child):not(:last-child),
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #finishers
+  .ffs-calls
+  b {
+  max-width: 100%;
   border-radius: var(--ring-radius-pill);
   clip-path: none;
-  padding: 6px 15px;
-  border: 1px solid rgb(255 224 148 / 30%);
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  color: #f4fbff;
+  font-weight: 600;
   background:
-    linear-gradient(180deg, rgb(255 250 236 / 14%) 0%, transparent 52%),
-    rgb(12 20 44 / 82%);
-  box-shadow: inset 0 1px 0 rgb(255 248 228 / 28%);
+    radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 252 244 / 24%), transparent 64%) padding-box,
+    radial-gradient(ellipse 82% 72% at 12% 0%, rgb(127 230 255 / 26%), transparent 60%) padding-box,
+    linear-gradient(164deg, rgb(14 26 60 / 94%), rgb(6 11 28 / 98%)) padding-box,
+    linear-gradient(148deg, rgb(255 252 240 / 76%) 0%, rgb(138 232 255 / 72%) 48%, rgb(255 215 122 / 64%) 100%)
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 46%),
+    inset 0 -1px 0 rgb(2 4 14 / 84%),
+    0 10px 24px -10px rgb(0 3 16 / 92%),
+    0 0 20px -6px rgb(127 230 255 / 34%);
 }
 
-#top.ffs-page #p16 :is(.ffs-p16-overview, .ffs-p16-comparator, .ffs-p16-lineage, .ffs-p16-main, .ffs-p16-summary) {
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #overview
+  .ffs-calls
+  b:not(:first-child):not(:last-child):nth-child(even) {
+  color: #fff8e8;
+  background:
+    radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 252 238 / 28%), transparent 64%) padding-box,
+    radial-gradient(ellipse 82% 72% at 14% 0%, rgb(255 215 122 / 26%), transparent 60%) padding-box,
+    linear-gradient(164deg, rgb(22 24 56 / 94%), rgb(8 11 26 / 98%)) padding-box,
+    linear-gradient(148deg, rgb(255 252 240 / 82%) 0%, rgb(255 218 128 / 78%) 48%, rgb(138 232 255 / 60%) 100%)
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 50%),
+    inset 0 -1px 0 rgb(20 8 14 / 84%),
+    0 10px 24px -10px rgb(0 3 16 / 92%),
+    0 0 22px -6px rgb(255 215 122 / 36%);
+}
+
+/* P16 Starship-Bridge Holographic Telemetry Modules: obsidian dark glass,
+   golden-sapphire prism rims, top laser beams, and metallic forged figures. */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  :is(.ffs-p16-overview, .ffs-p16-comparator, .ffs-p16-lineage, .ffs-p16-main, .ffs-p16-summary) {
+  border: 1px solid transparent;
   border-radius: var(--ring-radius-card);
-  border-top-width: 1px;
+  background:
+    radial-gradient(ellipse 74% 24% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 76% 52% at 10% 0%, rgb(112 214 255 / 22%), transparent 58%) padding-box,
+    radial-gradient(ellipse 68% 50% at 92% 100%, rgb(255 215 122 / 14%), transparent 62%) padding-box,
+    linear-gradient(158deg, rgb(12 22 52 / 97%) 0%, rgb(6 11 26 / 99%) 56%, rgb(3 6 16 / 100%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 250 232 / 72%) 0%,
+      rgb(138 232 255 / 64%) 36%,
+      rgb(255 215 122 / 60%) 74%,
+      rgb(138 232 255 / 54%) 100%
+    )
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 44%),
+    inset 0 -1px 0 rgb(2 4 12 / 90%),
+    0 28px 68px -20px rgb(0 3 16 / 96%),
+    0 0 44px -18px rgb(127 230 255 / 34%);
 }
 
-#top.ffs-page #p16 :is(.ffs-p16-comparator, .ffs-p16-lineage, .ffs-p16-main, .ffs-p16-summary)::before {
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  :is(.ffs-p16-comparator, .ffs-p16-lineage, .ffs-p16-main, .ffs-p16-summary)::before {
   inset: 0 28px auto 28px;
+  height: 2.5px;
   border-radius: var(--ring-radius-pill);
+  background: linear-gradient(90deg, transparent, #9ef2ff 14%, #ffffff 38%, #ffd77a 68%, #e84672 90%, transparent);
+  box-shadow:
+    0 0 20px rgb(127 230 255 / 68%),
+    0 0 32px rgb(255 215 122 / 40%);
 }
 
-#top.ffs-page #p16 :is(.ffs-p16-metric, .ffs-p16-generations article, .ffs-p16-topics article, .ffs-p16-note) {
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  .ffs-p16-copy
+  h3 {
+  background: linear-gradient(176deg, #ffffff 0%, #eaf9ff 40%, #9eeaff 74%, #ffe5a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 92%))
+    drop-shadow(0 0 26px rgb(127 230 255 / 44%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  .ffs-p16-figures
+  dd {
+  background: linear-gradient(176deg, #ffffff 0%, #e4f9ff 44%, #9aeaff 84%, #ffe6a8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 92%))
+    drop-shadow(0 0 18px rgb(127 230 255 / 40%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  .ffs-p16-figures
+  dl
+  > div:first-child
+  dd {
+  background: linear-gradient(176deg, #ffffff 0%, #fff4cc 32%, #ffd875 68%, #f2aa3c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 24px rgb(255 215 122 / 54%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  .ffs-p16-figures
+  dd
+  small {
+  -webkit-text-fill-color: #c8dcf0;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  .ffs-p16-values
+  strong {
+  background: linear-gradient(176deg, #ffffff 0%, #fff4ce 32%, #ffd875 68%, #f2aa3c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 92%))
+    drop-shadow(0 0 20px rgb(255 215 122 / 48%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  :is(.ffs-p16-metric, .ffs-p16-generations article, .ffs-p16-topics article, .ffs-p16-note) {
+  border: 1px solid transparent;
   border-radius: 20px;
+  background:
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 76% 56% at 10% 0%, rgb(127 230 255 / 16%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 52% at 92% 100%, rgb(255 215 122 / 12%), transparent 62%) padding-box,
+    linear-gradient(160deg, rgb(12 22 50 / 95%), rgb(5 9 22 / 98%)) padding-box,
+    linear-gradient(150deg, rgb(255 250 232 / 60%) 0%, rgb(138 232 255 / 54%) 46%, rgb(255 215 122 / 48%) 100%)
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 38%),
+    inset 0 -1px 0 rgb(2 4 12 / 86%),
+    0 18px 40px -16px rgb(0 3 16 / 90%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  #p16
+  :is(.ffs-p16-generations article[data-unit="p16"], .ffs-p16-note) {
+  background:
+    radial-gradient(ellipse 82% 36% at 50% 0%, rgb(255 252 238 / 28%), transparent 66%) padding-box,
+    radial-gradient(ellipse 80% 60% at 12% 0%, rgb(255 215 122 / 24%), transparent 58%) padding-box,
+    radial-gradient(ellipse 72% 56% at 92% 100%, rgb(127 230 255 / 20%), transparent 62%) padding-box,
+    linear-gradient(152deg, rgb(20 26 56 / 96%), rgb(7 11 26 / 99%)) padding-box,
+    linear-gradient(146deg, rgb(255 252 240 / 88%) 0%, rgb(255 218 128 / 84%) 42%, rgb(138 232 255 / 64%) 100%)
+      border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 54%),
+    inset 0 -1px 0 rgb(18 10 14 / 86%),
+    0 22px 50px -16px rgb(0 3 16 / 94%),
+    0 0 36px -12px rgb(255 215 122 / 38%);
 }
 
 #top.ffs-page #p16 .ffs-p16-functions li {
-  padding: 6px 14px;
-  border: 1px solid rgb(138 232 255 / 34%);
+  padding: 6px 15px;
+  border: 1px solid transparent;
   border-radius: var(--ring-radius-pill);
+  color: #f4fbff;
   background:
-    radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 250 238 / 16%), transparent 68%),
-    linear-gradient(155deg, rgb(18 32 66 / 84%), rgb(8 14 34 / 94%));
-  box-shadow: inset 0 1px 0 rgb(255 250 236 / 30%);
+    radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 252 242 / 22%), transparent 66%) padding-box,
+    linear-gradient(155deg, rgb(16 30 66 / 92%), rgb(6 12 28 / 98%)) padding-box,
+    linear-gradient(148deg, rgb(255 250 234 / 64%), rgb(138 232 255 / 64%) 52%, rgb(255 215 122 / 54%)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 40%),
+    0 8px 18px -10px rgb(0 3 16 / 88%);
 }
 
-/* Stages exhibit panel & 5-form comparison drawer + cards: rounded ring-card
-   geometry, corner-safe inset dispersion seams, pill tags/buttons, and
-   obsidian-gold-crimson-accent top specular gloss. */
+/* Stages exhibit panel & 5-form comparison drawer + cards: Starship-Bridge
+   obsidian-glass instruments, metallic titles, jewel-cut form selectors. */
 #top.ffs-page > #stages #ffs-stage-panel {
   border-radius: var(--ring-radius-card);
   border-top-width: 1px;
@@ -490,22 +1144,23 @@ html[data-family="special"]
   border-radius: var(--ring-radius-card);
   clip-path: none;
   background:
-    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 250 238 / 16%), transparent 68%) padding-box,
-    radial-gradient(ellipse 74% 54% at 14% 0%, rgb(127 230 255 / 15%), transparent 60%) padding-box,
-    radial-gradient(ellipse 68% 52% at 90% 100%, rgb(214 54 96 / 16%), transparent 62%) padding-box,
-    linear-gradient(164deg, rgb(15 24 54 / 96%), rgb(6 10 24 / 98%)) padding-box,
+    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 252 242 / 22%), transparent 66%) padding-box,
+    radial-gradient(ellipse 74% 54% at 14% 0%, rgb(127 230 255 / 22%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 52% at 90% 100%, rgb(255 215 122 / 14%), transparent 62%) padding-box,
+    linear-gradient(162deg, rgb(12 22 52 / 97%), rgb(5 9 22 / 99%)) padding-box,
     linear-gradient(
-      154deg,
-      rgb(255 246 218 / 54%) 0%,
-      rgb(138 232 255 / 46%) 36%,
-      rgb(214 54 96 / 36%) 72%,
-      rgb(255 215 122 / 46%) 100%
+      148deg,
+      rgb(255 250 232 / 74%) 0%,
+      rgb(138 232 255 / 68%) 36%,
+      rgb(255 215 122 / 64%) 72%,
+      rgb(138 232 255 / 56%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 34%),
-    inset 0 -1px 0 rgb(2 4 12 / 86%),
-    0 22px 54px -20px rgb(0 4 18 / 90%);
+    inset 0 1px 0 rgb(255 252 244 / 44%),
+    inset 0 -1px 0 rgb(2 4 12 / 90%),
+    0 26px 60px -20px rgb(0 3 16 / 95%),
+    0 0 40px -16px rgb(127 230 255 / 30%);
 }
 
 html[data-family="special"]
@@ -521,14 +1176,29 @@ html[data-family="special"]
   body
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
   > #stages
+  .ffs-form-comparison
+  > summary
+  > strong {
+  background: linear-gradient(176deg, #ffffff 0%, #eaf9ff 44%, #9eeaff 78%, #ffe5a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
   .ffs-comparison-codes
   > b {
-  padding: 5px 11px;
+  padding: 5px 12px;
   border-radius: var(--ring-radius-pill);
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 12%) 0%, transparent 56%),
-    rgb(8 14 32 / 78%);
-  box-shadow: inset 0 1px 0 rgb(255 250 238 / 24%);
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, transparent 56%),
+    rgb(6 12 28 / 90%);
+  box-shadow: inset 0 1px 0 rgb(255 252 242 / 32%);
 }
 
 html[data-family="special"]
@@ -539,13 +1209,13 @@ html[data-family="special"]
   > summary
   > i {
   border-radius: 50%;
-  border-color: rgb(255 224 148 / 46%);
+  border-color: rgb(255 224 148 / 58%);
   background:
-    radial-gradient(circle at 32% 24%, rgb(255 250 236 / 22%), transparent 56%),
-    rgb(10 18 40 / 88%);
+    radial-gradient(circle at 32% 24%, rgb(255 252 240 / 28%), transparent 56%),
+    rgb(10 18 42 / 94%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 38%),
-    0 6px 16px -8px rgb(0 4 18 / 84%);
+    inset 0 1px 0 rgb(255 250 232 / 48%),
+    0 6px 18px -6px rgb(0 3 16 / 90%);
 }
 
 html[data-family="special"]
@@ -557,23 +1227,23 @@ html[data-family="special"]
   border-radius: 20px;
   overflow: clip;
   background:
-    radial-gradient(ellipse 84% 34% at 50% 0%, rgb(255 252 242 / 22%), transparent 68%) padding-box,
-    linear-gradient(164deg, rgb(255 248 232 / 11%) 0%, rgb(255 255 255 / 2%) 28%, transparent 48%) padding-box,
-    radial-gradient(110% 70% at 50% 0%, color-mix(in srgb, var(--ffs-accent) 24%, transparent), transparent 62%) padding-box,
-    radial-gradient(90% 62% at 100% 100%, rgb(214 54 96 / 16%), transparent 66%) padding-box,
-    linear-gradient(168deg, rgb(15 24 52 / 96%), rgb(5 9 22 / 98%)) padding-box,
+    radial-gradient(ellipse 84% 34% at 50% 0%, rgb(255 252 242 / 26%), transparent 66%) padding-box,
+    linear-gradient(164deg, rgb(255 250 236 / 12%) 0%, rgb(255 255 255 / 2%) 28%, transparent 48%) padding-box,
+    radial-gradient(110% 70% at 50% 0%, color-mix(in srgb, var(--ffs-accent) 28%, transparent), transparent 62%) padding-box,
+    radial-gradient(90% 62% at 100% 100%, rgb(255 215 122 / 14%), transparent 66%) padding-box,
+    linear-gradient(166deg, rgb(12 21 48 / 97%), rgb(4 8 20 / 99%)) padding-box,
     linear-gradient(
-      154deg,
-      rgb(255 250 236 / 58%) 0%,
-      color-mix(in srgb, var(--ffs-accent) 62%, rgb(255 215 122)) 42%,
-      rgb(214 54 96 / 38%) 78%,
-      color-mix(in srgb, var(--ffs-accent) 44%, rgb(255 255 255)) 100%
+      148deg,
+      rgb(255 252 240 / 74%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 78%, #ffd77a) 40%,
+      rgb(255 215 122 / 58%) 76%,
+      color-mix(in srgb, var(--ffs-accent) 56%, #ffffff) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 238 / 42%),
-    inset 0 -1px 0 rgb(2 4 12 / 86%),
-    0 14px 32px -14px rgb(0 4 18 / 88%);
+    inset 0 1px 0 rgb(255 252 244 / 50%),
+    inset 0 -1px 0 rgb(2 4 12 / 90%),
+    0 16px 38px -14px rgb(0 3 16 / 94%);
 }
 
 html[data-family="special"]
@@ -582,6 +1252,7 @@ html[data-family="special"]
   > #stages
   .ffs-comparison-card::before {
   inset: 0 20px auto 20px;
+  height: 2.5px;
   border-radius: var(--ring-radius-pill);
 }
 
@@ -591,23 +1262,23 @@ html[data-family="special"]
   > #stages
   .ffs-comparison-card[data-selected="true"] {
   background:
-    radial-gradient(ellipse 88% 38% at 50% 0%, rgb(255 252 244 / 30%), transparent 68%) padding-box,
-    linear-gradient(162deg, rgb(255 250 236 / 14%) 0%, rgb(255 255 255 / 3%) 30%, transparent 50%) padding-box,
-    radial-gradient(112% 72% at 50% 0%, color-mix(in srgb, var(--ffs-accent) 32%, transparent), transparent 64%) padding-box,
-    radial-gradient(90% 62% at 100% 100%, rgb(214 54 96 / 20%), transparent 66%) padding-box,
-    linear-gradient(168deg, rgb(18 28 60 / 97%), rgb(6 10 26 / 99%)) padding-box,
+    radial-gradient(ellipse 88% 38% at 50% 0%, rgb(255 254 246 / 34%), transparent 66%) padding-box,
+    linear-gradient(162deg, rgb(255 252 240 / 16%) 0%, rgb(255 255 255 / 3%) 30%, transparent 50%) padding-box,
+    radial-gradient(112% 72% at 50% 0%, color-mix(in srgb, var(--ffs-accent) 36%, transparent), transparent 64%) padding-box,
+    radial-gradient(90% 62% at 100% 100%, rgb(255 215 122 / 20%), transparent 66%) padding-box,
+    linear-gradient(166deg, rgb(16 26 58 / 98%), rgb(5 9 24 / 100%)) padding-box,
     linear-gradient(
-      148deg,
-      #fffaf0 0%,
-      color-mix(in srgb, var(--ffs-accent) 82%, #ffffff) 38%,
-      #ffd77a 72%,
-      color-mix(in srgb, var(--ffs-accent) 68%, #ffffff) 100%
+      144deg,
+      #ffffff 0%,
+      color-mix(in srgb, var(--ffs-accent) 88%, #ffffff) 38%,
+      #ffe08a 72%,
+      color-mix(in srgb, var(--ffs-accent) 74%, #ffffff) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 58%),
-    inset 0 0 24px color-mix(in srgb, var(--ffs-accent) 22%, transparent),
-    0 18px 40px -12px color-mix(in srgb, var(--ffs-accent) 46%, transparent);
+    inset 0 1.5px 0 rgb(255 255 255 / 72%),
+    inset 0 0 28px color-mix(in srgb, var(--ffs-accent) 26%, transparent),
+    0 22px 46px -12px color-mix(in srgb, var(--ffs-accent) 56%, transparent);
 }
 
 html[data-family="special"]
@@ -617,6 +1288,20 @@ html[data-family="special"]
   .ffs-comparison-card
   img {
   border-radius: 12px;
+  border-color: color-mix(in srgb, var(--ffs-accent) 52%, rgb(255 224 148 / 32%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #stages
+  .ffs-comparison-card
+  h3 {
+  background: linear-gradient(176deg, #ffffff 0%, #eef9ff 52%, color-mix(in srgb, var(--ffs-accent) 70%, #ffe6a8) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 html[data-family="special"]
@@ -629,19 +1314,19 @@ html[data-family="special"]
   border-radius: var(--ring-radius-pill);
   clip-path: none;
   background:
-    radial-gradient(ellipse 80% 48% at 50% 0%, rgb(255 250 238 / 22%), transparent 68%) padding-box,
-    linear-gradient(180deg, rgb(22 36 72 / 90%), rgb(7 13 30 / 96%)) padding-box,
+    radial-gradient(ellipse 80% 48% at 50% 0%, rgb(255 252 242 / 26%), transparent 66%) padding-box,
+    linear-gradient(180deg, rgb(20 34 70 / 94%), rgb(6 11 26 / 98%)) padding-box,
     linear-gradient(
-      152deg,
-      rgb(255 248 228 / 58%) 0%,
-      color-mix(in srgb, var(--ffs-accent) 56%, rgb(138 232 255)) 48%,
-      rgb(214 54 96 / 40%) 100%
+      148deg,
+      rgb(255 250 232 / 72%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 68%, rgb(138 232 255)) 48%,
+      rgb(255 215 122 / 54%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 238 / 38%),
-    inset 0 -1.5px 0 rgb(2 4 14 / 82%),
-    0 8px 18px -8px rgb(0 4 18 / 84%);
+    inset 0 1px 0 rgb(255 252 242 / 46%),
+    inset 0 -1.5px 0 rgb(2 4 14 / 86%),
+    0 10px 22px -8px rgb(0 3 16 / 90%);
 }
 
 html[data-family="special"]
@@ -650,20 +1335,20 @@ html[data-family="special"]
   > #stages
   .ffs-comparison-card
   button[aria-pressed="true"] {
-  border: 1px solid rgb(255 255 255 / 86%);
+  border: 1px solid rgb(255 255 255 / 94%);
   color: #05111e;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(255 255 255 / 78%), transparent 68%),
-    linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 74%, #ffffff), var(--ffs-accent) 74%, color-mix(in srgb, var(--ffs-accent) 74%, #ffd77a));
+    radial-gradient(ellipse 82% 52% at 50% 0%, rgb(255 255 255 / 86%), transparent 66%),
+    linear-gradient(132deg, color-mix(in srgb, var(--ffs-accent) 68%, #ffffff), var(--ffs-accent) 72%, color-mix(in srgb, var(--ffs-accent) 68%, #ffd77a));
   box-shadow:
-    inset 0 1.5px 0 rgb(255 255 255 / 92%),
-    inset 0 -1.5px 0 rgb(10 24 44 / 34%),
-    0 8px 22px -6px color-mix(in srgb, var(--ffs-accent) 54%, transparent);
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1.5px 0 rgb(10 24 44 / 36%),
+    0 10px 26px -6px color-mix(in srgb, var(--ffs-accent) 64%, transparent);
 }
 
-/* Editorial plates, Arsenal weapon cards & Finisher sanctuary plates:
-   continuous rounded ring-card stroke, arched top specular reflection, and
-   obsidian × sovereign gold × deep crimson depth. */
+/* Editorial plates, Arsenal weapon plates & Finisher sanctuary plates:
+   deep starship obsidian × champagne gold × sapphire luminous rims,
+   metallic forged plate titles, and glowing gold weapon medallions. */
 html[data-family="special"]
   body
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
@@ -674,23 +1359,41 @@ html[data-family="special"]
   border-radius: var(--ring-radius-card);
   clip-path: none;
   background:
-    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 250 238 / 16%), transparent 68%) padding-box,
-    linear-gradient(164deg, rgb(255 248 232 / 9%) 0%, rgb(255 255 255 / 1.5%) 26%, transparent 46%) padding-box,
-    radial-gradient(ellipse 70% 54% at 8% 0%, color-mix(in srgb, var(--ffs-accent) 16%, transparent), transparent 60%) padding-box,
-    radial-gradient(ellipse 62% 50% at 94% 100%, rgb(214 54 96 / 14%), transparent 62%) padding-box,
-    linear-gradient(158deg, rgb(15 24 52 / 94%), rgb(6 10 24 / 98%)) padding-box,
+    radial-gradient(ellipse 76% 30% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    linear-gradient(164deg, rgb(255 250 236 / 10%) 0%, rgb(255 255 255 / 2%) 26%, transparent 46%) padding-box,
+    radial-gradient(ellipse 70% 54% at 8% 0%, color-mix(in srgb, var(--ffs-accent) 22%, transparent), transparent 60%) padding-box,
+    radial-gradient(ellipse 62% 50% at 94% 100%, rgb(255 215 122 / 14%), transparent 62%) padding-box,
+    linear-gradient(158deg, rgb(12 22 50 / 96%), rgb(5 9 22 / 99%)) padding-box,
     linear-gradient(
-      154deg,
-      rgb(255 246 218 / 50%) 0%,
-      color-mix(in srgb, var(--ffs-accent) 56%, rgb(138 232 255)) 38%,
-      rgb(214 54 96 / 34%) 74%,
-      rgb(255 215 122 / 44%) 100%
+      148deg,
+      rgb(255 250 232 / 68%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 70%, rgb(138 232 255)) 38%,
+      rgb(255 215 122 / 58%) 76%,
+      color-mix(in srgb, var(--ffs-accent) 52%, rgb(138 232 255)) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 34%),
-    inset 0 -1px 0 rgb(2 4 12 / 84%),
-    0 20px 50px -20px rgb(0 4 18 / 88%);
+    inset 0 1px 0 rgb(255 252 244 / 42%),
+    inset 0 -1px 0 rgb(2 4 12 / 88%),
+    0 24px 56px -20px rgb(0 3 16 / 94%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > :is(#theories, #system, #authority)
+  .ffs-articles
+  > article
+  > h3 {
+  background: linear-gradient(176deg, #ffffff 0%, #ebf9ff 44%, color-mix(in srgb, var(--ffs-accent) 70%, #ffffff) 78%, #ffe5a6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(2 5 18 / 90%))
+    drop-shadow(0 0 18px color-mix(in srgb, var(--ffs-accent) 44%, transparent));
 }
 
 html[data-family="special"]
@@ -703,23 +1406,24 @@ html[data-family="special"]
   border-radius: 22px;
   clip-path: none;
   background:
-    radial-gradient(ellipse 78% 40% at 50% 0%, rgb(255 248 228 / 21%), transparent 68%) padding-box,
-    linear-gradient(164deg, rgb(255 244 214 / 11%) 0%, rgb(255 255 255 / 2%) 30%, transparent 50%) padding-box,
-    radial-gradient(ellipse 72% 58% at 6% 0%, rgb(255 215 122 / 14%), transparent 60%) padding-box,
-    radial-gradient(ellipse 70% 58% at 94% 100%, rgb(214 54 96 / 18%), transparent 62%) padding-box,
-    linear-gradient(156deg, rgb(18 24 52 / 94%), rgb(6 10 24 / 98%)) padding-box,
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgb(255 252 238 / 26%), transparent 66%) padding-box,
+    linear-gradient(164deg, rgb(255 246 218 / 13%) 0%, rgb(255 255 255 / 2%) 30%, transparent 50%) padding-box,
+    radial-gradient(ellipse 74% 58% at 6% 0%, rgb(255 215 122 / 22%), transparent 58%) padding-box,
+    radial-gradient(ellipse 70% 58% at 94% 100%, rgb(127 230 255 / 20%), transparent 62%) padding-box,
+    linear-gradient(156deg, rgb(14 22 50 / 96%), rgb(5 9 22 / 99%)) padding-box,
     linear-gradient(
-      150deg,
-      rgb(255 248 224 / 64%) 0%,
-      rgb(255 215 122 / 56%) 34%,
-      rgb(214 54 96 / 46%) 70%,
-      rgb(138 232 255 / 42%) 100%
+      146deg,
+      rgb(255 252 238 / 82%) 0%,
+      rgb(255 218 128 / 76%) 34%,
+      rgb(138 232 255 / 66%) 72%,
+      rgb(255 215 122 / 64%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 232 / 42%),
-    inset 0 -1px 0 rgb(18 6 14 / 84%),
-    0 16px 36px -16px rgb(0 4 18 / 88%);
+    inset 0 1px 0 rgb(255 252 240 / 52%),
+    inset 0 -1px 0 rgb(10 6 14 / 88%),
+    0 18px 42px -16px rgb(0 3 16 / 94%),
+    0 0 28px -14px rgb(255 215 122 / 34%);
 }
 
 html[data-family="special"]
@@ -729,10 +1433,25 @@ html[data-family="special"]
   .ffs-weapons
   > li
   > span {
-  color: #ffe298;
-  text-shadow:
-    0 0 16px rgb(255 215 122 / 52%),
-    0 0 28px rgb(214 54 96 / 26%);
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-pill);
+  color: #ffebb6;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  background:
+    radial-gradient(ellipse 84% 54% at 50% 0%, rgb(255 252 236 / 30%), transparent 66%) padding-box,
+    linear-gradient(164deg, rgb(28 28 60 / 95%), rgb(9 12 28 / 98%)) padding-box,
+    linear-gradient(146deg, rgb(255 252 238 / 86%), rgb(255 215 122 / 84%) 52%, rgb(138 232 255 / 64%)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 56%),
+    0 0 18px -4px rgb(255 215 122 / 46%);
+  text-shadow: 0 0 12px rgb(255 215 122 / 62%);
 }
 
 html[data-family="special"]
@@ -740,27 +1459,65 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
   > #finishers
   .ffs-finisher {
+  position: relative;
   border: 1px solid transparent;
-  border-radius: 22px;
+  border-radius: var(--ring-radius-card);
   clip-path: none;
   background:
-    radial-gradient(ellipse 78% 34% at 50% 0%, rgb(255 246 226 / 22%), transparent 68%) padding-box,
-    radial-gradient(ellipse 74% 60% at 10% 0%, rgb(224 58 108 / 24%), transparent 60%) padding-box,
-    radial-gradient(ellipse 68% 56% at 92% 100%, rgb(255 215 122 / 18%), transparent 62%) padding-box,
-    linear-gradient(148deg, rgb(28 18 44 / 96%) 0%, rgb(12 13 30 / 98%) 54%, rgb(6 8 20 / 99%) 100%) padding-box,
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 250 236 / 28%), transparent 66%) padding-box,
+    radial-gradient(ellipse 74% 60% at 10% 0%, rgb(228 62 114 / 28%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 56% at 92% 100%, rgb(255 215 122 / 24%), transparent 62%) padding-box,
+    radial-gradient(ellipse 52% 46% at 86% 14%, rgb(127 230 255 / 18%), transparent 64%) padding-box,
+    linear-gradient(148deg, rgb(26 17 44 / 97%) 0%, rgb(10 12 28 / 99%) 54%, rgb(5 7 18 / 100%) 100%) padding-box,
     linear-gradient(
-      148deg,
-      rgb(255 248 224 / 72%) 0%,
-      rgb(255 215 122 / 64%) 34%,
-      rgb(232 68 118 / 58%) 70%,
-      rgb(192 142 255 / 44%) 100%
+      146deg,
+      rgb(255 252 238 / 86%) 0%,
+      rgb(255 218 128 / 82%) 34%,
+      rgb(236 74 124 / 70%) 70%,
+      rgb(138 232 255 / 60%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 246 230 / 44%),
-    inset 0 -1px 0 rgb(26 6 14 / 86%),
-    0 24px 58px -18px rgb(0 4 18 / 92%),
-    0 0 36px -14px rgb(214 54 96 / 28%);
+    inset 0 1px 0 rgb(255 250 238 / 54%),
+    inset 0 -1px 0 rgb(26 6 14 / 90%),
+    0 28px 66px -18px rgb(0 3 16 / 96%),
+    0 0 46px -12px rgb(214 54 96 / 36%),
+    0 0 34px -14px rgb(255 215 122 / 30%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #finishers
+  .ffs-finisher::before {
+  content: "";
+  position: absolute;
+  inset: 0 28px auto 28px;
+  height: 2.5px;
+  border-radius: var(--ring-radius-pill);
+  background: linear-gradient(90deg, transparent, #fff7dd 16%, #ffd77a 44%, #ff6c9e 76%, #9ef2ff 92%, transparent);
+  box-shadow:
+    0 0 22px rgb(255 215 122 / 64%),
+    0 0 34px rgb(232 68 118 / 46%);
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  > #finishers
+  .ffs-finisher
+  > h3 {
+  width: fit-content;
+  background: linear-gradient(176deg, #ffffff 0%, #fff4d0 32%, #ffd87a 66%, #ff9fc8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 26px rgb(255 215 122 / 48%));
 }
 
 /* The printed headings sit directly above their artwork on a phone. Let
@@ -804,32 +1561,35 @@ html[data-family="special"]
 }
 
 /* The closing Ultra Special Exhibition Stage: complete Ultra silhouette
-   bathed in celestial starlight white-sapphire-gold aura & gallery shadow. */
+   bathed in celestial starlight orbital rings, white-sapphire-gold aura,
+   and metallic forged closing manifesto. */
 html[data-family="special"] #top.ffs-page .ffs-footer {
-  border-top: 1px solid rgb(255 224 148 / 44%);
+  border-top: 1px solid rgb(255 226 154 / 54%);
   background:
-    radial-gradient(2px 2px at 14% 24%, rgb(244 252 255 / 72%), transparent 60%),
-    radial-gradient(1.5px 1.5px at 56% 18%, rgb(255 234 180 / 70%), transparent 60%),
-    radial-gradient(1.5px 1.5px at 90% 22%, rgb(156 241 255 / 74%), transparent 60%),
-    radial-gradient(2px 2px at 66% 78%, rgb(216 186 255 / 66%), transparent 60%),
-    radial-gradient(ellipse 36% 44% at 78% 20%, rgb(255 224 148 / 26%), transparent 66%),
-    radial-gradient(ellipse 42% 68% at 76% 56%, rgb(236 250 255 / 20%), rgb(138 232 255 / 26%) 36%, rgb(118 140 255 / 18%) 56%, transparent 78%),
-    radial-gradient(ellipse 56% 52% at 20% 82%, rgb(168 120 255 / 18%), transparent 68%),
-    linear-gradient(140deg, #060d22 0%, #0b1636 48%, #050918 100%);
+    radial-gradient(closest-side at 76% 52%, transparent calc(88% - 1.5px), rgb(156 242 255 / 26%) calc(88% - 1.5px) 88%, transparent 88.5%),
+    radial-gradient(closest-side at 76% 52%, transparent calc(66% - 1.5px), rgb(255 224 148 / 24%) calc(66% - 1.5px) 66%, transparent 66.5%),
+    radial-gradient(2px 2px at 14% 24%, rgb(248 253 255 / 88%), transparent 60%),
+    radial-gradient(2px 2px at 56% 18%, rgb(255 238 188 / 86%), transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 22%, rgb(156 244 255 / 88%), transparent 60%),
+    radial-gradient(2px 2px at 66% 78%, rgb(222 192 255 / 78%), transparent 60%),
+    radial-gradient(ellipse 38% 46% at 78% 20%, rgb(255 224 148 / 32%), transparent 66%),
+    radial-gradient(ellipse 46% 70% at 76% 56%, rgb(244 252 255 / 24%), rgb(138 232 255 / 30%) 36%, rgb(118 140 255 / 20%) 56%, transparent 78%),
+    radial-gradient(ellipse 56% 52% at 20% 82%, rgb(168 120 255 / 20%), transparent 68%),
+    linear-gradient(140deg, #050b1f 0%, #0a1432 48%, #030614 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 224 / 32%),
-    inset 0 28px 64px -36px rgb(156 241 255 / 22%);
+    inset 0 1px 0 rgb(255 252 238 / 42%),
+    inset 0 28px 68px -34px rgb(156 241 255 / 28%);
 }
 
 html[data-family="special"] #top.ffs-page .ffs-footer::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 2px;
+  height: 2.5px;
   background: linear-gradient(90deg, #9cf1ff 0%, #ffffff 28%, #ffd77a 58%, #c99bff 86%, transparent 100%);
   box-shadow:
-    0 0 20px rgb(156 241 255 / 64%),
-    0 0 36px rgb(255 215 122 / 42%);
+    0 0 24px rgb(156 241 255 / 76%),
+    0 0 42px rgb(255 215 122 / 52%);
   pointer-events: none;
 }
 
@@ -840,18 +1600,26 @@ html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
   transform: none;
   object-fit: contain;
   filter:
-    drop-shadow(0 0 36px rgb(156 241 255 / 38%))
-    drop-shadow(0 0 64px rgb(255 220 140 / 24%))
-    drop-shadow(0 24px 44px rgb(0 4 18 / 86%));
+    drop-shadow(0 0 42px rgb(156 241 255 / 46%))
+    drop-shadow(0 0 72px rgb(255 220 140 / 32%))
+    drop-shadow(0 24px 48px rgb(0 3 16 / 92%));
 }
 
-#top.ffs-page .ffs-footer h2 {
-  color: #f8fbff;
-  text-shadow:
-    0 2px 0 rgb(3 8 24 / 88%),
-    0 0 32px rgb(156 241 255 / 44%),
-    0 0 58px rgb(255 215 122 / 26%),
-    0 16px 42px rgb(0 4 18 / 78%);
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+  .ffs-footer
+  h2 {
+  background: linear-gradient(176deg, #ffffff 0%, #eaf9ff 36%, #9ef0ff 68%, #ffe5a2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 5 18 / 94%))
+    drop-shadow(0 0 28px rgb(156 241 255 / 54%))
+    drop-shadow(0 0 54px rgb(255 215 122 / 32%));
 }
 
 #top.ffs-page .ffs-footer h2 > span {
@@ -869,24 +1637,25 @@ html[data-family="special"]
   border: 1px solid transparent;
   border-radius: var(--ring-radius-pill);
   clip-path: none;
-  color: #f2f7ff;
+  color: #f6fbff;
   background:
-    radial-gradient(ellipse 78% 46% at 50% 0%, rgb(255 250 238 / 22%), transparent 66%) padding-box,
-    radial-gradient(ellipse 84% 76% at 16% 0%, rgb(127 230 255 / 22%), transparent 60%) padding-box,
-    radial-gradient(ellipse 78% 72% at 88% 100%, rgb(214 54 96 / 22%), transparent 64%) padding-box,
-    linear-gradient(180deg, rgb(18 28 58 / 92%) 0%, rgb(8 13 30 / 97%) 100%) padding-box,
+    radial-gradient(ellipse 80% 48% at 50% 0%, rgb(255 252 242 / 28%), transparent 66%) padding-box,
+    radial-gradient(ellipse 84% 76% at 16% 0%, rgb(127 230 255 / 28%), transparent 60%) padding-box,
+    radial-gradient(ellipse 78% 72% at 88% 100%, rgb(255 215 122 / 22%), transparent 64%) padding-box,
+    linear-gradient(180deg, rgb(18 30 66 / 95%) 0%, rgb(6 10 24 / 99%) 100%) padding-box,
     linear-gradient(
-      148deg,
-      rgb(255 246 218 / 64%) 0%,
-      rgb(138 232 255 / 56%) 42%,
-      rgb(214 54 96 / 48%) 78%,
-      rgb(255 215 122 / 56%) 100%
+      146deg,
+      rgb(255 250 232 / 84%) 0%,
+      rgb(138 232 255 / 74%) 40%,
+      rgb(255 215 122 / 70%) 76%,
+      rgb(156 242 255 / 72%) 100%
     )
       border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 238 / 44%),
-    inset 0 -2px 0 rgb(4 8 20 / 82%),
-    0 12px 28px -12px rgb(0 4 18 / 88%);
+    inset 0 1px 0 rgb(255 252 244 / 56%),
+    inset 0 -2px 0 rgb(3 5 14 / 88%),
+    0 14px 32px -10px rgb(0 3 16 / 92%),
+    0 0 26px -8px rgb(127 230 255 / 38%);
   filter: none;
 }
 
@@ -895,17 +1664,17 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
   .ffs-footer
   > a:first-of-type {
-  border: 1px solid rgb(255 248 224 / 92%);
-  color: #07101f;
+  border: 1px solid rgb(255 252 238 / 96%);
+  color: #060f1e;
   background:
-    radial-gradient(ellipse 78% 48% at 50% 0%, rgb(255 255 255 / 84%), transparent 68%),
-    linear-gradient(180deg, rgb(255 255 255 / 62%) 0%, rgb(255 255 255 / 6%) 46%, rgb(138 36 58 / 20%) 100%),
-    linear-gradient(112deg, #fffef8 0%, #ffe8a8 38%, #f3be56 76%, #ffe6be 100%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(255 255 255 / 92%), transparent 68%),
+    linear-gradient(180deg, rgb(255 255 255 / 66%) 0%, rgb(255 255 255 / 8%) 46%, rgb(138 42 54 / 22%) 100%),
+    linear-gradient(112deg, #ffffff 0%, #ffebb0 36%, #f4bd50 74%, #dff8ff 100%);
   box-shadow:
-    inset 0 1.5px 0 rgb(255 255 255 / 96%),
-    inset 0 -2px 0 rgb(134 38 56 / 44%),
-    0 12px 28px -8px rgb(255 210 112 / 46%),
-    0 6px 22px -6px rgb(214 54 96 / 28%);
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -2px 0 rgb(130 42 52 / 46%),
+    0 14px 34px -8px rgb(255 214 118 / 58%),
+    0 0 26px -6px rgb(127 230 255 / 44%);
   filter: none;
 }
 
@@ -923,16 +1692,16 @@ html[data-family="special"]
     .ffs-footer
     > a:first-of-type:hover {
     border-color: #ffffff;
-    color: #07101f;
+    color: #060f1e;
     background:
-      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 255 255 / 94%), transparent 68%),
-      linear-gradient(180deg, rgb(255 255 255 / 72%) 0%, rgb(255 255 255 / 10%) 48%, rgb(138 36 58 / 16%) 100%),
-      linear-gradient(112deg, #ffffff 0%, #fff0c2 38%, #ffd166 74%, #fff2d4 100%);
+      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 255 255 / 96%), transparent 68%),
+      linear-gradient(180deg, rgb(255 255 255 / 74%) 0%, rgb(255 255 255 / 12%) 48%, rgb(138 42 54 / 16%) 100%),
+      linear-gradient(112deg, #ffffff 0%, #fff2c8 38%, #ffd166 74%, #e8fbff 100%);
     box-shadow:
       inset 0 1.5px 0 #ffffff,
-      inset 0 -2px 0 rgb(134 38 56 / 40%),
-      0 16px 36px -8px rgb(255 215 122 / 62%),
-      0 8px 26px -6px rgb(214 54 96 / 36%);
+      inset 0 -2px 0 rgb(130 42 52 / 40%),
+      0 18px 40px -8px rgb(255 215 122 / 68%),
+      0 0 32px -4px rgb(127 230 255 / 52%);
     filter: none;
   }
 
@@ -949,11 +1718,11 @@ html[data-family="special"]
     > a:not(:first-of-type):hover {
     color: #ffffff;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 242 / 68%),
-      inset 0 -2px 0 rgb(4 6 16 / 84%),
-      0 16px 34px -10px rgb(0 4 18 / 92%),
-      0 0 28px -4px rgb(255 215 122 / 38%),
-      0 0 24px -6px rgb(214 54 96 / 34%);
+      inset 0 1px 0 rgb(255 254 246 / 76%),
+      inset 0 -2px 0 rgb(3 5 14 / 88%),
+      0 18px 38px -10px rgb(0 3 16 / 95%),
+      0 0 32px -4px rgb(127 230 255 / 52%),
+      0 0 26px -6px rgb(255 215 122 / 42%);
     filter: none;
   }
 
@@ -965,8 +1734,8 @@ html[data-family="special"]
     button:hover {
     color: #ffffff;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 64%),
-      0 10px 24px -8px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
+      inset 0 1px 0 rgb(255 255 255 / 68%),
+      0 10px 26px -8px color-mix(in srgb, var(--ffs-accent) 60%, transparent);
   }
 
   html[data-family="special"]
@@ -992,6 +1761,8 @@ html[data-family="special"]
       .rxs-local-nav nav a,
       .ffs-hero .ffs-hero-rail a,
       #ffs-chapter-map a,
+      #overview .ffs-calls b:not(:first-child):not(:last-child),
+      #finishers .ffs-calls b,
       #p16 .ffs-p16-index a,
       #stages .ffs-comparison-card button,
       .ffs-footer > a,
@@ -1111,6 +1882,18 @@ html[data-family="special"]
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
     body
     #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(#overview .ffs-calls b:not(:first-child):not(:last-child), #finishers .ffs-calls b):hover {
+    translate: 0 -2px;
+    scale: 1.03;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 68%),
+      0 14px 28px -10px rgb(0 3 16 / 95%),
+      0 0 26px -4px rgb(127 230 255 / 50%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
     > .ffs-hero
     .ffs-hero-rail
     a.ffs-hero-primary:hover:not(:active),
@@ -1122,16 +1905,16 @@ html[data-family="special"]
     translate: 0 -3px;
     scale: 1.03;
     border-color: #ffffff;
-    color: #07101f;
+    color: #060f1e;
     background:
-      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 255 255 / 94%), transparent 68%),
-      linear-gradient(180deg, rgb(255 255 255 / 72%) 0%, rgb(255 255 255 / 10%) 48%, rgb(138 36 58 / 16%) 100%),
-      linear-gradient(112deg, #ffffff 0%, #fff0c2 38%, #ffd166 74%, #fff2d4 100%);
+      radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 255 255 / 96%), transparent 68%),
+      linear-gradient(180deg, rgb(255 255 255 / 74%) 0%, rgb(255 255 255 / 12%) 48%, rgb(138 42 54 / 16%) 100%),
+      linear-gradient(112deg, #ffffff 0%, #fff2c8 38%, #ffd166 74%, #e8fbff 100%);
     box-shadow:
       inset 0 1.5px 0 #ffffff,
-      inset 0 -2px 0 rgb(134 38 56 / 40%),
-      0 16px 36px -8px rgb(255 215 122 / 62%),
-      0 8px 26px -6px rgb(214 54 96 / 36%);
+      inset 0 -2px 0 rgb(130 42 52 / 40%),
+      0 18px 40px -8px rgb(255 215 122 / 68%),
+      0 0 32px -4px rgb(127 230 255 / 52%);
     filter: none;
   }
 
@@ -1150,11 +1933,11 @@ html[data-family="special"]
     scale: 1.03;
     color: #ffffff;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 242 / 68%),
-      inset 0 -2px 0 rgb(4 6 16 / 84%),
-      0 16px 34px -10px rgb(0 4 18 / 92%),
-      0 0 28px -4px rgb(255 215 122 / 38%),
-      0 0 24px -6px rgb(214 54 96 / 34%);
+      inset 0 1px 0 rgb(255 254 246 / 76%),
+      inset 0 -2px 0 rgb(3 5 14 / 88%),
+      0 18px 38px -10px rgb(0 3 16 / 95%),
+      0 0 32px -4px rgb(127 230 255 / 52%),
+      0 0 26px -6px rgb(255 215 122 / 42%);
     filter: none;
   }
 
@@ -1184,10 +1967,10 @@ html[data-family="special"]
     translate: 0 -3px;
     scale: 1.015;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 240 / 54%),
-      inset 0 -1px 0 rgb(2 4 12 / 86%),
-      0 18px 36px -14px rgb(0 4 18 / 92%),
-      0 0 26px -8px rgb(255 215 122 / 38%);
+      inset 0 1px 0 rgb(255 252 240 / 60%),
+      inset 0 -1px 0 rgb(2 4 12 / 88%),
+      0 20px 40px -14px rgb(0 3 16 / 95%),
+      0 0 30px -8px rgb(255 215 122 / 44%);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1199,10 +1982,10 @@ html[data-family="special"]
     translate: 0 -4px;
     scale: 1.015;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 242 / 56%),
-      inset 0 -1px 0 rgb(2 4 12 / 86%),
-      0 22px 44px -16px rgb(0 4 18 / 92%),
-      0 0 28px -8px rgb(138 232 255 / 34%);
+      inset 0 1px 0 rgb(255 254 246 / 62%),
+      inset 0 -1px 0 rgb(2 4 12 / 88%),
+      0 24px 48px -16px rgb(0 3 16 / 95%),
+      0 0 32px -8px rgb(138 232 255 / 42%);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1212,11 +1995,11 @@ html[data-family="special"]
     .ffs-specs
     > [data-strike]:hover:not(:active) {
     box-shadow:
-      inset 0 1px 0 rgb(255 254 246 / 74%),
-      inset 0 -1px 0 rgb(34 10 18 / 84%),
-      0 24px 52px -14px rgb(0 4 18 / 94%),
-      0 0 42px -10px rgb(255 215 122 / 48%),
-      0 0 32px -10px rgb(214 54 96 / 34%);
+      inset 0 1px 0 rgb(255 254 246 / 78%),
+      inset 0 -1px 0 rgb(34 10 18 / 86%),
+      0 26px 56px -14px rgb(0 3 16 / 96%),
+      0 0 48px -10px rgb(255 215 122 / 56%),
+      0 0 34px -10px rgb(214 54 96 / 38%);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1228,11 +2011,11 @@ html[data-family="special"]
     translate: 0 -4px;
     scale: 1.015;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 240 / 60%),
-      inset 0 -1px 0 rgb(18 6 14 / 86%),
-      0 22px 44px -16px rgb(0 4 18 / 94%),
-      0 0 32px -10px rgb(255 215 122 / 38%),
-      0 0 26px -10px rgb(214 54 96 / 32%);
+      inset 0 1px 0 rgb(255 252 240 / 66%),
+      inset 0 -1px 0 rgb(10 6 14 / 88%),
+      0 24px 48px -16px rgb(0 3 16 / 96%),
+      0 0 36px -10px rgb(255 215 122 / 46%),
+      0 0 28px -10px rgb(127 230 255 / 36%);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1253,10 +2036,10 @@ html[data-family="special"]
     > summary:hover
     > i {
     scale: 1.09;
-    border-color: rgb(255 232 168 / 82%);
+    border-color: rgb(255 232 168 / 86%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 54%),
-      0 0 20px -4px rgb(255 215 122 / 44%);
+      inset 0 1px 0 rgb(255 255 255 / 60%),
+      0 0 22px -4px rgb(255 215 122 / 52%);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1267,10 +2050,10 @@ html[data-family="special"]
     translate: 0 -4px;
     scale: 1.015;
     box-shadow:
-      inset 0 1px 0 rgb(255 254 246 / 62%),
-      inset 0 -1px 0 rgb(2 4 12 / 86%),
-      0 22px 44px -14px rgb(0 4 18 / 94%),
-      0 0 32px -8px color-mix(in srgb, var(--ffs-accent) 44%, transparent);
+      inset 0 1px 0 rgb(255 254 246 / 68%),
+      inset 0 -1px 0 rgb(2 4 12 / 88%),
+      0 24px 48px -14px rgb(0 3 16 / 96%),
+      0 0 36px -8px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1282,8 +2065,8 @@ html[data-family="special"]
     translate: 0 -2px;
     scale: 1.03;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 64%),
-      0 10px 24px -8px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
+      inset 0 1px 0 rgb(255 255 255 / 68%),
+      0 10px 26px -8px color-mix(in srgb, var(--ffs-accent) 60%, transparent);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1300,10 +2083,10 @@ html[data-family="special"]
     translate: 0 -3px;
     scale: 1.008;
     box-shadow:
-      inset 0 1px 0 rgb(255 252 242 / 54%),
-      inset 0 -1px 0 rgb(18 6 14 / 86%),
-      0 26px 56px -18px rgb(0 4 18 / 94%),
-      0 0 36px -12px rgb(255 215 122 / 30%);
+      inset 0 1px 0 rgb(255 252 242 / 60%),
+      inset 0 -1px 0 rgb(18 6 14 / 88%),
+      0 28px 60px -18px rgb(0 3 16 / 96%),
+      0 0 40px -12px rgb(255 215 122 / 38%);
   }
 
   html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -1412,13 +2195,82 @@ html[data-family="special"]
 html[data-family="special"]:is([data-world-effects="economy"], [data-rzn-constrained])
   body
   #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
-  :is(.ffs-footer > .ffs-end-figure, .ffs-footer > a, .ffs-footer > a:first-of-type, .ffs-hero .ffs-hero-rail a) {
+  :is(
+    .ffs-hero .rxs-hero-ambient .ffs-aperture,
+    .ffs-hero h1,
+    .ffs-hero .ffs-mark,
+    .rxs-section:not(.ffs-suitup) > .rxs-section-heading > h2,
+    #specs .ffs-specs > div:not([data-long]) dd,
+    #specs .ffs-specs > [data-strike] dd,
+    #performance .ffs-metric:not(.ffs-metric-all) > header strong,
+    #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) > header strong,
+    #overview .ffs-calls b:first-child,
+    #overview .ffs-calls b:last-child,
+    #p16 .ffs-p16-copy h3,
+    #p16 .ffs-p16-figures dd,
+    #p16 .ffs-p16-figures dl > div:first-child dd,
+    #p16 .ffs-p16-values strong,
+    :is(#theories, #system, #authority) .ffs-articles > article > h3,
+    #finishers .ffs-finisher > h3,
+    .ffs-footer h2,
+    .ffs-footer > .ffs-end-figure,
+    .ffs-footer > a,
+    .ffs-footer > a:first-of-type,
+    .ffs-hero .ffs-hero-rail a
+  ) {
   filter: none;
 }
 
 @media (forced-colors: active) {
-  html[data-family="special"] #top.ffs-page .ffs-footer::before { display: none; }
-  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure { filter: none; }
+  html[data-family="special"] #top.ffs-page .ffs-footer::before,
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      #overview .ffs-calls::before,
+      #specs .ffs-specs > [data-strike]::before,
+      #finishers .ffs-finisher::before
+    ) {
+    display: none;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
+    filter: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
+    :is(
+      .ffs-hero h1,
+      .ffs-hero h1 .name-word,
+      .ffs-hero h1 .name-word:first-of-type,
+      .ffs-hero h1 .name-word:last-of-type,
+      .rxs-section:not(.ffs-suitup) > .rxs-section-heading > h2,
+      #specs .ffs-specs > div:not([data-long]) dd,
+      #specs .ffs-specs > [data-strike] dd,
+      #performance .ffs-metric:not(.ffs-metric-all) > header strong,
+      #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) > header strong,
+      #overview .ffs-calls b:first-child,
+      #overview .ffs-calls b:last-child,
+      #p16 .ffs-p16-copy h3,
+      #p16 .ffs-p16-figures dd,
+      #p16 .ffs-p16-figures dl > div:first-child dd,
+      #p16 .ffs-p16-figures dd small,
+      #p16 .ffs-p16-values strong,
+      #stages .ffs-form-comparison > summary > strong,
+      #stages .ffs-comparison-card h3,
+      :is(#theories, #system, #authority) .ffs-articles > article > h3,
+      #finishers .ffs-finisher > h3,
+      .ffs-footer h2
+    ) {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+    text-shadow: none;
+  }
+
   html[data-family="special"]
     body
     #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
@@ -1435,15 +2287,26 @@ html[data-family="special"]:is([data-world-effects="economy"], [data-rzn-constra
     filter: none;
     clip-path: none;
   }
+
   html[data-family="special"]
     body
     #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e)
     :is(
+      .ffs-hero .ffs-stages-line,
       #specs .ffs-specs > div,
       #specs .ffs-specs > [data-strike],
       #performance .ffs-console,
       #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]),
       #p16 .ffs-p16-index,
+      #p16 .ffs-p16-overview,
+      #p16 .ffs-p16-comparator,
+      #p16 .ffs-p16-lineage,
+      #p16 .ffs-p16-main,
+      #p16 .ffs-p16-summary,
+      #p16 .ffs-p16-metric,
+      #p16 .ffs-p16-generations article,
+      #p16 .ffs-p16-topics article,
+      #p16 .ffs-p16-note,
       #overview .ffs-calls,
       #overview .ffs-calls b:not(:first-child):not(:last-child),
       #finishers .ffs-calls b,
@@ -1454,6 +2317,7 @@ html[data-family="special"]:is([data-world-effects="economy"], [data-rzn-constra
       #stages .ffs-comparison-card,
       :is(#theories, #system, #authority) .ffs-articles > article,
       #arsenal .ffs-weapons > li,
+      #arsenal .ffs-weapons > li > span,
       #finishers .ffs-finisher
     ) {
     border: 1px solid CanvasText;

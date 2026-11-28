@@ -99,13 +99,13 @@
   position: relative;
   background-image: linear-gradient(
     100deg,
-    #fff7e3 0%,
-    #ffe2a0 22%,
-    var(--exo-gold) 38%,
-    #c99a45 52%,
-    #ffe7b0 66%,
-    var(--exo-gold) 82%,
-    #fffaf0 100%
+    #ffffff 0%,
+    #fff2c2 18%,
+    var(--exo-gold) 36%,
+    #b66e14 52%,
+    #ffe69c 68%,
+    var(--exo-gold) 84%,
+    #ffffff 100%
   );
 }
 
@@ -358,27 +358,28 @@
   isolation: isolate;
 }
 
-/* 205.6t〜: the punch connects; sixteen gold rays burst behind the unit. */
+/* 205.6t〜: the punch connects; sixteen molten-gold rays burst behind the unit. */
 .rxs-page.rxs-page.exs-page .exo-burst {
   position: absolute;
   z-index: -1;
   top: -4%;
   right: -0.5em;
-  width: 0.92em;
+  width: 0.96em;
   aspect-ratio: 1;
   border-radius: 50%;
   background: repeating-conic-gradient(
     from 4deg,
-    var(--exo-gold) 0 2.6deg,
-    transparent 2.6deg 22.5deg
+    #fff0be 0 1.4deg,
+    var(--exo-gold) 1.4deg 2.8deg,
+    transparent 2.8deg 22.5deg
   );
-  -webkit-mask: radial-gradient(circle closest-side, transparent 0 34%, #000 46%, transparent 100%);
-  mask: radial-gradient(circle closest-side, transparent 0 34%, #000 46%, transparent 100%);
-  opacity: 0.68;
+  -webkit-mask: radial-gradient(circle closest-side, transparent 0 32%, #000 46%, transparent 100%);
+  mask: radial-gradient(circle closest-side, transparent 0 32%, #000 46%, transparent 100%);
+  opacity: 0.78;
   pointer-events: none;
 }
 
-/* 0.002 SEC: it has already arrived; its streaks trail off to the right with multi-depth contrast. */
+/* 0.002 SEC: it has already arrived; high-voltage lightning streaks trail off to the right. */
 .rxs-page.rxs-page.exs-page .exo-speed {
   position: absolute;
   z-index: -1;
@@ -387,12 +388,12 @@
   bottom: 22%;
   left: 35%;
   background:
-    linear-gradient(270deg, transparent, #3cb4ff 52%, #e6fbff) 0 8% / 84% 2.5px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-ice) 68%, #fff) 0 28% / 98% 2px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-gold) 55%, var(--exo-hot)) 0 52% / 72% 2px no-repeat,
-    linear-gradient(270deg, transparent, #44bfff 60%, #fff) 0 72% / 92% 2px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-gold) 45%, #fff) 0 94% / 58% 2px no-repeat;
-  opacity: 0.68;
+    linear-gradient(270deg, transparent, #34b8ff 50%, #ffffff) 0 8% / 88% 2.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-ice) 64%, #ffffff) 0 28% / 100% 2.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold) 54%, var(--exo-hot)) 0 52% / 76% 2px no-repeat,
+    linear-gradient(270deg, transparent, #38c0ff 58%, #ffffff) 0 72% / 94% 2.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold) 46%, #ffffff) 0 94% / 62% 2px no-repeat;
+  opacity: 0.78;
   pointer-events: none;
 }
 

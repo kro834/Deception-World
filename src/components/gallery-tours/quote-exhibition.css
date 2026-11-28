@@ -1,7 +1,7 @@
 .quote-exhibition {
   margin: clamp(4rem, 8vw, 7.5rem) auto 1.5rem;
   max-width: 72rem;
-  color: var(--gallery-ivory, #f5eee3);
+  color: var(--gallery-ivory, #fcf9f2);
   scroll-margin-top: calc(var(--gallery-bar, 78px) + env(safe-area-inset-top, 0px) + 24px);
 }
 
@@ -12,9 +12,10 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px 40px;
-  margin-bottom: 24px;
-  padding: 28px 0 22px;
-  border-top: 1px solid var(--gallery-rule, #6b6353);
+  margin-bottom: 28px;
+  padding: 32px 0 22px;
+  border-top: 1px solid rgb(244 216 160 / 0.44);
+  box-shadow: inset 0 3px 0 -2px rgb(158 232 250 / 0.16);
 }
 
 .quote-exhibition-header::before {
@@ -22,16 +23,20 @@
   position: absolute;
   top: -1px;
   left: 0;
-  width: 172px;
-  height: 2px;
-  background: linear-gradient(90deg, #fae4b8 0%, #e4c388 48%, #9ee8fa 84%, transparent 100%);
-  box-shadow: 0 0 18px rgb(246 218 164 / 0.48);
+  width: 210px;
+  height: 2.5px;
+  background: linear-gradient(90deg, #ffffff 0%, #f6dda9 44%, #9ee8fa 84%, transparent 100%);
+  box-shadow: 0 2px 20px rgb(250 220 156 / 0.56);
   pointer-events: none;
 }
 
-.gallery-tours-page.command-support-tours .quote-exhibition-header {
-  border-top-color: rgb(240 214 164 / 0.44);
-  background: radial-gradient(ellipse 68% 90% at 24% 0%, rgb(248 222 172 / 0.14), transparent 72%);
+.gallery-tours-page.command-support-tours .quote-exhibition-header,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-exhibition-header {
+  border-top-color: rgb(246 218 162 / 0.46);
+  background: radial-gradient(ellipse 68% 95% at 20% 0%, rgb(252 224 168 / 0.18), transparent 72%);
 }
 
 .quote-exhibition-heading {
@@ -40,60 +45,118 @@
 
 .quote-exhibition-eyebrow {
   margin: 0 0 10px;
-  color: var(--gallery-brass, #c9dce6);
+  color: #f4da9f;
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-weight: 650;
+  letter-spacing: 0.2em;
   line-height: 1.6;
 }
 
-.quote-exhibition h2 {
+.quote-exhibition h2,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-exhibition
+  h2 {
   margin: 0;
+  color: #fffaf0;
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fff9ec 40%,
+    #f4da9f 82%,
+    #d6ac63 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-family: var(--gallery-serif, serif);
-  font-size: clamp(26px, 3vw, 38px);
-  font-weight: 400;
-  line-height: 1.55;
+  font-size: clamp(26px, 3vw, 40px);
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .quote-exhibition-lead {
-  max-width: 31em;
+  max-width: 32em;
   margin: 0;
-  color: var(--gallery-muted, #bcc8d0);
+  color: var(--gallery-muted, #ced6e2);
   font-size: 13px;
   line-height: 2;
   text-wrap: pretty;
 }
 
+/* Velvet dark-glass individual plaque cards aligned with 22px ring corners */
 .quote-plaque-list {
+  display: grid;
+  gap: 14px;
   min-width: 0;
 }
 
 .quote-scene {
   position: relative;
-  border-top: 1px solid #6b6353;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 38%, rgb(244 216 160 / 0.34));
+  border-top-color: color-mix(in srgb, var(--quote-ink) 54%, rgb(255 244 214 / 0.64));
+  background:
+    radial-gradient(
+      ellipse 56% 80% at 12% 0%,
+      color-mix(in srgb, var(--quote-ink) 18%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(156deg, #141626 0%, #090b15 58%, #05060c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 0.24),
+    0 18px 42px -10px rgb(0 0 0 / 0.72);
   overflow-anchor: none;
 }
 
-.quote-scene:last-child {
-  border-bottom: 1px solid #6b6353;
+.quote-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0 22px auto;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--quote-ink) 80%, #ffffff) 0%,
+    rgb(246 218 160 / 0.42) 48%,
+    transparent 96%
+  );
+  opacity: 0.72;
+  pointer-events: none;
 }
 
-.quote-plaque[data-open="true"] {
+.quote-plaque[data-open="true"],
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-exhibition
+  .quote-plaque[data-open="true"] {
+  border-color: color-mix(in srgb, var(--quote-ink) 72%, #fae4b6);
+  border-top-color: color-mix(in srgb, var(--quote-ink) 86%, #ffffff);
   background:
     radial-gradient(
-      ellipse 68% 54% at 24% 0%,
-      color-mix(in srgb, var(--quote-ink) 20%, transparent),
+      ellipse 72% 58% at 22% 0%,
+      color-mix(in srgb, var(--quote-ink) 36%, transparent),
       transparent 72%
     ),
     radial-gradient(
-      ellipse 46% 38% at 72% 8%,
-      rgb(244 222 178 / 0.08),
+      ellipse 54% 48% at 80% 10%,
+      rgb(254 228 176 / 0.22),
       transparent 70%
     ),
-    linear-gradient(180deg, rgb(255 252 244 / 0.04), transparent 56%);
+    linear-gradient(160deg, #191d32 0%, #0b0e19 56%, #05060c 100%);
   box-shadow:
-    inset 3px 0 0 var(--quote-ink),
-    inset 0 1px 0 rgb(255 252 244 / 0.14);
+    inset 0 1.5px 0 rgb(255 254 248 / 0.44),
+    0 0 0 3px #04050a,
+    0 0 0 4px color-mix(in srgb, var(--quote-ink) 34%, rgb(244 216 160 / 0.24)),
+    0 32px 72px -8px rgb(0 0 0 / 0.84),
+    0 0 48px -10px color-mix(in srgb, var(--quote-ink) 44%, transparent);
+}
+
+.quote-plaque[data-open="true"]::before {
+  opacity: 1;
+  height: 2.5px;
+  box-shadow: 0 2px 16px color-mix(in srgb, var(--quote-ink) 64%, transparent);
 }
 
 .quote-scene h3,
@@ -108,7 +171,7 @@
   align-items: center;
   gap: clamp(12px, 2vw, 22px);
   width: 100%;
-  padding: clamp(18px, 2.6vw, 30px) clamp(12px, 2vw, 20px);
+  padding: clamp(18px, 2.4vw, 28px) clamp(14px, 2.2vw, 24px);
   border: 0;
   background: transparent;
   color: inherit;
@@ -117,44 +180,55 @@
   font: inherit;
 }
 
-.quote-plaque-index {
+/* Jewelled medallion index & fold trigger */
+.quote-plaque-index,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-plaque-index {
   display: grid;
-  min-width: 36px;
-  height: 30px;
-  padding-inline: 7px;
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 44%, rgb(224 206 172 / 0.34));
-  border-top-color: color-mix(in srgb, var(--quote-ink) 64%, #f4dfb6);
-  border-radius: 2px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 62%, #fae4b6);
+  border-radius: 50%;
   background:
-    radial-gradient(ellipse 80% 70% at 50% 0%, color-mix(in srgb, var(--quote-ink) 18%, transparent), transparent 72%),
-    linear-gradient(180deg, rgb(16 25 35 / 0.88), rgb(9 14 21 / 0.94));
+    radial-gradient(
+      circle at 30% 24%,
+      color-mix(in srgb, var(--quote-ink) 40%, rgb(255 244 214 / 0.3)),
+      transparent 64%
+    ),
+    #070912;
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.2),
-    0 4px 12px rgb(0 0 0 / 0.32);
-  color: var(--quote-ink);
+    inset 0 1px 0 rgb(255 254 248 / 0.44),
+    inset 0 0 0 3px rgb(4 6 12 / 0.88),
+    0 8px 18px rgb(0 0 0 / 0.66),
+    0 0 18px -4px color-mix(in srgb, var(--quote-ink) 48%, transparent);
+  color: color-mix(in srgb, var(--quote-ink) 80%, #fffaf0);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   place-items: center;
 }
 
 .quote-words {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   min-width: 0;
   padding-inline-start: clamp(12px, 1.8vw, 20px);
-  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 42%, rgb(156 182 198 / 0.24));
+  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 52%, rgb(244 216 160 / 0.32));
 }
 
 .quote-scene[data-open="true"] .quote-words {
-  border-inline-start-color: var(--quote-ink);
+  border-inline-start-color: color-mix(in srgb, var(--quote-ink) 88%, #ffffff);
 }
 
 .quote-line {
+  color: #fcf9f2;
   font-family: var(--gallery-serif, serif);
-  font-size: clamp(19px, 2.5vw, 34px);
+  font-size: clamp(19px, 2.4vw, 33px);
   font-weight: 400;
   line-height: 1.62;
   letter-spacing: 0.02em;
@@ -163,8 +237,8 @@
 }
 
 .quote-scene[data-open="true"] .quote-line {
-  color: color-mix(in srgb, var(--quote-ink) 88%, #ffffff);
-  text-shadow: 0 2px 26px color-mix(in srgb, var(--quote-ink) 32%, transparent);
+  color: color-mix(in srgb, var(--quote-ink) 78%, #ffffff);
+  text-shadow: 0 2px 28px color-mix(in srgb, var(--quote-ink) 42%, transparent);
 }
 
 .quote-plaque-meta {
@@ -172,55 +246,97 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 14px;
-  color: var(--gallery-muted, #bcc8d0);
+  color: var(--gallery-muted, #ced6e2);
   font-size: 12px;
   letter-spacing: 0.05em;
   line-height: 1.6;
 }
 
 .quote-plaque-meta > span:first-child {
-  color: color-mix(in srgb, var(--quote-ink) 82%, #f4f8fa);
-  font-weight: 500;
+  color: color-mix(in srgb, var(--quote-ink) 78%, #fffaf0);
+  font-weight: 600;
 }
 
-.quote-fold {
+.quote-fold,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-fold {
   flex: none;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid #776e5d;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgb(244 216 160 / 0.54);
+  border-top-color: rgb(255 244 214 / 0.84);
   border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 24%, rgb(252 226 172 / 0.26), transparent 66%),
+    linear-gradient(180deg, #1b2033, #0a0d18);
+  box-shadow:
+    inset 0 1px 0 rgb(255 254 248 / 0.36),
+    0 8px 18px rgb(0 0 0 / 0.56);
+  color: #fae4b6;
   font-family: sans-serif;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1;
 }
 
+.quote-scene[data-open="true"] .quote-fold,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-scene[data-open="true"]
+  .quote-fold {
+  border-color: color-mix(in srgb, var(--quote-ink) 84%, #ffffff);
+  background:
+    radial-gradient(
+      circle at 32% 24%,
+      color-mix(in srgb, var(--quote-ink) 44%, #ffffff),
+      transparent 68%
+    ),
+    linear-gradient(180deg, #252d46, #0f1322);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 0 22px -2px color-mix(in srgb, var(--quote-ink) 68%, transparent);
+  color: #ffffff;
+}
+
+/* Expanded portrait leaf & action pills */
 .quote-leaf:not([hidden]) {
   display: grid;
   grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.16fr);
   align-items: center;
   gap: clamp(20px, 4vw, 52px);
-  padding: 8px clamp(12px, 2.2vw, 24px) clamp(26px, 4vw, 42px);
+  padding: 6px clamp(14px, 2.4vw, 28px) clamp(26px, 4vw, 40px);
 }
 
-.quote-leaf figure {
+.quote-leaf figure,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-leaf
+  figure {
   display: grid;
   place-items: center;
   position: relative;
   overflow: hidden;
   padding: clamp(10px, 1.5vw, 18px);
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 44%, rgb(232 208 164 / 0.42));
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 64%, rgb(248 220 164 / 0.62));
+  border-top-color: color-mix(in srgb, var(--quote-ink) 82%, #ffffff);
   background:
     radial-gradient(
-      ellipse 80% 56% at 50% 8%,
-      color-mix(in srgb, var(--quote-ink) 24%, #2a2926),
-      #0c0d10 82%
+      ellipse 84% 58% at 50% 4%,
+      color-mix(in srgb, var(--quote-ink) 38%, rgb(252 226 172 / 0.24)),
+      #05070e 82%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.24),
-    0 20px 46px -8px rgb(0 0 0 / 0.56);
+    inset 0 1.5px 0 rgb(255 254 248 / 0.46),
+    inset 0 0 0 4px rgb(4 6 12 / 0.92),
+    inset 0 0 0 5px color-mix(in srgb, var(--quote-ink) 36%, rgb(244 216 160 / 0.3)),
+    0 32px 72px -6px rgb(0 0 0 / 0.8),
+    0 0 42px -10px color-mix(in srgb, var(--quote-ink) 44%, transparent);
 }
 
 .quote-leaf-mat {
@@ -229,17 +345,18 @@
   width: 100%;
   min-width: 0;
   padding: clamp(8px, 1.2vw, 14px);
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 32%, rgb(242 222 182 / 0.28));
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 40%, rgb(248 224 176 / 0.36));
+  border-radius: 14px;
   background:
     radial-gradient(
-      ellipse 74% 58% at 50% 18%,
-      color-mix(in srgb, var(--quote-ink) 14%, #121b26),
-      #06090f 84%
+      ellipse 74% 58% at 50% 16%,
+      color-mix(in srgb, var(--quote-ink) 18%, #141828),
+      #04050a 84%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.2),
-    inset 0 0 0 4px rgb(4 7 12 / 0.86),
-    inset 0 12px 28px rgb(0 0 0 / 0.54);
+    inset 0 1px 0 rgb(255 253 246 / 0.28),
+    inset 0 0 0 4px rgb(3 5 10 / 0.9),
+    inset 0 14px 32px rgb(0 0 0 / 0.64);
 }
 
 .quote-leaf img {
@@ -253,8 +370,21 @@
   min-width: 0;
 }
 
-.quote-leaf-copy h4 {
+.quote-leaf-copy h4,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-leaf-copy
+  h4 {
   color: var(--quote-ink);
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    color-mix(in srgb, var(--quote-ink) 76%, #fffaf0) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-family: var(--gallery-serif, serif);
   font-size: clamp(22px, 2.3vw, 32px);
   font-weight: 500;
@@ -264,7 +394,8 @@
 .quote-leaf-caption {
   margin: 14px 0 22px;
   padding-inline-start: 14px;
-  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 42%, transparent);
+  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 56%, rgb(244 216 160 / 0.36));
+  color: #dce4f0;
   font-size: 15px;
   line-height: 2;
   text-wrap: pretty;
@@ -286,47 +417,73 @@
   gap: 8px;
   min-height: 44px;
   box-sizing: border-box;
-  color: var(--gallery-ivory, #f5eee3);
+  color: var(--gallery-ivory, #fcf9f2);
 }
 
-.quote-leaf-copy a.quote-source {
-  padding: 10px 18px;
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 52%, rgb(224 206 172 / 0.36));
-  border-top-color: color-mix(in srgb, var(--quote-ink) 70%, #f4dfb6);
-  border-radius: 2px;
+.quote-leaf-copy a.quote-source,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-leaf-copy
+  a.quote-source {
+  padding: 10px 20px;
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 64%, #fae4b6);
+  border-top-color: color-mix(in srgb, var(--quote-ink) 80%, #ffffff);
+  border-radius: 999px;
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, color-mix(in srgb, var(--quote-ink) 18%, transparent), transparent 72%),
-    linear-gradient(180deg, rgb(22 34 46 / 0.92), rgb(11 18 26 / 0.96));
+    radial-gradient(
+      ellipse 84% 90% at 50% 0%,
+      color-mix(in srgb, var(--quote-ink) 28%, rgb(250 224 170 / 0.2)),
+      transparent 72%
+    ),
+    linear-gradient(180deg, #1d2338 0%, #0c0f1b 100%);
   font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-decoration: none;
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.22),
-    0 8px 20px rgb(0 0 0 / 0.38);
+    inset 0 1px 0 rgb(255 254 248 / 0.4),
+    0 12px 26px -6px rgb(0 0 0 / 0.68),
+    0 0 22px -6px color-mix(in srgb, var(--quote-ink) 44%, transparent);
 }
 
-.quote-ambience {
+.quote-ambience,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-ambience {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   max-width: 100%;
-  padding: 0 15px;
-  border: 1px solid rgb(186 208 220 / 0.34);
-  border-radius: 2px;
-  background: linear-gradient(180deg, rgb(18 28 38 / 0.88), rgb(9 15 23 / 0.94));
+  padding: 0 18px;
+  border: 1px solid rgb(244 216 160 / 0.42);
+  border-top-color: rgb(255 242 208 / 0.72);
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 220 164 / 0.14), transparent 72%),
+    linear-gradient(180deg, #161a2b 0%, #090b15 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.14),
-    0 6px 16px rgb(0 0 0 / 0.3);
+    inset 0 1px 0 rgb(255 253 246 / 0.28),
+    0 10px 22px -6px rgb(0 0 0 / 0.6);
 }
 
-.quote-ambience[data-playing="true"] {
-  border-color: color-mix(in srgb, var(--quote-ink) 78%, #eaf4f8);
+.quote-ambience[data-playing="true"],
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .quote-ambience[data-playing="true"] {
+  border-color: color-mix(in srgb, var(--quote-ink) 84%, #ffffff);
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, color-mix(in srgb, var(--quote-ink) 22%, transparent), transparent 72%),
-    linear-gradient(180deg, rgb(22 36 48 / 0.94), rgb(11 19 28 / 0.96));
+    radial-gradient(
+      ellipse 80% 90% at 50% 0%,
+      color-mix(in srgb, var(--quote-ink) 32%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, #1f273e 0%, #0d111e 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.24),
-    0 0 20px -6px color-mix(in srgb, var(--quote-ink) 40%, transparent);
+    inset 0 1px 0 rgb(255 254 248 / 0.4),
+    0 0 26px -4px color-mix(in srgb, var(--quote-ink) 56%, transparent);
 }
 
 .quote-scene-ambience {
@@ -340,16 +497,17 @@
   padding: 8px 0;
   border: 0;
   background: transparent;
-  color: var(--quote-ink);
+  color: color-mix(in srgb, var(--quote-ink) 82%, #fffaf0);
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-decoration: none;
   cursor: pointer;
 }
 
 .quote-scene-ambience span[role="status"] {
-  color: var(--gallery-muted, #bcc8d0);
+  color: var(--gallery-muted, #ced6e2);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -359,27 +517,100 @@
   outline-offset: 3px;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .quote-scene:not([data-open="true"]):hover {
+    border-color: color-mix(in srgb, var(--quote-ink) 64%, #fae4b6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 0.36),
+      0 22px 48px -10px rgb(0 0 0 / 0.78),
+      0 0 32px -12px color-mix(in srgb, var(--quote-ink) 38%, transparent);
+  }
+
+  .quote-scene h3 button:hover {
+    color: color-mix(in srgb, var(--quote-ink, #f4da9f) 84%, #ffffff);
+  }
+
+  .quote-scene h3 button:hover .quote-words {
+    border-inline-start-color: var(--quote-ink, #f4da9f);
+  }
+
+  .quote-scene h3 button:hover .quote-fold,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-scene
+    h3
+    button:hover
+    .quote-fold {
+    border-color: color-mix(in srgb, var(--quote-ink, #f4da9f) 84%, #ffffff);
+    background: linear-gradient(180deg, #262e46, #111626);
+    color: #ffffff;
+  }
+
+  .quote-leaf-copy a.quote-source:hover,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-leaf-copy
+    a.quote-source:hover {
+    border-color: #ffffff;
+    background:
+      radial-gradient(
+        ellipse 84% 90% at 50% 0%,
+        color-mix(in srgb, var(--quote-ink) 42%, rgb(254 230 180 / 0.28)),
+        transparent 72%
+      ),
+      linear-gradient(180deg, #27304b 0%, #121728 100%);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      0 16px 32px -6px rgb(0 0 0 / 0.76),
+      0 0 28px -4px color-mix(in srgb, var(--quote-ink) 58%, transparent);
+  }
+
+  .quote-ambience:hover,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-ambience:hover {
+    border-color: color-mix(in srgb, var(--quote-ink) 78%, #fae4b6);
+  }
+
+  .quote-scene-ambience button:hover {
+    color: #ffffff;
+  }
+}
+
 @media (max-width: 620px) {
   .quote-exhibition-header {
-    padding: 18px 0 14px;
+    padding: 20px 0 14px;
   }
 
   .quote-scene h3 button {
     grid-template-columns: minmax(0, 1fr) auto;
-    padding-inline: 8px;
+    padding-inline: 14px;
   }
 
-  .quote-plaque-index {
-    display: none;
+  .quote-plaque-index,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-plaque-index {
+    display: none !important;
   }
 
   .quote-leaf:not([hidden]) {
     grid-template-columns: minmax(0, 1fr);
-    padding-inline: 8px;
+    padding-inline: 14px;
     gap: 18px;
   }
 
-  .quote-leaf figure {
+  .quote-leaf figure,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-leaf
+    figure {
     padding: 8px;
   }
 
@@ -397,6 +628,7 @@
     animation: quote-scene-arrive 0.48s ease-out both;
   }
 
+  html:not([data-world-effects="economy"]) .quote-scene,
   html:not([data-world-effects="economy"]) .quote-words,
   html:not([data-world-effects="economy"]) .quote-fold,
   html:not([data-world-effects="economy"]) .quote-leaf-copy a.quote-source,
@@ -420,135 +652,46 @@
   }
 }
 
-.command-support-tours .quote-exhibition,
-.gallery-tours-page.command-support-tours .quote-exhibition {
-  color: var(--gallery-ivory, #eef4f5);
+@media (prefers-reduced-motion: reduce) {
+  .quote-scene,
+  .quote-words,
+  .quote-fold,
+  .quote-leaf-copy a.quote-source,
+  .quote-ambience {
+    transition: none;
+  }
 }
 
-.command-support-tours .quote-exhibition .quote-scene,
-.gallery-tours-page.command-support-tours .quote-exhibition .quote-scene {
-  border-top-color: rgb(238 212 162 / 0.34);
-  background: linear-gradient(90deg, rgb(16 25 38 / 0.62), rgb(10 16 26 / 0.34) 68%, transparent);
-}
-
-.command-support-tours .quote-exhibition .quote-scene:last-child,
-.gallery-tours-page.command-support-tours .quote-exhibition .quote-scene:last-child {
-  border-bottom-color: rgb(238 212 162 / 0.34);
-}
-
-.gallery-tours-page.command-support-tours .quote-exhibition .quote-plaque[data-open="true"] {
-  border-top-color: color-mix(in srgb, var(--quote-ink) 72%, #f6e0b4);
-  background:
-    radial-gradient(
-      ellipse 72% 58% at 22% 0%,
-      color-mix(in srgb, var(--quote-ink) 32%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      ellipse 52% 46% at 78% 10%,
-      rgb(250 226 178 / 0.18),
-      transparent 70%
-    ),
-    linear-gradient(180deg, rgb(22 35 50 / 0.92), rgb(10 16 26 / 0.78));
-  box-shadow:
-    inset 4px 0 0 var(--quote-ink),
-    inset 0 1px 0 rgb(255 253 245 / 0.32),
-    0 24px 54px -10px rgb(0 0 0 / 0.66);
-}
-
-.command-support-tours .quote-exhibition .quote-fold,
-.gallery-tours-page.command-support-tours .quote-exhibition .quote-fold {
-  border-color: rgb(240 214 164 / 0.54);
-  background:
-    radial-gradient(circle at 50% 0%, rgb(248 224 176 / 0.24), transparent 72%),
-    linear-gradient(180deg, #1d2d40, #0e1723);
-  box-shadow:
-    inset 0 1px rgb(255 253 245 / 0.3),
-    0 6px 14px rgb(0 0 0 / 0.4);
-  color: #f6e5c2;
-}
-
-.command-support-tours .quote-exhibition .quote-scene[data-open="true"] .quote-fold,
-.gallery-tours-page.command-support-tours
+html[data-world-effects="economy"]
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
   .quote-exhibition
-  .quote-scene[data-open="true"]
-  .quote-fold {
-  border-color: var(--quote-ink, #efd5a2);
-  background: linear-gradient(180deg, #2a4258, #142332);
-  box-shadow:
-    inset 0 1px rgb(255 254 248 / 0.46),
-    0 0 18px -2px color-mix(in srgb, var(--quote-ink) 64%, transparent);
-  color: var(--quote-ink, #fff9ec);
-}
-
-.command-support-tours .quote-exhibition .quote-leaf figure,
-.gallery-tours-page.command-support-tours .quote-exhibition .quote-leaf figure {
-  border-color: color-mix(in srgb, var(--quote-ink) 62%, rgb(244 218 168 / 0.58));
-  border-top-color: color-mix(in srgb, var(--quote-ink) 78%, #fff4da);
-  background:
-    radial-gradient(
-      ellipse 84% 60% at 50% 8%,
-      color-mix(in srgb, var(--quote-ink) 34%, #243b4e),
-      #060b12 82%
-    );
-  box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 0.42),
-    inset 0 0 0 4px rgb(5 8 14 / 0.88),
-    inset 0 0 0 5px color-mix(in srgb, var(--quote-ink) 32%, rgb(240 214 164 / 0.28)),
-    0 28px 64px -6px rgb(0 0 0 / 0.72);
-}
-
-.command-support-tours .quote-exhibition .quote-leaf-copy p.quote-leaf-caption,
-.gallery-tours-page.command-support-tours .quote-exhibition .quote-leaf-copy p.quote-leaf-caption {
-  color: #d6e2e8;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .command-support-tours .quote-exhibition .quote-scene h3 button:hover,
-  .gallery-tours-page.command-support-tours .quote-exhibition .quote-scene h3 button:hover {
-    color: var(--quote-ink, #d8eef6);
-  }
-
-  .gallery-tours-page.command-support-tours
-    .quote-exhibition
-    .quote-scene
-    h3
-    button:hover
-    .quote-words {
-    border-inline-start-color: var(--quote-ink, #b7dce7);
-  }
-
-  .command-support-tours .quote-exhibition .quote-scene h3 button:hover .quote-fold,
-  .gallery-tours-page.command-support-tours
-    .quote-exhibition
-    .quote-scene
-    h3
-    button:hover
-    .quote-fold {
-    border-color: var(--quote-ink, #b7dce7);
-    background: #182936;
-    color: #f0f9fc;
-  }
-
-  .gallery-tours-page.command-support-tours .quote-exhibition .quote-leaf-copy a.quote-source:hover {
-    border-color: var(--quote-ink, #b7dce7);
-    background: linear-gradient(180deg, #1d2f3f, #111c27);
-    color: #f6fbfe;
-  }
-
-  .gallery-tours-page.command-support-tours .quote-exhibition .quote-ambience:hover {
-    border-color: color-mix(in srgb, var(--quote-ink) 72%, #b7dce7);
-  }
-
-  .command-support-tours .quote-exhibition .quote-scene-ambience button:hover,
-  .gallery-tours-page.command-support-tours .quote-exhibition .quote-scene-ambience button:hover {
-    color: #f3fbfe;
-  }
+  :is(
+    .quote-scene,
+    .quote-plaque-index,
+    .quote-fold,
+    .quote-leaf figure,
+    .quote-leaf-mat,
+    .quote-source,
+    .quote-ambience
+  ) {
+  box-shadow: none;
 }
 
 @media (forced-colors: active) {
-  .quote-exhibition-header::before {
+  .quote-exhibition-header::before,
+  .quote-scene::before {
     display: none;
+  }
+
+  .quote-exhibition h2,
+  .quote-leaf-copy h4,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    :is(.quote-exhibition h2, .quote-leaf-copy h4) {
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    color: CanvasText;
   }
 
   .quote-scene[data-open="true"] .quote-line {
@@ -556,25 +699,23 @@
   }
 
   .quote-exhibition-header,
-  .gallery-tours-page.command-support-tours .quote-exhibition-header,
   .quote-scene,
-  .quote-scene:last-child,
-  .command-support-tours .quote-exhibition .quote-scene,
-  .command-support-tours .quote-exhibition .quote-scene:last-child {
-    border-color: CanvasText;
-    background: Canvas;
-    box-shadow: none;
-  }
-
   .quote-plaque[data-open="true"],
-  .gallery-tours-page.command-support-tours .quote-exhibition .quote-plaque[data-open="true"] {
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    :is(.quote-exhibition-header, .quote-scene, .quote-plaque[data-open="true"]) {
+    border-color: CanvasText;
     background: Canvas;
     box-shadow: none;
   }
 
   .quote-plaque-index,
   .quote-fold,
-  .command-support-tours .quote-exhibition .quote-fold {
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    :is(.quote-plaque-index, .quote-fold) {
     border-color: ButtonText;
     background: ButtonFace;
     color: ButtonText;
@@ -582,7 +723,11 @@
   }
 
   .quote-scene[data-open="true"] .quote-fold,
-  .command-support-tours .quote-exhibition .quote-scene[data-open="true"] .quote-fold {
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-scene[data-open="true"]
+    .quote-fold {
     border-color: Highlight;
     background: Highlight;
     color: HighlightText;
@@ -592,19 +737,31 @@
 
   .quote-leaf figure,
   .quote-leaf-mat,
-  .command-support-tours .quote-exhibition .quote-leaf figure,
-  .quote-ambience {
+  .quote-ambience,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    :is(.quote-leaf figure, .quote-ambience) {
     border-color: CanvasText;
     background: Canvas;
     box-shadow: none;
   }
 
-  .quote-ambience[data-playing="true"] {
+  .quote-ambience[data-playing="true"],
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-ambience[data-playing="true"] {
     border-color: Highlight;
     box-shadow: none;
   }
 
-  .quote-leaf-copy a.quote-source {
+  .quote-leaf-copy a.quote-source,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-leaf-copy
+    a.quote-source {
     border-color: LinkText;
     background: Canvas;
     color: LinkText;

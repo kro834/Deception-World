@@ -144,7 +144,7 @@ html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-
   min-width: 0;
 }
 
-/* Obsidian glass & brass specular lighting foundation for the studio stage */
+/* Obsidian glass & brass specular lighting foundation for the studio stage (Wave-8) */
 .exhibition-studio-stage,
 html[data-family="gallery"]
   .exhibition-room.exhibition-room-curated
@@ -155,17 +155,23 @@ html[data-family="gallery"]
   width: 100%;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid rgb(240 214 162 / 0.5);
-  border-top-color: rgb(254 238 202 / 0.78);
+  border: 1px solid rgb(246 220 168 / 0.62);
+  border-top-color: #fff5dc;
   background:
-    radial-gradient(ellipse 76% 52% at 50% 2%, rgb(250 226 178 / 0.24), transparent 64%),
-    radial-gradient(ellipse 56% 42% at 86% 14%, rgb(158 232 250 / 0.08), transparent 68%),
-    radial-gradient(ellipse 68% 36% at 50% 102%, rgb(232 198 138 / 0.12), transparent 66%),
-    linear-gradient(180deg, #121b29 0%, #080d16 58%, #05080e 100%);
+    conic-gradient(
+      from 154deg at 50% -18%,
+      transparent 0deg,
+      rgb(255 238 196 / 0.24) 26deg,
+      transparent 52deg
+    ),
+    radial-gradient(ellipse 78% 58% at 50% 0%, rgb(255 234 188 / 0.34), transparent 66%),
+    radial-gradient(ellipse 58% 46% at 86% 14%, rgb(158 232 250 / 0.14), transparent 68%),
+    radial-gradient(ellipse 70% 40% at 50% 104%, rgb(238 204 142 / 0.16), transparent 66%),
+    linear-gradient(180deg, #142032 0%, #080e18 56%, #04070d 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 0.34),
-    0 28px 66px -8px rgb(0 0 0 / 0.72),
-    0 0 40px -14px rgb(240 208 148 / 0.22);
+    inset 0 1.5px 0 rgb(255 254 248 / 0.46),
+    0 32px 76px -8px rgb(0 0 0 / 0.82),
+    0 0 54px -12px rgb(246 214 152 / 0.32);
 }
 
 html[data-family="gallery"]
@@ -178,17 +184,18 @@ html[data-family="gallery"]
 .exhibition-studio-stage::before {
   content: "";
   position: absolute;
-  inset: 0 0 auto;
+  inset: 0 18px auto;
   z-index: 2;
   height: 2px;
   background: linear-gradient(
     90deg,
-    transparent 4%,
-    rgb(238 210 156 / 0.68) 22%,
-    #fff6df 50%,
-    rgb(238 210 156 / 0.68) 78%,
-    transparent 96%
+    transparent 2%,
+    rgb(244 216 162 / 0.78) 20%,
+    #fffaf0 50%,
+    rgb(158 232 250 / 0.68) 80%,
+    transparent 98%
   );
+  box-shadow: 0 0 18px rgb(248 220 164 / 0.55);
   pointer-events: none;
 }
 
@@ -197,10 +204,11 @@ html[data-family="gallery"]
   position: absolute;
   inset: 0;
   z-index: 2;
+  border-radius: inherit;
   box-shadow:
-    inset 0 0 0 4px rgb(4 7 12 / 0.82),
-    inset 0 0 0 5px rgb(238 212 162 / 0.24),
-    inset 0 -18px 36px -14px rgb(0 0 0 / 0.48);
+    inset 0 0 0 4px rgb(4 7 13 / 0.86),
+    inset 0 0 0 5px rgb(244 216 162 / 0.34),
+    inset 0 -22px 44px -14px rgb(0 0 0 / 0.56);
   pointer-events: none;
 }
 
@@ -303,25 +311,26 @@ html[data-family="gallery"]
   gap: 10px 14px;
   margin-top: 14px;
   padding: 10px 14px;
-  border: 1px solid rgb(238 212 162 / 0.4);
-  border-top-color: rgb(252 234 196 / 0.68);
+  border: 1px solid rgb(244 218 166 / 0.52);
+  border-top-color: #fff2d0;
   border-radius: 3px;
   background:
-    radial-gradient(ellipse 82% 90% at 50% 0%, rgb(246 220 170 / 0.14), transparent 72%),
-    linear-gradient(180deg, #162030 0%, #0c121c 56%, #070b12 100%);
+    radial-gradient(ellipse 84% 92% at 50% 0%, rgb(252 228 178 / 0.22), transparent 72%),
+    radial-gradient(ellipse 60% 70% at 90% 100%, rgb(158 232 250 / 0.12), transparent 72%),
+    linear-gradient(180deg, #182538 0%, #0b121f 56%, #060a12 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 242 / 0.28),
-    inset 0 0 0 1px rgb(158 232 250 / 0.07),
-    0 16px 36px -6px rgb(0 0 0 / 0.58);
+    inset 0 1px 0 rgb(255 253 246 / 0.38),
+    inset 0 0 0 1px rgb(158 232 250 / 0.12),
+    0 18px 42px -6px rgb(0 0 0 / 0.68);
   font-size: 12px;
-  color: #e4cfa4;
+  color: #f0daa8;
 }
 
 .exhibition-studio-label {
   letter-spacing: 0.14em;
   font-size: 12px;
   font-weight: 600;
-  color: #ebd3a3;
+  color: #f3dba8;
 }
 
 .exhibition-studio-tools [role="group"],
@@ -333,13 +342,13 @@ html[data-family="gallery"]
   flex-wrap: wrap;
   min-width: 0;
   gap: 6px;
-  padding: 4px;
-  border: 1px solid rgb(232 206 158 / 0.24);
-  border-radius: 3px;
-  background: rgb(4 7 12 / 0.76);
+  padding: 5px;
+  border: 1px solid rgb(242 216 164 / 0.32);
+  border-radius: 999px;
+  background: rgb(4 7 13 / 0.84);
   box-shadow:
-    inset 0 2px 6px rgb(0 0 0 / 0.68),
-    inset 0 -1px 0 rgb(255 250 238 / 0.08);
+    inset 0 2px 8px rgb(0 0 0 / 0.76),
+    inset 0 -1px 0 rgb(255 252 244 / 0.12);
 }
 
 .exhibition-studio-tools button,
@@ -349,18 +358,19 @@ html[data-family="gallery"]
   button {
   min-height: 44px;
   padding: 8px 16px;
-  color: #f4efe4;
+  color: #faf6ee;
   background:
-    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(244 218 168 / 0.12), transparent 70%),
-    linear-gradient(180deg, #1b2738 0%, #0e1520 62%, #090e16 100%);
-  border: 1px solid rgb(234 208 158 / 0.36);
-  border-top-color: rgb(250 230 190 / 0.58);
-  border-radius: 2px;
+    radial-gradient(ellipse 84% 90% at 50% 0%, rgb(248 222 172 / 0.16), transparent 70%),
+    linear-gradient(180deg, #1d2b3e 0%, #0d1522 62%, #070c15 100%);
+  border: 1px solid rgb(242 216 164 / 0.44);
+  border-top-color: rgb(255 240 202 / 0.68);
+  border-radius: 999px;
   font-size: 13px;
+  font-weight: 550;
   letter-spacing: 0.04em;
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 0.22),
-    0 4px 12px rgb(0 0 0 / 0.4);
+    inset 0 1px 0 rgb(255 253 246 / 0.28),
+    0 6px 14px rgb(0 0 0 / 0.46);
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -376,14 +386,14 @@ html[data-family="gallery"]
     .exhibition-studio-tools
     button:not([aria-pressed="true"]):hover:not(:disabled) {
     background:
-      radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 224 176 / 0.22), transparent 70%),
-      linear-gradient(180deg, #243347 0%, #131d2b 100%);
-    border-color: rgb(248 224 176 / 0.8);
-    color: #fffaf0;
+      radial-gradient(ellipse 84% 92% at 50% 0%, rgb(252 228 178 / 0.28), transparent 70%),
+      linear-gradient(180deg, #273850 0%, #131f30 100%);
+    border-color: #fae5b8;
+    color: #ffffff;
     box-shadow:
-      inset 0 1px 0 rgb(255 253 246 / 0.36),
-      0 8px 20px rgb(0 0 0 / 0.48),
-      0 0 16px -4px rgb(242 210 150 / 0.32);
+      inset 0 1px 0 rgb(255 254 248 / 0.46),
+      0 10px 24px rgb(0 0 0 / 0.54),
+      0 0 20px -4px rgb(246 214 152 / 0.4);
     text-decoration: none;
   }
 }
@@ -393,16 +403,16 @@ html[data-family="gallery"]
   .exhibition-room.exhibition-room-curated
   .exhibition-studio-tools
   button[aria-pressed="true"] {
-  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 54%, #cfa968 100%);
+  background: linear-gradient(180deg, #fffdf6 0%, #f2d9a4 50%, #cfa968 100%);
   border-color: #fae6be;
-  border-top-color: #fffaf0;
-  color: #14151b;
-  font-weight: 650;
+  border-top-color: #ffffff;
+  color: #10131c;
+  font-weight: 700;
   box-shadow:
-    inset 0 1px 0 #ffffff,
-    inset 0 -1px 0 rgb(104 74 28 / 0.3),
-    0 6px 18px rgb(0 0 0 / 0.48),
-    0 0 20px -4px rgb(244 212 150 / 0.44);
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1px 0 rgb(96 68 24 / 0.34),
+    0 8px 22px rgb(0 0 0 / 0.54),
+    0 0 26px -4px rgb(248 216 152 / 0.54);
 }
 
 .exhibition-studio-tools button:disabled,

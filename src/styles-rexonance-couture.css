@@ -70,19 +70,24 @@
 
 /* P14 opens a cool chamber; the old centre spine ran through its copy. */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-p14 {
-  background: linear-gradient(180deg, rgb(122 232 255 / 3.5%), transparent 640px);
+  background:
+    radial-gradient(ellipse 68% 48% at 50% 0%, rgb(122 232 255 / 6%), transparent 72%),
+    linear-gradient(180deg, rgb(122 232 255 / 4.5%), transparent 640px);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-system {
-  background: linear-gradient(180deg, rgb(182 163 255 / 3%), transparent 560px);
+  background:
+    radial-gradient(ellipse 68% 48% at 50% 0%, rgb(182 163 255 / 5.5%), transparent 72%),
+    linear-gradient(180deg, rgb(182 163 255 / 4%), transparent 560px);
 }
 
 /* ---------- Hero: the same lights on the lacquer ---------- */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero {
   background:
     var(--rc-grain) 0 0 / 180px 180px repeat,
-    radial-gradient(ellipse 52% 64% at 72% 44%, rgb(80 96 160 / 22%), transparent 70%),
-    radial-gradient(ellipse 46% 56% at 0 100%, rgb(37 104 126 / 12%), transparent 70%),
+    radial-gradient(ellipse 54% 66% at 72% 44%, rgb(80 96 160 / 26%), transparent 72%),
+    radial-gradient(ellipse 48% 58% at 0 100%, rgb(37 104 126 / 16%), transparent 72%),
+    radial-gradient(ellipse 42% 48% at 24% 38%, rgb(227 193 133 / 8%), transparent 70%),
     var(--rc-ink);
 }
 

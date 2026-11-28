@@ -1468,32 +1468,58 @@
 
 /* ---------- Dossier dialog ---------- */
 .dream-page.dream-page .dream-dossier-shell {
-  border: 1px solid var(--ts-hair);
-  border-radius: 4px;
-  background: var(--ts-velvet);
+  border: 1px solid rgb(242 206 136 / 72%);
+  border-radius: 6px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(242 208 138 / 58%) 24%,
+        rgb(255 248 220 / 92%) 50%,
+        rgb(242 208 138 / 58%) 76%,
+        transparent 94%
+      )
+      top / 100% 1.5px no-repeat,
+    radial-gradient(64% 48% at 18% 0%, rgb(252 210 132 / 18%), transparent 70%),
+    radial-gradient(52% 48% at 88% 100%, rgb(212 66 52 / 18%), transparent 72%),
+    linear-gradient(155deg, #1b1026 0%, #100818 54%, #09050f 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 220 / 34%),
+    inset 0 0 0 4px rgb(9 5 15 / 72%),
+    0 34px 86px rgb(0 0 0 / 88%);
 }
 
 .dream-page.dream-page .dream-dossier-layout,
 .dream-page.dream-page .dream-dossier-visuals {
-  background: var(--ts-velvet);
+  background: transparent;
 }
 
 .dream-page.dream-page .dream-dossier-copy {
   color: var(--ts-kinari);
-  background: var(--ts-velvet);
+  background:
+    radial-gradient(68% 44% at 84% 0%, rgb(248 206 128 / 12%), transparent 70%),
+    linear-gradient(180deg, #160d20 0%, #0d0715 100%);
 }
 
 .dream-page.dream-page .dream-dossier-visuals figure {
-  border: 1px solid var(--ts-hair-soft);
-  border-radius: 0;
-  background: var(--ts-ink);
+  border: 1px solid rgb(238 202 132 / 60%);
+  border-radius: 2px;
+  background:
+    radial-gradient(72% 60% at 50% 38%, rgb(252 204 114 / 12%), transparent 70%),
+    #08040e;
+  box-shadow:
+    inset 0 1px 0 rgb(255 246 218 / 28%),
+    0 18px 42px rgb(0 0 0 / 74%);
 }
 
 .dream-page.dream-page .dream-dossier-title h2 {
-  color: var(--ts-kin-light);
+  color: #fff2c6;
   font-family: var(--ts-display);
   font-weight: 800;
   letter-spacing: 0.1em;
+  text-shadow:
+    0 0 20px rgb(252 204 116 / 34%),
+    0 2px 10px rgb(0 0 0 / 82%);
 }
 
 .dream-page.dream-page .dream-dossier-title > span {
@@ -1543,9 +1569,20 @@
 }
 
 .dream-page.dream-page :is(.dream-profile-grid, .dream-ability-list article) {
-  border-color: var(--ts-hair-soft);
-  border-radius: 0;
-  background: var(--ts-ink);
+  border-color: rgb(232 196 126 / 44%);
+  border-radius: 4px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        rgb(255 246 216 / 58%) 50%,
+        transparent 90%
+      )
+      top / 100% 1px no-repeat,
+    linear-gradient(180deg, #170e22 0%, #0c0714 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 246 218 / 18%),
+    0 12px 28px rgb(0 0 0 / 54%);
 }
 
 .dream-page.dream-page .dream-dossier-close.ios26-glass {

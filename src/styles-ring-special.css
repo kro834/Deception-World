@@ -291,33 +291,41 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       0 0 34px -10px rgb(var(--cs-key-rgb) / 0.34);
   }
 
-  /* Final Stage nocturnal lamplight optical panels: restore deep night-blue
-     atmosphere, warm gold lamplight, and cyan/violet prism depth over the
-     generic --cs-face fill so story/cast/pickup panels radiate rich contrast. */
+  /* Final Stage nocturnal lamplight optical panels: obsidian royal-navy depth,
+     warm dawn gold lamplight, gold-foil top hairline, and cyan/violet prism rim. */
   html[data-family="special"]
     body
     #top.fst-page[data-command-special]:not(#ring-b)
     .fst-story-layout {
     background:
-      radial-gradient(ellipse 56% 42% at 6% 0%, rgb(255 212 146 / 0.24), transparent 68%) padding-box,
-      radial-gradient(ellipse 48% 36% at 96% 4%, rgb(122 232 255 / 0.16), transparent 68%) padding-box,
-      radial-gradient(ellipse 54% 44% at 94% 100%, rgb(164 139 255 / 0.16), transparent 72%) padding-box,
-      linear-gradient(164deg, #162244 0%, #0d1631 48%, #070d1f 100%) padding-box,
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          #f5ca79 22%,
+          #fff7e2 48%,
+          #7ae8ff 78%,
+          transparent 96%
+        )
+        0 0 / 100% 2px no-repeat padding-box,
+      radial-gradient(ellipse 58% 46% at 6% 4%, rgb(255 212 146 / 0.28), transparent 68%) padding-box,
+      radial-gradient(ellipse 50% 38% at 96% 8%, rgb(122 232 255 / 0.18), transparent 68%) padding-box,
+      radial-gradient(ellipse 56% 44% at 92% 100%, rgb(164 139 255 / 0.18), transparent 72%) padding-box,
+      linear-gradient(164deg, #101b3b 0%, #080f24 48%, #040713 100%) padding-box,
       conic-gradient(
         from var(--ring-from, 210deg),
-        #ffd9a3 0turn,
-        #fff5df 0.15turn,
+        #ffd996 0turn,
+        #fff7e2 0.15turn,
         #7ae8ff 0.42turn,
-        rgb(164 139 255 / 0.56) 0.68turn,
-        #ffd9a3 1turn
+        rgb(164 139 255 / 0.62) 0.68turn,
+        #ffd996 1turn
       )
       border-box;
     box-shadow:
-      inset 0 1px 0 rgb(255 244 218 / 0.3),
-      inset 0 0 0 1px rgb(255 217 163 / 0.22),
-      0 28px 60px -18px rgb(0 0 0 / 0.92),
-      0 0 42px -12px rgb(255 212 146 / 0.26),
-      0 0 56px -18px rgb(122 232 255 / 0.22);
+      inset 0 1px 0 rgb(255 248 226 / 0.36),
+      inset 0 0 0 1px rgb(255 217 150 / 0.24),
+      0 32px 72px -18px rgb(0 0 0 / 0.94),
+      0 0 50px -10px rgb(255 212 146 / 0.3),
+      0 0 64px -16px rgb(122 232 255 / 0.26);
   }
 
   html[data-family="special"]
@@ -325,23 +333,31 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     #top.fst-page[data-command-special]:not(#ring-b)
     :is(.fst-cast-console, .fst-pickup-card) {
     background:
-      radial-gradient(ellipse 52% 40% at 8% 0%, rgb(255 212 146 / 0.18), transparent 68%) padding-box,
-      radial-gradient(ellipse 46% 38% at 94% 6%, color-mix(in srgb, var(--fst-accent, #7ae8ff) 20%, transparent), transparent 66%) padding-box,
-      linear-gradient(164deg, #131e3b 0%, #0b1328 52%, #070c1b 100%) padding-box,
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(255 217 150 / 0.78) 24%,
+          color-mix(in srgb, var(--fst-accent, #7ae8ff) 80%, #fff6e0) 76%,
+          transparent 96%
+        )
+        0 0 / 100% 1.5px no-repeat padding-box,
+      radial-gradient(ellipse 54% 42% at 8% 0%, rgb(255 212 146 / 0.22), transparent 68%) padding-box,
+      radial-gradient(ellipse 48% 38% at 94% 6%, color-mix(in srgb, var(--fst-accent, #7ae8ff) 24%, transparent), transparent 66%) padding-box,
+      linear-gradient(164deg, #101a38 0%, #080e22 52%, #040713 100%) padding-box,
       conic-gradient(
         from var(--ring-from, 210deg),
         color-mix(in srgb, var(--fst-accent, #7ae8ff) 78%, #ffd9a3) 0turn,
-        #fff5e2 0.16turn,
-        #ffd9a3 0.44turn,
-        rgb(122 232 255 / 0.46) 0.72turn,
+        #fff7e4 0.16turn,
+        #ffd996 0.44turn,
+        rgb(122 232 255 / 0.52) 0.72turn,
         color-mix(in srgb, var(--fst-accent, #7ae8ff) 78%, #ffd9a3) 1turn
       )
       border-box;
     box-shadow:
-      inset 0 1px 0 rgb(255 244 218 / 0.26),
-      inset 0 0 0 1px rgb(255 217 163 / 0.18),
-      0 26px 56px -18px rgb(0 0 0 / 0.92),
-      0 0 38px -12px color-mix(in srgb, var(--fst-accent, #7ae8ff) 32%, transparent);
+      inset 0 1px 0 rgb(255 248 226 / 0.32),
+      inset 0 0 0 1px rgb(255 217 150 / 0.22),
+      0 30px 64px -18px rgb(0 0 0 / 0.94),
+      0 0 44px -10px color-mix(in srgb, var(--fst-accent, #7ae8ff) 36%, transparent);
   }
 
   html[data-family="special"]
@@ -904,12 +920,17 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
   width: min(100%, 560px);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(var(--saga-accent-rgb), 0.14) 0%,
-    rgba(var(--saga-accent-rgb), 0.05) 42%,
-    transparent 70%
-  );
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(var(--saga-accent-rgb), 0.22) 0%,
+      rgb(240 211 156 / 0.1) 34%,
+      rgba(122, 232, 255, 0.06) 56%,
+      transparent 74%
+    );
+  box-shadow:
+    0 0 80px -20px rgba(var(--saga-accent-rgb), 0.34),
+    inset 0 0 64px -20px rgb(240 211 156 / 0.18);
   pointer-events: none;
 }
 
@@ -918,8 +939,8 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
   content: "";
   position: absolute;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::before {
@@ -931,11 +952,11 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
   inset: 14%;
   background: conic-gradient(
     from 45deg,
-    rgba(var(--saga-accent-rgb), 0.52) 0turn,
-    rgb(255 246 228 / 0.62) 0.18turn,
-    rgba(var(--saga-accent-rgb), 0.22) 0.48turn,
+    rgba(var(--saga-accent-rgb), 0.68) 0turn,
+    rgb(255 248 232 / 0.78) 0.18turn,
+    rgba(var(--saga-accent-rgb), 0.28) 0.48turn,
     var(--ring-gold) 0.72turn,
-    rgba(var(--saga-accent-rgb), 0.52) 1turn
+    rgba(var(--saga-accent-rgb), 0.68) 1turn
   );
 }
 
@@ -1115,9 +1136,36 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .brand-ma
 html[data-family="special"]
   body
   .saga-cinema.saga-cinema:not(#ring-b)
-  :is(.world-return-link, .frame-button, .hero-actions > :is(a, button), .text-button) {
+  :is(.world-return-link, .frame-button, .hero-actions > :is(a, button), .text-button, .hero-project, #hero-chapter) {
   border-radius: var(--ring-radius-pill);
   clip-path: none;
+}
+
+html[data-family="special"]
+  body
+  .saga-cinema.saga-cinema:not(#ring-b)
+  .frame-button {
+  border: 1.5px solid transparent;
+  background:
+    radial-gradient(120% 110% at 18% 0%, rgba(var(--saga-accent-rgb), 0.34), transparent 64%) padding-box,
+    radial-gradient(90% 90% at 88% 100%, rgb(240 211 156 / 0.22), transparent 66%) padding-box,
+    linear-gradient(168deg, #16243a 0%, #09111f 58%, #050912 100%) padding-box,
+    var(--ring-prism) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 246 / 0.44),
+    0 18px 40px -12px rgb(0 0 0 / 0.9),
+    0 0 34px -6px rgba(var(--saga-accent-rgb), 0.44);
+}
+
+html[data-family="special"]
+  body
+  .saga-cinema.saga-cinema:not(#ring-b)
+  .frame-button::before,
+html[data-family="special"]
+  body
+  .saga-cinema.saga-cinema:not(#ring-b)
+  .frame-button::after {
+  display: none;
 }
 
 html[data-family="special"]
@@ -1127,9 +1175,21 @@ html[data-family="special"]
   border-radius: var(--ring-radius-card);
 }
 
+html[data-family="special"]
+  body
+  .saga-cinema.saga-cinema:not(#ring-b)
+  .chapter-reel {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
 /* Artwork stays rectangular: the smaller corner. */
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero-poster, .visual-feature) {
   border-radius: 18px;
+}
+
+html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .hero-poster img {
+  border-radius: 11px;
 }
 
 @media (hover: hover) and (pointer: fine) and (forced-colors: none) {

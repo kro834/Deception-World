@@ -45,24 +45,31 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
   > .dossier-reader {
   position: sticky;
-  border-top: 1px solid color-mix(in srgb, var(--crt-accent) 26%, rgb(255 255 255 / 14%));
-  border-bottom: 1px solid color-mix(in srgb, var(--crt-foil) 42%, rgb(255 255 255 / 16%));
+  border-top: 1px solid color-mix(in srgb, var(--crt-accent) 34%, rgb(255 255 255 / 18%));
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-foil) 52%, rgb(255 255 255 / 20%));
   background:
     linear-gradient(
+        90deg,
+        transparent 4%,
+        color-mix(in srgb, var(--crt-foil) 46%, #ffffff) 50%,
+        transparent 96%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
       90deg,
-      color-mix(in srgb, var(--crt-accent) 16%, transparent) 0%,
-      color-mix(in srgb, var(--crt-accent-2) 6%, transparent) 28%,
+      color-mix(in srgb, var(--crt-accent) 22%, transparent) 0%,
+      color-mix(in srgb, var(--crt-accent-2) 9%, transparent) 28%,
       transparent 54%,
-      color-mix(in srgb, var(--crt-foil) 11%, transparent) 100%
+      color-mix(in srgb, var(--crt-foil) 15%, transparent) 100%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 4%) 0%, transparent 56%),
+    linear-gradient(180deg, rgb(255 255 255 / 6%) 0%, transparent 56%),
     var(--crt-plate-deep);
   background-color: var(--crt-plate-deep);
   box-shadow:
-    0 18px 46px rgb(0 0 0 / 64%),
-    0 2px 18px color-mix(in srgb, var(--crt-accent) 10%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--crt-accent) 24%, rgb(255 255 255 / 16%)),
-    inset 0 -1px 0 color-mix(in srgb, var(--crt-foil) 34%, transparent);
+    0 20px 52px rgb(0 0 0 / 72%),
+    0 2px 24px color-mix(in srgb, var(--crt-accent) 16%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--crt-accent) 32%, rgb(255 255 255 / 22%)),
+    inset 0 -1px 0 color-mix(in srgb, var(--crt-foil) 44%, transparent);
 }
 
 html[data-family="dossier"]
@@ -71,17 +78,17 @@ html[data-family="dossier"]
   content: "";
   position: absolute;
   inset: auto 0 -1px 0;
-  height: 2px;
+  height: 2.5px;
   pointer-events: none;
   background: linear-gradient(
     90deg,
     var(--crt-accent) 0%,
-    color-mix(in srgb, var(--crt-accent) 52%, #ffffff) 44%,
+    color-mix(in srgb, var(--crt-accent) 56%, #ffffff) 44%,
     var(--crt-foil) 82%,
     var(--crt-accent-2) 100%
   );
-  box-shadow: 0 0 12px color-mix(in srgb, var(--crt-accent) 42%, transparent);
-  opacity: 0.72;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--crt-accent) 56%, transparent);
+  opacity: 0.78;
   transform: scaleX(1);
   transform-origin: left center;
 }
@@ -130,27 +137,33 @@ html[data-family="dossier"]
   > .dossier-reader
   .dossier-reader-links
   a[aria-current] {
-  border-top-color: color-mix(in srgb, var(--crt-accent) 72%, #ffffff);
+  border-top-color: color-mix(in srgb, var(--crt-accent) 82%, #ffffff);
   color: #ffffff;
   background:
     linear-gradient(
         90deg,
         transparent 6%,
-        color-mix(in srgb, var(--crt-accent) 88%, #ffffff) 50%,
+        color-mix(in srgb, var(--crt-accent) 92%, #ffffff) 50%,
         transparent 94%
       )
       50% 0 / 100% 2px no-repeat,
+    radial-gradient(
+      80% 70% at 50% 0%,
+      color-mix(in srgb, var(--crt-accent) 26%, transparent),
+      transparent 72%
+    ),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--crt-accent) 26%, transparent) 0%,
-      color-mix(in srgb, var(--crt-foil) 9%, transparent) 58%,
+      color-mix(in srgb, var(--crt-accent) 30%, transparent) 0%,
+      color-mix(in srgb, var(--crt-foil) 12%, transparent) 58%,
       transparent 100%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 32%),
-    inset 0 -2px 0 color-mix(in srgb, var(--crt-foil) 84%, #ffffff),
-    0 8px 20px rgb(0 0 0 / 48%);
-  text-shadow: 0 0 14px color-mix(in srgb, var(--crt-accent) 44%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 -2px 0 color-mix(in srgb, var(--crt-foil) 92%, #ffffff),
+    0 10px 24px rgb(0 0 0 / 54%),
+    0 0 22px -6px color-mix(in srgb, var(--crt-accent) 36%, transparent);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--crt-accent) 56%, transparent);
 }
 
 /* Preserve 13px pin on narrow dossier navigation (75b1fbe8). */
@@ -220,18 +233,31 @@ html[data-family="dossier"]
   :is(#dossier-profile, #dossier-index .manager-copy-body)
   .manager-facts {
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 54%, var(--crt-accent));
-  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 18%, rgb(255 255 255 / 10%));
-  border-radius: 0;
+  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 62%, var(--crt-accent));
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 24%, rgb(255 255 255 / 12%));
+  border-radius: 0 0 4px 4px;
   background:
     linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--crt-foil) 72%, #ffffff) 0%,
+        color-mix(in srgb, var(--crt-accent) 62%, transparent) 46%,
+        transparent 92%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      76% 90px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 16%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(
       180deg,
-      color-mix(in srgb, var(--crt-accent) 8%, transparent) 0%,
-      color-mix(in srgb, var(--crt-plate-deep) 90%, transparent) 100%
+      color-mix(in srgb, var(--crt-accent) 11%, transparent) 0%,
+      color-mix(in srgb, var(--crt-plate-deep) 94%, #000) 100%
     );
   box-shadow:
     inset 0 1px 0 var(--crt-rim-hi),
-    0 18px 44px rgb(0 0 0 / 42%);
+    0 22px 52px rgb(0 0 0 / 54%),
+    0 0 28px -10px color-mix(in srgb, var(--crt-accent) 20%, transparent);
 }
 
 /* Divine redaction seal without diagonal stripe noise (Yoake Mamori) */
@@ -240,27 +266,28 @@ html[data-family="dossier"]
   #dossier-profile
   .manager-facts
   dd.is-redacted {
-  border: 1px solid color-mix(in srgb, var(--crt-foil) 48%, var(--crt-accent));
-  border-left: 2px solid var(--crt-accent);
+  border: 1px solid color-mix(in srgb, var(--crt-foil) 56%, var(--crt-accent));
+  border-left: 2.5px solid var(--crt-accent);
   border-radius: 3px;
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--crt-accent) 76%, #ffffff) 0%,
-        var(--crt-foil) 54%,
+        color-mix(in srgb, var(--crt-accent) 84%, #ffffff) 0%,
+        var(--crt-foil) 56%,
         transparent 96%
       )
       0 0 / 100% 1px no-repeat,
     radial-gradient(
       80% 100% at 15% 50%,
-      color-mix(in srgb, var(--crt-accent) 18%, transparent),
+      color-mix(in srgb, var(--crt-accent) 24%, transparent),
       transparent 72%
     ),
-    linear-gradient(155deg, #0b1422 0%, #050912 100%);
+    linear-gradient(155deg, #0b1422 0%, #040810 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    0 4px 12px rgb(0 0 0 / 38%);
-  color: color-mix(in srgb, var(--crt-foil) 76%, #ffffff);
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 6px 16px rgb(0 0 0 / 48%),
+    0 0 18px -6px color-mix(in srgb, var(--crt-accent) 26%, transparent);
+  color: color-mix(in srgb, var(--crt-foil) 82%, #ffffff);
   letter-spacing: 0.16em;
 }
 
@@ -273,30 +300,31 @@ html[data-family="dossier"]
   .manager-quotes {
   position: relative;
   border: 0;
-  border-left: 2px solid var(--crt-accent);
+  border-left: 2.5px solid var(--crt-accent);
   border-radius: 0 var(--dx-radius, 6px) var(--dx-radius, 6px) 0;
   background:
     linear-gradient(
         90deg,
-        var(--crt-accent) 0%,
-        var(--crt-foil) 38%,
-        transparent 82%
+        color-mix(in srgb, var(--crt-accent) 88%, #ffffff) 0%,
+        var(--crt-foil) 44%,
+        transparent 88%
       )
-      0 0 / 100% 1px no-repeat,
+      0 0 / 100% 1.5px no-repeat,
     radial-gradient(
-      76% 120px at 0% 0%,
-      color-mix(in srgb, var(--crt-accent) 18%, transparent),
+      76% 130px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 24%, transparent),
       transparent 70%
     ),
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--crt-plate) 90%, #000) 0%,
-      color-mix(in srgb, var(--crt-plate-deep) 78%, transparent) 64%,
-      color-mix(in srgb, var(--crt-plate-deep) 44%, transparent) 100%
+      color-mix(in srgb, var(--crt-plate) 94%, #000) 0%,
+      color-mix(in srgb, var(--crt-plate-deep) 84%, transparent) 64%,
+      color-mix(in srgb, var(--crt-plate-deep) 52%, transparent) 100%
     );
   box-shadow:
-    inset 4px 0 22px -10px color-mix(in srgb, var(--crt-accent) 30%, transparent),
-    0 18px 46px rgb(0 0 0 / 38%);
+    inset 4px 0 28px -10px color-mix(in srgb, var(--crt-accent) 38%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 22px 54px rgb(0 0 0 / 48%);
 }
 
 html[data-family="dossier"]
@@ -346,26 +374,29 @@ html[data-family="dossier"]
   gap: 14px;
   min-height: 72px;
   padding: 15px 18px 15px 16px;
-  border: 1px solid color-mix(in srgb, var(--crt-accent) 16%, rgb(255 255 255 / 9%));
-  border-left: 2.5px solid color-mix(in srgb, var(--crt-accent) 84%, var(--crt-foil));
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 24%, rgb(255 255 255 / 12%));
+  border-top-color: color-mix(in srgb, var(--crt-foil) 46%, var(--crt-accent));
+  border-left: 3px solid color-mix(in srgb, var(--crt-accent) 90%, var(--crt-foil));
   border-radius: 2px var(--dx-radius, 6px) var(--dx-radius, 6px) 2px;
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--crt-foil) 72%, var(--crt-accent)) 0%,
-        transparent 68%
+        color-mix(in srgb, var(--crt-foil) 86%, #ffffff) 0%,
+        color-mix(in srgb, var(--crt-accent) 52%, transparent) 46%,
+        transparent 88%
       )
-      0 0 / 100% 1px no-repeat,
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--crt-accent) 11%, transparent) 0%,
-      transparent 48%
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      64% 92% at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 20%, transparent),
+      transparent 72%
     ),
     linear-gradient(158deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 10%),
-    inset 0 -1px 0 rgb(0 0 0 / 48%),
-    0 12px 28px rgb(0 0 0 / 36%);
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 54%),
+    0 16px 36px rgb(0 0 0 / 48%),
+    0 0 22px -8px color-mix(in srgb, var(--crt-accent) 16%, transparent);
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -450,36 +481,37 @@ html[data-family="dossier"]
   position: relative;
   overflow: hidden;
   padding: clamp(24px, 4vw, 38px) clamp(20px, 3.8vw, 36px);
-  border: 1px solid color-mix(in srgb, var(--crt-accent) 18%, rgb(255 255 255 / 10%));
-  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 54%, var(--crt-accent));
-  border-left: 2.5px solid color-mix(in srgb, var(--crt-accent) 84%, var(--crt-foil));
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 26%, rgb(255 255 255 / 12%));
+  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 68%, var(--crt-accent));
+  border-left: 3px solid color-mix(in srgb, var(--crt-accent) 90%, var(--crt-foil));
   border-radius: 2px var(--dx-radius, 6px) var(--dx-radius, 6px) 2px;
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--crt-accent) 76%, #ffffff) 0%,
-        var(--crt-foil) 38%,
-        color-mix(in srgb, var(--crt-accent-2) 28%, transparent) 78%,
-        transparent 96%
+        color-mix(in srgb, var(--crt-accent) 88%, #ffffff) 0%,
+        var(--crt-foil) 40%,
+        color-mix(in srgb, var(--crt-accent-2) 38%, transparent) 80%,
+        transparent 98%
       )
-      0 0 / 100% 1.5px no-repeat,
+      0 0 / 100% 2px no-repeat,
     radial-gradient(
-      72% 160px at 0% 0%,
-      color-mix(in srgb, var(--crt-accent) 14%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      56% 120px at 100% 100%,
-      color-mix(in srgb, var(--crt-foil) 7%, transparent),
+      76% 180px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 20%, transparent),
       transparent 72%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 4.5%) 0%, transparent 110px),
+    radial-gradient(
+      58% 130px at 100% 100%,
+      color-mix(in srgb, var(--crt-foil) 10%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 5.5%) 0%, transparent 115px),
     linear-gradient(164deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 34%, rgb(255 255 255 / 26%)),
+    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 44%, rgb(255 255 255 / 32%)),
     inset 0 -1px 0 var(--crt-rim-lo),
-    inset 4px 0 24px -10px color-mix(in srgb, var(--crt-accent) 26%, transparent),
-    0 22px 54px rgb(0 0 0 / 48%);
+    inset 4px 0 32px -10px color-mix(in srgb, var(--crt-accent) 34%, transparent),
+    0 26px 64px rgb(0 0 0 / 56%),
+    0 0 42px -12px color-mix(in srgb, var(--crt-accent) 18%, transparent);
 }
 
 html[data-family="dossier"]
@@ -490,45 +522,45 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-index
   .manager-copy-section:first-child {
-  border-color: color-mix(in srgb, var(--crt-foil) 28%, rgb(255 255 255 / 12%));
-  border-top-color: color-mix(in srgb, var(--crt-foil) 62%, var(--crt-accent));
+  border-color: color-mix(in srgb, var(--crt-foil) 36%, rgb(255 255 255 / 14%));
+  border-top-color: color-mix(in srgb, var(--crt-foil) 76%, var(--crt-accent));
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 42%, rgb(255 255 255 / 22%)),
-    inset 0 -1px 0 color-mix(in srgb, var(--crt-foil) 28%, transparent),
-    inset 4px 0 28px -8px color-mix(in srgb, var(--crt-accent) 32%, transparent),
-    0 26px 64px rgb(0 0 0 / 54%),
-    0 0 38px -8px color-mix(in srgb, var(--crt-accent) 16%, transparent);
+    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 52%, rgb(255 255 255 / 28%)),
+    inset 0 -1px 0 color-mix(in srgb, var(--crt-foil) 34%, transparent),
+    inset 4px 0 36px -8px color-mix(in srgb, var(--crt-accent) 40%, transparent),
+    0 30px 72px rgb(0 0 0 / 62%),
+    0 0 48px -8px color-mix(in srgb, var(--crt-accent) 24%, transparent);
 }
 
 html[data-family="dossier"]
   main.manager-page.dante-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-index
   #character-section-04.manager-copy-section {
-  border-color: rgb(237 102 126 / 38%);
+  border-color: rgb(237 102 126 / 48%);
   border-left-color: #ed667e;
   background:
-    linear-gradient(90deg, #ed667e 0%, #ffb8c5 44%, #369b89 88%, transparent 100%) 0 0 / 100% 2px
-      no-repeat,
-    radial-gradient(78% 190px at 0% 0%, rgb(237 102 126 / 22%), transparent 72%),
-    radial-gradient(58% 160px at 100% 100%, rgb(54 155 137 / 14%), transparent 72%),
-    linear-gradient(160deg, #140912 0%, #06060b 100%);
+    linear-gradient(90deg, #ff9ab0 0%, #ffb8c5 42%, #ed667e 68%, #369b89 90%, transparent 100%) 0 0 /
+      100% 2px no-repeat,
+    radial-gradient(78% 190px at 0% 0%, rgb(237 102 126 / 28%), transparent 72%),
+    radial-gradient(58% 160px at 100% 100%, rgb(54 155 137 / 18%), transparent 72%),
+    linear-gradient(160deg, #160914 0%, #05050a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 204 214 / 30%),
-    inset 0 -1px 0 rgb(186 65 91 / 28%),
-    0 28px 68px rgb(0 0 0 / 62%),
-    0 0 38px rgb(186 65 91 / 16%);
+    inset 0 1px 0 rgb(255 204 214 / 38%),
+    inset 0 -1px 0 rgb(186 65 91 / 34%),
+    0 32px 76px rgb(0 0 0 / 68%),
+    0 0 48px rgb(186 65 91 / 24%);
 }
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-index
   .manager-copy-section:target {
-  border-color: color-mix(in srgb, var(--crt-accent) 72%, #ffffff);
+  border-color: color-mix(in srgb, var(--crt-accent) 78%, #ffffff);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 32%),
-    0 0 0 1px color-mix(in srgb, var(--crt-accent) 56%, transparent),
-    0 24px 64px rgb(0 0 0 / 54%),
-    0 0 42px color-mix(in srgb, var(--crt-accent) 22%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    0 0 0 1px color-mix(in srgb, var(--crt-accent) 62%, transparent),
+    0 26px 70px rgb(0 0 0 / 60%),
+    0 0 48px color-mix(in srgb, var(--crt-accent) 28%, transparent);
 }
 
 /* Chapter Heading: unboxed foil folio index + kicker + illuminated hairline divider */
@@ -545,15 +577,15 @@ html[data-family="dossier"]
   gap: 6px 14px;
   margin: 0 0 22px;
   padding: 0 0 18px;
-  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 18%, rgb(255 255 255 / 10%));
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 22%, rgb(255 255 255 / 12%));
   background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--crt-foil) 76%, #ffffff) 0%,
-      color-mix(in srgb, var(--crt-accent) 74%, var(--crt-foil)) 24%,
-      color-mix(in srgb, var(--crt-foil) 42%, transparent) 52%,
-      transparent 92%
+      color-mix(in srgb, var(--crt-foil) 86%, #ffffff) 0%,
+      color-mix(in srgb, var(--crt-accent) 82%, var(--crt-foil)) 26%,
+      color-mix(in srgb, var(--crt-foil) 48%, transparent) 56%,
+      transparent 94%
     )
-    0 100% / 100% 1px no-repeat;
+    0 100% / 100% 1.5px no-repeat;
 }
 
 html[data-family="dossier"]
@@ -566,17 +598,17 @@ html[data-family="dossier"]
   min-width: auto;
   padding: 0 8px 4px 0;
   border: 0;
-  border-bottom: 2px solid color-mix(in srgb, var(--crt-foil) 76%, var(--crt-accent));
+  border-bottom: 2px solid color-mix(in srgb, var(--crt-foil) 84%, var(--crt-accent));
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: color-mix(in srgb, var(--crt-foil) 74%, var(--crt-accent));
+  color: color-mix(in srgb, var(--crt-foil) 84%, #ffffff);
   font-family: var(--sd-display, inherit);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   letter-spacing: 0.18em;
-  text-shadow: 0 0 16px color-mix(in srgb, var(--crt-accent) 32%, transparent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--crt-accent) 44%, transparent);
 }
 
 html[data-family="dossier"]
@@ -586,7 +618,7 @@ html[data-family="dossier"]
   .manager-copy-heading
   > p {
   margin: 0;
-  color: color-mix(in srgb, var(--crt-foil) 56%, #b2c3d4);
+  color: color-mix(in srgb, var(--crt-foil) 64%, #bdd0e2);
   font-size: 12px;
   letter-spacing: 0.14em;
 }
@@ -599,12 +631,19 @@ html[data-family="dossier"]
   h2 {
   grid-column: 1 / -1;
   margin: 2px 0 0;
-  color: #f8fbff;
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f1f7fd 54%,
+    color-mix(in srgb, var(--crt-foil) 72%, #c9d8ea) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
   line-height: 1.48;
   letter-spacing: 0.015em;
-  text-shadow:
-    0 2px 14px rgb(0 0 0 / 48%),
-    0 0 26px color-mix(in srgb, var(--crt-accent) 14%, transparent);
+  filter: drop-shadow(0 3px 14px rgb(0 0 0 / 58%))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--crt-accent) 22%, transparent));
 }
 
 html[data-family="dossier"]
@@ -624,9 +663,14 @@ html[data-family="dossier"]
   .manager-copy-section
   .manager-copy-body
   > p:first-of-type {
-  padding-left: 14px;
-  border-left: 2px solid color-mix(in srgb, var(--crt-foil) 64%, var(--crt-accent));
-  color: #f4f8fd;
+  padding: 2px 0 2px 15px;
+  border-left: 2.5px solid color-mix(in srgb, var(--crt-foil) 72%, var(--crt-accent));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--crt-accent) 8%, transparent) 0%,
+    transparent 64%
+  );
+  color: #f6faff;
   line-height: 1.96;
 }
 
@@ -765,30 +809,30 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   gap: 16px;
   margin: 4px 0 0;
   padding: 16px 18px 16px 22px;
-  border: 1px solid color-mix(in srgb, var(--crt-accent) 26%, rgb(255 255 255 / 14%));
-  border-top-color: color-mix(in srgb, var(--crt-foil) 62%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 34%, rgb(255 255 255 / 16%));
+  border-top-color: color-mix(in srgb, var(--crt-foil) 76%, #ffffff);
   border-left: 3px solid var(--crt-accent);
   border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--crt-accent) 72%, #ffffff) 0%,
-        var(--crt-foil) 44%,
+        color-mix(in srgb, var(--crt-accent) 82%, #ffffff) 0%,
+        var(--crt-foil) 46%,
         transparent 94%
       )
       0 0 / 100% 1.5px no-repeat,
     radial-gradient(
-      64% 120% at 0% 50%,
-      color-mix(in srgb, var(--crt-accent) 18%, transparent),
+      68% 120% at 0% 50%,
+      color-mix(in srgb, var(--crt-accent) 24%, transparent),
       transparent 72%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 7%) 0%, transparent 58%),
-    var(--crt-plate);
+    linear-gradient(180deg, rgb(255 255 255 / 9%) 0%, transparent 58%),
+    linear-gradient(160deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
   box-shadow:
-    0 16px 36px rgb(0 0 0 / 46%),
-    0 0 24px -6px color-mix(in srgb, var(--crt-accent) 16%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 36%, rgb(255 255 255 / 24%)),
-    inset 0 -1px 0 rgb(0 0 0 / 50%);
+    0 18px 42px rgb(0 0 0 / 54%),
+    0 0 28px -6px color-mix(in srgb, var(--crt-accent) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 44%, rgb(255 255 255 / 28%)),
+    inset 0 -1px 0 rgb(0 0 0 / 54%);
 }
 
 /* Swallowtail ribbon bookmark notch hung from the plate's top edge (silent). */
@@ -809,7 +853,7 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
     color-mix(in srgb, var(--crt-accent) 44%, transparent) 100%
   );
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
-  opacity: 0.88;
+  opacity: 0.92;
   pointer-events: none;
 }
 
@@ -821,23 +865,23 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   gap: 16px;
   margin: 6px 0;
   padding: 14px 16px 14px 18px;
-  border: 1px solid color-mix(in srgb, var(--crt-accent) 18%, rgb(255 255 255 / 10%));
-  border-top-color: color-mix(in srgb, var(--crt-foil) 34%, rgb(255 255 255 / 16%));
-  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 24%, rgb(255 255 255 / 12%));
+  border-top-color: color-mix(in srgb, var(--crt-foil) 44%, rgb(255 255 255 / 20%));
+  border-radius: 5px;
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--crt-accent) 44%, transparent) 0%,
-        color-mix(in srgb, var(--crt-foil) 28%, transparent) 46%,
+        color-mix(in srgb, var(--crt-accent) 56%, transparent) 0%,
+        color-mix(in srgb, var(--crt-foil) 36%, transparent) 46%,
         transparent 92%
       )
       0 0 / 100% 1px no-repeat,
-    linear-gradient(90deg, color-mix(in srgb, var(--crt-accent) 8%, transparent) 0%, transparent 62%),
-    rgb(255 255 255 / 2.5%);
+    linear-gradient(90deg, color-mix(in srgb, var(--crt-accent) 12%, transparent) 0%, transparent 62%),
+    linear-gradient(160deg, rgb(255 255 255 / 4%) 0%, rgb(4 8 15 / 54%) 100%);
   box-shadow:
-    inset 2px 0 0 color-mix(in srgb, var(--crt-accent) 62%, var(--crt-foil)),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 6px 16px -6px rgb(0 0 0 / 42%);
+    inset 2.5px 0 0 color-mix(in srgb, var(--crt-accent) 72%, var(--crt-foil)),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 10px 24px -6px rgb(0 0 0 / 50%);
 }
 
 main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
@@ -895,28 +939,28 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   margin: 34px 0 0;
   padding: clamp(22px, 4.5vw, 30px) clamp(18px, 4.5vw, 32px) clamp(18px, 3vw, 24px)
     clamp(24px, 5vw, 38px);
-  border: 1px solid color-mix(in srgb, var(--crt-accent) 30%, rgb(255 255 255 / 14%));
-  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 50%, var(--crt-accent));
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 36%, rgb(255 255 255 / 16%));
+  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 62%, var(--crt-accent));
   border-left: 3px solid var(--crt-accent);
   border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
   background:
     linear-gradient(
         90deg,
         var(--crt-accent) 0%,
-        var(--crt-foil) 48%,
+        color-mix(in srgb, var(--crt-foil) 86%, #ffffff) 48%,
         transparent 94%
       )
       0 0 / 100% 2px no-repeat,
-    linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 120px),
+    linear-gradient(180deg, rgb(255 255 255 / 6%), transparent 120px),
     radial-gradient(
-      76% 140px at 0% 0%,
-      color-mix(in srgb, var(--crt-accent) 14%, transparent),
+      76% 160px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 20%, transparent),
       transparent 72%
     ),
     linear-gradient(158deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
   box-shadow:
-    0 22px 54px rgb(0 0 0 / 48%),
-    0 0 28px -8px color-mix(in srgb, var(--crt-accent) 14%, transparent),
+    0 26px 62px rgb(0 0 0 / 56%),
+    0 0 36px -8px color-mix(in srgb, var(--crt-accent) 20%, transparent),
     inset 0 1px 0 var(--crt-rim-hi),
     inset 0 -1px 0 var(--crt-rim-lo);
 }
@@ -951,12 +995,21 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
 .character-related-records h2 {
   margin: 0 0 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 18%, rgb(255 255 255 / 10%));
-  color: #f8fbff;
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 22%, rgb(255 255 255 / 12%));
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f1f7fd 54%,
+    color-mix(in srgb, var(--crt-foil) 72%, #c9d8ea) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
   font-family: var(--sd-display, inherit);
   font-size: 18px;
   font-weight: 600;
   line-height: 1.7;
+  filter: drop-shadow(0 2px 10px rgb(0 0 0 / 52%));
 }
 
 .character-related-records ul {
@@ -1370,10 +1423,18 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
     main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
     .manager-facts
-    dd.is-redacted {
+    dd.is-redacted,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section
+    .manager-copy-heading
+    h2,
+  .character-related-records h2 {
     background: Canvas;
     color: CanvasText;
     box-shadow: none;
+    filter: none;
     text-shadow: none;
   }
 

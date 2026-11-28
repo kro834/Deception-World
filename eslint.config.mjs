@@ -14,6 +14,7 @@ export default tseslint.config(
       ".vercel/**",
       ".nitro/**",
       "node_modules/**",
+      "dream-experience-polish/**",
       "src/routeTree.gen.ts",
       // Preserve the upstream decoder bytes and their recorded hashes.
       "public/dogs-archive-20261028/decoders/**",

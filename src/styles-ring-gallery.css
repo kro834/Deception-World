@@ -181,32 +181,38 @@ html[data-family="gallery"] body .artwork-stage--gallery:not(#ring-x#ring-x) {
 
 /* The pill track of filters keeps its measured marker; both are pills. */
 html[data-family="gallery"] body .gallery-filters:not(#ring-x#ring-x) {
+  padding: 5px;
+  border: 1px solid rgb(var(--ring-g-gold) / 0.34);
   border-radius: var(--ring-radius-pill);
+  background:
+    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(var(--ring-g-gold) / 0.12), transparent 72%),
+    rgb(5 8 15 / 0.86);
   box-shadow:
-    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.14),
-    inset 0 0 0 1px rgb(var(--ring-g-gold) / 0.22),
-    0 12px 28px -16px rgb(0 0 0 / 0.72);
+    inset 0 2px 8px rgb(0 0 0 / 0.72),
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.2),
+    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.14),
+    0 14px 32px -14px rgb(0 0 0 / 0.78);
 }
 
-/* Museum-grade champagne × prism specular edge on primary action pills. */
+/* Museum-grade champagne × prism specular edge on primary action pills
+   (gold-ingot pressed / primary pills keep their own bright highlight). */
 html[data-family="gallery"] body
   :is(
     .gallery-refresh,
     .gallery-topbar-actions > a,
-    .gallery-screening-nav > a,
-    .gallery-feature-save,
+    .gallery-screening-nav > a:not(.gallery-enter),
     .gallery-feature-settings > a,
-    .gallery-favorites-filter,
+    .gallery-favorites-filter:not([aria-pressed="true"]),
     .gallery-shuffle-start,
-    .gallery-viewer-close,
+    .gallery-viewer-close:not([aria-pressed="true"]),
     .gallery-viewer-footer > button,
     .gallery-tour-action,
     .gallery-tour-course-actions > :is(a, button),
     .gallery-tour-theatre-button,
     .gallery-tour-next-tour,
     .quote-leaf-actions > :is(a, button),
-    .exhibition-room-entrances > a,
-    .exhibition-studio-tools button,
+    .exhibition-room-entrances > a:first-child,
+    .exhibition-studio-tools button:not([aria-pressed="true"]),
     .exhibition-room-choose > a,
     .exhibition-room-adjacent > button,
     .exhibition-shelf-return,
@@ -214,9 +220,10 @@ html[data-family="gallery"] body
     .exhibition-shelf-pagination > button
   ):not(#ring-x#ring-x) {
   box-shadow:
-    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.26),
-    inset 0 -1px 0 rgb(var(--ring-key-rgb) / 0.12),
-    0 10px 24px -14px rgb(0 0 0 / 0.66);
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.36),
+    inset 0 -1px 0 rgb(var(--ring-key-rgb) / 0.18),
+    0 0 0 1px rgb(var(--ring-g-gold) / 0.14),
+    0 12px 26px -12px rgb(0 0 0 / 0.74);
 }
 
 html[data-family="gallery"] body .ring-divider {
@@ -225,9 +232,9 @@ html[data-family="gallery"] body .ring-divider {
 }
 
 /* ---------------------------------------------------------------
-   2. Ring numbers: a place in a set, drawn as a lit arc around the
-   number that already says it — now framed by a delicate concentric
-   double halo and spring-driven arc progress (--ring-g-p).
+   2. Ring numbers: Swiss Luxury Chronograph Dials (Wave-8).
+   Sunray satin obsidian dial + dual concentric brass/cyan chapter rings
+   + spring-driven luminous chronograph arc (--ring-g-p).
    --------------------------------------------------------------- */
 
 html[data-family="gallery"] body
@@ -252,18 +259,29 @@ html[data-family="gallery"] body
   border: 0 !important;
   border-radius: 50% !important;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-g-ivory) / 0.16), transparent 44%),
-    radial-gradient(circle at 34% 26%, rgb(var(--ring-g-gold) / 0.24), transparent 64%),
-    radial-gradient(circle at 72% 78%, rgb(var(--ring-key-rgb) / 0.14), transparent 60%),
-    #080b12 !important;
+    radial-gradient(circle at 28% 20%, rgb(var(--ring-g-ivory) / 0.24), transparent 40%),
+    radial-gradient(circle at 50% 50%, transparent 56%, rgb(3 5 10 / 0.88) 78%),
+    conic-gradient(
+      from 32deg,
+      rgb(var(--ring-g-gold) / 0.18) 0turn,
+      rgb(12 18 30 / 0.94) 0.16turn,
+      rgb(var(--ring-key-rgb) / 0.15) 0.34turn,
+      rgb(8 12 21 / 0.96) 0.5turn,
+      rgb(var(--ring-g-gold) / 0.2) 0.68turn,
+      rgb(10 15 26 / 0.95) 0.84turn,
+      rgb(var(--ring-g-gold) / 0.18) 1turn
+    ),
+    #060911 !important;
   box-shadow:
-    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.34),
-    inset 0 0 0 5px rgb(6 10 18 / 0.84),
-    inset 0 0 0 6px rgb(var(--ring-g-gold) / 0.3),
-    0 0 0 3px rgb(5 8 15 / 0.66),
-    0 0 0 4px rgb(var(--ring-key-rgb) / 0.26),
-    0 10px 24px -6px rgb(0 0 0 / 0.7),
-    0 0 22px -5px rgb(var(--ring-g-gold) / 0.34) !important;
+    inset 0 1.5px 0 rgb(var(--ring-g-ivory) / 0.48),
+    inset 0 0 0 5px rgb(4 7 14 / 0.9),
+    inset 0 0 0 6px rgb(var(--ring-g-gold) / 0.48),
+    inset 0 0 0 9px rgb(7 11 20 / 0.86),
+    inset 0 0 0 10px rgb(var(--ring-key-rgb) / 0.22),
+    0 0 0 3px rgb(4 7 13 / 0.78),
+    0 0 0 4px rgb(var(--ring-g-gold) / 0.34),
+    0 12px 28px -6px rgb(0 0 0 / 0.82),
+    0 0 28px -4px rgb(var(--ring-g-gold) / 0.44) !important;
   font-variant-numeric: tabular-nums;
   text-align: center;
   white-space: nowrap;
@@ -295,12 +313,13 @@ html[data-family="gallery"] body
   pointer-events: none;
   -webkit-mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 3.6px),
-    #000 calc(100% - 3px)
+    transparent calc(100% - 3.8px),
+    #000 calc(100% - 3.1px)
   );
-  mask: radial-gradient(farthest-side, transparent calc(100% - 3.6px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3.8px), #000 calc(100% - 3.1px));
 }
 
+/* Cardinal brass × cyan bezel track around the chronograph perimeter */
 html[data-family="gallery"] body
   :is(
     .gallery-ring-number,
@@ -309,10 +328,15 @@ html[data-family="gallery"] body
     .exhibition-ring-number
   ):not(#ring-x#ring-x)::before {
   background: conic-gradient(
-    from 180deg,
-    rgb(var(--ring-g-gold) / 0.28),
-    rgb(var(--ring-key-rgb) / 0.2) 0.5turn,
-    rgb(var(--ring-g-gold) / 0.28) 1turn
+    from 0deg,
+    rgb(var(--ring-g-ivory) / 0.58) 0turn 0.008turn,
+    rgb(var(--ring-g-gold) / 0.32) 0.02turn 0.24turn,
+    rgb(var(--ring-key-rgb) / 0.52) 0.25turn 0.258turn,
+    rgb(var(--ring-key-rgb) / 0.24) 0.27turn 0.49turn,
+    rgb(var(--ring-g-ivory) / 0.52) 0.5turn 0.508turn,
+    rgb(var(--ring-g-gold) / 0.32) 0.52turn 0.74turn,
+    rgb(var(--ring-key-rgb) / 0.52) 0.75turn 0.758turn,
+    rgb(var(--ring-g-gold) / 0.3) 0.77turn 1turn
   ) !important;
 }
 
@@ -326,9 +350,9 @@ html[data-family="gallery"] body
   background: conic-gradient(
     from 0deg,
     var(--ring-key) 0turn,
-    var(--ring-pink) calc(var(--ring-g-p) * 0.56turn),
-    var(--ring-gold) calc(var(--ring-g-p) * 0.94turn),
-    rgb(var(--ring-g-ivory)) calc(var(--ring-g-p) * 1turn),
+    var(--ring-pink) calc(var(--ring-g-p) * 0.52turn),
+    var(--ring-gold) calc(var(--ring-g-p) * 0.92turn),
+    #ffffff calc(var(--ring-g-p) * 1turn),
     transparent calc(var(--ring-g-p) * 1turn)
   ) !important;
 }
@@ -339,60 +363,74 @@ html[data-family="gallery"] body
 html[data-family="gallery"] body .gallery-feature > figcaption:not(#ring-x#ring-x) {
   display: flex !important;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 html[data-family="gallery"] body .gallery-ring-number:not(#ring-x#ring-x) {
   --ring-size: 68px;
   flex: none;
   margin: 0 !important;
-  color: rgb(var(--ring-g-ivory));
+  color: #fffdf8;
   font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-shadow: 0 1px 10px rgb(var(--ring-g-gold) / 0.36);
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.9),
+    0 0 14px rgb(var(--ring-g-gold) / 0.55);
 }
 
 html[data-family="gallery"] body .gallery-ring-position:not(#ring-x#ring-x) {
   --ring-size: 68px;
-  color: rgb(var(--ring-g-ivory));
+  color: #fffdf8;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 10px rgb(var(--ring-g-gold) / 0.42);
 }
 
 html[data-family="gallery"] body .exhibition-ring-page:not(#ring-x#ring-x) {
-  --ring-size: 64px;
-  color: rgb(var(--ring-g-ivory));
+  --ring-size: 66px;
+  color: #fffdf8;
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 12px rgb(var(--ring-g-gold) / 0.46);
 }
 
-/* The exhibition's number is the panel's heading mark: a large ring. */
+/* The exhibition's number is the panel's heading mark: a grand tourbillon dial. */
 html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) {
-  --ring-size: clamp(120px, 11vw, 156px);
+  --ring-size: clamp(124px, 11.4vw, 160px);
   grid-template-columns: auto;
-  gap: 2px;
-  color: rgb(var(--ring-g-ivory) / 0.82);
+  gap: 3px;
+  color: rgb(var(--ring-g-ivory) / 0.88);
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   line-height: 1.1;
   box-shadow:
-    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.4),
-    inset 0 0 0 8px rgb(6 10 18 / 0.86),
-    inset 0 0 0 9px rgb(var(--ring-g-gold) / 0.34),
-    0 0 0 5px rgb(5 8 15 / 0.68),
-    0 0 0 6px rgb(var(--ring-key-rgb) / 0.28),
-    0 18px 36px -10px rgb(0 0 0 / 0.78),
-    0 0 32px -6px rgb(var(--ring-g-gold) / 0.38) !important;
+    inset 0 2px 0 rgb(var(--ring-g-ivory) / 0.56),
+    inset 0 0 0 8px rgb(4 7 14 / 0.92),
+    inset 0 0 0 9.5px rgb(var(--ring-g-gold) / 0.56),
+    inset 0 0 0 15px rgb(8 13 23 / 0.88),
+    inset 0 0 0 16px rgb(var(--ring-key-rgb) / 0.3),
+    0 0 0 5px rgb(4 7 13 / 0.8),
+    0 0 0 6px rgb(var(--ring-g-gold) / 0.4),
+    0 24px 48px -10px rgb(0 0 0 / 0.88),
+    0 0 44px -6px rgb(var(--ring-g-gold) / 0.52),
+    0 0 32px -8px rgb(var(--ring-key-rgb) / 0.3) !important;
 }
 
 html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) > span {
   display: block;
-  color: rgb(var(--ring-g-ivory));
-  font-size: clamp(34px, 3.2vw, 46px);
-  font-weight: 600;
-  line-height: 1;
-  text-shadow: 0 2px 18px rgb(var(--ring-g-gold) / 0.4);
+  background: linear-gradient(180deg, #ffffff 0%, #fff4dc 50%, #e4c17e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(35px, 3.3vw, 48px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-shadow: none;
 }
 
 /* ---------------------------------------------------------------
@@ -733,42 +771,54 @@ html[data-family="gallery"] body
 html[data-family="gallery"] body .exhibition-room-adjacent-number:not(#ring-x#ring-x) {
   display: grid !important;
   place-items: center;
-  width: 64px !important;
-  min-width: 64px;
-  height: 64px !important;
+  width: 66px !important;
+  min-width: 66px;
+  height: 66px !important;
   padding: 0 !important;
   border-radius: 50% !important;
   clip-path: none !important;
   background:
-    radial-gradient(circle at 30% 24%, rgb(var(--ring-g-gold) / 0.24), transparent 62%),
-    #090c14 !important;
+    radial-gradient(circle at 28% 20%, rgb(var(--ring-g-ivory) / 0.24), transparent 42%),
+    conic-gradient(
+      from 32deg,
+      rgb(var(--ring-g-gold) / 0.22) 0turn,
+      rgb(10 15 26 / 0.96) 0.25turn,
+      rgb(var(--ring-key-rgb) / 0.16) 0.5turn,
+      rgb(8 12 22 / 0.96) 0.75turn,
+      rgb(var(--ring-g-gold) / 0.22) 1turn
+    ),
+    #070a12 !important;
   box-shadow:
-    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.32),
-    inset 0 0 0 4px rgb(6 10 18 / 0.8),
-    inset 0 0 0 5px rgb(var(--ring-g-gold) / 0.3),
-    0 0 0 3px rgb(var(--ring-key-rgb) / 0.18),
-    0 10px 22px -8px rgb(0 0 0 / 0.72) !important;
-  color: rgb(var(--ring-g-ivory));
+    inset 0 1.5px 0 rgb(var(--ring-g-ivory) / 0.44),
+    inset 0 0 0 4px rgb(4 7 14 / 0.88),
+    inset 0 0 0 5.5px rgb(var(--ring-g-gold) / 0.48),
+    0 0 0 3px rgb(4 7 13 / 0.76),
+    0 0 0 4px rgb(var(--ring-key-rgb) / 0.26),
+    0 12px 26px -6px rgb(0 0 0 / 0.8),
+    0 0 24px -5px rgb(var(--ring-g-gold) / 0.42) !important;
+  color: #fffdf8;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 0 1px 12px rgb(var(--ring-g-gold) / 0.45);
 }
 
 html[data-family="gallery"] body .exhibition-shelf-pagination:not(#ring-x#ring-x) {
   align-items: center;
-  gap: 14px;
+  gap: clamp(10px, 2vw, 18px);
 }
 
 html[data-family="gallery"] body .exhibition-shelf-pagination > button:not(#ring-x#ring-x) {
   min-height: 46px;
-  padding-inline: 20px;
-  border-color: rgb(var(--ring-g-gold) / 0.36);
+  padding-inline: clamp(10px, 2.2vw, 22px);
+  border-color: rgb(var(--ring-g-gold) / 0.52);
   background:
-    radial-gradient(circle at 28% 18%, rgb(var(--ring-g-gold) / 0.18), transparent 62%),
-    linear-gradient(180deg, rgb(22 27 38 / 0.94), rgb(10 13 21 / 0.96));
+    radial-gradient(circle at 28% 16%, rgb(var(--ring-g-gold) / 0.26), transparent 64%),
+    linear-gradient(180deg, rgb(28 38 56 / 0.96), rgb(10 15 25 / 0.98));
   box-shadow:
-    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.3),
-    0 0 0 1px rgb(var(--ring-key-rgb) / 0.14),
-    0 12px 24px -12px rgb(0 0 0 / 0.74);
+    inset 0 1px 0 rgb(var(--ring-g-ivory) / 0.42),
+    inset 0 -1px 0 rgb(var(--ring-key-rgb) / 0.2),
+    0 0 0 1px rgb(var(--ring-g-gold) / 0.18),
+    0 14px 28px -10px rgb(0 0 0 / 0.8);
 }
 
 /* ---------------------------------------------------------------
@@ -1163,21 +1213,27 @@ html[data-family="gallery"] body
   background:
     radial-gradient(
       closest-side,
-      transparent calc(100% - 1.5px),
-      rgb(var(--ring-g-gold) / 0.68) calc(100% - 1.5px) 100%,
+      transparent calc(100% - 1.8px),
+      rgb(var(--ring-g-gold) / 0.82) calc(100% - 1.8px) 100%,
       transparent 100%
     ),
     radial-gradient(
       closest-side,
       transparent calc(80% - 1.5px),
-      rgb(var(--ring-key-rgb) / 0.5) calc(80% - 1.5px) 80%,
+      rgb(var(--ring-key-rgb) / 0.62) calc(80% - 1.5px) 80%,
       transparent 80%
     ),
     radial-gradient(
       closest-side,
-      transparent calc(60% - 1px),
-      rgb(var(--ring-pink-rgb) / 0.38) calc(60% - 1px) 60%,
+      transparent calc(60% - 1.2px),
+      rgb(var(--ring-pink-rgb) / 0.46) calc(60% - 1.2px) 60%,
       transparent 60%
+    ),
+    radial-gradient(
+      closest-side,
+      rgb(var(--ring-g-gold) / 0.16) 0%,
+      rgb(var(--ring-key-rgb) / 0.08) 54%,
+      transparent 96%
     );
 }
 
@@ -1202,6 +1258,14 @@ html[data-family="gallery"] body .gallery-topbar-actions > :is(a, button):not(#r
 
 /* High-contrast / forced-colors preservation for ring dials & stops. */
 @media (forced-colors: active) {
+  html[data-family="gallery"] body .exhibition-ring-number:not(#ring-x#ring-x) > span {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: CanvasText;
+    color: CanvasText;
+  }
+
   html[data-family="gallery"] body
     :is(
       .gallery-ring-number,

@@ -47,15 +47,17 @@ html[data-family]:not([data-button-style="liquid"]) body .side-panel-trigger:not
      paint the trigger with !important; this is the layer above them. */
   border-radius: 50% !important;
   background:
-    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.24), transparent 44%),
-    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.34), transparent 60%),
-    radial-gradient(circle at 72% 86%, rgb(var(--ring-pink-rgb) / 0.26), transparent 62%), #07101c !important;
+    radial-gradient(ellipse 66% 42% at 36% 16%, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.08) 54%, transparent 74%),
+    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.42), transparent 60%),
+    radial-gradient(circle at 74% 86%, rgb(var(--ring-pink-rgb) / 0.34), transparent 60%),
+    radial-gradient(circle at 50% 50%, #122642 0%, #060e1b 78%, #040812 100%) !important;
   box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 0.34),
-    inset 0 -4px 10px rgb(0 0 0 / 0.54),
-    0 0 0 1px rgb(var(--ring-key-rgb) / 0.18),
-    0 10px 24px -10px rgb(var(--ring-key-rgb) / 0.82) !important;
-  color: #f0fbff !important;
+    inset 0 1.5px 2px rgb(255 255 255 / 0.46),
+    inset 0 -5px 12px rgb(0 0 0 / 0.64),
+    0 0 0 1px rgb(var(--ring-key-rgb) / 0.3),
+    0 10px 26px -8px rgb(var(--ring-key-rgb) / 0.9),
+    0 0 22px -10px rgb(var(--ring-pink-rgb) / 0.52) !important;
+  color: #f4fcff !important;
   clip-path: none !important;
 }
 
@@ -197,12 +199,15 @@ html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-si
   border: 0;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 28% 20%, rgb(255 255 255 / 0.28), transparent 44%),
-    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 62%),
-    radial-gradient(circle at 74% 82%, rgb(var(--ring-pink-rgb) / 0.22), transparent 58%), #07101c;
+    radial-gradient(ellipse 68% 42% at 34% 16%, rgb(255 255 255 / 0.44), rgb(255 255 255 / 0.08) 54%, transparent 74%),
+    radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.42), transparent 62%),
+    radial-gradient(circle at 74% 84%, rgb(var(--ring-pink-rgb) / 0.32), transparent 58%),
+    radial-gradient(circle at 50% 50%, #132846 0%, #071120 76%, #040914 100%);
   box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 0.34),
-    0 0 22px -6px rgb(var(--ring-key-rgb) / 0.86);
+    inset 0 1.5px 2px rgb(255 255 255 / 0.48),
+    inset 0 -4px 10px rgb(0 0 0 / 0.62),
+    0 0 26px -5px rgb(var(--ring-key-rgb) / 0.94),
+    0 0 20px -10px rgb(var(--ring-pink-rgb) / 0.5);
   clip-path: none;
   isolation: isolate;
 }
@@ -435,8 +440,8 @@ html[data-family="world"] body main.site-shell.film-edition > header.topbar > na
   }
 }
 
-/* The halo: static rings round the dial, painted on the panel's own
-   background (it does not scroll with the rows). */
+/* The astrolabe bridge backdrop: deep-space nebula spotlights and precision
+   concentric celestial rings anchored on the dial centre. */
 html[data-family]:not([data-family="dream"])
   body
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
@@ -444,20 +449,45 @@ html[data-family]:not([data-family="dream"])
   background-image:
     radial-gradient(
       circle at var(--orbit-cx) var(--orbit-cy),
-      transparent calc(var(--orbit-r) + 109px),
-      rgb(var(--ring-key-rgb) / 0.16) calc(var(--orbit-r) + 110px) calc(var(--orbit-r) + 111px),
-      transparent calc(var(--orbit-r) + 112px)
+      transparent calc(var(--orbit-r) * 0.55),
+      rgb(var(--ring-key-rgb) / 0.16) calc(var(--orbit-r) * 0.55 + 1px)
+        calc(var(--orbit-r) * 0.55 + 2px),
+      transparent calc(var(--orbit-r) * 0.55 + 3px)
     ),
     radial-gradient(
       circle at var(--orbit-cx) var(--orbit-cy),
-      transparent calc(var(--orbit-r) + 219px),
-      rgb(var(--ring-pink-rgb) / 0.1) calc(var(--orbit-r) + 220px) calc(var(--orbit-r) + 221px),
-      transparent calc(var(--orbit-r) + 222px)
+      transparent calc(var(--orbit-r) + 95px),
+      rgb(var(--ring-key-rgb) / 0.22) calc(var(--orbit-r) + 96px) calc(var(--orbit-r) + 97px),
+      transparent calc(var(--orbit-r) + 98px)
     ),
     radial-gradient(
       circle at var(--orbit-cx) var(--orbit-cy),
-      rgb(36 140 255 / 0.2),
-      transparent calc(var(--orbit-r) + 160px)
+      transparent calc(var(--orbit-r) + 197px),
+      rgb(var(--ring-gold-rgb) / 0.16) calc(var(--orbit-r) + 198px) calc(var(--orbit-r) + 199px),
+      transparent calc(var(--orbit-r) + 200px)
+    ),
+    radial-gradient(
+      circle at var(--orbit-cx) var(--orbit-cy),
+      transparent calc(var(--orbit-r) + 317px),
+      rgb(var(--ring-pink-rgb) / 0.12) calc(var(--orbit-r) + 318px) calc(var(--orbit-r) + 319px),
+      transparent calc(var(--orbit-r) + 320px)
+    ),
+    radial-gradient(
+      circle at var(--orbit-cx) var(--orbit-cy),
+      rgb(46 168 255 / 0.3),
+      rgb(112 94 255 / 0.13) 48%,
+      transparent calc(var(--orbit-r) + 220px)
+    ),
+    radial-gradient(
+      ellipse 56% 68% at 78% 48%,
+      rgb(157 134 255 / 0.18),
+      rgb(255 95 200 / 0.08) 46%,
+      transparent 74%
+    ),
+    radial-gradient(
+      ellipse 46% 42% at 96% 4%,
+      rgb(240 207 134 / 0.15),
+      transparent 72%
     ) !important;
 }
 
@@ -506,11 +536,18 @@ html[data-family]:not([data-family="dream"])
   max-width: calc(var(--orbit-r) * 2 - var(--orbit-disc) - 24px);
   translate: -50% -100%;
   font-size: clamp(20px, 3.6vh, 30px);
+  font-weight: 700;
   line-height: 1.2;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   display: block;
   text-align: center;
   white-space: nowrap;
+  background: linear-gradient(180deg, #ffffff 0%, #e6f6ff 54%, #9ee2ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 14px rgb(var(--ring-key-rgb) / 0.42))
+    drop-shadow(0 2px 4px rgb(0 0 0 / 0.72));
   pointer-events: none;
 }
 
@@ -611,7 +648,7 @@ html[data-family]:not([data-family="dream"])
   cursor: grabbing;
 }
 
-/* The orbit's line: one prism stroke. */
+/* The orbit's line: one radiant prism stroke. */
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .command-atlas-index::before {
   content: "";
@@ -627,7 +664,7 @@ html[data-family]:not([data-family="dream"])
   mask:
     linear-gradient(#000 0 0) padding-box exclude,
     linear-gradient(#000 0 0);
-  opacity: 0.68;
+  opacity: 0.86;
   pointer-events: none;
 }
 
@@ -639,19 +676,20 @@ html[data-family]:not([data-family="dream"])
   left: calc(100% + var(--orbit-disc) * 0.61 + 6px);
   top: 50%;
   width: calc(var(--orbit-gap) - var(--orbit-disc) * 0.61 - 22px);
-  height: 2px;
-  margin-top: -1px;
+  height: 2.5px;
+  margin-top: -1.25px;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
     #ffffff 0%,
-    var(--ring-key) 26%,
-    rgb(var(--ring-pink-rgb) / 0.68) 72%,
-    rgb(var(--ring-key-rgb) / 0.2) 100%
+    var(--ring-key) 28%,
+    rgb(var(--ring-pink-rgb) / 0.82) 66%,
+    rgb(var(--ring-gold-rgb) / 0.52) 88%,
+    rgb(var(--ring-key-rgb) / 0.16) 100%
   );
   box-shadow:
-    0 0 12px 1px rgb(var(--ring-key-rgb) / 0.72),
-    0 0 22px -2px rgb(var(--ring-pink-rgb) / 0.42);
+    0 0 14px 1.5px rgb(var(--ring-key-rgb) / 0.84),
+    0 0 26px -1px rgb(var(--ring-pink-rgb) / 0.52);
   pointer-events: none;
 }
 
@@ -674,13 +712,16 @@ html[data-family]:not([data-family="dream"])
   border: 2px solid transparent;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.2), transparent 44%) padding-box,
-    radial-gradient(circle at 34% 28%, #1f3658, #0a1426 70%) padding-box,
+    radial-gradient(ellipse 68% 44% at 36% 18%, rgb(255 255 255 / 0.36), rgb(255 255 255 / 0.08) 54%, transparent 74%)
+      padding-box,
+    radial-gradient(circle at 74% 86%, rgb(var(--ring-pink-rgb) / 0.24), transparent 58%) padding-box,
+    radial-gradient(circle at 32% 28%, #284a7c 0%, #10203a 58%, #07101f 100%) padding-box,
     var(--ring-prism) border-box;
   box-shadow:
-    inset 0 1px 2px rgb(255 255 255 / 0.3),
-    inset 0 -6px 12px rgb(0 0 0 / 0.56),
-    0 10px 22px -10px rgb(0 0 0 / 0.88);
+    inset 0 2px 3px rgb(255 255 255 / 0.44),
+    inset 0 -8px 14px rgb(0 0 0 / 0.66),
+    0 0 0 1px rgb(var(--ring-key-rgb) / 0.24),
+    0 12px 26px -10px rgb(0 0 0 / 0.92);
   color: var(--ring-paper);
   /* Out along its spoke, then upright again whatever the dial's angle. */
   transform: rotate(var(--orbit-a)) translateX(var(--orbit-r)) rotate(calc(var(--orbit-a) * -1))
@@ -699,7 +740,7 @@ html[data-family]:not([data-family="dream"])
   font-weight: 800;
   line-height: 1.2;
   text-align: center;
-  text-shadow: 0 1px 6px rgb(0 0 0 / 0.72);
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.78);
   white-space: normal;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -710,14 +751,19 @@ html[data-family]:not([data-family="dream"])
   > button[aria-selected="true"] {
   --orbit-s: 1.22;
   background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.38), transparent 42%) padding-box,
-    radial-gradient(circle at 34% 28%, #3586e0, #102e5c 72%) padding-box,
+    radial-gradient(ellipse 68% 42% at 36% 17%, rgb(255 255 255 / 0.56), rgb(255 255 255 / 0.14) 52%, transparent 74%)
+      padding-box,
+    radial-gradient(circle at 76% 86%, rgb(var(--ring-pink-rgb) / 0.36), transparent 58%) padding-box,
+    radial-gradient(circle at 34% 28%, #4298f6 0%, #153c76 62%, #0a1f42 100%) padding-box,
     var(--ring-prism) border-box;
   box-shadow:
-    inset 0 1px 3px rgb(255 255 255 / 0.56),
-    0 0 0 6px rgb(var(--ring-key-rgb) / 0.16),
-    0 0 0 12px rgb(var(--ring-pink-rgb) / 0.08),
-    0 0 32px -4px rgb(var(--ring-key-rgb) / 0.78);
+    inset 0 2px 4px rgb(255 255 255 / 0.72),
+    inset 0 -8px 16px rgb(0 0 0 / 0.48),
+    0 0 0 5px rgb(var(--ring-key-rgb) / 0.24),
+    0 0 0 11px rgb(var(--ring-pink-rgb) / 0.14),
+    0 0 0 18px rgb(var(--ring-gold-rgb) / 0.08),
+    0 0 40px -2px rgb(var(--ring-key-rgb) / 0.92),
+    0 0 64px -8px rgb(var(--ring-pink-rgb) / 0.48);
 }
 
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
@@ -824,7 +870,7 @@ html[data-family]:not([data-family="dream"])
   padding: 0;
 }
 
-/* A row: a sculpted dark-lens pill with top specular edge and celestial depth. */
+/* A row: a sculpted metallic-edge dark-lens pill with sharp top specular rim. */
 #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
   .side-panel-links
   > :is(a, button) {
@@ -843,17 +889,18 @@ html[data-family]:not([data-family="dream"])
   margin: 0;
   padding: 5px 18px 5px 22px;
   overflow: hidden;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.28);
-  border-top-color: rgb(224 246 255 / 0.36);
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.36);
+  border-top-color: rgb(236 250 255 / 0.52);
   border-radius: var(--ring-radius-pill) !important;
   background:
-    radial-gradient(ellipse 66% 124% at 10% 0%, rgb(var(--ring-key-rgb) / 0.14), transparent 64%),
-    radial-gradient(ellipse 52% 114% at 94% 100%, rgb(var(--ring-pink-rgb) / 0.08), transparent 66%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.11) 0%, rgb(16 29 48 / 0.72) 48%, rgb(9 18 32 / 0.92) 100%);
+    radial-gradient(ellipse 68% 128% at 10% 0%, rgb(var(--ring-key-rgb) / 0.2), transparent 64%),
+    radial-gradient(ellipse 56% 120% at 94% 100%, rgb(var(--ring-pink-rgb) / 0.13), transparent 66%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.15) 0%, rgb(18 33 56 / 0.78) 46%, rgb(9 18 33 / 0.96) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.26),
-    inset 0 -1px 0 rgb(0 0 0 / 0.48),
-    0 10px 22px -14px rgb(0 0 0 / 0.86);
+    inset 0 1px 0 rgb(255 255 255 / 0.38),
+    inset 0 -1px 0 rgb(0 0 0 / 0.58),
+    0 12px 26px -14px rgb(0 0 0 / 0.92),
+    0 0 20px -14px rgb(var(--ring-key-rgb) / 0.42);
   color: var(--ring-paper);
   font-size: 15px;
   text-align: left;
@@ -1046,16 +1093,16 @@ html[data-family]:not([data-family="dream"])
   .side-panel-links
   > :is(a, button)[aria-current] {
   border-color: var(--ring-key);
-  border-top-color: #f0fdff;
+  border-top-color: #ffffff;
   background:
-    radial-gradient(ellipse 74% 140% at 12% 0%, rgb(var(--ring-key-rgb) / 0.34), transparent 66%),
-    radial-gradient(ellipse 62% 130% at 92% 100%, rgb(var(--ring-pink-rgb) / 0.24), transparent 68%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.16) 0%, rgb(15 36 62 / 0.92) 100%);
+    radial-gradient(ellipse 78% 146% at 12% 0%, rgb(var(--ring-key-rgb) / 0.44), transparent 66%),
+    radial-gradient(ellipse 64% 134% at 92% 100%, rgb(var(--ring-pink-rgb) / 0.32), transparent 68%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.22) 0%, rgb(18 46 80 / 0.94) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.48),
-    inset 0 0 18px -6px rgb(var(--ring-key-rgb) / 0.42),
-    0 10px 26px -12px rgb(var(--ring-key-rgb) / 0.64),
-    0 0 24px -8px rgb(var(--ring-pink-rgb) / 0.36);
+    inset 0 1px 0 rgb(255 255 255 / 0.66),
+    inset 0 0 22px -4px rgb(var(--ring-key-rgb) / 0.56),
+    0 10px 28px -10px rgb(var(--ring-key-rgb) / 0.8),
+    0 0 28px -8px rgb(var(--ring-pink-rgb) / 0.46);
   color: #ffffff;
 }
 
@@ -1134,11 +1181,12 @@ html[data-family]:not([data-family="dream"])
   flex: none;
   width: 64px;
   height: 64px;
-  border: 2px solid rgb(var(--ring-key-rgb) / 0.82);
+  border: 2px solid rgb(var(--ring-key-rgb) / 0.9);
   border-radius: 50%;
   box-shadow:
-    0 0 0 4px rgb(var(--ring-key-rgb) / 0.14),
-    0 8px 20px -8px rgb(var(--ring-key-rgb) / 0.62);
+    0 0 0 4px rgb(var(--ring-key-rgb) / 0.18),
+    0 0 0 8px rgb(var(--ring-pink-rgb) / 0.08),
+    0 10px 24px -6px rgb(var(--ring-key-rgb) / 0.72);
   object-fit: cover;
   opacity: 1;
   filter: none;
@@ -1155,8 +1203,24 @@ html[data-family]:not([data-family="dream"])
   font-size: 20px;
   font-weight: 800;
   line-height: 1.25;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  background: linear-gradient(180deg, #ffffff 0%, #e4f6ff 56%, #9de2ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 12px rgb(var(--ring-key-rgb) / 0.36))
+    drop-shadow(0 1px 3px rgb(0 0 0 / 0.72));
   text-shadow: none;
+}
+
+@media (forced-colors: active) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    :is(.command-atlas-heading, .command-atlas-scene > figcaption) {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
 }
 
 /* ---- Bottom layout: phones and portrait tablets. ---- */
@@ -1187,11 +1251,30 @@ html[data-family]:not([data-family="dream"])
   html[data-family]:not([data-family="dream"])
     body
     #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
-    background-image: radial-gradient(
-      circle at var(--orbit-cx) var(--orbit-cy),
-      rgb(36 140 255 / 0.22),
-      transparent calc(var(--orbit-r) + 190px)
-    ) !important;
+    background-image:
+      radial-gradient(
+        circle at var(--orbit-cx) var(--orbit-cy),
+        transparent calc(var(--orbit-r) + 64px),
+        rgb(var(--ring-key-rgb) / 0.2) calc(var(--orbit-r) + 65px) calc(var(--orbit-r) + 66px),
+        transparent calc(var(--orbit-r) + 67px)
+      ),
+      radial-gradient(
+        circle at var(--orbit-cx) var(--orbit-cy),
+        transparent calc(var(--orbit-r) + 144px),
+        rgb(var(--ring-gold-rgb) / 0.14) calc(var(--orbit-r) + 145px) calc(var(--orbit-r) + 146px),
+        transparent calc(var(--orbit-r) + 147px)
+      ),
+      radial-gradient(
+        circle at var(--orbit-cx) var(--orbit-cy),
+        rgb(44 166 255 / 0.28),
+        rgb(122 96 255 / 0.12) 48%,
+        transparent calc(var(--orbit-r) + 210px)
+      ),
+      radial-gradient(
+        ellipse 82% 36% at 14% 6%,
+        rgb(var(--ring-key-rgb) / 0.14),
+        transparent 72%
+      ) !important;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]

@@ -346,24 +346,34 @@ main.manager-page:not(.is-sovereign)
 }
 
 main.manager-page:not(.is-sovereign) :is(.dossier-read-link, .rider-special-site-link) {
-  border-color: color-mix(in srgb, var(--dm-lock) 54%, rgb(240 207 134 / 32%));
+  border-color: color-mix(in srgb, var(--dm-lock) 62%, rgb(240 207 134 / 44%));
   border-radius: 999px;
   background:
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        #ffffff 32%,
+        var(--dm-lock) 58%,
+        var(--dm-gold) 84%,
+        transparent 95%
+      )
+      50% 0 / 100% 1.5px no-repeat,
     radial-gradient(
-      85% 120% at 32% 0%,
-      rgb(255 255 255 / 15%),
+      85% 130% at 24% 0%,
+      rgb(255 255 255 / 20%),
       transparent 68%
     ),
     linear-gradient(
-      140deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, #112038),
-      #08101d 80%
+      145deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, #0c172a) 0%,
+      #060b15 68%,
+      #04070e 100%
     );
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 48%),
-    0 0 22px -6px color-mix(in srgb, var(--manager-accent, #7ae8ff) 28%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 28%),
-    inset 0 -1px 0 rgb(240 207 134 / 20%);
+    0 16px 36px rgb(0 0 0 / 62%),
+    0 0 28px -5px color-mix(in srgb, var(--manager-accent, #7ae8ff) 36%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 -1px 0 rgb(240 207 134 / 28%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1185,11 +1195,12 @@ main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb {
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb {
-  border-color: color-mix(in srgb, var(--dm-lock) 68%, #f4fbff);
+  border-color: color-mix(in srgb, var(--dm-lock) 76%, #ffffff);
   box-shadow:
-    0 6px 16px rgb(0 0 0 / 48%),
-    0 0 16px color-mix(in srgb, var(--manager-accent, #7ae8ff) 28%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 38%);
+    0 8px 20px rgb(0 0 0 / 60%),
+    0 0 22px color-mix(in srgb, var(--manager-accent, #7ae8ff) 38%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 48%),
+    inset 0 -1px 0 rgb(240 207 134 / 30%);
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb > i {
@@ -1197,33 +1208,33 @@ main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb > i {
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open {
-  border-color: color-mix(in srgb, var(--dm-lock) 56%, rgb(240 207 134 / 34%));
+  border-color: color-mix(in srgb, var(--dm-lock) 64%, rgb(240 207 134 / 46%));
   background:
     linear-gradient(
         90deg,
-        transparent 4%,
-        #ffffff 22%,
-        var(--dm-lock) 52%,
+        transparent 3%,
+        #ffffff 20%,
+        var(--dm-lock) 50%,
         var(--dm-gold) 82%,
-        transparent 96%
+        transparent 97%
       )
-      50% 0 / 100% 1.5px no-repeat,
+      50% 0 / 100% 2px no-repeat,
     radial-gradient(
-      90% 140% at 14% 50%,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, transparent),
-      transparent 68%
+      92% 145% at 14% 50%,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 32%, transparent),
+      transparent 70%
     ),
     linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 22%, #1a283c) 0%,
-      #0d1624 58%,
-      #142033 100%
+      162deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, #0d182b) 0%,
+      #060b15 56%,
+      #091221 100%
     ) !important;
   box-shadow:
-    0 14px 34px rgb(0 0 0 / 56%),
-    0 0 24px -4px color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 26%),
-    inset 0 -1px 0 rgb(240 207 134 / 24%);
+    0 18px 42px rgb(0 0 0 / 68%),
+    0 0 30px -4px color-mix(in srgb, var(--manager-accent, #7ae8ff) 34%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 -1px 0 rgb(240 207 134 / 32%);
 }
 
 main.manager-page:not(.is-sovereign)

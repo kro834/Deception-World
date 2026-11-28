@@ -25,25 +25,25 @@
     radial-gradient(
       circle at 84% 7%,
       transparent 0 156px,
-      rgb(157 234 250 / 9%) 157px 158px,
+      rgb(157 234 250 / 13%) 157px 158px,
       transparent 159px
     ),
     radial-gradient(
       circle at 84% 7%,
       transparent 0 296px,
-      rgb(242 207 141 / 7.5%) 297px 298px,
+      rgb(242 207 141 / 11%) 297px 298px,
       transparent 299px
     ),
     radial-gradient(
       circle at 84% 7%,
       transparent 0 456px,
-      rgb(157 234 250 / 5.5%) 457px 458px,
+      rgb(255 110 196 / 8%) 457px 458px,
       transparent 459px
     ),
-    radial-gradient(ellipse 74% 46% at 82% -2%, rgb(38 104 142 / 48%), transparent 72%),
-    radial-gradient(ellipse 56% 38% at 8% 15%, rgb(242 207 141 / 12%), transparent 68%),
-    radial-gradient(ellipse 64% 48% at 50% 62%, rgb(20 62 92 / 28%), transparent 74%),
-    linear-gradient(155deg, #040912 0%, #0a1929 48%, #050c16 100%);
+    radial-gradient(ellipse 76% 48% at 82% -2%, rgb(46 126 196 / 52%), transparent 72%),
+    radial-gradient(ellipse 58% 40% at 8% 15%, rgb(242 207 141 / 16%), transparent 68%),
+    radial-gradient(ellipse 66% 50% at 50% 62%, rgb(24 72 118 / 32%), transparent 74%),
+    linear-gradient(155deg, #030710 0%, #081526 48%, #040913 100%);
   color-scheme: dark;
 }
 
@@ -117,16 +117,19 @@
   position: absolute;
   left: 0;
   bottom: -1px;
-  width: min(320px, 56%);
+  width: min(460px, 68%);
   height: 2px;
   content: "";
   background: linear-gradient(
     90deg,
     var(--search-gold) 0%,
-    var(--search-accent) 56%,
+    var(--search-accent) 44%,
+    #ff6ec7 74%,
     transparent 100%
   );
-  box-shadow: 0 0 16px rgb(157 234 250 / 42%);
+  box-shadow:
+    0 0 18px rgb(157 234 250 / 52%),
+    0 0 28px rgb(242 207 141 / 32%);
   pointer-events: none;
 }
 
@@ -135,11 +138,31 @@
   z-index: -1;
   inset: 0 0 1px;
   background:
-    radial-gradient(ellipse 56% 70% at 78% 36%, rgb(122 232 255 / 12%), transparent 70%),
-    linear-gradient(0deg, #06101c 4%, rgb(6 16 28 / 46%) 54%, transparent 86%),
-    linear-gradient(90deg, #050d18 0%, rgb(6 16 28 / 78%) 52%, rgb(6 16 28 / 28%) 100%),
+    radial-gradient(
+      circle at 14% 42%,
+      transparent 0 176px,
+      rgb(157 234 250 / 16%) 177px 178.5px,
+      transparent 180px
+    ),
+    radial-gradient(
+      circle at 14% 42%,
+      transparent 0 288px,
+      rgb(242 207 141 / 14%) 289px 290.5px,
+      transparent 292px
+    ),
+    radial-gradient(
+      circle at 14% 42%,
+      transparent 0 412px,
+      rgb(255 110 199 / 9%) 413px 414.5px,
+      transparent 416px
+    ),
+    radial-gradient(ellipse 46% 68% at 16% 38%, rgb(74 186 255 / 18%), transparent 68%),
+    radial-gradient(ellipse 36% 52% at 8% 72%, rgb(242 207 141 / 14%), transparent 66%),
+    radial-gradient(ellipse 56% 70% at 78% 36%, rgb(122 232 255 / 16%), transparent 70%),
+    linear-gradient(0deg, #050d19 4%, rgb(6 16 28 / 44%) 54%, transparent 86%),
+    linear-gradient(90deg, rgb(4 10 20 / 92%) 0%, rgb(6 16 28 / 76%) 52%, rgb(6 16 28 / 28%) 100%),
     url("/poster-card-03-delivery.webp") right 24% / max(48%, 360px) auto no-repeat;
-  opacity: 0.92;
+  opacity: 0.96;
   content: "";
   pointer-events: none;
 }
@@ -176,8 +199,8 @@
   justify-items: stretch;
   order: 0;
   gap: 10px 20px;
-  padding-left: clamp(14px, 2vw, 22px);
-  border-left: 2px solid rgb(157 234 250 / 38%);
+  padding-left: clamp(16px, 2.2vw, 24px);
+  border-left: 2px solid rgb(157 234 250 / 48%);
 }
 
 :is(
@@ -189,13 +212,14 @@
   position: absolute;
   top: 0;
   left: -2px;
-  width: 2px;
-  height: 42px;
+  width: 3px;
+  height: 54px;
+  border-radius: 999px;
   content: "";
-  background: linear-gradient(180deg, var(--search-gold), var(--search-accent));
+  background: linear-gradient(180deg, #fff6de 0%, var(--search-gold) 44%, var(--search-accent) 100%);
   box-shadow:
-    0 0 14px rgb(242 207 141 / 48%),
-    0 0 22px rgb(122 232 255 / 44%);
+    0 0 18px rgb(242 207 141 / 64%),
+    0 0 28px rgb(122 232 255 / 54%);
   pointer-events: none;
 }
 
@@ -207,12 +231,14 @@
   display: block;
   margin: 0;
   color: #f7fcff;
-  background: linear-gradient(174deg, #ffffff 0%, #e6f7ff 48%, #f4d89e 100%);
+  background: linear-gradient(174deg, #ffffff 0%, #eefaff 38%, #bbe8ff 68%, #f6dca0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 6px 22px rgb(0 0 0 / 62%));
-  font-size: clamp(32px, 4.8vw, 62px);
+  filter:
+    drop-shadow(0 8px 26px rgb(0 0 0 / 74%))
+    drop-shadow(0 0 28px rgb(122 232 255 / 22%));
+  font-size: clamp(34px, 4.8vw, 64px);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -924,14 +950,15 @@
   gap: 12px 20px;
   margin-bottom: 14px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgb(157 234 250 / 32%);
+  border-bottom: 1px solid rgb(157 234 250 / 38%);
   background: linear-gradient(
       90deg,
       var(--search-gold) 0%,
-      var(--search-accent) 50%,
-      transparent 94%
+      var(--search-accent) 48%,
+      #ff6ec7 78%,
+      transparent 98%
     )
-    0 100% / min(280px, 52%) 1px no-repeat;
+    0 100% / min(340px, 58%) 2px no-repeat;
 }
 
 :is(
@@ -940,9 +967,14 @@
 )
   #record-results-heading {
   margin: 0;
-  color: var(--search-ink);
+  color: #f6fbff;
+  background: linear-gradient(176deg, #ffffff 0%, #e8f7ff 46%, #f5da9f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 18px rgb(0 0 0 / 65%));
   font-size: clamp(22px, 2.6vw, 34px);
-  font-weight: 750;
+  font-weight: 800;
   line-height: 1.3;
   letter-spacing: 0.03em;
   scroll-margin-top: 96px;
@@ -2170,7 +2202,7 @@
     .world.search-page,
     html body .world.search-page.search-observatory[data-search-page][data-search-mode]
   )
-    #search-title {
+    :is(#search-title, #record-results-heading) {
     color: CanvasText;
     background: none;
     -webkit-text-fill-color: CanvasText;

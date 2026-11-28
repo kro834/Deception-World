@@ -1,14 +1,14 @@
 .gallery-tour-theatre {
-  --gallery-tour-accent: #c8a76b;
-  --gallery-tour-text: #eee9dc;
-  --gallery-tour-muted: #c3bcae;
+  --gallery-tour-accent: #efd5a2;
+  --gallery-tour-text: #fcf9f2;
+  --gallery-tour-muted: #ced6e2;
   color: var(--gallery-tour-text);
   min-width: 0;
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-theatre {
-  --gallery-tour-text: #eef4f6;
-  --gallery-tour-muted: #c2ced5;
+  --gallery-tour-text: #fcf9f2;
+  --gallery-tour-muted: #ced6e2;
 }
 
 .gallery-tour-theatre *,
@@ -21,24 +21,47 @@
   display: none !important;
 }
 
+/* ================================================================
+   1. Theatre Header & Metallic Title
+   ================================================================ */
+
 .gallery-tour-theatre-heading {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
   margin-bottom: clamp(22px, 3vw, 36px);
-  padding-bottom: clamp(14px, 2vw, 22px);
+  padding-bottom: clamp(16px, 2vw, 24px);
   border-bottom: 1px solid
-    color-mix(in srgb, var(--gallery-tour-accent) 24%, rgb(156 182 198 / 0.18));
+    color-mix(in srgb, var(--gallery-tour-accent) 42%, rgb(244 216 160 / 0.34));
+  box-shadow: inset 0 -3px 0 -2px rgb(158 232 250 / 0.16);
+}
+
+.gallery-tour-theatre-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 168px;
+  height: 2.5px;
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    var(--gallery-tour-accent) 54%,
+    transparent 100%
+  );
+  box-shadow: 0 0 18px color-mix(in srgb, var(--gallery-tour-accent) 56%, transparent);
+  pointer-events: none;
 }
 
 .gallery-tour-theatre-kicker {
-  margin: 0 0 12px;
-  color: var(--gallery-tour-accent);
+  margin: 0 0 10px;
+  color: color-mix(in srgb, var(--gallery-tour-accent) 76%, #fae4b6);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.19em;
+  letter-spacing: 0.2em;
   line-height: 1.7;
 }
 
@@ -52,17 +75,31 @@
   word-break: normal;
 }
 
-.gallery-tour-theatre-heading h1 {
-  color: var(--gallery-tour-text);
+.gallery-tour-theatre-heading h1,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre-heading
+  h1 {
+  color: #fffaf0;
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fff9ec 40%,
+    color-mix(in srgb, var(--gallery-tour-accent) 54%, #f5dca8) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-size: clamp(27px, 3.7vw, 46px);
-  line-height: 1.5;
-  letter-spacing: 0.05em;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
 }
 
 .gallery-tour-theatre-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(274px, 320px);
-  gap: clamp(16px, 2.5vw, 34px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 332px);
+  gap: clamp(18px, 2.6vw, 36px);
   align-items: start;
 }
 
@@ -74,6 +111,10 @@
 .gallery-tour-reading-column {
   padding-top: 58px;
 }
+
+/* ================================================================
+   2. View Controls, Spotlight Stage & Chronograph Transport
+   ================================================================ */
 
 .gallery-tour-view-controls {
   display: flex;
@@ -87,16 +128,11 @@
 
 .gallery-tour-theatre .gallery-tour-view-controls button {
   border-color: transparent;
-  padding-inline: 12px;
+  padding-inline: 14px;
   color: var(--gallery-tour-muted);
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-view-controls button {
-  border-color: rgb(156 182 198 / 0.28);
-  background: linear-gradient(180deg, rgb(19 29 39 / 0.9), rgb(11 17 24 / 0.94));
-  color: #cdd9df;
-}
-
+.gallery-selection-toggle,
 .gallery-tour-selection-toggle {
   display: inline-flex;
   align-items: center;
@@ -112,127 +148,156 @@
 .gallery-tour-theatre .gallery-tour-focus-toggle,
 .gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-focus-toggle {
   margin-left: auto;
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 40%, #5c717e);
 }
 
-.gallery-tour-theatre .gallery-tour-view-controls [aria-pressed="true"] {
-  color: var(--gallery-tour-accent);
-  border-color: var(--gallery-tour-accent);
+.gallery-tour-theatre .gallery-tour-theatre-button {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid rgb(244 216 160 / 0.44);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gallery-tour-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-theatre-button,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
+  .gallery-tour-theatre-button {
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 46%, rgb(244 216 160 / 0.44));
+  border-top-color: rgb(255 244 214 / 0.8);
+  background:
+    radial-gradient(ellipse 84% 90% at 50% 0%, rgb(250 224 170 / 0.2), transparent 70%),
+    linear-gradient(180deg, #1b2033 0%, #0c0f1b 60%, #070912 100%);
+  color: #fcf8ef;
+  box-shadow:
+    inset 0 1px 0 rgb(255 254 248 / 0.36),
+    inset 0 -1px 0 rgb(0 0 0 / 0.5),
+    0 10px 24px -6px rgb(0 0 0 / 0.66);
 }
 
 .gallery-tours-page.command-support-tours
   .gallery-tour-theatre
+  :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"],
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
   :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 68%, #eff8fb);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--gallery-tour-accent) 26%, #eef6f9),
-    color-mix(in srgb, var(--gallery-tour-accent) 34%, #9ebbc8) 52%,
-    #7895a3
-  );
-  color: #0b141c;
-  font-weight: 600;
+  border-color: #ffefc8;
+  border-top-color: #ffffff;
+  background: linear-gradient(180deg, #fffdf7 0%, #f6dda8 48%, #d7ae68 100%);
+  color: #14110b;
+  font-weight: 700;
   box-shadow:
-    inset 0 1px 0 #ffffff,
-    0 2px 0 #314551;
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1px 0 rgb(96 66 20 / 0.36),
+    0 12px 28px -4px rgb(0 0 0 / 0.7),
+    0 0 28px -4px color-mix(in srgb, var(--gallery-tour-accent) 56%, rgb(250 218 152 / 0.48));
 }
 
 .gallery-tours-page.command-support-tours
   .gallery-tour-theatre
   .gallery-tour-view-controls
   button[aria-pressed="true"]
+  > span:last-child,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
+  .gallery-tour-view-controls
+  button[aria-pressed="true"]
   > span:last-child {
-  color: #0b141c;
+  color: #14110b;
 }
 
+/* Velvet night screening stage with rounded double-bezel optics */
 .gallery-tour-stage {
   position: relative;
   min-width: 0;
+  overflow: hidden;
   background:
     radial-gradient(
-      ellipse 58% 26% at 50% -2%,
-      color-mix(in srgb, var(--gallery-tour-accent) 26%, rgb(246 224 180 / 0.16)),
-      transparent 76%
+      ellipse 64% 34% at 50% -2%,
+      color-mix(in srgb, var(--gallery-tour-accent) 34%, rgb(252 226 172 / 0.24)),
+      transparent 74%
     ),
     radial-gradient(
-      ellipse 72% 64% at 50% 36%,
-      color-mix(in srgb, var(--gallery-tour-accent) 14%, #1a2029),
-      #07090e 70%,
-      #040508 100%
+      ellipse 72% 68% at 50% 34%,
+      color-mix(in srgb, var(--gallery-tour-accent) 18%, #16192b),
+      #06070e 72%,
+      #030408 100%
     );
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 44%, rgb(236 212 166 / 0.34));
-  padding: clamp(12px, 1.7vw, 22px);
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 56%, rgb(244 216 160 / 0.48));
+  padding: clamp(14px, 1.8vw, 24px);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.22),
-    inset 0 0 0 5px rgb(5 8 13 / 0.82),
-    inset 0 0 0 6px color-mix(in srgb, var(--gallery-tour-accent) 22%, rgb(236 212 166 / 0.16)),
-    0 0 44px -12px color-mix(in srgb, var(--gallery-tour-accent) 26%, transparent),
-    0 28px 72px rgb(0 0 0 / 0.58);
+    inset 0 1.5px 0 rgb(255 254 248 / 0.36),
+    inset 0 0 0 5px rgb(4 6 12 / 0.88),
+    inset 0 0 0 6px color-mix(in srgb, var(--gallery-tour-accent) 28%, rgb(244 216 160 / 0.22)),
+    0 34px 80px -8px rgb(0 0 0 / 0.78);
   outline-offset: 5px;
 }
 
 .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
   .gallery-tour-stage,
-.gallery-tours-page.command-support-tours .gallery-tour-stage {
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 66%, rgb(242 216 164 / 0.68));
-  border-top-color: color-mix(in srgb, var(--gallery-tour-accent) 84%, #fff8e6);
+.gallery-tours-page.command-support-tours .gallery-tour-stage,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-stage {
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 72%, rgb(248 222 168 / 0.74));
+  border-top-color: color-mix(in srgb, var(--gallery-tour-accent) 88%, #ffffff);
   background:
     radial-gradient(
-      ellipse 64% 36% at 50% -2%,
-      color-mix(in srgb, var(--gallery-tour-accent) 42%, rgb(254 232 184 / 0.32)),
-      transparent 76%
+      ellipse 68% 40% at 50% -2%,
+      color-mix(in srgb, var(--gallery-tour-accent) 46%, rgb(255 234 186 / 0.38)),
+      transparent 74%
     ),
     radial-gradient(
-      ellipse 74% 82% at 50% 24%,
-      color-mix(in srgb, var(--gallery-tour-accent) 22%, #1b2b40),
-      #04070d 92%
+      ellipse 74% 80% at 50% 28%,
+      color-mix(in srgb, var(--gallery-tour-accent) 24%, #181c30),
+      #04050a 90%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 254 248 / 0.46),
-    inset 0 0 0 5px #05080f,
-    inset 0 0 0 6px color-mix(in srgb, var(--gallery-tour-accent) 38%, rgb(242 216 164 / 0.32)),
-    inset 0 18px 42px rgb(0 0 0 / 0.58),
-    0 0 64px -10px color-mix(in srgb, var(--gallery-tour-accent) 42%, transparent),
-    0 34px 82px rgb(0 0 0 / 0.76);
+    inset 0 1.5px 0 rgb(255 254 248 / 0.54),
+    inset 0 0 0 5px #04050a,
+    inset 0 0 0 6px color-mix(in srgb, var(--gallery-tour-accent) 42%, rgb(246 218 162 / 0.36)),
+    inset 0 20px 46px rgb(0 0 0 / 0.66),
+    0 0 72px -10px color-mix(in srgb, var(--gallery-tour-accent) 48%, rgb(248 214 146 / 0.32)),
+    0 40px 92px -8px rgb(0 0 0 / 0.86);
 }
 
 .gallery-tour-stage::before {
   content: "";
   position: absolute;
   inset: 7px;
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 36%, rgb(246 224 178 / 0.32));
-  box-shadow: inset 0 1px 0 rgb(255 253 246 / 0.22);
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 42%, rgb(250 226 176 / 0.38));
+  box-shadow: inset 0 1px 0 rgb(255 254 248 / 0.28);
   pointer-events: none;
   border-radius: 15px;
 }
 
+/* Rounded optical inner bezel replacing old square L-brackets */
 .gallery-tour-stage-aperture {
   position: absolute;
-  inset: clamp(12px, 1.5vw, 16px);
+  inset: clamp(12px, 1.5vw, 15px);
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 32%, rgb(248 220 162 / 0.24));
+  border-radius: 11px;
+  box-shadow: inset 0 1px 0 rgb(255 253 246 / 0.14);
   pointer-events: none;
-  opacity: 0.68;
-  background:
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 12px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 1px 12px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 12px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 1px 12px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 12px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 1px 12px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 12px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 1px 12px
-      no-repeat;
+  opacity: 0.72;
 }
 
 .gallery-tour-stage:focus-visible .gallery-tour-stage-aperture,
 .gallery-tour-stage[data-advancing="true"] .gallery-tour-stage-aperture {
   opacity: 1;
+  border-color: color-mix(in srgb, var(--gallery-tour-accent) 68%, #fff4da);
 }
 
 .gallery-tour-artwork {
@@ -259,7 +324,9 @@
   }
 
   html:not([data-world-effects="economy"]) .gallery-tour-stage-aperture {
-    transition: opacity 220ms ease;
+    transition:
+      opacity 220ms ease,
+      border-color 220ms ease;
   }
 
   html:not([data-world-effects="economy"]) .gallery-tour-theatre .gallery-tour-theatre-button,
@@ -306,43 +373,56 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
-  margin: 14px 0;
+  gap: 14px;
+  margin: 16px 0;
 }
 
-.gallery-tour-theatre .gallery-tour-theatre-button {
-  min-height: 44px;
-  padding: 10px 15px;
-  border: 1px solid rgb(218 197 157 / 0.3);
-  border-radius: 2px;
-  background: transparent;
-  color: var(--gallery-tour-text);
-  font: inherit;
-  font-size: 13px;
-  line-height: 1.5;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-theatre-button {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 30%, #586c79);
-  background: linear-gradient(180deg, #1b2834, #0f1720);
-  color: #eef4f6;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+/* Primary forward pill in transport */
+.gallery-tours-page.command-support-tours
+  .gallery-tour-theatre
+  .gallery-tour-transport
+  > button:last-child:enabled,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
+  .gallery-tour-transport
+  > button:last-child:enabled {
+  border: 1px solid #ffefc8;
+  border-top-color: #ffffff;
+  background: linear-gradient(180deg, #fffdf7 0%, #f6dda8 48%, #d7ae68 100%);
+  box-shadow:
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1px 0 rgb(96 66 20 / 0.36),
+    0 12px 28px -4px rgb(0 0 0 / 0.7),
+    0 0 26px -4px rgb(250 218 152 / 0.46);
+  color: #14110b;
+  font-weight: 700;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .gallery-tour-theatre .gallery-tour-theatre-button:hover:not(:disabled) {
     border-color: var(--gallery-tour-accent);
-    background: rgb(218 197 157 / 0.06);
+    background: rgb(218 197 157 / 0.08);
   }
 
   .gallery-tours-page.command-support-tours
     .gallery-tour-theatre
+    .gallery-tour-theatre-button:not([aria-pressed="true"]):hover:not(:disabled),
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
     .gallery-tour-theatre-button:not([aria-pressed="true"]):hover:not(:disabled) {
-    border-color: var(--gallery-tour-accent);
-    background: linear-gradient(180deg, #243646, #14202c);
-    color: #f7fbfd;
+    border-color: #fff2d2;
+    background:
+      radial-gradient(ellipse 84% 90% at 50% 0%, rgb(254 230 180 / 0.3), transparent 70%),
+      linear-gradient(180deg, #252c44 0%, #111626 100%);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 14px 30px -6px rgb(0 0 0 / 0.72),
+      0 0 24px -6px color-mix(in srgb, var(--gallery-tour-accent) 48%, rgb(248 216 152 / 0.36));
   }
 
   .gallery-tours-page.command-support-tours
@@ -350,21 +430,42 @@
     :is(
       .gallery-tour-play-button,
       .gallery-tour-view-controls button
-    )[aria-pressed="true"]:hover:not(:disabled) {
-    border-color: #f4fbfe;
-    background: linear-gradient(
-      180deg,
-      #f2f9fb,
-      color-mix(in srgb, var(--gallery-tour-accent) 36%, #b0cbd7) 52%,
-      #88a5b3
-    );
+    )[aria-pressed="true"]:hover:not(:disabled),
+  .gallery-tours-page.command-support-tours
+    .gallery-tour-theatre
+    .gallery-tour-transport
+    > button:last-child:enabled:hover,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
+    :is(
+      .gallery-tour-play-button[aria-pressed="true"],
+      .gallery-tour-view-controls button[aria-pressed="true"],
+      .gallery-tour-transport > button:last-child:enabled
+    ):hover:not(:disabled) {
+    border-color: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #fbe7bc 48%, #e2bc7a 100%);
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      0 16px 34px -4px rgb(0 0 0 / 0.76),
+      0 0 34px -2px rgb(254 226 164 / 0.62);
+    color: #0f0d08;
   }
 
   .gallery-tours-page.command-support-tours
     .gallery-tour-theatre
+    .gallery-tour-thumbnail:not([aria-current="step"]):hover,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
     .gallery-tour-thumbnail:not([aria-current="step"]):hover {
-    border-color: color-mix(in srgb, var(--gallery-tour-accent) 68%, #9dc2cf);
-    color: #eef4f6;
+    border-color: color-mix(in srgb, var(--gallery-tour-accent) 76%, #fff2d2);
+    color: #fffaf0;
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 0.34),
+      0 12px 26px rgb(0 0 0 / 0.64);
   }
 }
 
@@ -392,17 +493,40 @@
   justify-self: end;
 }
 
+/* Chronograph stop dial in the middle of transport */
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-ring-stops {
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 254 248 / 0.22), transparent 40%),
+    radial-gradient(
+      circle at 34% 28%,
+      color-mix(in srgb, var(--gallery-tour-accent) 36%, rgb(248 218 158 / 0.28)),
+      transparent 64%
+    ),
+    radial-gradient(circle at 72% 78%, rgb(158 232 250 / 0.16), transparent 58%),
+    #060811 !important;
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 254 248 / 0.4),
+    inset 0 0 0 8px rgb(4 6 12 / 0.88),
+    inset 0 0 0 9px color-mix(in srgb, var(--gallery-tour-accent) 34%, rgb(244 216 160 / 0.28)),
+    0 16px 34px -8px rgb(0 0 0 / 0.82),
+    0 0 28px -6px color-mix(in srgb, var(--gallery-tour-accent) 42%, transparent);
+}
+
 .gallery-tour-position {
   margin: 0;
   white-space: nowrap;
   font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
-  font-size: 23px;
+  font-size: 24px;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
 .gallery-tour-position > span:first-child {
-  color: var(--gallery-tour-accent);
+  color: color-mix(in srgb, var(--gallery-tour-accent) 78%, #fff4da);
+  font-weight: 600;
 }
 
 .gallery-tour-progress {
@@ -425,27 +549,25 @@
   background: rgb(238 233 220 / 0.18);
 }
 
-.gallery-tours-page.command-support-tours
-  .gallery-tour-progress-marks
-  span:not([data-visited="true"]) {
-  background: rgb(183 220 231 / 0.2);
-}
-
 .gallery-tour-progress-marks [data-visited="true"] {
   background: var(--gallery-tour-accent);
-  opacity: 0.56;
+  opacity: 0.64;
 }
 
 .gallery-tour-progress-marks [data-current="true"] {
   opacity: 1;
   height: 3px;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--gallery-tour-accent) 62%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--gallery-tour-accent) 68%, transparent);
 }
 
 .gallery-tour-position-total {
   color: var(--gallery-tour-muted);
   font-size: 14px;
 }
+
+/* ================================================================
+   3. Filmstrip & Curatorial Reading Console
+   ================================================================ */
 
 .gallery-tour-filmstrip {
   display: flex;
@@ -454,50 +576,60 @@
   min-width: 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  padding: 10px 8px 13px;
-  border: 1px solid rgb(218 197 157 / 0.14);
-  background: rgb(10 11 14 / 0.72);
+  padding: 12px 10px 14px;
+  border: 1px solid rgb(244 216 160 / 0.28);
+  background: rgb(8 10 18 / 0.88);
   scrollbar-width: thin;
-  scrollbar-color: var(--gallery-tour-accent) #171614;
+  scrollbar-color: var(--gallery-tour-accent) #080a13;
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-filmstrip {
-  border-color: rgb(206 218 228 / 0.28);
-  border-top-color: rgb(238 220 184 / 0.42);
+.gallery-tours-page.command-support-tours .gallery-tour-filmstrip,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-filmstrip {
+  border: 1px solid rgb(244 216 160 / 0.4);
+  border-top-color: rgb(255 242 208 / 0.68);
   background:
-    radial-gradient(ellipse 76% 64% at 50% 0%, rgb(236 214 172 / 0.1), transparent 70%),
-    linear-gradient(180deg, rgb(8 13 20 / 0.94), rgb(12 19 28 / 0.96));
+    radial-gradient(ellipse 76% 64% at 50% 0%, rgb(250 222 166 / 0.14), transparent 70%),
+    linear-gradient(180deg, #101322 0%, #060810 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.14),
-    inset 0 8px 20px rgb(0 0 0 / 0.44),
-    0 12px 28px rgb(0 0 0 / 0.36);
-  scrollbar-color: var(--gallery-tour-accent) #0c131b;
+    inset 0 1px 0 rgb(255 253 246 / 0.22),
+    inset 0 10px 24px rgb(0 0 0 / 0.56),
+    0 18px 40px -8px rgb(0 0 0 / 0.68);
+  scrollbar-color: var(--gallery-tour-accent) #080a13;
 }
 
 .gallery-tour-theatre .gallery-tour-thumbnail {
   position: relative;
-  flex: 0 0 104px;
-  width: 104px;
-  height: 92px;
-  padding: 7px 7px 23px;
-  border: 1px solid rgb(218 197 157 / 0.24);
-  border-radius: 1px;
-  background: #0d0d0f;
+  flex: 0 0 106px;
+  width: 106px;
+  height: 94px;
+  padding: 7px 7px 24px;
+  border: 1px solid rgb(244 216 160 / 0.3);
+  border-radius: 18px;
+  background: #080a12;
   color: var(--gallery-tour-muted);
   cursor: pointer;
   touch-action: manipulation;
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-thumbnail {
-  border-color: rgb(206 216 226 / 0.32);
-  border-top-color: rgb(238 220 184 / 0.44);
+.gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-thumbnail,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
+  .gallery-tour-thumbnail {
+  border: 1px solid rgb(244 216 160 / 0.36);
+  border-top-color: rgb(255 242 208 / 0.56);
   background:
-    radial-gradient(ellipse 80% 56% at 50% 0%, rgb(236 214 172 / 0.1), transparent 70%),
-    linear-gradient(180deg, #101925, #070b11);
+    radial-gradient(ellipse 80% 56% at 50% 0%, rgb(248 220 164 / 0.14), transparent 70%),
+    linear-gradient(180deg, #131626, #060810);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 0.14),
-    inset 0 0 0 2px rgb(5 8 13 / 0.8);
-  color: #c2cfd7;
+    inset 0 1px 0 rgb(255 253 246 / 0.2),
+    inset 0 0 0 2px rgb(4 6 12 / 0.88),
+    0 8px 18px rgb(0 0 0 / 0.5);
+  color: #cbd4e2;
 }
 
 .gallery-tour-thumbnail img {
@@ -509,96 +641,106 @@
 
 .gallery-tour-thumbnail span {
   position: absolute;
-  bottom: 3px;
+  bottom: 4px;
   left: 0;
   right: 0;
   font-size: 12px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.4;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
 }
 
 .gallery-tour-theatre .gallery-tour-thumbnail[data-visited="true"]:not([aria-current="step"]) span {
-  color: color-mix(in srgb, var(--gallery-tour-accent) 72%, var(--gallery-tour-muted));
+  color: color-mix(in srgb, var(--gallery-tour-accent) 76%, var(--gallery-tour-muted));
 }
 
 .gallery-tour-theatre .gallery-tour-thumbnail[aria-current="step"],
 .gallery-tours-page.command-support-tours
   .gallery-tour-theatre
+  .gallery-tour-thumbnail[aria-current="step"],
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
   .gallery-tour-thumbnail[aria-current="step"] {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 78%, #f7e6c4);
+  border-color: color-mix(in srgb, var(--gallery-tour-accent) 84%, #fff4da);
   background:
     radial-gradient(
-      ellipse at 50% 24%,
-      color-mix(in srgb, var(--gallery-tour-accent) 28%, #1e3040),
-      #091019 82%
+      ellipse at 50% 22%,
+      color-mix(in srgb, var(--gallery-tour-accent) 36%, #242a44),
+      #070912 82%
     );
-  color: #f8fbfd;
+  color: #fffdf7;
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 0.36),
-    inset 0 0 0 1px var(--gallery-tour-accent),
-    0 0 22px -4px color-mix(in srgb, var(--gallery-tour-accent) 52%, transparent),
-    0 8px 18px rgb(0 0 0 / 0.48);
+    inset 0 1px 0 rgb(255 254 248 / 0.48),
+    inset 0 0 0 1.5px var(--gallery-tour-accent),
+    0 0 26px -4px color-mix(in srgb, var(--gallery-tour-accent) 62%, transparent),
+    0 12px 24px rgb(0 0 0 / 0.64);
 }
 
+/* Rounded inner bezel on active thumbnail (no square L-brackets) */
 .gallery-tour-theatre .gallery-tour-thumbnail[aria-current="step"]::before {
   content: "";
   position: absolute;
-  inset: 3px 3px 19px;
+  inset: 4px 4px 21px;
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 56%, rgb(255 244 214 / 0.44));
+  border-radius: 12px;
   pointer-events: none;
-  background:
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 7px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 1px 7px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 7px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 1px 7px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 7px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 1px 7px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 7px 1px
-      no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 1px 7px
-      no-repeat;
 }
 
+/* Curatorial caption & playback dark-glass cards */
 .gallery-tour-stop-caption {
   position: relative;
-  padding: clamp(16px, 2vw, 25px);
-  border-top: 1px solid rgb(218 197 157 / 0.2);
-  border-bottom: 1px solid rgb(218 197 157 / 0.2);
+  overflow: hidden;
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid rgb(244 216 160 / 0.34);
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-stop-caption {
-  border: 1px solid rgb(143 175 205 / 0.28);
-  background: linear-gradient(155deg, #1b283a, #101824 80%);
+.gallery-tours-page.command-support-tours .gallery-tour-stop-caption,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-stop-caption {
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 46%, rgb(244 216 160 / 0.44));
+  border-top-color: rgb(255 244 214 / 0.8);
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 24% 0%,
+      color-mix(in srgb, var(--gallery-tour-accent) 22%, rgb(250 222 166 / 0.18)),
+      transparent 72%
+    ),
+    linear-gradient(156deg, #171a2d 0%, #0b0d18 58%, #060810 100%);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 254 248 / 0.36),
+    0 24px 54px -10px rgb(0 0 0 / 0.74);
 }
 
 .gallery-tour-stop-caption::before {
   content: "";
   position: absolute;
-  top: -1px;
-  left: 0;
-  width: 44px;
-  height: 2px;
-  background: var(--gallery-tour-accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--gallery-tour-accent) 48%, transparent);
+  top: 0;
+  left: 22px;
+  width: 72px;
+  height: 2.5px;
+  background: linear-gradient(90deg, #ffffff, var(--gallery-tour-accent), transparent);
+  box-shadow: 0 2px 14px color-mix(in srgb, var(--gallery-tour-accent) 62%, transparent);
   pointer-events: none;
 }
 
 .gallery-tour-stop-caption h2 {
+  color: #fffaf0;
   font-size: clamp(20px, 2vw, 28px);
   line-height: 1.55;
 }
 
 .gallery-tour-stop-note {
-  margin: 18px 0 0;
-  color: var(--gallery-tour-muted);
+  margin: 16px 0 0;
+  padding-inline-start: 14px;
+  border-inline-start: 2px solid color-mix(in srgb, var(--gallery-tour-accent) 56%, rgb(244 216 160 / 0.4));
+  color: #d8e0ec;
   font-size: 15px;
-  line-height: 2.12;
+  line-height: 2.08;
   text-wrap: pretty;
   overflow-wrap: anywhere;
 }
@@ -626,16 +768,25 @@
 }
 
 .gallery-tour-playback {
-  margin-top: 24px;
-  padding: 16px;
-  border: 1px solid rgb(218 197 157 / 0.18);
-  background: rgb(15 15 17 / 0.64);
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid rgb(244 216 160 / 0.28);
+  background: rgb(10 12 20 / 0.88);
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-playback {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 24%, #4f6370);
-  background: linear-gradient(180deg, rgb(16 24 33 / 0.84), rgb(9 14 20 / 0.92));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+.gallery-tours-page.command-support-tours .gallery-tour-playback,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-playback {
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 40%, rgb(244 216 160 / 0.38));
+  border-top-color: rgb(255 242 208 / 0.7);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(248 220 164 / 0.14), transparent 72%),
+    linear-gradient(164deg, #141728 0%, #090b15 62%, #06070e 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 0.28),
+    0 20px 46px -10px rgb(0 0 0 / 0.7);
 }
 
 .gallery-tour-playback-label {
@@ -644,7 +795,7 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
-  color: var(--gallery-tour-muted);
+  color: #dce3ee;
   font-size: 12px;
   line-height: 1.8;
 }
@@ -654,13 +805,13 @@
   appearance: none;
   flex: 0 0 auto;
   min-height: 44px;
-  padding: 8px 38px 8px 12px;
-  border: 1px solid rgb(218 197 157 / 0.3);
-  border-radius: 2px;
-  background-color: #171614;
+  padding: 8px 38px 8px 14px;
+  border: 1px solid rgb(244 216 160 / 0.44);
+  border-radius: 999px;
+  background-color: #070912;
   background-image:
-    linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #f3d8a0 50%),
+    linear-gradient(135deg, #f3d8a0 50%, transparent 50%);
   background-position:
     right 18px center,
     right 12px center;
@@ -671,34 +822,41 @@
   font-size: 13px;
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-playback-label select {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 34%, #576c79);
-  background-color: #0b1219;
-  color: #eef4f6;
+.gallery-tours-page.command-support-tours .gallery-tour-playback-label select,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-playback-label
+  select {
+  border-color: color-mix(in srgb, var(--gallery-tour-accent) 48%, rgb(244 216 160 / 0.46));
+  background-color: #060810;
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.68);
+  color: #fcf8ef;
 }
 
 .gallery-tour-theatre .gallery-tour-play-button,
 .gallery-tours-page.command-support-tours
   .gallery-tour-theatre
+  .gallery-tour-play-button:not([aria-pressed="true"]),
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
   .gallery-tour-play-button:not([aria-pressed="true"]) {
   width: 100%;
-  border-color: var(--gallery-tour-accent);
+  border-color: color-mix(in srgb, var(--gallery-tour-accent) 68%, #fae3b4);
   text-align: center;
 }
 
 .gallery-tour-time-track {
   position: relative;
-  height: 5px;
-  margin-top: 10px;
-  border: 1px solid rgb(218 197 157 / 0.2);
+  height: 6px;
+  margin-top: 12px;
+  border: 1px solid rgb(244 216 160 / 0.28);
   border-radius: 999px;
-  background: rgb(10 11 14 / 0.88);
+  background: #05070d;
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 0.72);
   overflow: hidden;
-}
-
-.gallery-tours-page.command-support-tours .gallery-tour-time-track {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 28%, #4a5e6b);
-  background: #070c12;
 }
 
 .gallery-tour-time-fill {
@@ -707,11 +865,11 @@
   height: 100%;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--gallery-tour-accent) 72%, #ffffff 10%),
-    var(--gallery-tour-accent) 82%,
-    color-mix(in srgb, var(--gallery-tour-accent) 68%, #ffffff)
+    #fff4da 0%,
+    var(--gallery-tour-accent) 72%,
+    #ffffff 100%
   );
-  box-shadow: 0 0 12px color-mix(in srgb, var(--gallery-tour-accent) 55%, transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--gallery-tour-accent) 65%, transparent);
   transform-origin: left;
   transform: scaleX(1);
 }
@@ -744,21 +902,18 @@
 }
 
 .gallery-tour-playback-notice {
-  color: var(--gallery-tour-accent);
+  color: color-mix(in srgb, var(--gallery-tour-accent) 82%, #fff4da);
 }
 
+/* Ending & Next-Tour Capsule */
 .gallery-tour-ending {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-block: 18px;
-  padding-top: 16px;
-  border-top: 1px solid rgb(218 197 157 / 0.2);
-}
-
-.gallery-tours-page.command-support-tours .gallery-tour-ending {
-  border-top-color: color-mix(in srgb, var(--gallery-tour-accent) 30%, #566b77);
+  margin-block: 20px;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 38%, rgb(244 216 160 / 0.3));
 }
 
 .gallery-tour-ending-return {
@@ -767,25 +922,41 @@
 
 .gallery-tour-ending p {
   margin: 0 0 10px;
-  color: var(--gallery-tour-accent);
+  color: color-mix(in srgb, var(--gallery-tour-accent) 82%, #fae3b4);
   font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0.06em;
   line-height: 1.8;
 }
 
-.gallery-tour-theatre .gallery-tour-next-tour {
+.gallery-tour-theatre .gallery-tour-next-tour,
+html[data-family="gallery"]
+  body
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
+  .gallery-tour-next-tour {
   --gallery-tour-plate-accent: var(--gallery-tour-next-accent, var(--gallery-tour-accent));
   position: relative;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
-  width: min(100%, 448px);
+  width: min(100%, 456px);
   min-height: 104px;
-  padding: 13px 18px 13px 13px;
-  border: 1px solid rgb(218 197 157 / 0.3);
-  border-left: 3px solid var(--gallery-tour-plate-accent);
-  background: rgb(218 197 157 / 0.035);
+  padding: 12px 20px 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-plate-accent) 56%, rgb(248 220 164 / 0.5));
+  border-top-color: color-mix(in srgb, var(--gallery-tour-plate-accent) 76%, #fff8e6);
+  background:
+    radial-gradient(
+      ellipse 76% 90% at 14% 50%,
+      color-mix(in srgb, var(--gallery-tour-plate-accent) 26%, rgb(250 222 166 / 0.16)),
+      transparent 72%
+    ),
+    linear-gradient(152deg, #191d30 0%, #0b0e19 60%, #060810 100%);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 254 248 / 0.36),
+    0 20px 44px -8px rgb(0 0 0 / 0.74),
+    0 0 32px -10px color-mix(in srgb, var(--gallery-tour-plate-accent) 44%, transparent);
   color: var(--gallery-tour-text);
   font: inherit;
   text-align: left;
@@ -793,48 +964,39 @@
   touch-action: manipulation;
 }
 
-.gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-next-tour {
-  border-color: color-mix(in srgb, var(--gallery-tour-plate-accent) 40%, #5d727f);
-  border-left: 3px solid var(--gallery-tour-plate-accent);
-  background:
-    radial-gradient(
-      ellipse 72% 88% at 0% 50%,
-      color-mix(in srgb, var(--gallery-tour-plate-accent) 16%, transparent),
-      transparent 72%
-    ),
-    linear-gradient(152deg, #1d2b37 0%, #101923 58%, #0b1219 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.14),
-    0 16px 34px rgb(0 0 0 / 0.42);
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .gallery-tour-next-tour:hover {
-    border-color: var(--gallery-tour-plate-accent);
-    background: rgb(218 197 157 / 0.08);
-  }
-
-  .gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-next-tour:hover {
-    border-color: var(--gallery-tour-plate-accent);
+  .gallery-tour-next-tour:hover,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
+    .gallery-tour-next-tour:hover {
+    border-color: color-mix(in srgb, var(--gallery-tour-plate-accent) 84%, #ffffff);
     background:
       radial-gradient(
-        ellipse 76% 90% at 0% 50%,
-        color-mix(in srgb, var(--gallery-tour-plate-accent) 24%, transparent),
+        ellipse 76% 90% at 14% 50%,
+        color-mix(in srgb, var(--gallery-tour-plate-accent) 36%, rgb(254 230 180 / 0.24)),
         transparent 74%
       ),
-      linear-gradient(152deg, #243645 0%, #14202c 58%, #0d161f 100%);
+      linear-gradient(152deg, #222840 0%, #101424 100%);
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      0 24px 52px -8px rgb(0 0 0 / 0.8),
+      0 0 38px -8px color-mix(in srgb, var(--gallery-tour-plate-accent) 56%, transparent);
   }
 }
 
 .gallery-tour-next-tour img {
   display: block;
-  flex: 0 0 78px;
-  width: 78px;
-  height: 78px;
-  padding: 4px;
+  flex: 0 0 74px;
+  width: 74px;
+  height: 74px;
+  padding: 5px;
   object-fit: contain;
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-plate-accent) 28%, #475a66);
-  background: #070b10;
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-plate-accent) 48%, rgb(244 216 160 / 0.44));
+  border-radius: 50%;
+  background: #05070e;
+  box-shadow: inset 0 1px 0 rgb(255 253 246 / 0.24);
 }
 
 .gallery-tour-next-tour > span:first-of-type {
@@ -844,38 +1006,51 @@
 
 .gallery-tour-next-tour small {
   display: block;
-  margin-bottom: 5px;
-  color: var(--gallery-tour-plate-accent);
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--gallery-tour-plate-accent) 78%, #fae3b4);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.14em;
 }
 
 .gallery-tour-next-tour strong {
   display: block;
+  color: #fffaf0;
   font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.55;
   overflow-wrap: anywhere;
 }
 
 .gallery-tour-next-tour > span:last-child {
   display: grid;
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
   border: 1px solid
-    color-mix(in srgb, var(--gallery-tour-plate-accent) 44%, rgb(255 255 255 / 0.18));
-  background: rgb(8 13 19 / 0.65);
-  color: var(--gallery-tour-plate-accent);
+    color-mix(in srgb, var(--gallery-tour-plate-accent) 62%, rgb(255 244 214 / 0.48));
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 30% 24%,
+      color-mix(in srgb, var(--gallery-tour-plate-accent) 34%, transparent),
+      transparent 65%
+    ),
+    #070912;
+  box-shadow: inset 0 1px 0 rgb(255 254 248 / 0.32);
+  color: color-mix(in srgb, var(--gallery-tour-plate-accent) 82%, #fff4da);
   font-size: 14px;
   place-items: center;
 }
 
 .gallery-tour-theatre-actions {
-  margin-top: 24px;
+  margin-top: 22px;
 }
+
+/* ================================================================
+   4. Responsive & Accessibility Safeguards
+   ================================================================ */
 
 @media (max-width: 900px) {
   .gallery-tour-theatre-heading {
@@ -913,12 +1088,12 @@
   }
 
   .gallery-tour-theatre .gallery-tour-transport button {
-    padding: 10px;
+    padding: 10px 12px;
     font-size: 12px;
   }
 
   .gallery-tour-stop-caption {
-    padding-top: 14px;
+    padding-top: 16px;
   }
 
   .gallery-tour-playback {
@@ -928,7 +1103,12 @@
 }
 
 @media (max-width: 560px) {
-  .gallery-tour-theatre-heading h1 {
+  .gallery-tour-theatre-heading h1,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre-heading
+    h1 {
     font-size: clamp(25px, 7.6vw, 36px);
   }
 
@@ -949,11 +1129,12 @@
   }
 
   .gallery-tour-stage,
-  .gallery-tours-page.command-support-tours .gallery-tour-stage {
-    padding: 6px;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.12),
-      0 18px 42px rgb(0 0 0 / 0.56);
+  .gallery-tours-page.command-support-tours .gallery-tour-stage,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-stage {
+    padding: 8px;
   }
 
   .gallery-tour-stage::before,
@@ -967,11 +1148,13 @@
   }
 
   .gallery-tour-theatre .gallery-tour-view-controls button,
-  .gallery-tours-page.command-support-tours
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
     .gallery-tour-theatre
     .gallery-tour-view-controls
     button {
-    padding-inline: 8px;
+    padding-inline: 10px;
     font-size: 12px;
   }
 
@@ -980,7 +1163,11 @@
   }
 
   .gallery-tour-theatre .gallery-tour-thumbnail,
-  .gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-thumbnail {
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
+    .gallery-tour-thumbnail {
     flex-basis: 86px;
     width: 86px;
     height: 82px;
@@ -988,7 +1175,7 @@
 
   .gallery-tour-playback,
   .gallery-tour-theatre-actions {
-    margin-top: 24px;
+    margin-top: 22px;
   }
 
   .gallery-tour-stop-caption h2 {
@@ -1002,18 +1189,24 @@
     margin-top: 18px;
   }
 
-  .gallery-tour-theatre .gallery-tour-next-tour {
+  .gallery-tour-theatre .gallery-tour-next-tour,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
+    .gallery-tour-next-tour {
     gap: 12px;
+    padding: 12px 14px;
   }
 
   .gallery-tour-next-tour img {
-    flex-basis: 60px;
-    width: 60px;
-    height: 60px;
+    flex-basis: 58px;
+    width: 58px;
+    height: 58px;
   }
 
   .gallery-tour-next-tour strong {
-    font-size: 18px;
+    font-size: 17px;
   }
 }
 
@@ -1042,7 +1235,7 @@
   }
 
   .gallery-tour-playback {
-    margin-top: 24px;
+    margin-top: 22px;
   }
 
   .gallery-tour-theatre[data-focused="true"] .gallery-tour-artwork {
@@ -1063,6 +1256,21 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
   transform: scaleX(1);
 }
 
+html[data-world-effects="economy"]
+  .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+  .gallery-tour-theatre
+  :is(
+    .gallery-tour-stage,
+    .gallery-tour-theatre-button,
+    .gallery-tour-filmstrip,
+    .gallery-tour-thumbnail,
+    .gallery-tour-stop-caption,
+    .gallery-tour-playback,
+    .gallery-tour-next-tour
+  ) {
+  box-shadow: none;
+}
+
 /* iPhone Safari zooms the page in on focusing a control under 16px; the
    interval select was 13px. Phones only (landscape included). */
 @media (max-width: 700px), (max-height: 500px) and (pointer: coarse) {
@@ -1073,6 +1281,7 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
 }
 
 @media (forced-colors: active) {
+  .gallery-tour-theatre-heading::after,
   .gallery-tour-stage::before,
   .gallery-tour-stage-aperture,
   .gallery-tour-stop-caption::before,
@@ -1080,10 +1289,30 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
     display: none;
   }
 
+  .gallery-tour-theatre-heading h1,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre-heading
+    h1 {
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    color: CanvasText;
+  }
+
   .gallery-tour-playback,
   .gallery-tour-filmstrip,
   .gallery-tours-page.command-support-tours .gallery-tour-stop-caption,
-  .gallery-tour-next-tour > span:last-child {
+  .gallery-tour-next-tour > span:last-child,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    :is(
+      .gallery-tour-stage,
+      .gallery-tour-filmstrip,
+      .gallery-tour-stop-caption,
+      .gallery-tour-playback
+    ) {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;
@@ -1091,14 +1320,33 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
   }
 
   .gallery-tour-playback-label select,
-  .gallery-tours-page.command-support-tours .gallery-tour-playback-label select {
+  .gallery-tours-page.command-support-tours .gallery-tour-playback-label select,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-playback-label
+    select {
     -webkit-appearance: auto;
     appearance: auto;
     background-image: none;
+    box-shadow: none;
+  }
+
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .gallery-tour-theatre
+    :is(.gallery-tour-theatre-button, .gallery-tour-next-tour) {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
   }
 
   .gallery-tour-theatre [aria-pressed="true"],
-  .gallery-tours-page.command-support-tours
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
     .gallery-tour-theatre
     :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"] {
     background: Highlight;
@@ -1109,7 +1357,9 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
   }
 
   .gallery-tour-theatre .gallery-tour-thumbnail[aria-current="step"],
-  .gallery-tours-page.command-support-tours
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
     .gallery-tour-theatre
     .gallery-tour-thumbnail[aria-current="step"] {
     border-color: Highlight;
@@ -1118,37 +1368,5 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
     outline-offset: -2px;
     color: Highlight;
     box-shadow: none;
-  }
-}
-
-.gallery-tours-page.command-support-tours
-  .gallery-tour-theatre
-  .gallery-tour-transport
-  > button:last-child:enabled {
-  border-color: #e8cf9e;
-  background: #e8cf9e;
-  box-shadow: none;
-  color: #181817;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .gallery-tours-page.command-support-tours
-    .gallery-tour-theatre
-    .gallery-tour-transport
-    > button:last-child:enabled:hover {
-    border-color: #fae4b5;
-    background: #fae4b5;
-    color: #181817;
-  }
-}
-
-@media (forced-colors: active) {
-  .gallery-tours-page.command-support-tours
-    .gallery-tour-theatre
-    .gallery-tour-transport
-    > button:last-child:enabled {
-    border-color: ButtonText;
-    background: ButtonFace;
-    color: ButtonText;
   }
 }

@@ -4,12 +4,53 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   --ring-track: color-mix(in srgb, var(--ring-key) 24%, transparent);
 }
 
-/* ---------- 1. The roster at the end of a file: a ring of files ----------
+/* ---------- 1. The roster at the end of a file: a celestial astrolabe ----------
    Six or eight files stand on one ring, clockwise from the top in the
    list's order, and the file being read rests at its centre. Each tile is
    placed by top/left from fixed unit-circle coordinates (no transform), so
    the picture stays the route cover's lift target. A list of two keeps its
    row and only takes the ring frame. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  > .manager-pagination {
+  background:
+    radial-gradient(
+      ellipse 56% 58% at 68% 50%,
+      color-mix(in srgb, var(--ring-key) 18%, transparent) 0%,
+      rgb(var(--ring-gold-rgb) / 0.07) 44%,
+      transparent 74%
+    ),
+    radial-gradient(
+      ellipse 44% 52% at 18% 48%,
+      color-mix(in srgb, var(--ring-key) 12%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, #070d1a 0%, #03060d 100%);
+}
+
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .manager-pagination
+  .dossier-index-return
+  > .dossier-index-arrow {
+  border: 1.5px solid transparent;
+  background:
+    radial-gradient(
+        circle at 32% 24%,
+        rgb(255 255 255 / 20%) 0%,
+        color-mix(in srgb, var(--ring-key) 22%, #101e34) 48%,
+        #060c18 100%
+      )
+      padding-box,
+    var(--ring-prism) border-box;
+  box-shadow:
+    0 8px 22px rgb(0 0 0 / 52%),
+    0 0 18px -4px color-mix(in srgb, var(--ring-key) 36%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 32%);
+  color: #ffffff;
+}
+
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .manager-pagination
@@ -21,9 +62,29 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: auto;
   aspect-ratio: 1;
   margin: 40px auto 84px;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      closest-side,
+      transparent calc(96% - 1px),
+      rgb(var(--ring-gold-rgb) / 0.14) calc(96% - 1px) 96%,
+      transparent 96%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent calc(64% - 1px),
+      color-mix(in srgb, var(--ring-key) 20%, transparent) calc(64% - 1px) 64%,
+      transparent 64%
+    ),
+    radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--ring-key) 18%, transparent) 0%,
+      rgb(var(--ring-gold-rgb) / 0.05) 48%,
+      transparent 76%
+    );
 }
 
-/* The orbit's line and a halo round the file being read. */
+/* The orbit's prismatic metallic ring and sovereign triple halo round the centre. */
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   .manager-pagination
@@ -52,10 +113,23 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     :has(> li:nth-child(8):last-child)
   )::before {
   inset: 10.5%;
-  border: 1px solid color-mix(in srgb, var(--ring-key) 42%, rgb(255 255 255 / 16%));
-  box-shadow:
-    0 0 0 9px rgb(var(--ring-gold-rgb) / 0.08),
-    0 0 34px color-mix(in srgb, var(--ring-key) 15%, transparent);
+  padding: 1.5px;
+  border: 0;
+  background: conic-gradient(
+    from 160deg,
+    color-mix(in srgb, var(--ring-key) 86%, #ffffff) 0turn,
+    rgb(var(--ring-gold-rgb) / 0.78) 0.28turn,
+    color-mix(in srgb, var(--ring-pink) 48%, var(--ring-key)) 0.56turn,
+    #ffffff 0.78turn,
+    color-mix(in srgb, var(--ring-key) 86%, #ffffff) 1turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
 }
 
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -65,25 +139,31 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     :has(> li:nth-child(6):last-child),
     :has(> li:nth-child(8):last-child)
   )::after {
-  inset: 25.5%;
+  inset: 24.5%;
   background:
     radial-gradient(
       closest-side,
       transparent calc(100% - 1.5px),
-      rgb(var(--ring-gold-rgb) / 0.58) calc(100% - 1.5px) 100%,
+      rgb(var(--ring-gold-rgb) / 0.72) calc(100% - 1.5px) 100%,
       transparent 100%
     ),
     radial-gradient(
       closest-side,
-      transparent calc(88% - 1px),
-      color-mix(in srgb, var(--ring-key) 48%, rgb(255 255 255 / 42%)) calc(88% - 1px) 88%,
-      transparent 88%
+      transparent calc(90% - 1px),
+      color-mix(in srgb, var(--ring-key) 62%, #ffffff) calc(90% - 1px) 90%,
+      transparent 90%
     ),
     radial-gradient(
       closest-side,
-      color-mix(in srgb, var(--ring-key) 26%, transparent) 0%,
-      rgb(var(--ring-gold-rgb) / 0.1) 58%,
-      transparent 78%
+      transparent calc(80% - 1px),
+      rgb(var(--ring-gold-rgb) / 0.28) calc(80% - 1px) 80%,
+      transparent 80%
+    ),
+    radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--ring-key) 32%, transparent) 0%,
+      rgb(var(--ring-gold-rgb) / 0.14) 56%,
+      transparent 80%
     );
 }
 
@@ -371,9 +451,10 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   > li.is-current
   > span {
   box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--ring-key) 22%, transparent),
-    0 0 38px color-mix(in srgb, var(--ring-key) 38%, transparent),
-    0 18px 42px rgb(0 0 0 / 60%);
+    0 0 0 4px rgb(4 8 16 / 84%),
+    0 0 0 5.5px color-mix(in srgb, var(--ring-gold) 64%, var(--ring-key)),
+    0 0 48px color-mix(in srgb, var(--ring-key) 46%, transparent),
+    0 22px 48px rgb(0 0 0 / 68%);
 }
 
 /* The tile's accent bar becomes the ring frame. */
@@ -1145,7 +1226,7 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   display: none;
 }
 
-/* The figure: the art in a card at the orbit's centre. */
+/* The figure: the art in a jewel-bezel showcase inside a volumetric spotlight stage. */
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.manager-page:has(> .dossier-orbit)
@@ -1158,7 +1239,34 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   margin-top: 0;
   padding: 0;
   overflow: visible;
-  box-shadow: none;
+  background:
+    radial-gradient(
+      46% 36% at 50% -4%,
+      color-mix(in srgb, var(--ring-key) 72%, #ffffff 26%) 0%,
+      transparent 74%
+    ),
+    conic-gradient(
+      from 154deg at 50% -12%,
+      transparent 0deg,
+      color-mix(in srgb, var(--ring-key) 26%, transparent) 18deg,
+      rgb(255 255 255 / 18%) 25deg,
+      rgb(var(--ring-gold-rgb) / 0.24) 32deg,
+      transparent 52deg
+    ),
+    radial-gradient(
+      64% 58% at 50% 50%,
+      color-mix(in srgb, var(--ring-key) 26%, transparent) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      78% 24% at 50% 102%,
+      color-mix(in srgb, var(--ring-key) 58%, var(--ring-gold)) 0%,
+      transparent 74%
+    ),
+    linear-gradient(180deg, #0a1426 0%, #050913 54%, #020409 100%);
+  box-shadow:
+    inset -1px 0 0 color-mix(in srgb, var(--ring-key) 30%, rgb(255 255 255 / 12%)),
+    28px 0 80px rgb(0 0 0 / 64%);
 }
 
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
@@ -1191,10 +1299,13 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   overflow: hidden;
   border-radius: 28px;
   box-shadow:
-    0 0 0 1.5px color-mix(in srgb, var(--ring-key) 72%, #ffffff),
-    0 0 0 6px color-mix(in srgb, var(--ring-key) 12%, transparent),
-    0 24px 56px rgb(0 0 0 / 56%),
-    0 0 42px -6px color-mix(in srgb, var(--ring-key) 30%, transparent);
+    inset 0 0 0 1px rgb(255 255 255 / 38%),
+    0 0 0 1.5px color-mix(in srgb, var(--ring-key) 82%, #ffffff),
+    0 0 0 6px rgb(5 9 18 / 82%),
+    0 0 0 7.5px
+      color-mix(in srgb, var(--ring-gold) 52%, color-mix(in srgb, var(--ring-key) 46%, transparent)),
+    0 28px 68px rgb(0 0 0 / 72%),
+    0 0 58px -4px color-mix(in srgb, var(--ring-key) 46%, transparent);
   translate: -50% -50%;
 }
 
@@ -1244,7 +1355,47 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   height: 100%;
 }
 
-/* The orbit's gossamer concentric hairlines and a soft celestial halo. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-stage::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--d1-r) * 2 + var(--d1-node) + 34px);
+  height: calc(var(--d1-r) * 2 + var(--d1-node) + 34px);
+  padding: 1px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgb(255 255 255 / 46%) 0deg,
+    transparent 24deg,
+    transparent 66deg,
+    color-mix(in srgb, var(--ring-key) 58%, #ffffff) 90deg,
+    transparent 114deg,
+    transparent 156deg,
+    rgb(var(--ring-gold-rgb) / 0.52) 180deg,
+    transparent 204deg,
+    transparent 246deg,
+    color-mix(in srgb, var(--ring-key) 58%, #ffffff) 270deg,
+    transparent 294deg,
+    transparent 336deg,
+    rgb(255 255 255 / 46%) 360deg
+  );
+  translate: -50% -50%;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* The orbit's prismatic concentric rings and celestial halo (center 100% hollow
+   so the character portrait underneath remains crystal-clear). */
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.manager-page
@@ -1254,12 +1405,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   left: 50%;
   width: calc(var(--d1-r) * 2);
   height: calc(var(--d1-r) * 2);
-  border: 1.5px solid color-mix(in srgb, var(--ring-key) 64%, rgb(255 255 255 / 44%));
+  border: 0;
   border-radius: 50%;
-  box-shadow:
-    0 0 38px color-mix(in srgb, var(--ring-key) 22%, transparent),
-    inset 0 0 30px color-mix(in srgb, var(--ring-key) 14%, transparent);
-  opacity: 0.92;
+  background: none;
+  box-shadow: 0 0 36px -6px color-mix(in srgb, var(--ring-key) 24%, transparent);
+  opacity: 0.96;
   translate: -50% -50%;
 }
 
@@ -1281,23 +1431,36 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.manager-page
   .dossier-orbit-track::before {
-  inset: calc(var(--d1-node) * -0.5 - 12px);
-  border: 1px solid
-    color-mix(in srgb, var(--ring-gold) 36%, color-mix(in srgb, var(--ring-key) 24%, transparent));
-  box-shadow: 0 0 44px -10px color-mix(in srgb, var(--ring-key) 18%, transparent);
+  inset: 0;
+  box-sizing: border-box;
+  padding: 1.5px;
+  border: 0;
+  background: conic-gradient(
+    from 135deg,
+    color-mix(in srgb, var(--ring-key) 90%, #ffffff) 0turn,
+    rgb(var(--ring-gold-rgb) / 0.82) 0.25turn,
+    color-mix(in srgb, var(--ring-key) 46%, rgb(255 255 255 / 26%)) 0.5turn,
+    #ffffff 0.76turn,
+    color-mix(in srgb, var(--ring-key) 90%, #ffffff) 1turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
 }
 
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.manager-page
   .dossier-orbit-track::after {
-  inset: 11%;
-  border: 1px solid color-mix(in srgb, var(--ring-key) 22%, rgb(255 255 255 / 12%));
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--ring-key) 14%, transparent) 0%,
-    transparent 68%
-  );
+  inset: calc(var(--d1-node) * -0.5 - 12px);
+  border: 1px solid
+    color-mix(in srgb, var(--ring-gold) 48%, color-mix(in srgb, var(--ring-key) 32%, transparent));
+  background: none;
+  box-shadow: 0 0 42px -10px color-mix(in srgb, var(--ring-key) 20%, transparent);
 }
 
 /* The figure answers 変身記録: the first record's art over the portrait. */
@@ -1768,6 +1931,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     padding: 2px;
     border-radius: 50%;
     background: var(--ring-prism);
+    box-shadow:
+      0 14px 32px rgb(0 0 0 / 48%),
+      0 0 28px -6px color-mix(in srgb, var(--ring-key) 40%, transparent);
     translate: -50% -50%;
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
@@ -1981,5 +2147,42 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     a:hover
     > .dossier-index-arrow {
     scale: 1.1;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(
+      #dossier-profile .manager-portrait-column,
+      .manager-pagination,
+      .manager-pagination .dossier-roster
+    ) {
+    background: none;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(
+      .dossier-orbit-stage::before,
+      .dossier-orbit-track,
+      .dossier-orbit-track::before,
+      .dossier-orbit-track::after,
+      .manager-pagination .dossier-roster::before,
+      .manager-pagination .dossier-roster::after
+    ) {
+    display: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(#dossier-profile .manager-portrait-frame, .dossier-index-arrow) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }

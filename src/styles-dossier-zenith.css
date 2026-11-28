@@ -103,28 +103,29 @@ html[data-family="dossier"]
   min-height: 34px;
   margin: 0;
   padding: 5px 14px 5px 8px;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 38%, rgb(255 255 255 / 14%));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 46%, rgb(246 222 161 / 22%));
   border-radius: 7px;
   background:
     linear-gradient(
         90deg,
-        transparent 6%,
-        var(--sd-accent) 36%,
-        var(--sd-foil, #f3d999) 72%,
-        transparent 94%
+        transparent 4%,
+        #ffffff 24%,
+        var(--sd-accent) 52%,
+        var(--sd-foil, #f3d999) 84%,
+        transparent 96%
       )
-      50% 0 / 100% 1px no-repeat,
+      50% 0 / 100% 1.5px no-repeat,
     radial-gradient(
-      90% 140% at 12% 50%,
-      color-mix(in srgb, var(--sd-accent) 24%, transparent),
-      transparent 70%
+      92% 145% at 12% 50%,
+      color-mix(in srgb, var(--sd-accent) 30%, transparent),
+      transparent 72%
     ),
-    linear-gradient(165deg, #101b2e 0%, #070d18 100%);
+    linear-gradient(165deg, #0b1424 0%, #050912 100%);
   box-shadow:
-    0 10px 24px rgb(0 0 0 / 48%),
-    0 0 18px -6px color-mix(in srgb, var(--sd-accent) 28%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f3d999) 18%, transparent);
+    0 12px 28px rgb(0 0 0 / 60%),
+    0 0 22px -6px color-mix(in srgb, var(--sd-accent) 36%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f3d999) 24%, transparent);
 }
 
 html[data-family="dossier"]
@@ -139,14 +140,15 @@ html[data-family="dossier"]
   min-width: 24px;
   height: 20px;
   padding: 0 6px;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 44%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 56%, var(--sd-foil, #f3d999));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--sd-accent) 18%, rgb(4 8 16 / 84%));
-  color: color-mix(in srgb, var(--sd-accent) 72%, #ffffff);
+  background: color-mix(in srgb, var(--sd-accent) 24%, rgb(3 6 13 / 90%));
+  color: #ffffff;
   font: 500 12px/1 var(--sd-hud);
   font-style: normal;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 24%);
 }
 
 html[data-family="dossier"]
@@ -156,7 +158,7 @@ html[data-family="dossier"]
   > li
   > b {
   min-width: 0;
-  color: #f6faff;
+  color: #ffffff;
   font: 600 13px/1.35 var(--sd-mono);
   letter-spacing: 0.06em;
   overflow-wrap: anywhere;
@@ -172,14 +174,14 @@ html[data-family="dossier"]
   gap: 1px;
   margin: 0;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 36%, rgb(255 255 255 / 14%));
-  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f3d999) 60%, var(--sd-accent));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 44%, rgb(246 222 161 / 20%));
+  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f3d999) 68%, var(--sd-accent));
   border-radius: 8px;
-  background: color-mix(in srgb, var(--sd-accent) 26%, rgb(255 255 255 / 10%));
+  background: color-mix(in srgb, var(--sd-accent) 34%, rgb(246 222 161 / 16%));
   box-shadow:
-    0 22px 52px rgb(0 0 0 / 56%),
-    0 0 32px -4px color-mix(in srgb, var(--sd-accent) 18%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 20%);
+    0 26px 60px rgb(0 0 0 / 66%),
+    0 0 36px -4px color-mix(in srgb, var(--sd-accent) 24%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 26%);
   overflow: clip;
 }
 
@@ -195,19 +197,19 @@ html[data-family="dossier"]
   min-width: 0;
   margin: 0;
   padding: 12px 12px 13px;
-  background-color: #080e1a;
+  background-color: #050912;
   background-image:
     radial-gradient(
-      84% 76% at 14% 0%,
-      color-mix(in srgb, var(--sd-accent) 16%, transparent),
+      86% 78% at 14% 0%,
+      color-mix(in srgb, var(--sd-accent) 20%, transparent),
       transparent 72%
     ),
     linear-gradient(
       180deg,
-      rgb(255 255 255 / 4.5%) 0%,
+      rgb(255 255 255 / 5.5%) 0%,
       transparent 68%
     );
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 9%);
   transition: background-color 180ms ease, opacity 180ms ease;
 }
 
@@ -217,8 +219,8 @@ html[data-family="dossier"]
     .form-pickup-record
     .form-pickup-spec
     > div:hover {
-    background-color: color-mix(in srgb, var(--sd-accent) 16%, #0b1424);
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 48%, #ffffff);
+    background-color: color-mix(in srgb, var(--sd-accent) 18%, #091221);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 56%, #ffffff);
   }
 
   html[data-family="dossier"]
@@ -227,7 +229,7 @@ html[data-family="dossier"]
     .form-pickup-spec
     > div:hover
     dt {
-    color: var(--sd-text-2, var(--sd-text));
+    color: #ffffff;
   }
 }
 
@@ -240,12 +242,12 @@ html[data-family="dossier"]
   position: absolute;
   top: 0;
   left: 0;
-  width: 24px;
+  width: 28px;
   height: 2px;
   border-radius: 0 0 2px 0;
-  background: linear-gradient(90deg, #ffffff 0%, var(--sd-accent) 48%, var(--sd-foil, #f3d999) 100%);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--sd-accent) 52%, transparent);
-  opacity: 0.96;
+  background: linear-gradient(90deg, #ffffff 0%, var(--sd-accent) 46%, var(--sd-foil, #f3d999) 100%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--sd-accent) 64%, transparent);
+  opacity: 0.98;
 }
 
 html[data-family="dossier"]
@@ -254,7 +256,7 @@ html[data-family="dossier"]
   .form-pickup-spec
   dt {
   margin: 0;
-  color: color-mix(in srgb, var(--sd-accent) 38%, #a6b9cb);
+  color: color-mix(in srgb, var(--sd-accent) 62%, #cde2f7);
   font: 400 12px/1.3 var(--sd-hud);
   letter-spacing: 0.08em;
   overflow-wrap: anywhere;
@@ -267,10 +269,11 @@ html[data-family="dossier"]
   .form-pickup-spec
   dd {
   margin: 0;
-  color: #f8fbff;
+  color: #ffffff;
   font: 600 clamp(15px, 1.24vw, 19px) / 1.3 var(--sd-mono);
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 64%);
   overflow-wrap: anywhere;
 }
 
@@ -2362,12 +2365,14 @@ html[data-family="dossier"]
       right: 2px;
       left: auto;
       margin: 0;
-      color: color-mix(in srgb, var(--sd-accent) 6.5%, transparent);
+      color: color-mix(in srgb, var(--sd-accent) 13%, rgb(6 11 21 / 68%));
       font-size: clamp(58px, min(5.4vw, 9.4svh), 90px);
       line-height: 0.84;
-      -webkit-text-stroke: 1.2px
-        color-mix(in srgb, var(--sd-accent) 40%, rgb(246 222 161 / 56%));
-      text-shadow: 0 0 28px color-mix(in srgb, var(--sd-accent) 18%, transparent);
+      -webkit-text-stroke: 1.45px
+        color-mix(in srgb, var(--sd-foil, #f6dea1) 58%, var(--sd-accent));
+      text-shadow:
+        0 4px 18px rgb(0 0 0 / 64%),
+        0 0 34px color-mix(in srgb, var(--sd-accent) 28%, transparent);
       transform: none;
     }
 
@@ -3278,13 +3283,35 @@ html[data-family="dossier"]
 }
 
 /* ----------------------------------------------------------------
-   8. Artbook Editorial Hierarchy (Phase 2):
-      ① Open illuminated masthead + jewel-cut title capsule
-      ② Open-sided editorial quote wash with 2px glowing left spine
-      ③ L-bracket-free architectural spec ledger (3-col for 7+ facts on desktop)
-      ④ Unified obsidian-glass chapter dock with optical catchlights
-      ⑤ Editorial chapter plates & museum record cards (outranks future-spectrum)
+   8. Artbook Editorial Hierarchy (Wave-8 Luxury Elevation):
+      ① Sculpted Platinum-Chrome × Champagne-Gold masthead + jewel-bezel title capsule
+      ② Deep jet-obsidian crystal quote plate with 3px vertical prism light blade
+      ③ High-contrast magazine specification ledger (3-col for 7+ facts on desktop)
+      ④ Unified obsidian-glass chapter dock with optical horizon catchlights
+      ⑤ Platinum-ice chapter titles & obsidian-crystal record instruments
    ---------------------------------------------------------------- */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name {
+  background: linear-gradient(
+    176deg,
+    #ffffff 0%,
+    #f6fbff 27%,
+    color-mix(in srgb, var(--sd-accent) 56%, #d0ebff) 47%,
+    #ffffff 56%,
+    color-mix(in srgb, var(--sd-foil, #f6dea1) 74%, var(--sd-accent)) 83%,
+    color-mix(in srgb, var(--sd-accent) 84%, var(--sd-foil, #f6dea1)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 html:not([data-world-effects="economy"])[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
@@ -3299,11 +3326,26 @@ html:not([data-world-effects="economy"])[data-family="dossier"]
   .dossier-identity
   .manager-display-name {
   filter:
-    drop-shadow(0 10px 28px rgb(0 0 0 / 64%))
-    drop-shadow(0 0 28px color-mix(in srgb, var(--sd-accent) 34%, transparent));
+    drop-shadow(0 2px 0 rgb(2 5 12 / 86%))
+    drop-shadow(0 12px 30px rgb(0 0 0 / 72%))
+    drop-shadow(0 0 34px color-mix(in srgb, var(--sd-accent) 46%, transparent));
 }
 
-/* ① Jewel-cut title tag (.manager-title): sleek metallic-glass capsule, no L-brackets. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  .manager-introduction
+  .dossier-identity
+  h1
+  small {
+  color: color-mix(in srgb, var(--sd-accent) 52%, #c4d9ef);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--sd-accent) 28%, transparent);
+}
+
+/* ① Jewel-bezel title tag (.manager-title): 1.5px platinum-gold metallic rim over jet obsidian. */
 html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
@@ -3315,39 +3357,49 @@ html[data-family="dossier"]
   display: inline-flex;
   align-items: center;
   padding: 6px 20px;
-  border: 1px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 50%, var(--sd-accent));
+  border: 1.5px solid transparent;
   border-radius: 999px;
-  color: #f8fbff;
+  color: #ffffff;
   background:
     linear-gradient(
         90deg,
-        transparent 10%,
-        #ffffff 32%,
-        var(--sd-accent) 58%,
+        transparent 8%,
+        #ffffff 30%,
+        var(--sd-accent) 56%,
         var(--sd-foil, #f6dea1) 84%,
-        transparent 95%
+        transparent 94%
       )
-      50% 0 / 100% 1px no-repeat,
+      50% 0 / 100% 1px no-repeat padding-box,
     radial-gradient(
-      88% 140% at 14% 50%,
-      color-mix(in srgb, var(--sd-accent) 32%, transparent),
-      transparent 70%
-    ),
+        90% 145% at 14% 50%,
+        color-mix(in srgb, var(--sd-accent) 34%, transparent),
+        transparent 70%
+      )
+      padding-box,
     linear-gradient(
-      96deg,
-      color-mix(in srgb, var(--sd-accent) 24%, #0f1b2f) 0%,
-      color-mix(in srgb, var(--sd-foil, #f6dea1) 12%, #091120) 62%,
-      #060c17 100%
-    );
+        98deg,
+        color-mix(in srgb, var(--sd-accent) 22%, #0a1426) 0%,
+        #050a14 58%,
+        #03060d 100%
+      )
+      padding-box,
+    linear-gradient(
+        130deg,
+        rgb(255 255 255 / 72%) 0%,
+        var(--sd-accent) 44%,
+        var(--sd-foil, #f6dea1) 82%,
+        color-mix(in srgb, var(--sd-accent) 54%, transparent) 100%
+      )
+      border-box;
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 48%),
-    0 0 24px -5px color-mix(in srgb, var(--sd-accent) 30%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 28%),
-    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 26%, transparent);
+    0 16px 36px rgb(0 0 0 / 62%),
+    0 0 28px -5px color-mix(in srgb, var(--sd-accent) 38%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 30%, transparent);
 }
 
-/* ② Open-sided editorial quote plate (.manager-quotes): 2px glowing left spine
-   and soft horizontal light wash fading open on the right — zero 4-sided box. */
+/* ② Deep jet-obsidian crystal quote plate (.manager-quotes): 3px vertical multi-stop
+   prism light blade + sculpted dark crystal glass + razor specular top edge. */
 html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
@@ -3355,37 +3407,67 @@ html[data-family="dossier"]
   ):not(.dante-page)
   #dossier-profile
   :is(.manager-quotes, #zenith-stage-boost) {
-  border: 0;
-  border-left: 2px solid var(--sd-accent);
-  border-radius: 0 8px 8px 0;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 12%));
+  border-left: 0;
+  border-radius: 2px 10px 10px 2px;
   background:
     linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--sd-accent) 62%, var(--sd-foil, #f6dea1)) 0%,
-        color-mix(in srgb, var(--sd-foil, #f6dea1) 24%, transparent) 44%,
-        transparent 86%
+        180deg,
+        #ffffff 0%,
+        var(--sd-accent) 32%,
+        var(--sd-foil, #f6dea1) 70%,
+        color-mix(in srgb, var(--sd-accent-2, var(--sd-accent)) 82%, #ff5fc8) 100%
       )
-      0 0 / 100% 1px no-repeat,
+      0 0 / 3px 100% no-repeat,
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--sd-accent) 26%, transparent) 0%,
-        transparent 74%
+        #ffffff 0%,
+        color-mix(in srgb, var(--sd-accent) 76%, var(--sd-foil, #f6dea1)) 32%,
+        color-mix(in srgb, var(--sd-foil, #f6dea1) 34%, transparent) 72%,
+        transparent 96%
       )
-      0 100% / 100% 1px no-repeat,
+      3px 0 / calc(100% - 3px) 1px no-repeat,
     radial-gradient(
-      68% 130% at 0% 50%,
-      color-mix(in srgb, var(--sd-accent) 22%, transparent),
+      72% 140% at 0% 50%,
+      color-mix(in srgb, var(--sd-accent) 26%, transparent),
       transparent 72%
     ),
     linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--sd-accent) 14%, rgb(12 22 38 / 86%)) 0%,
-      rgb(8 15 27 / 56%) 56%,
-      transparent 100%
+      106deg,
+      color-mix(in srgb, var(--sd-accent) 18%, rgb(9 16 30 / 96%)) 0%,
+      rgb(5 9 18 / 94%) 54%,
+      rgb(3 6 13 / 89%) 100%
     );
   box-shadow:
-    -3px 0 22px -4px color-mix(in srgb, var(--sd-accent) 48%, transparent),
-    inset 1px 0 0 rgb(255 255 255 / 24%);
+    -6px 0 28px -4px color-mix(in srgb, var(--sd-accent) 58%, transparent),
+    0 22px 54px rgb(0 0 0 / 62%),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 18%, transparent);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  .manager-quotes
+  q:first-child {
+  color: #ffffff;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 70%),
+    0 0 22px color-mix(in srgb, var(--sd-accent) 22%, transparent);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  .manager-quotes
+  q:not(:first-child) {
+  color: #dce9f7;
 }
 
 html[data-family="dossier"]
@@ -3397,16 +3479,16 @@ html[data-family="dossier"]
   border-top: 0;
   background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--sd-accent) 44%, var(--sd-foil, #f6dea1)) 0%,
-      rgb(255 255 255 / 12%) 46%,
-      transparent 92%
+      color-mix(in srgb, var(--sd-accent) 56%, var(--sd-foil, #f6dea1)) 0%,
+      rgb(255 255 255 / 16%) 48%,
+      transparent 94%
     )
     0 0 / 100% 1px no-repeat;
   box-shadow: none;
 }
 
-/* ③ Architectural specification ledger (.manager-facts): clean prism crown &
-   obsidian-velvet glass with zero corner L-brackets at every viewport. */
+/* ③ High-contrast magazine specification ledger (.manager-facts): full-width 2px
+   platinum-to-champagne crown, deep jet-obsidian crystal & crisp metallic hairlines. */
 html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
@@ -3414,27 +3496,34 @@ html[data-family="dossier"]
   ):not(.dante-page)
   :is(#dossier-profile, #dossier-index .manager-copy-body)
   .manager-facts {
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 13%));
-  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 62%, var(--sd-accent));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 36%, rgb(255 255 255 / 16%));
+  border-top: 0;
   border-radius: 8px;
   background:
+    linear-gradient(
+        90deg,
+        #ffffff 0%,
+        var(--sd-accent) 34%,
+        var(--sd-foil, #f6dea1) 74%,
+        color-mix(in srgb, var(--sd-accent) 58%, transparent) 100%
+      )
+      0 0 / 100% 2px no-repeat,
     radial-gradient(
-      72% 130px at 14% 0%,
-      color-mix(in srgb, var(--sd-accent) 18%, transparent),
+      76% 140px at 14% 0%,
+      color-mix(in srgb, var(--sd-accent) 22%, transparent),
       transparent 72%
     ),
     radial-gradient(
-      56% 110px at 90% 100%,
-      color-mix(in srgb, var(--sd-foil, #f6dea1) 11%, transparent),
+      58% 120px at 90% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 14%, transparent),
       transparent 74%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 5.5%) 0%, transparent 58px),
-    linear-gradient(160deg, rgb(12 21 36 / 95%) 0%, rgb(6 11 20 / 97%) 100%);
+    linear-gradient(180deg, rgb(255 255 255 / 6.5%) 0%, transparent 56px),
+    linear-gradient(164deg, rgb(9 16 29 / 97%) 0%, rgb(4 7 15 / 99%) 100%);
   box-shadow:
-    inset 0 1px 0 var(--sd-bevel-hi),
-    inset 0 -1px 0 var(--sd-bevel-lo),
-    0 24px 56px rgb(0 0 0 / 50%),
-    0 0 30px -6px color-mix(in srgb, var(--sd-accent) 14%, transparent);
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 20%, transparent),
+    0 28px 64px rgb(0 0 0 / 64%),
+    0 0 36px -6px color-mix(in srgb, var(--sd-accent) 20%, transparent);
 }
 
 html[data-family="dossier"]
@@ -3446,7 +3535,7 @@ html[data-family="dossier"]
   .manager-facts
   > div {
   border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--sd-accent) 15%, rgb(255 255 255 / 8%));
+  border-bottom: 1px solid color-mix(in srgb, var(--sd-accent) 26%, rgb(246 222 161 / 14%));
   background: none;
   box-shadow: none;
   transition: background-color 180ms ease;
@@ -3456,11 +3545,26 @@ html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
     .ciel-dossier-page
-  ):not(.dante-page)
+  ):not(.dante-page):not([data-rider="cipher"])
   :is(#dossier-profile, #dossier-index .manager-copy-body)
   .manager-facts
   dt {
+  color: color-mix(in srgb, var(--sd-accent) 68%, #d2e6fa);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--sd-accent) 22%, transparent);
   transition: color 180ms ease;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  :is(#dossier-profile, #dossier-index .manager-copy-body)
+  .manager-facts
+  dd:not(.is-redacted) {
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 64%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -3472,7 +3576,7 @@ html[data-family="dossier"]
     :is(#dossier-profile, #dossier-index .manager-copy-body)
     .manager-facts
     > div:hover {
-    background-color: color-mix(in srgb, var(--sd-accent) 9%, rgb(255 255 255 / 2%));
+    background-color: color-mix(in srgb, var(--sd-accent) 12%, rgb(255 255 255 / 3%));
   }
 
   html[data-family="dossier"]
@@ -3484,7 +3588,7 @@ html[data-family="dossier"]
     .manager-facts
     > div:hover
     dt {
-    color: color-mix(in srgb, var(--sd-accent) 72%, #eef6ff);
+    color: #ffffff;
   }
 }
 
@@ -3520,31 +3624,32 @@ html[data-family="dossier"]
     .dante-page
   )
   > :is(.dossier-reader, #zenith-stage-boost) {
-  border-top: 1px solid color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 14%));
-  border-bottom: 1px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 40%, rgb(255 255 255 / 12%));
+  border-top: 1px solid color-mix(in srgb, var(--sd-accent) 34%, rgb(255 255 255 / 18%));
+  border-bottom: 1px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 48%, rgb(255 255 255 / 14%));
   background:
     linear-gradient(
         90deg,
-        transparent 4%,
-        color-mix(in srgb, var(--sd-accent) 46%, rgb(255 255 255 / 26%)) 26%,
-        color-mix(in srgb, var(--sd-foil, #f6dea1) 36%, rgb(255 255 255 / 18%)) 68%,
-        transparent 96%
+        transparent 3%,
+        #ffffff 22%,
+        color-mix(in srgb, var(--sd-accent) 68%, #ffffff) 48%,
+        color-mix(in srgb, var(--sd-foil, #f6dea1) 52%, transparent) 78%,
+        transparent 97%
       )
-      50% 0 / 100% 1px no-repeat,
+      50% 0 / 100% 1.5px no-repeat,
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--sd-accent) 16%, transparent) 0%,
+      color-mix(in srgb, var(--sd-accent) 20%, transparent) 0%,
       transparent 34%,
-      transparent 68%,
-      color-mix(in srgb, var(--sd-foil, #f6dea1) 11%, transparent) 100%
+      transparent 66%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 14%, transparent) 100%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 5%) 0%, transparent 56%),
-    #050912;
-  background-color: #050912;
+    linear-gradient(180deg, rgb(255 255 255 / 6%) 0%, transparent 56%),
+    #040811;
+  background-color: #040811;
   box-shadow:
-    0 18px 46px rgb(0 0 0 / 66%),
-    0 2px 20px color-mix(in srgb, var(--sd-accent) 12%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 24%, rgb(255 255 255 / 16%));
+    0 22px 52px rgb(0 0 0 / 74%),
+    0 2px 24px color-mix(in srgb, var(--sd-accent) 16%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 18%));
 }
 
 html[data-family="dossier"]
@@ -3574,15 +3679,15 @@ html[data-family="dossier"]
   > .dossier-reader
   .dossier-reader-links
   a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]) {
-  border-bottom-color: color-mix(in srgb, var(--sd-foil, #f6dea1) 62%, var(--sd-accent));
+  border-bottom-color: color-mix(in srgb, var(--sd-foil, #f6dea1) 68%, var(--sd-accent));
   color: #ffffff;
   background: radial-gradient(
     84% 110% at 50% 100%,
-    color-mix(in srgb, var(--sd-accent) 32%, transparent),
+    color-mix(in srgb, var(--sd-accent) 38%, transparent),
     transparent 76%
   );
-  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--sd-accent) 46%, transparent);
-  text-shadow: 0 0 14px color-mix(in srgb, var(--sd-accent) 44%, transparent);
+  box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--sd-accent) 54%, transparent);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--sd-accent) 50%, transparent);
 }
 
 @media (min-width: 761px) {
@@ -3596,23 +3701,23 @@ html[data-family="dossier"]
     gap: 4px;
     margin-block: 6px;
     padding: 3px;
-    border: 1px solid color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 14%));
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 36%, rgb(255 255 255 / 16%));
     border-radius: 10px;
     background:
       linear-gradient(
           90deg,
-          transparent 6%,
-          rgb(255 255 255 / 26%) 24%,
-          color-mix(in srgb, var(--sd-accent) 46%, #ffffff) 50%,
-          color-mix(in srgb, var(--sd-foil, #f6dea1) 36%, transparent) 78%,
-          transparent 94%
+          transparent 5%,
+          #ffffff 24%,
+          color-mix(in srgb, var(--sd-accent) 56%, #ffffff) 50%,
+          color-mix(in srgb, var(--sd-foil, #f6dea1) 46%, transparent) 78%,
+          transparent 95%
         )
         50% 0 / 100% 1px no-repeat,
-      linear-gradient(180deg, #04070e 0%, #0a1324 100%);
+      linear-gradient(180deg, #03060c 0%, #08101f 100%);
     box-shadow:
-      inset 0 1px 3px rgb(0 0 0 / 72%),
-      inset 0 -1px 0 color-mix(in srgb, var(--sd-accent) 16%, rgb(255 255 255 / 6%)),
-      0 2px 12px rgb(0 0 0 / 38%);
+      inset 0 1px 4px rgb(0 0 0 / 78%),
+      inset 0 -1px 0 color-mix(in srgb, var(--sd-accent) 22%, rgb(255 255 255 / 8%)),
+      0 4px 16px rgb(0 0 0 / 48%);
   }
 
   html[data-family="dossier"]
@@ -3644,25 +3749,25 @@ html[data-family="dossier"]
     color: #ffffff;
     background:
       radial-gradient(
-        70% 65% at 50% 0%,
-        rgb(255 255 255 / 15%),
+        72% 68% at 50% 0%,
+        rgb(255 255 255 / 20%),
         transparent 70%
       ),
       radial-gradient(
-        88% 120% at 50% 100%,
-        color-mix(in srgb, var(--sd-accent) 40%, transparent),
+        90% 124% at 50% 100%,
+        color-mix(in srgb, var(--sd-accent) 46%, transparent),
         transparent 74%
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--sd-accent) 24%, #152540) 0%,
-        #0a1323 100%
+        color-mix(in srgb, var(--sd-accent) 28%, #13223b) 0%,
+        #070e1c 100%
       );
     box-shadow:
-      0 6px 16px rgb(0 0 0 / 50%),
-      0 0 22px -5px color-mix(in srgb, var(--sd-accent) 38%, transparent),
-      inset 0 1px 0 rgb(255 255 255 / 38%),
-      inset 0 -2px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 70%, var(--sd-accent));
+      0 8px 18px rgb(0 0 0 / 58%),
+      0 0 24px -5px color-mix(in srgb, var(--sd-accent) 46%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      inset 0 -2px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 74%, var(--sd-accent));
   }
 }
 
@@ -3676,7 +3781,7 @@ html[data-family="dossier"]
     .dossier-reader-links
     a:not([aria-current]):hover {
     color: #ffffff;
-    background-color: rgb(255 255 255 / 6.5%);
+    background-color: rgb(255 255 255 / 8%);
   }
 }
 
@@ -3687,19 +3792,25 @@ html[data-family="dossier"]
   .dossier-contents
   a {
   padding: 12px 16px;
-  border-color: color-mix(in srgb, var(--sd-accent) 24%, rgb(255 255 255 / 10%));
-  border-left: 2px solid color-mix(in srgb, var(--sd-accent) 76%, var(--sd-foil, #f6dea1));
+  border-color: color-mix(in srgb, var(--sd-accent) 32%, rgb(255 255 255 / 13%));
+  border-left: 3px solid color-mix(in srgb, var(--sd-accent) 82%, var(--sd-foil, #f6dea1));
   border-radius: 8px;
   background:
+    linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sd-accent) 58%, #ffffff) 0%,
+        transparent 68%
+      )
+      0 0 / 100% 1px no-repeat,
     radial-gradient(
-      76% 120% at 0% 50%,
-      color-mix(in srgb, var(--sd-accent) 16%, transparent),
-      transparent 68%
+      78% 130% at 0% 50%,
+      color-mix(in srgb, var(--sd-accent) 22%, transparent),
+      transparent 70%
     ),
-    linear-gradient(160deg, #0e1828 0%, #070c15 100%);
+    linear-gradient(162deg, #0b1424 0%, #050912 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 12px 30px rgb(0 0 0 / 42%);
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 16px 36px rgb(0 0 0 / 54%);
 }
 
 html[data-family="dossier"]
@@ -3709,27 +3820,34 @@ html[data-family="dossier"]
   ):not(.dante-page):not([data-rider="cipher"])
   #dossier-index
   :is(.manager-copy-section, #zenith-stage-boost) {
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 24%, rgb(255 255 255 / 10%));
-  border-top: 2px solid color-mix(in srgb, var(--sd-accent) 48%, var(--sd-foil, #f6dea1));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 32%, rgb(255 255 255 / 13%));
+  border-top: 0;
   border-radius: 10px;
   background:
+    linear-gradient(
+        90deg,
+        #ffffff 0%,
+        var(--sd-accent) 36%,
+        var(--sd-foil, #f6dea1) 76%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
     radial-gradient(
-      74% 180px at 0% 0%,
-      color-mix(in srgb, var(--sd-accent) 16%, transparent),
+      76% 190px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 20%, transparent),
       transparent 72%
     ),
     radial-gradient(
-      58% 150px at 100% 100%,
-      color-mix(in srgb, var(--sd-foil, #f6dea1) 9%, transparent),
+      60% 160px at 100% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 12%, transparent),
       transparent 72%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 5%) 0%, transparent 120px),
-    linear-gradient(162deg, #0d1626 0%, #060b14 100%);
+    linear-gradient(180deg, rgb(255 255 255 / 6%) 0%, transparent 120px),
+    linear-gradient(164deg, #0a1220 0%, #040811 100%);
   box-shadow:
-    inset 0 1px 0 var(--sd-bevel-hi),
-    inset 0 -1px 0 var(--sd-bevel-lo),
-    0 26px 64px rgb(0 0 0 / 52%),
-    0 0 30px -6px color-mix(in srgb, var(--sd-accent) 12%, transparent);
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 18%, transparent),
+    0 30px 72px rgb(0 0 0 / 62%),
+    0 0 34px -6px color-mix(in srgb, var(--sd-accent) 16%, transparent);
 }
 
 html[data-family="dossier"]
@@ -3739,26 +3857,33 @@ html[data-family="dossier"]
   ):not(.dante-page):not([data-rider="cipher"])
   #dossier-index
   :is(.manager-copy-section[data-record-role="lead"], #zenith-stage-boost) {
-  border-color: color-mix(in srgb, var(--sd-accent) 38%, rgb(255 255 255 / 14%));
-  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 62%, var(--sd-accent));
+  border-color: color-mix(in srgb, var(--sd-accent) 44%, rgb(246 222 161 / 20%));
+  border-top: 0;
   background:
+    linear-gradient(
+        90deg,
+        #ffffff 0%,
+        var(--sd-foil, #f6dea1) 34%,
+        var(--sd-accent) 74%,
+        color-mix(in srgb, var(--sd-foil, #f6dea1) 48%, transparent) 100%
+      )
+      0 0 / 100% 2px no-repeat,
     radial-gradient(
-      80% 210px at 0% 0%,
-      color-mix(in srgb, var(--sd-accent) 22%, transparent),
+      82% 220px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 26%, transparent),
       transparent 72%
     ),
     radial-gradient(
-      64% 160px at 100% 100%,
-      color-mix(in srgb, var(--sd-foil, #f6dea1) 12%, transparent),
+      66% 170px at 100% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 15%, transparent),
       transparent 72%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 6.5%) 0%, transparent 140px),
-    linear-gradient(160deg, #0f1a2c 0%, #060b14 100%);
+    linear-gradient(180deg, rgb(255 255 255 / 7.5%) 0%, transparent 140px),
+    linear-gradient(162deg, #0c1627 0%, #040811 100%);
   box-shadow:
-    inset 0 1px 0 var(--sd-bevel-hi),
-    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 28%, transparent),
-    0 32px 76px rgb(0 0 0 / 60%),
-    0 0 38px -4px color-mix(in srgb, var(--sd-accent) 18%, transparent);
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 30%, transparent),
+    0 36px 84px rgb(0 0 0 / 68%),
+    0 0 42px -4px color-mix(in srgb, var(--sd-accent) 22%, transparent);
 }
 
 /* Related records (#identity-records): bevelled museum cards without corner brackets. */
@@ -3769,29 +3894,36 @@ html[data-family="dossier"]
   ):not(.dante-page)
   #identity-records
   > :is(.rider-archive-civilian, .rider-nightmare-card, #zenith-stage-boost) {
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 12%));
-  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 56%, var(--sd-accent));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 34%, rgb(255 255 255 / 14%));
+  border-top: 0;
   border-radius: 10px;
   background:
+    linear-gradient(
+        90deg,
+        #ffffff 0%,
+        var(--sd-accent) 38%,
+        var(--sd-foil, #f6dea1) 78%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
     radial-gradient(
-      74% 170px at 0% 0%,
-      color-mix(in srgb, var(--sd-accent) 18%, transparent),
+      76% 180px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 22%, transparent),
       transparent 72%
     ),
     radial-gradient(
-      56% 140px at 100% 100%,
-      color-mix(in srgb, var(--sd-foil, #f6dea1) 10%, transparent),
+      58% 150px at 100% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 13%, transparent),
       transparent 74%
     ),
-    linear-gradient(160deg, #0e1828 0%, #060b14 100%);
+    linear-gradient(162deg, #0a1322 0%, #040811 100%);
   box-shadow:
-    inset 0 1px 0 var(--sd-bevel-hi),
-    inset 0 -1px 0 var(--sd-bevel-lo),
-    0 26px 62px rgb(0 0 0 / 54%),
-    0 0 32px -6px color-mix(in srgb, var(--sd-accent) 14%, transparent);
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 20%, transparent),
+    0 30px 68px rgb(0 0 0 / 64%),
+    0 0 36px -6px color-mix(in srgb, var(--sd-accent) 18%, transparent);
 }
 
-/* Editorial chapter heading rhythm: unboxed luminous index numeral + fine rule + lead emphasis. */
+/* Editorial chapter heading rhythm: luminous index numeral + prism divider + platinum-ice title. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign):not(
     .ciel-dossier-page
@@ -3800,7 +3932,14 @@ html[data-family="dossier"]
   .manager-copy-section
   .manager-copy-heading {
   padding-bottom: 14px;
-  border-bottom: 1px solid color-mix(in srgb, var(--sd-accent) 20%, rgb(255 255 255 / 8%));
+  border-bottom: 0;
+  background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--sd-accent) 72%, var(--sd-foil, #f6dea1)) 0%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 28%, rgb(255 255 255 / 12%)) 54%,
+      transparent 98%
+    )
+    0 100% / 100% 1px no-repeat;
 }
 
 html[data-family="dossier"]
@@ -3814,11 +3953,32 @@ html[data-family="dossier"]
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: color-mix(in srgb, var(--sd-accent) 78%, var(--sd-foil, #f6dea1));
-  font: 600 15px/1.3 var(--sd-mono);
-  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--sd-foil, #f6dea1) 52%, var(--sd-accent));
+  font: 600 16px/1.3 var(--sd-mono);
+  letter-spacing: 0.14em;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 18px color-mix(in srgb, var(--sd-accent) 36%, transparent);
+  text-shadow: 0 0 20px color-mix(in srgb, var(--sd-accent) 48%, transparent);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading
+  h2 {
+  background: linear-gradient(
+    178deg,
+    #ffffff 0%,
+    #f3f9ff 42%,
+    color-mix(in srgb, var(--sd-accent) 44%, #dceeff) 78%,
+    color-mix(in srgb, var(--sd-foil, #f6dea1) 62%, var(--sd-accent)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 html[data-family="dossier"]
@@ -3829,7 +3989,7 @@ html[data-family="dossier"]
   .manager-copy-section
   .manager-copy-body
   > p:first-child {
-  color: #f2f7fc;
+  color: #f6faff;
 }
 
 /* Desktop first-view vertical rhythm & 3-column multi-fact ledger (7+ facts:
@@ -3857,7 +4017,7 @@ html[data-family="dossier"]
     .manager-quotes {
     gap: 8px;
     margin-top: 16px;
-    padding: 15px 22px 15px 24px;
+    padding: 14px 22px 14px 26px;
   }
 
   html[data-family="dossier"]
@@ -3890,7 +4050,7 @@ html[data-family="dossier"]
     .manager-facts {
     gap: 0;
     margin-top: 16px;
-    padding: 4px 10px 6px;
+    padding: 5px 10px 6px;
   }
 
   html[data-family="dossier"]
@@ -3923,7 +4083,7 @@ html[data-family="dossier"]
     #dossier-profile
     .manager-facts:not(:has(> div:nth-child(7)))
     > div:nth-child(even) {
-    border-left: 1px solid color-mix(in srgb, var(--sd-accent) 12%, rgb(255 255 255 / 5.5%));
+    border-left: 1px solid color-mix(in srgb, var(--sd-accent) 22%, rgb(255 255 255 / 10%));
   }
 
   html[data-family="dossier"]
@@ -3949,7 +4109,7 @@ html[data-family="dossier"]
     .manager-facts:has(> div:nth-child(7)) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0;
-    padding: 4px 8px 6px;
+    padding: 5px 8px 6px;
   }
 
   html[data-family="dossier"]
@@ -3962,7 +4122,7 @@ html[data-family="dossier"]
     > div {
     gap: 3px;
     padding: 7px 12px 8px;
-    border-bottom: 1px solid color-mix(in srgb, var(--sd-accent) 15%, rgb(255 255 255 / 8%));
+    border-bottom: 1px solid color-mix(in srgb, var(--sd-accent) 26%, rgb(246 222 161 / 14%));
   }
 
   html[data-family="dossier"]
@@ -3973,7 +4133,7 @@ html[data-family="dossier"]
     #dossier-profile
     .manager-facts:has(> div:nth-child(7))
     > div:not(:nth-child(3n + 1)) {
-    border-left: 1px solid color-mix(in srgb, var(--sd-accent) 12%, rgb(255 255 255 / 5.5%));
+    border-left: 1px solid color-mix(in srgb, var(--sd-accent) 22%, rgb(255 255 255 / 10%));
   }
 
   html[data-family="dossier"]
@@ -4085,7 +4245,18 @@ html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
     .dossier-identity
-    .manager-display-name {
+    .manager-display-name,
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section
+    .manager-copy-heading
+    h2 {
+    forced-color-adjust: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
     filter: none;
   }
 

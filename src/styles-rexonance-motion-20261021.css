@@ -572,20 +572,20 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   }
 
   /* The chapter's number stands left of its tick, in the HUD face (OPTICS,
-     2026-11-14: at the HUD's 11px floor, it was 9px). */
+     2026-11-14: at the HUD's 12px floor). */
   .rxs-page.rxs-page.rxs-rexonance-page > .rxk-rail > .rxk-rail-tick > b {
     position: absolute;
     top: 50%;
     right: 13px;
     translate: 6px -50%;
     color: rgb(var(--rxk-ice));
-    font: 400 11px / 1 var(--dx-hud, sans-serif);
+    font: 400 12px / 1 var(--dx-hud, sans-serif);
     letter-spacing: 0.08em;
-    text-shadow: 0 0 6px rgb(var(--rxk-ice) / 18%);
+    text-shadow: 0 0 8px rgb(var(--rxk-ice) / 28%);
     /* A dark backing: the number reads over whatever the rail passes. */
-    padding: 2px 4px;
-    border-radius: 2px;
-    background: rgb(2 5 10 / 78%);
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: rgb(2 5 10 / 84%);
     opacity: 0;
     transition:
       opacity 320ms ease,
@@ -964,6 +964,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
       :is(
         .rxs-p14-copy > dl > div,
         .rxs-processing-comparison > div > section,
+        .rxs-comparison-metrics > article,
+        .rxs-p14-metrics > article,
         .rxs-stage-panel > div > ul > li,
         .rxs-specs > div
       ) {
@@ -984,6 +986,31 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
       ):hover {
       translate: 0 -3px;
       scale: 1.008;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page
+      :is(.rxs-comparison-metrics > article, .rxs-p14-metrics > article):hover {
+      translate: 0 -2px;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"])
+      body
+      #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#ring-b):not(#rxt)
+      :is(
+        .rxs-comparison-metrics > article,
+        .rxs-p14-metrics > article,
+        .rxs-p14-copy > dl > div,
+        .rxs-processing-comparison > div > section,
+        .rxs-specs > div
+      ):hover {
+      border-color: rgb(156 240 255 / 64%);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 42%),
+        inset 0 0 0 1px rgb(121 232 255 / 28%),
+        0 20px 44px -16px rgb(0 0 0 / 88%),
+        0 0 30px -6px rgb(121 232 255 / 38%);
     }
 
     html[data-family="special"]:not([data-world-effects="economy"])

@@ -78,16 +78,24 @@ html .fst-page.fst-page .fst-cast-console {
   background:
     var(--fsl-grain) 0 0 / 160px 160px,
     var(--fsk-paper) 0 0 / 26px 26px,
-    radial-gradient(ellipse 54% 42% at 6% 0%, rgb(255 212 146 / 18%), transparent 70%),
-    radial-gradient(ellipse 46% 36% at 96% 6%, rgb(122 232 255 / 12%), transparent 68%),
-    radial-gradient(ellipse 50% 42% at 96% 100%, rgb(201 155 255 / 13%), transparent 74%),
-    var(--fst-prism-soft) top / 100% 1px no-repeat,
-    linear-gradient(162deg, #152142 0%, #0c142c 52%, #070c1c 100%);
+    linear-gradient(
+        90deg,
+        transparent 4%,
+        rgb(245 202 121 / 86%) 22%,
+        rgb(255 247 224 / 92%) 48%,
+        rgb(122 232 255 / 80%) 78%,
+        transparent 96%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 56% 44% at 6% 2%, rgb(255 212 146 / 24%), transparent 70%),
+    radial-gradient(ellipse 46% 36% at 96% 6%, rgb(122 232 255 / 15%), transparent 68%),
+    radial-gradient(ellipse 50% 42% at 96% 100%, rgb(201 155 255 / 15%), transparent 74%),
+    linear-gradient(162deg, #101b3b 0%, #080f24 52%, #040713 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 244 218 / 22%),
-    inset 0 0 0 1px rgb(255 217 163 / 14%),
-    0 26px 58px rgb(0 0 0 / 48%),
-    0 0 36px -12px rgb(255 212 146 / 18%);
+    inset 0 1px 0 rgb(255 248 226 / 28%),
+    inset 0 0 0 1px rgb(255 217 150 / 18%),
+    0 30px 68px rgb(0 0 0 / 56%),
+    0 0 44px -10px rgb(255 212 146 / 24%);
 }
 
 html .fst-page.fst-page .fst-pickup-card {

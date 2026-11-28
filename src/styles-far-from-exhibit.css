@@ -26,8 +26,9 @@
   aspect-ratio: 5 / 1;
   clip-path: polygon(2.3% 0, 100% 0, 97.7% 100%, 0 100%);
   filter:
-    drop-shadow(0 12px 28px rgb(0 4 18 / 74%))
-    drop-shadow(0 0 20px rgb(127 230 255 / 26%));
+    drop-shadow(0 14px 32px rgb(0 4 18 / 84%))
+    drop-shadow(0 0 24px rgb(127 230 255 / 38%))
+    drop-shadow(0 0 38px rgb(255 215 122 / 18%));
 }
 #top.ffs-page .ffs-exhibit-core {
   position: relative;
@@ -35,8 +36,8 @@
   max-width: 600px;
   aspect-ratio: 700 / 288;
   background:
-    radial-gradient(ellipse 66% 62% at 48% 54%, rgb(92 178 255 / 32%), rgb(162 114 255 / 18%) 46%, transparent 72%),
-    radial-gradient(ellipse 36% 34% at 50% 42%, rgb(255 215 122 / 16%), transparent 66%);
+    radial-gradient(ellipse 68% 64% at 48% 54%, rgb(104 202 255 / 38%), rgb(162 114 255 / 20%) 46%, transparent 72%),
+    radial-gradient(ellipse 40% 36% at 50% 42%, rgb(255 224 148 / 26%), transparent 64%);
 }
 #top.ffs-page .ffs-exhibit-core img {
   position: absolute;
@@ -44,23 +45,29 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 0 24px rgb(127 230 255 / 32%));
+  filter:
+    drop-shadow(0 0 28px rgb(127 230 255 / 44%))
+    drop-shadow(0 0 46px rgb(255 215 122 / 22%));
 }
 #top.ffs-page .ffs-exhibit-core::before,
 #top.ffs-page .ffs-exhibit-core::after {
   content: "";
   position: absolute;
-  inset: 27% 7% 24%;
-  border: 1px solid rgb(138 232 255 / 62%);
-  border-left-color: rgb(138 232 255 / 16%);
+  inset: 25% 6% 22%;
+  border: 1.5px solid rgb(156 242 255 / 78%);
+  border-left-color: rgb(138 232 255 / 20%);
   border-radius: 50%;
-  box-shadow: 0 0 18px rgb(127 230 255 / 22%);
+  box-shadow:
+    0 0 22px rgb(127 230 255 / 34%),
+    inset 0 0 18px rgb(127 230 255 / 16%);
   transform: rotate(-9deg);
 }
 #top.ffs-page .ffs-exhibit-core::after {
-  inset: 23% 12% 22%;
-  border-color: rgb(255 215 122 / 64%) rgb(201 155 255 / 18%) rgb(201 155 255 / 56%) rgb(255 215 122 / 22%);
-  box-shadow: 0 0 22px rgb(255 215 122 / 18%);
+  inset: 21% 11% 20%;
+  border-color: rgb(255 226 150 / 82%) rgb(201 155 255 / 22%) rgb(127 230 255 / 62%) rgb(255 215 122 / 28%);
+  box-shadow:
+    0 0 26px rgb(255 215 122 / 28%),
+    inset 0 0 16px rgb(255 215 122 / 14%);
   transform: rotate(14deg);
 }
 
@@ -111,7 +118,7 @@
   box-shadow: none;
 }
 
-/* Multi-layer titanium-glass form exhibition stage */
+/* Multi-layer obsidian-glass starship-bridge form exhibition vitrine */
 #top.ffs-page > #stages #ffs-stage-panel {
   position: relative;
   margin: clamp(16px, 1.8vw, 26px) auto 0;
@@ -119,101 +126,124 @@
   gap: 0;
   overflow: hidden;
   clip-path: none;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--ffs-accent) 44%, rgb(138 232 255 / 26%));
-  border-top: 2px solid color-mix(in srgb, var(--ffs-accent) 88%, #ffffff);
+  border-radius: var(--ring-radius-card, 28px);
+  border: 1px solid transparent;
   background:
-    radial-gradient(ellipse 74% 64% at 74% 38%, color-mix(in srgb, var(--ffs-accent) 26%, transparent), transparent 64%),
-    radial-gradient(ellipse 60% 54% at 14% 12%, color-mix(in srgb, var(--ffs-accent) 16%, transparent), transparent 60%),
-    radial-gradient(ellipse 56% 50% at 88% 92%, rgb(168 120 255 / 16%), transparent 64%),
-    linear-gradient(156deg, rgb(14 26 58 / 96%) 0%, rgb(8 15 36 / 98%) 54%, rgb(4 9 22 / 99%) 100%);
+    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 76% 64% at 74% 38%, color-mix(in srgb, var(--ffs-accent) 30%, transparent), transparent 64%) padding-box,
+    radial-gradient(ellipse 62% 54% at 14% 12%, color-mix(in srgb, var(--ffs-accent) 18%, transparent), transparent 60%) padding-box,
+    radial-gradient(ellipse 56% 50% at 88% 92%, rgb(255 215 122 / 14%), transparent 64%) padding-box,
+    linear-gradient(156deg, rgb(12 22 52 / 97%) 0%, rgb(6 11 28 / 99%) 54%, rgb(3 6 16 / 100%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 252 240 / 74%) 0%,
+      color-mix(in srgb, var(--ffs-accent) 82%, #7fe6ff) 36%,
+      rgb(255 215 122 / 64%) 70%,
+      color-mix(in srgb, var(--ffs-accent) 52%, rgb(138 232 255)) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(242 252 255 / 34%),
-    inset 0 0 0 1px color-mix(in srgb, var(--ffs-accent) 22%, transparent),
-    0 28px 72px -20px rgb(0 4 18 / 92%),
-    0 0 52px -14px color-mix(in srgb, var(--ffs-accent) 36%, transparent);
+    inset 0 1px 0 rgb(255 252 244 / 46%),
+    inset 0 0 0 1px color-mix(in srgb, var(--ffs-accent) 26%, transparent),
+    0 32px 80px -20px rgb(0 2 14 / 96%),
+    0 0 60px -14px color-mix(in srgb, var(--ffs-accent) 44%, transparent);
 }
 #top.ffs-page > #stages #ffs-stage-panel::before {
   content: "";
   position: absolute;
-  inset: 0 0 auto;
-  height: 2px;
+  inset: 0 28px auto 28px;
+  height: 2.5px;
+  border-radius: var(--ring-radius-pill, 999px);
   z-index: 3;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--ffs-accent) 88%, white),
-    #7fe6ff 34%,
-    #c99bff 68%,
-    #ffd77a 94%,
+    transparent,
+    color-mix(in srgb, var(--ffs-accent) 88%, #ffffff) 16%,
+    #ffffff 42%,
+    #ffd77a 74%,
     transparent
   );
-  box-shadow: 0 0 20px color-mix(in srgb, var(--ffs-accent) 68%, transparent);
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--ffs-accent) 78%, transparent),
+    0 0 34px rgb(255 215 122 / 36%);
   pointer-events: none;
 }
 #top.ffs-page > #stages #ffs-stage-panel > figure {
   min-width: 0;
   margin: 0;
   border: 0;
-  border-inline-start: 1px solid color-mix(in srgb, var(--ffs-accent) 26%, rgb(138 232 255 / 16%));
+  border-inline-start: 1px solid color-mix(in srgb, var(--ffs-accent) 34%, rgb(255 224 148 / 22%));
   border-radius: 0;
   background:
-    radial-gradient(ellipse 72% 62% at 50% 42%, color-mix(in srgb, var(--ffs-accent) 24%, transparent), transparent 68%),
-    radial-gradient(ellipse 68% 30% at 50% 98%, color-mix(in srgb, var(--ffs-accent) 22%, transparent), transparent 72%),
-    linear-gradient(180deg, rgb(8 16 38 / 86%), rgb(4 8 20 / 96%));
+    radial-gradient(closest-side at 50% 44%, transparent calc(84% - 1px), color-mix(in srgb, var(--ffs-accent) 34%, transparent) calc(84% - 1px) 84%, transparent 84.5%),
+    radial-gradient(closest-side at 50% 44%, transparent calc(64% - 1px), rgb(255 215 122 / 26%) calc(64% - 1px) 64%, transparent 64.5%),
+    radial-gradient(ellipse 74% 64% at 50% 42%, color-mix(in srgb, var(--ffs-accent) 30%, transparent), transparent 68%),
+    radial-gradient(ellipse 68% 32% at 50% 98%, color-mix(in srgb, var(--ffs-accent) 26%, transparent), transparent 72%),
+    linear-gradient(180deg, rgb(7 14 34 / 90%), rgb(3 6 16 / 98%));
   box-shadow:
-    inset 0 0 42px rgb(2 6 18 / 72%),
-    inset 0 1px 0 rgb(242 252 255 / 22%);
+    inset 0 0 50px rgb(2 5 16 / 78%),
+    inset 0 1px 0 rgb(255 252 244 / 26%);
 }
 
 /* Divine Ultra Special Exhibition Stage: celestial white-sapphire-gold aura
    and double-matted museum framing when Ultra is selected */
 #top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) {
-  border-color: rgb(255 224 148 / 68%);
-  border-top-color: #fff6dc;
   background:
-    radial-gradient(ellipse 56% 62% at 74% 38%, rgb(245 253 255 / 24%), rgb(140 236 255 / 28%) 34%, rgb(255 220 138 / 18%) 56%, transparent 76%),
-    radial-gradient(ellipse 50% 46% at 74% 16%, rgb(255 226 150 / 26%), transparent 66%),
-    radial-gradient(ellipse 64% 58% at 14% 14%, rgb(156 241 255 / 20%), transparent 62%),
-    radial-gradient(ellipse 58% 54% at 86% 90%, rgb(198 152 255 / 24%), transparent 66%),
-    linear-gradient(150deg, #101e46 0%, #091330 52%, #050a1c 100%);
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 254 246 / 28%), transparent 66%) padding-box,
+    radial-gradient(ellipse 58% 64% at 74% 38%, rgb(248 254 255 / 30%), rgb(140 236 255 / 32%) 34%, rgb(255 220 138 / 22%) 56%, transparent 76%) padding-box,
+    radial-gradient(ellipse 50% 46% at 74% 16%, rgb(255 230 156 / 32%), transparent 66%) padding-box,
+    radial-gradient(ellipse 64% 58% at 14% 14%, rgb(156 241 255 / 24%), transparent 62%) padding-box,
+    radial-gradient(ellipse 58% 54% at 86% 90%, rgb(206 160 255 / 26%), transparent 66%) padding-box,
+    linear-gradient(150deg, #0f1d44 0%, #07102a 52%, #040818 100%) padding-box,
+    linear-gradient(142deg, #ffffff 0%, #9cf1ff 28%, #ffe49e 64%, #ffffff 100%) border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 58%),
-    inset 0 0 0 1px rgb(156 241 255 / 34%),
-    inset 0 0 54px rgb(156 241 255 / 16%),
-    0 34px 86px -16px rgb(0 4 18 / 96%),
-    0 0 76px -12px rgb(156 241 255 / 44%),
-    0 0 48px -10px rgb(255 222 138 / 34%);
+    inset 0 1.5px 0 rgb(255 255 255 / 72%),
+    inset 0 0 0 1px rgb(156 241 255 / 42%),
+    inset 0 0 60px rgb(156 241 255 / 20%),
+    0 36px 92px -16px rgb(0 3 16 / 98%),
+    0 0 84px -10px rgb(156 241 255 / 52%),
+    0 0 54px -10px rgb(255 222 138 / 42%);
 }
 #top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"])::before {
+  inset: 0 28px auto 28px;
   height: 3px;
-  background: linear-gradient(90deg, #ffffff, #9cf1ff 28%, #ffe49e 58%, #d6b6ff 84%, #ffffff);
+  border-radius: var(--ring-radius-pill, 999px);
+  background: linear-gradient(90deg, transparent, #ffffff 14%, #9cf1ff 36%, #ffe49e 64%, #ffffff 86%, transparent);
   box-shadow:
-    0 0 24px rgb(156 241 255 / 82%),
-    0 0 40px rgb(255 224 148 / 54%);
+    0 0 28px rgb(156 241 255 / 90%),
+    0 0 46px rgb(255 224 148 / 62%);
 }
 #top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) > figure {
-  border-inline-start-color: rgb(255 224 148 / 46%);
+  border-inline-start-color: rgb(255 228 156 / 54%);
   background:
-    radial-gradient(ellipse 68% 58% at 50% 40%, rgb(245 253 255 / 26%), rgb(148 236 255 / 24%) 42%, rgb(255 220 138 / 14%) 64%, transparent 78%),
-    radial-gradient(ellipse 62% 30% at 50% 96%, rgb(255 220 138 / 28%), rgb(156 241 255 / 18%) 50%, transparent 74%),
-    linear-gradient(180deg, #0b1738, #050b1f);
+    radial-gradient(closest-side at 50% 42%, transparent calc(86% - 1.5px), rgb(156 241 255 / 46%) calc(86% - 1.5px) 86%, transparent 86.5%),
+    radial-gradient(closest-side at 50% 42%, transparent calc(66% - 1.5px), rgb(255 226 150 / 42%) calc(66% - 1.5px) 66%, transparent 66.5%),
+    radial-gradient(ellipse 68% 58% at 50% 40%, rgb(245 253 255 / 32%), rgb(148 236 255 / 28%) 42%, rgb(255 220 138 / 18%) 64%, transparent 78%),
+    radial-gradient(ellipse 62% 30% at 50% 96%, rgb(255 224 148 / 34%), rgb(156 241 255 / 22%) 50%, transparent 74%),
+    linear-gradient(180deg, #0a1636, #04091a);
   box-shadow:
-    inset 0 0 0 1px rgb(255 244 214 / 24%),
-    inset 0 0 48px rgb(156 241 255 / 18%);
+    inset 0 0 0 1px rgb(255 248 224 / 30%),
+    inset 0 0 54px rgb(156 241 255 / 22%);
 }
 #top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) .ffs-stage-copy h3 {
-  color: #ffffff;
-  text-shadow:
-    0 2px 6px rgb(2 6 18 / 86%),
-    0 0 32px rgb(156 241 255 / 72%),
-    0 0 58px rgb(255 224 148 / 44%);
+  background: linear-gradient(176deg, #ffffff 0%, #e4fbff 36%, #9ef2ff 64%, #ffe5a2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 6 18 / 92%))
+    drop-shadow(0 0 28px rgb(156 241 255 / 72%))
+    drop-shadow(0 0 48px rgb(255 224 148 / 46%));
 }
 #top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) .ffs-stage-copy h3::after {
-  width: 1.8em;
+  width: 2.1em;
+  border-radius: var(--ring-radius-pill, 999px);
   background: linear-gradient(90deg, #ffffff, #9cf1ff 42%, #ffd77a);
   box-shadow:
-    0 0 18px rgb(156 241 255 / 78%),
-    0 0 28px rgb(255 215 122 / 48%);
+    0 0 20px rgb(156 241 255 / 86%),
+    0 0 32px rgb(255 215 122 / 56%);
 }
 
 #top.ffs-page > #stages #ffs-stage-panel > .ffs-stage-copy {
@@ -224,22 +254,28 @@
 #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy h3 {
   width: fit-content;
   margin: 0 0 .62em;
-  color: #f8fbff;
+  background: linear-gradient(176deg, #ffffff 0%, #eef8ff 40%, color-mix(in srgb, var(--ffs-accent) 72%, #ffffff) 74%, #ffe8ad 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
   font-size: clamp(30px, 3.25vw, 58px);
   font-weight: 800;
   letter-spacing: .015em;
-  text-shadow:
-    0 2px 6px rgb(2 6 18 / 82%),
-    0 0 28px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
+  text-shadow: none;
+  filter:
+    drop-shadow(0 3px 0 rgb(2 6 18 / 90%))
+    drop-shadow(0 0 24px color-mix(in srgb, var(--ffs-accent) 58%, transparent));
 }
 #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy h3::after {
   display: block;
-  width: 1.4em;
+  width: 1.6em;
   height: 3px;
+  border-radius: var(--ring-radius-pill, 999px);
   margin-top: .43em;
   content: "";
   background: linear-gradient(90deg, #ffffff, var(--ffs-accent) 44%, #ffd77a);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--ffs-accent) 62%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--ffs-accent) 72%, transparent);
 }
 #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy p {
   max-width: 36em;
@@ -360,31 +396,46 @@
 }
 #top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > p + p { margin-top: 1.12em; }
 
-/* Reports, weapons and finishers: archival titanium-glass dossiers & armament plates */
+/* Reports, weapons and finishers: obsidian starship-bridge archival dossiers */
 #top.ffs-page > #report .ffs-report {
   padding: clamp(22px, 2.8vw, 44px) clamp(18px, 2.8vw, 44px);
-  border: 1px solid rgb(138 232 255 / 32%);
-  border-block-start: 2px solid #7fe6ff;
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--ring-radius-card, 28px);
   background:
-    radial-gradient(ellipse 74% 52% at 6% 0%, rgb(112 214 255 / 20%), transparent 58%),
-    radial-gradient(ellipse 62% 48% at 94% 100%, rgb(168 120 255 / 14%), transparent 62%),
-    linear-gradient(155deg, rgb(14 26 58 / 95%) 0%, rgb(8 16 36 / 97%) 46%, rgb(5 10 24 / 99%) 100%);
+    radial-gradient(ellipse 74% 26% at 50% 0%, rgb(255 252 242 / 16%), transparent 68%) padding-box,
+    radial-gradient(ellipse 74% 52% at 6% 0%, rgb(112 214 255 / 20%), transparent 58%) padding-box,
+    radial-gradient(ellipse 62% 48% at 94% 100%, rgb(255 215 122 / 12%), transparent 62%) padding-box,
+    linear-gradient(155deg, rgb(12 22 50 / 97%) 0%, rgb(6 12 28 / 98%) 48%, rgb(3 7 18 / 100%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 250 236 / 62%) 0%,
+      rgb(127 230 255 / 56%) 38%,
+      rgb(255 215 122 / 48%) 78%,
+      rgb(138 232 255 / 44%) 100%
+    )
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(238 251 255 / 28%),
-    inset 0 0 0 1px rgb(192 142 255 / 12%),
-    0 24px 58px -20px rgb(0 4 18 / 90%);
+    inset 0 1px 0 rgb(255 252 242 / 38%),
+    inset 0 0 0 1px rgb(127 230 255 / 14%),
+    0 28px 64px -20px rgb(0 2 14 / 94%);
 }
 /* ReportDocument retains the official title and subtitle. Its retired chrome
    caption was still being painted by the older comparison-console sheet. */
 #top.ffs-page > #report .ffs-report::before { content: none; }
 #top.ffs-page > #report .ffs-report + .ffs-report {
-  border-color: rgb(201 155 255 / 34%);
-  border-block-start-color: #ffd77a;
   background:
-    radial-gradient(ellipse 74% 52% at 6% 0%, rgb(201 155 255 / 20%), transparent 58%),
-    radial-gradient(ellipse 62% 48% at 94% 100%, rgb(255 215 122 / 14%), transparent 62%),
-    linear-gradient(155deg, rgb(22 24 54 / 95%) 0%, rgb(11 16 36 / 97%) 46%, rgb(6 10 24 / 99%) 100%);
+    radial-gradient(ellipse 74% 26% at 50% 0%, rgb(255 250 232 / 18%), transparent 68%) padding-box,
+    radial-gradient(ellipse 74% 52% at 6% 0%, rgb(255 215 122 / 18%), transparent 58%) padding-box,
+    radial-gradient(ellipse 62% 48% at 94% 100%, rgb(127 230 255 / 14%), transparent 62%) padding-box,
+    linear-gradient(155deg, rgb(18 22 48 / 97%) 0%, rgb(8 13 30 / 98%) 48%, rgb(4 7 18 / 100%) 100%) padding-box,
+    linear-gradient(
+      148deg,
+      rgb(255 250 232 / 72%) 0%,
+      rgb(255 215 122 / 64%) 40%,
+      rgb(138 232 255 / 48%) 78%,
+      rgb(255 215 122 / 54%) 100%
+    )
+      border-box;
 }
 #top.ffs-page > #report .ffs-report details[open] > summary {
   background:
@@ -499,7 +550,7 @@
 
 html:is([data-world-effects="economy"], [data-rzn-constrained])
   #top.ffs-page
-  :is(.ffs-exhibit-forms, .ffs-exhibit-core img, .ffs-form-code) {
+  :is(.ffs-exhibit-forms, .ffs-exhibit-core img, .ffs-form-code, #ffs-stage-panel .ffs-stage-copy h3) {
   filter: none;
 }
 
@@ -513,6 +564,14 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
     border: 1px solid CanvasText;
     background: Canvas;
     box-shadow: none;
+  }
+  #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy h3,
+  #top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) .ffs-stage-copy h3 {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+    text-shadow: none;
   }
   #top.ffs-page > #stages #ffs-stage-panel::before { display: none; }
   #top.ffs-page .ffs-exhibit-core::before,

@@ -456,17 +456,17 @@ html[data-family="special"]
   display: block;
   width: calc(var(--rsn-figure-size) * 1.5);
   aspect-ratio: 1;
-  border: 1px solid rgb(var(--rsn-ice) / 38%);
+  border: 1px solid rgb(var(--rsn-ice) / 48%);
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgb(var(--rsn-ice) / 14%) 0%,
-    rgb(var(--rsn-violet) / 6%) 54%,
+    rgb(var(--rsn-ice) / 20%) 0%,
+    rgb(var(--rsn-violet) / 9%) 54%,
     transparent 76%
   );
   box-shadow:
-    0 0 24px rgb(var(--rsn-ice) / 18%),
-    inset 0 0 18px rgb(var(--rsn-ice) / 14%);
+    0 0 28px rgb(var(--rsn-ice) / 26%),
+    inset 0 0 22px rgb(var(--rsn-ice) / 18%);
   translate: -50% -50%;
   pointer-events: none;
 }
@@ -479,14 +479,14 @@ html[data-family="special"]
   > .rsn-field
   > i:nth-child(2) {
   width: calc(var(--rsn-figure-size) * 2.13);
-  border-color: rgb(var(--rsn-violet) / 28%);
+  border-color: rgb(var(--rsn-violet) / 36%);
   background: radial-gradient(
     circle,
-    transparent 48%,
-    rgb(var(--rsn-violet) / 8%) 78%,
-    rgb(var(--rsn-gold) / 10%) 100%
+    transparent 46%,
+    rgb(var(--rsn-violet) / 11%) 76%,
+    rgb(var(--rsn-gold) / 14%) 100%
   );
-  box-shadow: 0 0 28px rgb(var(--rsn-violet) / 14%);
+  box-shadow: 0 0 32px rgb(var(--rsn-violet) / 20%);
 }
 
 html[data-family="special"]
@@ -497,9 +497,9 @@ html[data-family="special"]
   > .rsn-field
   > i:nth-child(3) {
   width: calc(var(--rsn-figure-size) * 2.91);
-  border-color: rgb(var(--rsn-gold) / 22%);
+  border-color: rgb(var(--rsn-gold) / 32%);
   background: none;
-  box-shadow: none;
+  box-shadow: 0 0 24px rgb(var(--rsn-gold) / 16%);
 }
 
 html[data-family="special"]
@@ -554,16 +554,16 @@ html[data-family="special"]
   article:nth-child(2)
   > .rsn-field
   > i:first-child {
-  border-color: rgb(var(--rsn-pink) / 42%);
+  border-color: rgb(var(--rsn-pink) / 50%);
   background: radial-gradient(
     circle,
-    rgb(var(--rsn-pink) / 15%) 0%,
-    rgb(var(--rsn-violet) / 7%) 54%,
+    rgb(var(--rsn-pink) / 20%) 0%,
+    rgb(var(--rsn-violet) / 9%) 54%,
     transparent 76%
   );
   box-shadow:
-    0 0 24px rgb(var(--rsn-pink) / 20%),
-    inset 0 0 18px rgb(var(--rsn-pink) / 15%);
+    0 0 28px rgb(var(--rsn-pink) / 26%),
+    inset 0 0 22px rgb(var(--rsn-pink) / 18%);
 }
 
 /* The prism edge each cut enters with (the motion sheet draws it). */
@@ -650,10 +650,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-
   width: min(118%, 900px);
   aspect-ratio: 1.6;
   background:
-    radial-gradient(closest-side, transparent 52%, rgb(var(--rsn-ice) / 30%) 52.4% 52.8%, transparent 53.2%),
-    radial-gradient(closest-side, transparent 70%, rgb(var(--rsn-violet) / 24%) 70.3% 70.6%, transparent 71%),
-    radial-gradient(closest-side, transparent 88%, rgb(var(--rsn-pink) / 18%) 88.3% 88.6%, transparent 89%);
-  opacity: 0.55;
+    radial-gradient(closest-side, rgb(var(--rsn-ice) / 18%) 0%, rgb(var(--rsn-violet) / 10%) 32%, transparent 56%),
+    radial-gradient(closest-side, transparent 52%, rgb(var(--rsn-ice) / 44%) 52.4% 52.8%, transparent 53.2%),
+    radial-gradient(closest-side, transparent 70%, rgb(var(--rsn-violet) / 36%) 70.3% 70.6%, transparent 71%),
+    radial-gradient(closest-side, transparent 88%, rgb(var(--rsn-gold) / 32%) 88.3% 88.6%, transparent 89%);
+  opacity: 0.78;
   translate: -50% -22%;
   pointer-events: none;
 }
@@ -690,7 +691,7 @@ html[data-family="special"]
   aspect-ratio: 1;
   border: 1.5px solid var(--rxs-stage-accent, #79e8ff);
   border-radius: 50%;
-  box-shadow: 0 0 20px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 50%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 60%, transparent);
   opacity: 0;
   translate: -50% -50%;
 }
@@ -732,12 +733,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   width: min(92vw, 980px);
   aspect-ratio: 1;
   background:
-    radial-gradient(closest-side, transparent 24%, rgb(var(--rsn-ice) / 26%) 24.3% 24.6%, transparent 25%),
-    radial-gradient(closest-side, transparent 44%, rgb(var(--rsn-violet) / 22%) 44.2% 44.5%, transparent 44.9%),
-    radial-gradient(closest-side, transparent 66%, rgb(var(--rsn-gold) / 22%) 66.2% 66.5%, transparent 66.9%),
-    radial-gradient(closest-side, rgb(var(--rsn-ice) / 10%), transparent 30%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 18%, #000 36%, #000 64%, transparent 82%);
-  mask-image: linear-gradient(180deg, transparent 18%, #000 36%, #000 64%, transparent 82%);
+    radial-gradient(closest-side, transparent 24%, rgb(var(--rsn-ice) / 38%) 24.3% 24.6%, transparent 25%),
+    radial-gradient(closest-side, transparent 44%, rgb(var(--rsn-violet) / 34%) 44.2% 44.5%, transparent 44.9%),
+    radial-gradient(closest-side, transparent 66%, rgb(var(--rsn-gold) / 34%) 66.2% 66.5%, transparent 66.9%),
+    radial-gradient(closest-side, rgb(var(--rsn-ice) / 16%), rgb(var(--rsn-violet) / 8%) 22%, transparent 38%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 14%, #000 34%, #000 66%, transparent 86%);
+  mask-image: linear-gradient(180deg, transparent 14%, #000 34%, #000 66%, transparent 86%);
   translate: -50% -50%;
   pointer-events: none;
 }

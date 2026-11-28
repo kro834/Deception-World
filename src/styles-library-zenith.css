@@ -1438,3 +1438,44 @@ html[data-family="library"] .search-page .search-scope-note {
     border-color: Highlight;
   }
 }
+
+/* ================================================================
+   Wave-8 — Royal Astronomical Archive & Astrolabe hardware polish:
+   high-contrast count medallions, history row glass, and card titles.
+   ================================================================ */
+html[data-family="library"] .library-page .library-hub-subhead > b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 2px 10px;
+  border: 1px solid rgb(242 207 141 / 58%);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(255 250 236 / 22%) 0%, transparent 52%),
+    linear-gradient(145deg, rgb(242 207 141 / 24%), rgb(6 14 24 / 94%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 36%),
+    0 0 16px -4px rgb(242 207 141 / 38%);
+  color: #fff1cb;
+}
+
+html[data-family="library"] .library-page .library-rows > li {
+  border-top: 1px solid rgb(157 234 250 / 16%);
+  background: linear-gradient(90deg, rgb(122 232 255 / 5%), transparent 84%);
+}
+
+html[data-family="library"] .library-page .library-card h3 > a,
+html[data-family="library"] .search-page .search-result-title {
+  color: #f7fcff;
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"] .library-page .library-hub-subhead > b,
+  html[data-family="library"] .library-page .library-rows > li {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+}

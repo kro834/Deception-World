@@ -81,23 +81,23 @@ html[data-family="world"]:root
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: clamp(32px, 6vw, 100px);
   padding: clamp(28px, 5vw, 80px);
-  border: 1px solid rgb(196 172 122 / 46%);
-  border-top: 3px solid #d9bc80;
+  border: 1px solid rgb(206 180 126 / 56%);
+  border-top: 3px solid #e2c484;
   border-radius: 0;
   background:
-    linear-gradient(#9b7838 0 0) 0 0 / 28px 2px no-repeat,
-    linear-gradient(#9b7838 0 0) 0 0 / 2px 28px no-repeat,
-    linear-gradient(#9b7838 0 0) 100% 100% / 28px 2px no-repeat,
-    linear-gradient(#9b7838 0 0) 100% 100% / 2px 28px no-repeat,
-    radial-gradient(ellipse 76% 48% at 14% 0%, rgb(255 253 246 / 82%), transparent 68%),
-    radial-gradient(ellipse 62% 54% at 92% 100%, rgb(217 188 128 / 22%), transparent 72%),
-    linear-gradient(154deg, #efebe1 0%, #e7e1d4 58%, #ddd6c5 100%);
-  color: #1e2624;
+    linear-gradient(#9b7838 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(#9b7838 0 0) 0 0 / 2px 32px no-repeat,
+    linear-gradient(#9b7838 0 0) 100% 100% / 32px 2px no-repeat,
+    linear-gradient(#9b7838 0 0) 100% 100% / 2px 32px no-repeat,
+    radial-gradient(ellipse 78% 50% at 14% 0%, rgb(255 254 248 / 88%), transparent 70%),
+    radial-gradient(ellipse 64% 56% at 92% 100%, rgb(217 188 128 / 26%), transparent 74%),
+    linear-gradient(154deg, #f3efe6 0%, #eae3d6 58%, #dfd7c6 100%);
+  color: #1c2422;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 78%),
-    inset 0 0 0 1px rgb(166 138 82 / 20%),
-    0 32px 68px -22px rgb(0 0 0 / 78%),
-    0 10px 26px -8px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 255 255 / 86%),
+    inset 0 0 0 1px rgb(166 138 82 / 24%),
+    0 36px 76px -22px rgb(0 0 0 / 86%),
+    0 12px 30px -8px rgb(0 0 0 / 56%);
 }
 html[data-family="world"]:root
   body
@@ -167,18 +167,19 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > #story
   .world-column {
-  border-color: rgb(169 196 255 / 38%);
+  border-color: rgb(164 212 255 / 44%);
   border-top: 2px solid var(--astra-gold);
   background:
-    linear-gradient(90deg, #a9c4ff 0%, #e6c786 58%, transparent 100%) 0 0 / 56% 2px no-repeat,
-    radial-gradient(ellipse 68% 60% at 96% 4%, rgb(169 196 255 / 16%), transparent 68%),
-    radial-gradient(ellipse 56% 52% at 6% 96%, rgb(201 171 255 / 14%), transparent 70%),
-    linear-gradient(156deg, #131d3a 0%, #0b1227 58%, #070c1b 100%);
+    linear-gradient(90deg, #7ae8ff 0%, #e6c786 48%, #ff5fc8 78%, transparent 100%) 0 0 / 68% 2px
+      no-repeat,
+    radial-gradient(ellipse 68% 60% at 96% 4%, rgb(122 232 255 / 18%), transparent 68%),
+    radial-gradient(ellipse 56% 52% at 6% 96%, rgb(201 171 255 / 16%), transparent 70%),
+    linear-gradient(156deg, #0b1428 0%, #060b18 58%, #03060f 100%);
   box-shadow:
-    inset 0 1px 0 rgb(232 242 255 / 26%),
-    inset 0 0 0 1px rgb(169 196 255 / 14%),
-    0 28px 58px -20px rgb(0 0 0 / 84%),
-    0 6px 20px rgb(0 0 0 / 52%);
+    inset 0 1px 0 rgb(236 248 255 / 32%),
+    inset 0 0 0 1px rgb(164 212 255 / 18%),
+    0 32px 68px -20px rgb(0 0 0 / 90%),
+    0 0 42px -16px rgb(122 232 255 / 22%);
 }
 html[data-family="world"]:root
   body
@@ -227,19 +228,19 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #story
     #manager-archive#manager-archive#manager-archive {
-    border-color: rgb(200 163 255 / 36%);
+    border-color: rgb(206 172 255 / 42%);
     border-top: 2px solid var(--astra-gold);
     background:
-      linear-gradient(90deg, #c8a3ff 0%, #ff7fa4 48%, #e6c786 84%, transparent 100%) 0 0 / 68% 2px
+      linear-gradient(90deg, #c8a3ff 0%, #ff7fa4 46%, #e6c786 82%, transparent 100%) 0 0 / 74% 2px
         no-repeat,
-      radial-gradient(ellipse 68% 48% at 6% 4%, rgb(172 118 255 / 22%), transparent 68%),
-      radial-gradient(ellipse 56% 44% at 94% 96%, rgb(255 110 156 / 16%), transparent 70%),
-      linear-gradient(158deg, #1a102b 0%, #0e0a1a 56%, #07050f 100%);
+      radial-gradient(ellipse 68% 48% at 6% 4%, rgb(172 118 255 / 26%), transparent 68%),
+      radial-gradient(ellipse 56% 44% at 94% 96%, rgb(255 110 156 / 18%), transparent 70%),
+      linear-gradient(158deg, #130b22 0%, #090613 56%, #040309 100%);
     box-shadow:
-      inset 0 1px 0 rgb(246 236 255 / 32%),
-      inset 0 0 0 1px rgb(200 163 255 / 14%),
-      0 30px 64px -22px rgb(0 0 0 / 88%),
-      0 0 42px -16px rgb(172 118 255 / 26%);
+      inset 0 1px 0 rgb(248 240 255 / 38%),
+      inset 0 0 0 1px rgb(200 163 255 / 18%),
+      0 34px 72px -22px rgb(0 0 0 / 92%),
+      0 0 48px -14px rgb(172 118 255 / 30%);
   }
 
   html[data-family="world"]:root
@@ -249,18 +250,18 @@ html[data-family="world"]:root
     #manager-archive#manager-archive#manager-archive
     .manager-slot-grid
     > :is(.signal, .dante-archive, .other-archive-card, .archive-placeholder) {
-    border-color: rgb(200 163 255 / 34%);
-    border-top: 2px solid rgb(230 199 134 / 72%);
-    background-color: #0b0714;
+    border-color: rgb(206 172 255 / 40%);
+    border-top: 2px solid rgb(236 206 142 / 80%);
+    background-color: #07040e;
     background-image:
-      radial-gradient(ellipse 76% 48% at 14% 0%, rgb(224 202 255 / 14%), transparent 66%),
-      radial-gradient(ellipse 60% 42% at 92% 100%, rgb(255 127 164 / 12%), transparent 70%),
-      linear-gradient(154deg, rgb(28 16 44 / 78%), rgb(8 5 16 / 96%) 64%);
+      radial-gradient(ellipse 76% 48% at 14% 0%, rgb(224 202 255 / 18%), transparent 66%),
+      radial-gradient(ellipse 60% 42% at 92% 100%, rgb(255 127 164 / 14%), transparent 70%),
+      linear-gradient(154deg, rgb(22 12 36 / 86%), rgb(5 3 11 / 98%) 64%);
     box-shadow:
-      inset 0 1px 0 rgb(255 244 255 / 34%),
-      inset 0 0 0 1px rgb(200 163 255 / 18%),
-      0 20px 40px -16px rgb(0 0 0 / 90%),
-      0 4px 14px rgb(0 0 0 / 54%);
+      inset 0 1px 0 rgb(255 246 255 / 40%),
+      inset 0 0 0 1px rgb(200 163 255 / 22%),
+      0 22px 46px -16px rgb(0 0 0 / 92%),
+      0 4px 16px rgb(0 0 0 / 58%);
   }
 
   html[data-family="world"]:root
@@ -268,17 +269,19 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #riders#riders
     > .rider-console {
-    border-color: rgb(207 216 227 / 38%);
+    border-color: rgb(196 220 242 / 44%);
     border-top: 2px solid var(--astra-gold);
     background:
-      radial-gradient(ellipse 68% 42% at 14% 0%, rgb(236 244 255 / 14%), transparent 66%),
-      radial-gradient(ellipse 52% 40% at 92% 100%, rgb(255 95 200 / 12%), transparent 70%),
-      linear-gradient(158deg, #161d27 0%, #0b1018 58%, #06090f 100%);
+      linear-gradient(90deg, #7ae8ff 0%, #e6c786 48%, #ff5fc8 80%, transparent 100%) 0 0 / 68% 2px
+        no-repeat,
+      radial-gradient(ellipse 68% 44% at 14% 0%, rgb(122 232 255 / 18%), transparent 66%),
+      radial-gradient(ellipse 52% 42% at 92% 100%, rgb(255 95 200 / 16%), transparent 70%),
+      linear-gradient(158deg, #0d141e 0%, #070b12 58%, #03050a 100%);
     box-shadow:
-      inset 0 1px 0 rgb(244 250 255 / 34%),
-      inset 0 0 0 1px rgb(207 216 227 / 14%),
-      0 30px 64px -22px rgb(0 0 0 / 88%),
-      0 8px 22px rgb(0 0 0 / 56%);
+      inset 0 1px 0 rgb(246 252 255 / 38%),
+      inset 0 0 0 1px rgb(196 220 242 / 18%),
+      0 34px 72px -22px rgb(0 0 0 / 92%),
+      0 0 46px -16px rgb(122 232 255 / 24%);
   }
 
   html[data-family="world"]:root
@@ -291,11 +294,11 @@ html[data-family="world"]:root
     background:
       radial-gradient(
         ellipse 64% 62% at 78% 12%,
-        color-mix(in srgb, var(--rider-tone, #7ae8ff) 22%, transparent),
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 26%, transparent),
         transparent 68%
       ),
-      radial-gradient(ellipse 52% 46% at 14% 94%, rgb(230 199 134 / 10%), transparent 70%),
-      linear-gradient(132deg, #131c28 0%, #090e16 58%, #05080e 100%);
+      radial-gradient(ellipse 52% 46% at 14% 94%, rgb(230 199 134 / 12%), transparent 70%),
+      linear-gradient(132deg, #0b121c 0%, #060a11 58%, #030509 100%);
   }
 
   html[data-family="world"]:root
@@ -303,19 +306,19 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #riders#riders
     .rider-copy-block {
-    border-color: rgb(207 216 227 / 34%);
+    border-color: rgb(196 222 246 / 40%);
     border-left: 3px solid var(--rider-tone, var(--astra-gold));
     background:
       radial-gradient(
         ellipse 74% 48% at 12% 0%,
-        color-mix(in srgb, var(--rider-tone, #7ae8ff) 14%, transparent),
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 18%, transparent),
         transparent 68%
       ),
-      linear-gradient(150deg, rgb(22 33 48 / 86%), rgb(8 12 20 / 96%) 64%);
+      linear-gradient(150deg, rgb(12 20 32 / 92%), rgb(4 7 14 / 98%) 64%);
     box-shadow:
-      inset 0 1px 0 rgb(244 250 255 / 32%),
-      inset 0 0 0 1px rgb(207 216 227 / 12%),
-      0 22px 44px -16px rgb(0 0 0 / 86%);
+      inset 0 1px 0 rgb(246 252 255 / 36%),
+      inset 0 0 0 1px rgb(196 222 246 / 16%),
+      0 24px 48px -16px rgb(0 0 0 / 90%);
   }
 }
 
@@ -390,18 +393,18 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > #cast-roster#cast-roster
   .wa-person {
-  border: 1px solid rgb(109 223 186 / 32%);
+  border: 1px solid rgb(109 223 186 / 38%);
   border-top: 2px solid var(--astra-gold);
   border-radius: 4px;
   background:
-    radial-gradient(ellipse 74% 46% at 14% 0%, rgb(109 223 186 / 14%), transparent 66%),
-    radial-gradient(ellipse 56% 42% at 92% 100%, rgb(230 199 134 / 10%), transparent 70%),
-    linear-gradient(156deg, #102421 0%, #081414 58%, #050c0c 100%);
+    radial-gradient(ellipse 74% 46% at 14% 0%, rgb(109 223 186 / 18%), transparent 66%),
+    radial-gradient(ellipse 56% 42% at 92% 100%, rgb(230 199 134 / 12%), transparent 70%),
+    linear-gradient(156deg, #0b1b19 0%, #050d0e 58%, #030708 100%);
   box-shadow:
-    inset 0 1px 0 rgb(232 252 246 / 32%),
-    inset 0 0 0 1px rgb(109 223 186 / 14%),
-    0 20px 42px -18px rgb(0 0 0 / 88%),
-    0 4px 14px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(236 254 248 / 38%),
+    inset 0 0 0 1px rgb(109 223 186 / 18%),
+    0 22px 46px -18px rgb(0 0 0 / 92%),
+    0 4px 16px rgb(0 0 0 / 56%);
 }
 html[data-family="world"]:root
   body
@@ -411,12 +414,12 @@ html[data-family="world"]:root
   border-color: #6ddfba;
   border-top-color: #fff3d2;
   background:
-    radial-gradient(ellipse 80% 48% at 16% 0%, rgb(109 223 186 / 22%), transparent 68%),
-    linear-gradient(154deg, #14322d 0%, #0a1b19 58%, #061010 100%);
+    radial-gradient(ellipse 80% 48% at 16% 0%, rgb(109 223 186 / 26%), transparent 68%),
+    linear-gradient(154deg, #0f2824 0%, #071413 58%, #040a0a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 54%),
-    0 24px 48px -16px rgb(0 0 0 / 90%),
-    0 0 32px -8px rgb(109 223 186 / 34%);
+    inset 0 1px 0 rgb(255 255 255 / 58%),
+    0 26px 52px -16px rgb(0 0 0 / 92%),
+    0 0 36px -8px rgb(109 223 186 / 40%);
 }
 html[data-family="world"]:root
   body
@@ -479,18 +482,19 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > #records
     .episode-archive {
-    border-color: rgb(239 185 111 / 38%);
+    border-color: rgb(239 185 111 / 44%);
     border-top: 2px solid #f0cf86;
     background:
-      linear-gradient(90deg, #efb96f 0%, #e98c5e 52%, transparent 100%) 0 0 / 60% 2px no-repeat,
-      radial-gradient(ellipse 68% 48% at 10% 0%, rgb(255 196 112 / 18%), transparent 68%),
-      radial-gradient(ellipse 56% 42% at 92% 100%, rgb(233 140 94 / 14%), transparent 70%),
-      linear-gradient(158deg, #24190e 0%, #150e08 58%, #0d0805 100%);
+      linear-gradient(90deg, #efb96f 0%, #e98c5e 48%, #ff5fc8 78%, transparent 100%) 0 0 / 68% 2px
+        no-repeat,
+      radial-gradient(ellipse 68% 48% at 10% 0%, rgb(255 196 112 / 22%), transparent 68%),
+      radial-gradient(ellipse 56% 42% at 92% 100%, rgb(233 140 94 / 16%), transparent 70%),
+      linear-gradient(158deg, #1b1209 0%, #0e0905 58%, #070403 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 238 202 / 28%),
-      inset 0 0 0 1px rgb(239 185 111 / 14%),
-      0 28px 60px -20px rgb(0 0 0 / 86%),
-      0 0 40px -16px rgb(239 185 111 / 24%);
+      inset 0 1px 0 rgb(255 240 208 / 34%),
+      inset 0 0 0 1px rgb(239 185 111 / 18%),
+      0 32px 68px -20px rgb(0 0 0 / 90%),
+      0 0 46px -16px rgb(239 185 111 / 28%);
   }
 
   html[data-family="world"]:root
@@ -499,12 +503,12 @@ html[data-family="world"]:root
     > #records
     .episode-card-surface {
     border-radius: 2px;
-    border-color: rgb(239 185 111 / 44%);
-    border-top-color: rgb(255 232 184 / 68%);
+    border-color: rgb(239 185 111 / 48%);
+    border-top-color: rgb(255 234 190 / 74%);
     box-shadow:
-      inset 0 1px 0 rgb(255 244 218 / 32%),
-      0 18px 36px -14px rgb(0 0 0 / 78%),
-      0 4px 12px rgb(0 0 0 / 48%);
+      inset 0 1px 0 rgb(255 246 222 / 38%),
+      0 20px 42px -14px rgb(0 0 0 / 84%),
+      0 4px 14px rgb(0 0 0 / 54%);
   }
 
   html[data-family="world"]:root
@@ -515,10 +519,10 @@ html[data-family="world"]:root
     .episode-card-surface {
     border-color: #f6d58f;
     box-shadow:
-      inset 0 1px 0 rgb(255 250 232 / 56%),
-      inset 0 0 0 1px rgb(239 185 111 / 34%),
-      0 24px 48px -14px rgb(0 0 0 / 86%),
-      0 0 36px -8px rgb(239 185 111 / 42%);
+      inset 0 1px 0 rgb(255 252 236 / 62%),
+      inset 0 0 0 1px rgb(239 185 111 / 40%),
+      0 26px 54px -14px rgb(0 0 0 / 90%),
+      0 0 42px -8px rgb(239 185 111 / 48%);
   }
 }
 html[data-family="world"]:root

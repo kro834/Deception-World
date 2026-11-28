@@ -325,7 +325,7 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
     .fst-page.fst-page
     .fst-hero
     .rxs-scroll-cue {
-    animation: fsc-fade 360ms linear calc(var(--fsc-delay) + 560ms) both;
+    animation: fsc-fade 320ms var(--fsc-out) calc(var(--fsc-delay) + 280ms) both;
   }
 
   /* A record locks on as it opens: the sheet's bracket frame (a pseudo, so
@@ -339,7 +339,7 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
     .fst-hero
     .rxs-scroll-cue
     i {
-    animation: fsc-draw-y 640ms var(--fsc-ease) calc(var(--fsc-delay) + 620ms) both;
+    animation: fsc-draw-y 420ms var(--fsc-ease) calc(var(--fsc-delay) + 340ms) both;
   }
 }
 

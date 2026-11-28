@@ -2208,28 +2208,30 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
    ================================================================ */
 html[data-family="library"] .world.command-records.library-page.library-screening-room {
   background:
-    radial-gradient(ellipse 860px 600px at 86% 5%, rgb(46 88 78 / 68%), transparent 78%),
-    radial-gradient(ellipse 820px 520px at 6% 24%, rgb(96 72 42 / 34%), transparent 84%),
-    radial-gradient(ellipse 760px 520px at 50% 64%, rgb(26 54 58 / 38%), transparent 80%),
-    linear-gradient(165deg, #080d12 0%, #0d151b 48%, #070b10 100%);
+    radial-gradient(ellipse 900px 620px at 84% 6%, rgb(42 126 196 / 44%), transparent 76%),
+    radial-gradient(ellipse 760px 520px at 14% 18%, rgb(34 136 150 / 30%), transparent 76%),
+    radial-gradient(ellipse 800px 520px at 8% 34%, rgb(242 204 132 / 16%), transparent 80%),
+    radial-gradient(ellipse 820px 560px at 50% 66%, rgb(26 72 124 / 28%), transparent 78%),
+    linear-gradient(165deg, #030710 0%, #07111f 48%, #040811 100%);
 }
 
 html[data-family="library"]
   .world.command-records.library-page.library-screening-room
   .library-topbar {
-  border-bottom: 1px solid rgb(164 221 207 / 42%);
+  border-bottom: 1px solid rgb(122 232 255 / 38%);
   background:
     linear-gradient(
         90deg,
-        rgb(230 200 149 / 76%) 0%,
-        rgb(164 221 207 / 72%) 48%,
-        rgb(230 200 149 / 44%) 100%
+        rgb(242 207 141 / 82%) 0%,
+        rgb(122 232 255 / 78%) 48%,
+        rgb(255 96 198 / 58%) 78%,
+        rgb(242 207 141 / 52%) 100%
       )
       0 100% / 100% 1px no-repeat,
-    linear-gradient(180deg, rgb(6 11 16 / 99%), rgb(9 16 21 / 98%));
+    linear-gradient(180deg, rgb(4 9 18 / 99%), rgb(6 13 24 / 98%));
   box-shadow:
-    inset 0 1px 0 rgb(244 253 250 / 18%),
-    0 16px 36px -14px rgb(0 0 0 / 86%);
+    inset 0 1px 0 rgb(244 253 255 / 20%),
+    0 16px 38px -14px rgb(0 0 0 / 88%);
 }
 
 html[data-family="library"]
@@ -2324,11 +2326,15 @@ html[data-family="library"] .library-screening-room #library-main .library-intro
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-intro h1 {
-  color: #fff9ef;
-  text-shadow:
-    0 2px 0 rgb(3 7 11 / 92%),
-    0 0 30px rgb(230 200 149 / 28%),
-    0 0 58px rgb(164 221 207 / 16%);
+  color: #f7fcff;
+  background: linear-gradient(174deg, #ffffff 0%, #eefaff 36%, #bae8ff 68%, #f8dfa4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 8px 26px rgb(0 0 0 / 76%))
+    drop-shadow(0 0 28px rgb(122 232 255 / 22%));
+  text-shadow: none;
 }
 
 /* The jump row: every way in is a sculpted glass plaque; the first is forged brass. */
@@ -2410,14 +2416,20 @@ html[data-family="library"] .library-screening-room #library-main .library-scree
     linear-gradient(0deg, #07101484, transparent 46%);
 }
 
-/* Section heads: a gold-to-teal optical beam under each title, and a lit title. */
+/* Section heads: a gold-to-cyan-prism optical beam under each title, and metallic luster. */
 html[data-family="library"]
   .library-screening-room
   #library-main
   :is(.library-hub-heading, .library-browser-heading, .inquiry-heading) {
-  border-bottom-color: rgb(164 221 207 / 30%);
-  background: linear-gradient(90deg, var(--room-gold), var(--room-teal) 48%, transparent) 0 100% /
-    min(320px, 56%) 2px no-repeat;
+  border-bottom-color: rgb(122 232 255 / 32%);
+  background: linear-gradient(
+      90deg,
+      var(--room-gold) 0%,
+      #7ae8ff 46%,
+      rgb(255 96 198 / 68%) 76%,
+      transparent
+    )
+    0 100% / min(380px, 62%) 2px no-repeat;
 }
 
 html[data-family="library"]
@@ -2426,10 +2438,13 @@ html[data-family="library"]
   :is(.library-hub-heading, .library-browser-heading, .inquiry-heading)
   h2,
 html[data-family="library"] .library-screening-room #library-main .library-discovery > h2 {
-  color: #fff7ec;
-  text-shadow:
-    0 1px 0 rgb(3 7 11 / 90%),
-    0 0 24px rgb(230 200 149 / 22%);
+  color: #f7fcff;
+  background: linear-gradient(176deg, #ffffff 0%, #e8f7ff 46%, #f5da9f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 18px rgb(0 0 0 / 68%));
+  text-shadow: none;
 }
 
 /* The shelf overview & My Library cabinets: bevelled gold x cyan glass plaques. */
@@ -3218,6 +3233,10 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
       .library-kind-count > b,
       .library-results-heading > p > strong
     ) {
+    color: CanvasText;
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
     text-shadow: none;
   }
 }

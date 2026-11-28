@@ -45,12 +45,12 @@ main.site-shell.film-edition.mirage-edition
   .primary-action.ios26-glass {
   color: var(--we-print);
   background:
-    linear-gradient(124deg, #ffffff 0%, #eaf3f5 46%, #d5e7ea 100%) padding-box,
-    linear-gradient(96deg, var(--mr-ice), #ffffff 48%, var(--we-gold)) border-box !important;
+    linear-gradient(124deg, #ffffff 0%, #f1f7f8 42%, #d8eaee 100%) padding-box,
+    linear-gradient(96deg, var(--mr-ice), #ffffff 46%, var(--we-gold)) border-box !important;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 92%),
-    0 14px 32px -12px rgb(0 0 0 / 72%),
-    0 0 28px -8px rgb(230 199 136 / 34%);
+    inset 0 1px 0 rgb(255 255 255 / 96%),
+    0 18px 38px -12px rgb(0 0 0 / 80%),
+    0 0 36px -6px rgb(230 199 136 / 46%);
 }
 
 /* Numerals remain the archive's voice; their face is crisp against the

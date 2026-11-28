@@ -152,10 +152,21 @@ html[data-family="special"]
   > .rxs-section-heading
   > h2 {
   color: #fffdf8;
-  text-shadow:
-    0 4px 30px rgb(0 0 0 / 82%),
-    0 0 40px rgb(var(--fsz-gold-rgb) / 24%),
-    0 0 68px rgb(var(--fsz-cyan-rgb) / 18%);
+  background: linear-gradient(
+    176deg,
+    #ffffff 0%,
+    #ebf5ff 36%,
+    #ffe6b8 74%,
+    #f2c26d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 4px 24px rgb(0 0 0 / 88%))
+    drop-shadow(0 0 34px rgb(var(--fsz-gold-rgb) / 30%))
+    drop-shadow(0 0 56px rgb(var(--fsz-cyan-rgb) / 20%));
 }
 
 html[data-family="special"]
@@ -164,8 +175,8 @@ html[data-family="special"]
   > .rxs-section
   > .rxs-section-heading
   > span {
-  color: #dce4f4;
-  text-shadow: 0 2px 14px rgb(0 0 0 / 64%);
+  color: #e4ebf8;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 72%);
 }
 
 /* ================================================================
@@ -173,43 +184,59 @@ html[data-family="special"]
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
   background:
-    radial-gradient(54% 44% at 50% 34%, rgb(var(--fsz-cyan-rgb) / 14%), transparent 68%),
-    radial-gradient(46% 36% at 50% 40%, rgb(var(--fsx-violet-rgb) / 18%), transparent 72%),
-    radial-gradient(44% 28% at 50% 72%, rgb(var(--fsz-gold-rgb) / 15%), transparent 70%),
-    radial-gradient(66% 34% at 50% 100%, rgb(var(--fsz-cyan-rgb) / 11%), transparent 74%),
-    var(--fsx-house);
+    radial-gradient(64% 58% at 16% 24%, rgb(68 148 255 / 26%), rgb(32 64 156 / 14%) 46%, transparent 74%),
+    radial-gradient(50% 44% at 22% 64%, rgb(var(--fsz-gold-rgb) / 28%), rgb(255 186 112 / 11%) 48%, transparent 74%),
+    radial-gradient(58% 50% at 74% 38%, rgb(var(--fsz-cyan-rgb) / 22%), rgb(142 118 255 / 18%) 46%, transparent 74%),
+    radial-gradient(48% 36% at 68% 82%, rgb(var(--fsz-gold-rgb) / 20%), transparent 72%),
+    radial-gradient(72% 34% at 50% 100%, rgb(var(--fsz-cyan-rgb) / 14%), transparent 76%),
+    linear-gradient(158deg, #09112c 0%, #060a1e 50%, #040612 100%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
-  border-top: 1px solid rgb(var(--fsz-gold-rgb) / 66%);
-  border-bottom: 1px solid rgb(var(--fsz-cyan-rgb) / 60%);
-  border-inline: 1px solid rgb(var(--fsx-violet-rgb) / 28%);
-  border-radius: 3px;
+  border: 1.5px solid transparent;
+  border-radius: 26px;
   background:
-    radial-gradient(56% 74% at 50% 46%, rgb(var(--fsz-cyan-rgb) / 18%), transparent 70%),
-    radial-gradient(48% 64% at 50% 54%, rgb(var(--fsx-violet-rgb) / 22%), transparent 74%),
-    radial-gradient(42% 52% at 50% 96%, rgb(var(--fsz-gold-rgb) / 18%), transparent 72%),
-    linear-gradient(180deg, #0b1033 0%, #05071c 100%);
+    radial-gradient(62% 76% at 50% 42%, rgb(var(--fsz-cyan-rgb) / 22%), transparent 70%) padding-box,
+    radial-gradient(54% 64% at 50% 56%, rgb(var(--fsx-violet-rgb) / 26%), transparent 74%) padding-box,
+    radial-gradient(48% 54% at 50% 96%, rgb(var(--fsz-gold-rgb) / 24%), transparent 72%) padding-box,
+    linear-gradient(170deg, #101944 0%, #070c25 56%, #040717 100%) padding-box,
+    conic-gradient(
+      from 208deg,
+      #ffd996 0turn,
+      #fff8e8 0.14turn,
+      #7ae8ff 0.42turn,
+      rgb(168 142 255 / 72%) 0.68turn,
+      #ffd996 1turn
+    )
+    border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 36%),
-    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 34%),
-    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 16%),
-    0 30px 84px rgb(0 0 0 / 78%),
-    0 0 76px -10px rgb(var(--fsz-cyan-rgb) / 28%),
-    0 0 100px -16px rgb(var(--fsz-gold-rgb) / 22%);
+    inset 0 1.5px 0 rgb(255 252 240 / 48%),
+    inset 0 -1.5px 0 rgb(var(--fsz-cyan-rgb) / 44%),
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 24%),
+    0 0 0 5px rgb(5 8 20 / 88%),
+    0 0 0 6.5px rgb(var(--fsz-cyan-rgb) / 40%),
+    0 34px 96px rgb(0 0 0 / 86%),
+    0 0 82px -8px rgb(var(--fsz-gold-rgb) / 38%),
+    0 0 124px -10px rgb(var(--fsz-cyan-rgb) / 34%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::before {
+  inset: 9px;
+  border: 1px solid rgb(var(--fsz-gold-rgb) / 30%);
+  border-radius: 17px;
   background:
-    linear-gradient(var(--fsz-gold) 0 0) 0 0 / 26px 1.5px no-repeat,
-    linear-gradient(var(--fsz-gold) 0 0) 0 0 / 1.5px 26px no-repeat,
-    linear-gradient(var(--fsz-gold) 0 0) 100% 0 / 26px 1.5px no-repeat,
-    linear-gradient(var(--fsz-gold) 0 0) 100% 0 / 1.5px 26px no-repeat,
-    linear-gradient(var(--fsz-cyan) 0 0) 0 100% / 26px 1.5px no-repeat,
-    linear-gradient(var(--fsz-cyan) 0 0) 0 100% / 1.5px 26px no-repeat,
-    linear-gradient(var(--fsz-cyan) 0 0) 100% 100% / 26px 1.5px no-repeat,
-    linear-gradient(var(--fsz-cyan) 0 0) 100% 100% / 1.5px 26px no-repeat;
-  filter: drop-shadow(0 0 6px rgb(var(--fsz-gold-rgb) / 42%));
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(255 246 218 / 68%) 34%,
+        rgb(var(--fsz-cyan-rgb) / 62%) 68%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 28%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 24%);
+  filter: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::after {
@@ -218,26 +245,39 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   inset: 0;
   z-index: 2;
   display: block;
+  border-radius: inherit;
   pointer-events: none;
   background:
-    radial-gradient(64% 2px at 50% 0%, rgb(255 248 224 / 72%), transparent 82%),
-    radial-gradient(58% 2px at 50% 100%, rgb(var(--fsz-cyan-rgb) / 68%), transparent 82%);
+    radial-gradient(66% 3px at 50% 0%, rgb(255 250 230 / 82%), transparent 80%),
+    radial-gradient(60% 3px at 50% 100%, rgb(var(--fsz-cyan-rgb) / 76%), transparent 80%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
   color: #fffdf8;
-  text-shadow:
-    0 4px 28px rgb(0 0 0 / 88%),
-    0 0 38px rgb(var(--fsz-gold-rgb) / 28%),
-    0 0 68px rgb(var(--fsz-cyan-rgb) / 22%);
+  background: linear-gradient(
+    172deg,
+    #ffffff 0%,
+    #eef7ff 28%,
+    #ffe6b5 62%,
+    #f2bf68 88%,
+    #fff4d8 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 6px 28px rgb(0 0 0 / 92%))
+    drop-shadow(0 0 38px rgb(var(--fsz-gold-rgb) / 42%))
+    drop-shadow(0 0 64px rgb(var(--fsz-cyan-rgb) / 26%));
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-lede {
-  color: #ede6d8;
-  border-top-color: rgb(var(--fsz-gold-rgb) / 38%);
+  color: #f4eee1;
+  border-top-color: rgb(var(--fsz-gold-rgb) / 52%);
   text-shadow:
-    0 2px 18px rgb(0 0 0 / 78%),
-    0 0 24px rgb(var(--fsz-gold-rgb) / 14%);
+    0 2px 18px rgb(0 0 0 / 82%),
+    0 0 26px rgb(var(--fsz-gold-rgb) / 20%);
 }
 
 /* Nagi's 12-stroke Kiro map and the Lamplight sweep hand, locked inside the
@@ -352,26 +392,29 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story
   max-width: 1180px;
   margin-inline: auto;
   padding: clamp(28px, 4vw, 56px) clamp(20px, 3.6vw, 48px);
-  border: 1px solid rgb(var(--fsz-gold-rgb) / 36%);
-  border-radius: 6px;
+  border: 1px solid rgb(var(--fsz-gold-rgb) / 42%);
+  border-radius: 26px;
   background:
     linear-gradient(
         90deg,
-        transparent 2%,
-        rgb(var(--fsz-gold-rgb) / 78%) 26%,
-        rgb(var(--fsz-cyan-rgb) / 72%) 74%,
-        transparent 98%
+        transparent 3%,
+        #f5ca79 22%,
+        #fff7e0 48%,
+        rgb(var(--fsz-cyan-rgb) / 86%) 78%,
+        transparent 97%
       )
-      0 0 / 100% 1.5px no-repeat,
-    radial-gradient(52% 44% at 4% 0%, rgb(var(--fsz-gold-rgb) / 14%), transparent 70%),
-    radial-gradient(48% 42% at 96% 100%, rgb(var(--fsz-cyan-rgb) / 13%), transparent 72%),
-    linear-gradient(150deg, #10182b 0%, #090e1d 55%, #070b17 100%);
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(56% 46% at 6% 4%, rgb(var(--fsz-gold-rgb) / 24%), transparent 68%),
+    radial-gradient(48% 42% at 94% 12%, rgb(var(--fsz-cyan-rgb) / 14%), transparent 68%),
+    radial-gradient(52% 44% at 92% 100%, rgb(156 128 255 / 15%), transparent 72%),
+    linear-gradient(160deg, #0e1836 0%, #070d21 52%, #040712 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 24%),
-    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 22%),
-    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 10%),
-    0 28px 72px rgb(0 0 0 / 62%),
-    0 0 56px -14px rgb(var(--fsz-cyan-rgb) / 18%);
+    inset 0 1px 0 rgb(255 248 228 / 32%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 26%),
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 16%),
+    0 32px 80px rgb(0 0 0 / 74%),
+    0 0 56px -12px rgb(var(--fsz-gold-rgb) / 24%),
+    0 0 64px -16px rgb(var(--fsz-cyan-rgb) / 22%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-index span {
@@ -1861,23 +1904,34 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* Reading order and typography are independent of the station's motion. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
   background:
-    radial-gradient(64% 74% at 72% 38%, rgb(82 104 206 / 46%), transparent 72%),
-    radial-gradient(50% 44% at 70% 42%, rgb(var(--fsz-cyan-rgb) / 20%), transparent 68%),
-    radial-gradient(48% 42% at 24% 48%, rgb(var(--fsz-gold-rgb) / 14%), transparent 72%),
-    radial-gradient(56% 40% at 62% 100%, rgb(var(--fsz-gold-rgb) / 22%), transparent 76%),
-    linear-gradient(180deg, #060916 0%, #090e20 55%, #050712 100%);
+    radial-gradient(64% 58% at 16% 24%, rgb(68 148 255 / 26%), rgb(32 64 156 / 14%) 46%, transparent 74%),
+    radial-gradient(50% 44% at 22% 64%, rgb(var(--fsz-gold-rgb) / 28%), rgb(255 186 112 / 11%) 48%, transparent 74%),
+    radial-gradient(64% 72% at 74% 38%, rgb(82 114 224 / 42%), transparent 72%),
+    radial-gradient(52% 46% at 72% 40%, rgb(var(--fsz-cyan-rgb) / 22%), transparent 68%),
+    radial-gradient(54% 38% at 66% 96%, rgb(var(--fsz-gold-rgb) / 24%), transparent 74%),
+    linear-gradient(158deg, #09112c 0%, #060a1e 52%, #040612 100%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
   color: #fffdf8;
-  background: none;
-  filter: none;
+  background: linear-gradient(
+    172deg,
+    #ffffff 0%,
+    #eef7ff 28%,
+    #ffe6b5 62%,
+    #f2bf68 88%,
+    #fff4d8 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: 0.1em;
   text-indent: 0;
-  text-shadow:
-    0 6px 32px rgb(0 0 0 / 92%),
-    0 0 42px rgb(var(--fsz-gold-rgb) / 34%),
-    0 0 76px rgb(var(--fsz-cyan-rgb) / 24%);
+  text-shadow: none;
+  filter:
+    drop-shadow(0 6px 28px rgb(0 0 0 / 92%))
+    drop-shadow(0 0 38px rgb(var(--fsz-gold-rgb) / 42%))
+    drop-shadow(0 0 64px rgb(var(--fsz-cyan-rgb) / 26%));
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-lede {
@@ -2055,14 +2109,24 @@ html[data-family="special"]
   > h2 {
   justify-self: start;
   color: #fffdf8;
-  background: none;
+  background: linear-gradient(
+    176deg,
+    #ffffff 0%,
+    #ebf5ff 36%,
+    #ffe6b8 74%,
+    #f2c26d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-size: clamp(27px, 4.3vw, 58px);
   letter-spacing: 0.025em;
   text-align: start;
-  text-shadow:
-    0 4px 30px rgb(0 0 0 / 84%),
-    0 0 42px rgb(var(--fsz-gold-rgb) / 28%),
-    0 0 72px rgb(var(--fsz-cyan-rgb) / 20%);
+  text-shadow: none;
+  filter:
+    drop-shadow(0 4px 24px rgb(0 0 0 / 88%))
+    drop-shadow(0 0 34px rgb(var(--fsz-gold-rgb) / 30%))
+    drop-shadow(0 0 56px rgb(var(--fsz-cyan-rgb) / 20%));
 }
 
 html[data-family="special"]
@@ -2083,25 +2147,28 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story
   margin-inline: auto;
   padding: clamp(24px, 3.8vw, 50px);
   border: 1px solid rgb(var(--fsz-gold-rgb) / 48%);
-  border-radius: 6px;
+  border-radius: 26px;
   background:
     linear-gradient(
         90deg,
-        transparent 2%,
-        rgb(var(--fsz-gold-rgb) / 92%) 22%,
-        rgb(var(--fsz-cyan-rgb) / 82%) 78%,
-        transparent 98%
+        transparent 3%,
+        #f5ca79 22%,
+        #fff7e0 48%,
+        rgb(var(--fsz-cyan-rgb) / 86%) 78%,
+        transparent 97%
       )
       0 0 / 100% 2px no-repeat,
-    radial-gradient(56% 48% at 4% 0%, rgb(var(--fsz-gold-rgb) / 18%), transparent 70%),
-    radial-gradient(52% 44% at 96% 100%, rgb(var(--fsz-cyan-rgb) / 16%), transparent 72%),
-    linear-gradient(148deg, #161f36 0%, #0c1224 56%, #080c19 100%);
+    radial-gradient(56% 46% at 6% 4%, rgb(var(--fsz-gold-rgb) / 24%), transparent 68%),
+    radial-gradient(48% 42% at 94% 12%, rgb(var(--fsz-cyan-rgb) / 14%), transparent 68%),
+    radial-gradient(52% 44% at 92% 100%, rgb(156 128 255 / 15%), transparent 72%),
+    linear-gradient(160deg, #0e1836 0%, #070d21 52%, #040712 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 250 232 / 32%),
+    inset 0 1px 0 rgb(255 248 228 / 32%),
     inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 28%),
-    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 14%),
-    0 32px 80px rgb(0 0 0 / 70%),
-    0 0 64px -12px rgb(var(--fsz-cyan-rgb) / 24%);
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 16%),
+    0 32px 80px rgb(0 0 0 / 74%),
+    0 0 56px -12px rgb(var(--fsz-gold-rgb) / 24%),
+    0 0 64px -16px rgb(var(--fsz-cyan-rgb) / 24%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-copy p {
@@ -2210,7 +2277,24 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-record 
     > .rxs-section
     > .rxs-section-heading
     > h2 {
+    color: CanvasText;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: CanvasText;
     text-shadow: none;
+    filter: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::before,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::after {
+    display: none;
   }
 
   html[data-family="special"]
@@ -2359,7 +2443,7 @@ html[data-family="special"]
   mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 62%) 48%, transparent 94%);
 }
 
-/* The light: twin volumetric projector shafts and the logo's colours spilling on the house. */
+/* The light: dawn celestial sapphire, warm lamplight & sweeping aurora arcs across the stage. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.fst-page
@@ -2368,23 +2452,38 @@ html[data-family="special"]
   > i:nth-child(2) {
   inset: 0;
   background:
+    radial-gradient(
+      118% 106% at 14% 110%,
+      transparent 65.8%,
+      rgb(var(--fsz-gold-rgb) / 48%) 66.6%,
+      rgb(var(--fsz-cyan-rgb) / 34%) 67.8%,
+      transparent 69.8%
+    ),
+    radial-gradient(
+      138% 124% at 14% 110%,
+      transparent 73.2%,
+      rgb(var(--fsz-cyan-rgb) / 34%) 74%,
+      rgb(164 139 255 / 22%) 75.2%,
+      transparent 77%
+    ),
     linear-gradient(
-      112deg,
-      transparent 34%,
-      rgb(var(--fsz-cyan-rgb) / 14%) 45%,
-      rgb(var(--fsx-lilac-rgb) / 11%) 52%,
+      114deg,
+      transparent 28%,
+      rgb(var(--fsz-cyan-rgb) / 18%) 42%,
+      rgb(var(--fsx-lilac-rgb) / 14%) 50%,
       transparent 62%
     ),
     linear-gradient(
-      74deg,
-      transparent 46%,
-      rgb(var(--fsz-gold-rgb) / 14%) 56%,
-      rgb(var(--fsz-lamp-rgb) / 6%) 62%,
-      transparent 69%
+      72deg,
+      transparent 40%,
+      rgb(var(--fsz-gold-rgb) / 18%) 53%,
+      rgb(var(--fsz-lamp-rgb) / 9%) 61%,
+      transparent 70%
     ),
-    radial-gradient(38% 44% at 20% 56%, rgb(92 214 255 / 17%), transparent 72%),
-    radial-gradient(36% 42% at 84% 36%, rgb(255 110 196 / 14%), transparent 72%),
-    radial-gradient(46% 32% at 62% 86%, rgb(var(--fsz-gold-rgb) / 19%), transparent 74%);
+    radial-gradient(44% 48% at 18% 48%, rgb(78 164 255 / 24%), transparent 72%),
+    radial-gradient(38% 40% at 24% 68%, rgb(var(--fsz-gold-rgb) / 26%), transparent 72%),
+    radial-gradient(38% 44% at 82% 36%, rgb(255 124 204 / 16%), transparent 72%),
+    radial-gradient(50% 34% at 64% 86%, rgb(var(--fsz-gold-rgb) / 24%), transparent 74%);
 }
 
 /* The horizon: gleaming gold-core x cyan-violet prism seam where the floor meets the dark. */
@@ -2404,32 +2503,32 @@ html[data-family="special"]
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(var(--fsz-cyan-rgb) / 62%) 18%,
-    rgb(255 246 216 / 92%) 50%,
-    rgb(var(--fsz-gold-rgb) / 72%) 78%,
+    rgb(var(--fsz-cyan-rgb) / 68%) 16%,
+    rgb(255 248 224 / 96%) 50%,
+    rgb(var(--fsz-gold-rgb) / 80%) 80%,
     transparent
   );
   box-shadow:
-    0 0 28px 3px rgb(var(--fsz-gold-rgb) / 36%),
-    0 0 48px 6px rgb(var(--fsz-cyan-rgb) / 24%);
+    0 0 32px 4px rgb(var(--fsz-gold-rgb) / 42%),
+    0 0 54px 8px rgb(var(--fsz-cyan-rgb) / 30%);
 }
 
-/* The screen stands lit in the house: double-rimmed CinemaScope gold x cyan mount. */
+/* The screen stands lit in the house: rounded royal exhibition glass frame with gold x cyan double halo. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
-  border-top: 1.5px solid rgb(var(--fsz-gold-rgb) / 86%);
-  border-bottom: 1.5px solid rgb(var(--fsz-cyan-rgb) / 78%);
-  border-inline: 1px solid rgb(var(--fsx-violet-rgb) / 42%);
+  border: 1.5px solid transparent;
+  border-radius: 26px;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 234 / 48%),
-    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 44%),
-    inset 0 0 0 4px rgb(5 7 18 / 88%),
-    inset 0 0 0 5px rgb(var(--fsz-gold-rgb) / 30%),
-    inset 0 0 56px rgb(var(--fsz-cyan-rgb) / 14%),
-    0 0 0 1px rgb(var(--fsz-gold-rgb) / 34%),
-    0 32px 92px rgb(0 0 0 / 84%),
-    0 0 84px -6px rgb(var(--fsz-cyan-rgb) / 34%),
-    0 0 140px -10px rgb(var(--fsz-gold-rgb) / 28%),
-    0 0 220px rgb(var(--fsx-lilac-rgb) / 20%);
+    inset 0 1.5px 0 rgb(255 252 240 / 54%),
+    inset 0 -1.5px 0 rgb(var(--fsz-cyan-rgb) / 48%),
+    inset 0 0 0 4px rgb(5 8 20 / 88%),
+    inset 0 0 0 5.5px rgb(var(--fsz-gold-rgb) / 34%),
+    inset 0 0 64px rgb(var(--fsz-cyan-rgb) / 18%),
+    0 0 0 5px rgb(5 8 20 / 90%),
+    0 0 0 6.5px rgb(var(--fsz-cyan-rgb) / 48%),
+    0 36px 96px rgb(0 0 0 / 88%),
+    0 0 88px -6px rgb(var(--fsz-gold-rgb) / 44%),
+    0 0 144px -10px rgb(var(--fsz-cyan-rgb) / 38%),
+    0 0 210px rgb(var(--fsx-lilac-rgb) / 22%);
 }
 
 @media (min-width: 1100px) and (min-height: 620px) {

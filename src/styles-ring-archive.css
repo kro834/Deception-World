@@ -47,18 +47,24 @@ html[data-family="archive"] body .form-archive-frame-status:not(#ring-x#ring-x) 
   border-radius: 50% !important;
   clip-path: none !important;
   background:
-    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.16), transparent 38%) padding-box,
-    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 64%) padding-box,
-    linear-gradient(160deg, #0a1728, #050c16) padding-box,
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.22), transparent 36%) padding-box,
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.42), transparent 62%) padding-box,
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 54%,
+      rgb(var(--ring-gold-rgb) / 0.22) 56% 58%,
+      transparent 60%
+    ) padding-box,
+    linear-gradient(160deg, #071322, #020710) padding-box,
     var(--ring-prism) border-box !important;
   border: var(--ring-w) solid transparent !important;
   box-shadow:
-    0 0 0 7px rgb(var(--ring-key-rgb) / 0.24),
-    0 0 28px -2px rgb(var(--ring-key-rgb) / 0.44),
-    0 0 54px -8px rgb(var(--ring-pink-rgb) / 0.28),
-    inset 0 1.5px 0 rgb(255 255 255 / 0.42),
-    inset 0 0 20px rgb(var(--ring-key-rgb) / 0.24) !important;
-  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.52);
+    0 0 0 8px rgb(var(--ring-key-rgb) / 0.28),
+    0 0 34px -2px rgb(var(--ring-key-rgb) / 0.52),
+    0 0 62px -8px rgb(var(--ring-pink-rgb) / 0.34),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.52),
+    inset 0 0 24px rgb(var(--ring-key-rgb) / 0.3) !important;
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.62);
   outline-offset: 14px;
 }
 
@@ -148,12 +154,12 @@ html[data-family="utility"] body .lab-ring {
 }
 
 html[data-family="utility"] body .lab-ring > .ring-orbit-track {
-  border-color: rgb(var(--ring-key-rgb) / 0.46);
+  border-color: rgb(var(--ring-key-rgb) / 0.56);
   box-shadow:
-    0 0 24px -4px rgb(var(--ring-key-rgb) / 0.28),
-    inset 0 0 24px -4px rgb(var(--ring-key-rgb) / 0.22);
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.26);
-  outline-offset: 8px;
+    0 0 28px -3px rgb(var(--ring-key-rgb) / 0.36),
+    inset 0 0 28px -3px rgb(var(--ring-key-rgb) / 0.28);
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.36);
+  outline-offset: 9px;
 }
 
 /* The centre: a precision optical gauge lit up to the stage in progress
@@ -164,24 +170,24 @@ html[data-family="utility"] body .lab-ring > .lab-ring-core {
   inset: calc(var(--ring-item) + 20px);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.16), transparent 36%),
-    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.34), transparent 58%),
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.22), transparent 34%),
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.42), transparent 56%),
     radial-gradient(
       circle at 50% 50%,
-      rgb(var(--ring-gold-rgb) / 0.2) 0 14%,
-      transparent 16% 36%,
-      rgb(var(--ring-key-rgb) / 0.22) 37% 39%,
-      transparent 40% 58%,
-      rgb(var(--ring-pink-rgb) / 0.16) 59% 61%,
+      rgb(var(--ring-gold-rgb) / 0.28) 0 14%,
+      transparent 16% 35%,
+      rgb(var(--ring-key-rgb) / 0.32) 36% 39%,
+      transparent 40% 57%,
+      rgb(var(--ring-pink-rgb) / 0.22) 58% 61%,
       transparent 62%
     ),
-    radial-gradient(circle at 72% 76%, rgb(var(--ring-gold-rgb) / 0.18), transparent 56%),
-    #050e18;
+    radial-gradient(circle at 72% 76%, rgb(var(--ring-gold-rgb) / 0.24), transparent 54%),
+    #030912;
   box-shadow:
-    0 14px 34px -6px rgb(0 0 0 / 0.82),
-    0 0 28px -4px rgb(var(--ring-key-rgb) / 0.34),
-    inset 0 1.5px 0 rgb(255 255 255 / 0.28),
-    inset 0 -2px 6px rgb(0 0 0 / 0.86);
+    0 16px 38px -6px rgb(0 0 0 / 0.9),
+    0 0 34px -3px rgb(var(--ring-key-rgb) / 0.42),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.36),
+    inset 0 -2px 8px rgb(0 0 0 / 0.92);
   pointer-events: none;
 }
 
@@ -200,7 +206,7 @@ html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
 }
 
 html[data-family="utility"] body .lab-ring > .lab-ring-core::before {
-  background: rgb(var(--ring-key-rgb) / 0.22);
+  background: rgb(var(--ring-key-rgb) / 0.26);
 }
 
 html[data-family="utility"] body .lab-ring > .lab-ring-core::after {
@@ -225,13 +231,13 @@ html[data-family="utility"] body .lab-ring button {
   padding: 4px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.2), transparent 64%),
-    linear-gradient(160deg, #0b1828, #060e19);
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.26), transparent 62%),
+    linear-gradient(160deg, #091524, #030912);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    inset 0 -1.5px 0 rgb(0 0 0 / 0.78),
-    0 6px 16px -4px rgb(0 0 0 / 0.68);
-  color: rgb(226 245 255 / 0.8);
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 -1.5px 0 rgb(0 0 0 / 0.86),
+    0 8px 18px -4px rgb(0 0 0 / 0.78);
+  color: rgb(234 248 255 / 0.86);
   font-size: clamp(10.5px, 0.9vw, 12.5px);
   font-weight: 700;
   line-height: 1.15;
@@ -248,7 +254,7 @@ html[data-family="utility"] body .lab-ring button::before {
   inset: 0;
   padding: var(--ring-w);
   border-radius: 50%;
-  background: rgb(var(--ring-key-rgb) / 0.34);
+  background: rgb(var(--ring-key-rgb) / 0.42);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -266,15 +272,15 @@ html[data-family="utility"] body .lab-ring button:focus-visible {
 
 /* Stages already passed are lit; the stage in progress wears the prism. */
 html[data-family="utility"] body .lab-ring button[data-state="passed"] {
-  color: #f2fbff;
+  color: #f6fdff;
   background:
-    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.36), transparent 68%),
-    radial-gradient(circle at 72% 78%, rgb(var(--ring-gold-rgb) / 0.18), transparent 64%),
-    #09192a;
+    radial-gradient(circle at 30% 22%, rgb(var(--ring-key-rgb) / 0.44), transparent 66%),
+    radial-gradient(circle at 72% 78%, rgb(var(--ring-gold-rgb) / 0.24), transparent 62%),
+    #071626;
   box-shadow:
-    0 0 18px -3px rgb(var(--ring-key-rgb) / 0.52),
-    0 6px 16px -4px rgb(0 0 0 / 0.72),
-    inset 0 1px 0 rgb(255 255 255 / 0.38);
+    0 0 22px -3px rgb(var(--ring-key-rgb) / 0.58),
+    0 8px 18px -4px rgb(0 0 0 / 0.8),
+    inset 0 1px 0 rgb(255 255 255 / 0.44);
 }
 
 html[data-family="utility"] body .lab-ring button[data-state="passed"]::before {
@@ -282,22 +288,22 @@ html[data-family="utility"] body .lab-ring button[data-state="passed"]::before {
 }
 
 html[data-family="utility"] body .lab-ring button[data-state="active"] {
-  scale: 1.15;
+  scale: 1.16;
   background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 40%),
-    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.6), transparent 72%),
-    radial-gradient(circle at 70% 78%, rgb(var(--ring-pink-rgb) / 0.28), transparent 66%),
-    #0d2238;
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.4), transparent 38%),
+    radial-gradient(circle at 32% 24%, rgb(var(--ring-key-rgb) / 0.68), transparent 70%),
+    radial-gradient(circle at 70% 78%, rgb(var(--ring-pink-rgb) / 0.34), transparent 64%),
+    #0a1d32;
   color: #ffffff;
   text-shadow:
-    0 1px 4px rgb(0 0 0 / 0.85),
-    0 0 14px rgb(var(--ring-key-rgb) / 0.75);
+    0 1px 4px rgb(0 0 0 / 0.9),
+    0 0 16px rgb(var(--ring-key-rgb) / 0.85);
   box-shadow:
-    0 0 24px -2px rgb(var(--ring-key-rgb) / 0.74),
-    0 0 42px -6px rgb(var(--ring-pink-rgb) / 0.44),
-    0 10px 22px -4px rgb(0 0 0 / 0.82),
-    inset 0 1.5px 0 rgb(255 255 255 / 0.62);
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.58);
+    0 0 28px -2px rgb(var(--ring-key-rgb) / 0.82),
+    0 0 46px -6px rgb(var(--ring-pink-rgb) / 0.52),
+    0 12px 26px -4px rgb(0 0 0 / 0.88),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.72);
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.68);
   outline-offset: 4px;
 }
 
@@ -339,18 +345,24 @@ html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) {
   border-radius: 50% !important;
   clip-path: none !important;
   background:
-    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.18), transparent 38%) padding-box,
-    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.36), transparent 64%) padding-box,
-    linear-gradient(160deg, #0b182a, #050c17) padding-box,
+    radial-gradient(circle at 30% 24%, rgb(255 255 255 / 0.24), transparent 36%) padding-box,
+    radial-gradient(circle at 32% 26%, rgb(var(--ring-key-rgb) / 0.44), transparent 62%) padding-box,
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 54%,
+      rgb(var(--ring-gold-rgb) / 0.24) 56% 58%,
+      transparent 60%
+    ) padding-box,
+    linear-gradient(160deg, #071323, #020710) padding-box,
     var(--ring-prism) border-box !important;
   /* The halo: two concentric outer rings + jewel aura that take no layout. */
   box-shadow:
-    0 0 0 7px rgb(var(--ring-key-rgb) / 0.28),
-    0 0 32px -2px rgb(var(--ring-key-rgb) / 0.48),
-    0 0 58px -8px rgb(var(--ring-gold-rgb) / 0.34),
-    inset 0 1.5px 0 rgb(255 255 255 / 0.46),
-    inset 0 0 24px rgb(var(--ring-key-rgb) / 0.26) !important;
-  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.56);
+    0 0 0 8px rgb(var(--ring-key-rgb) / 0.32),
+    0 0 38px -2px rgb(var(--ring-key-rgb) / 0.56),
+    0 0 66px -8px rgb(var(--ring-gold-rgb) / 0.4),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.54),
+    inset 0 0 26px rgb(var(--ring-key-rgb) / 0.32) !important;
+  outline: 1.5px solid rgb(var(--ring-gold-rgb) / 0.66);
   outline-offset: 14px;
   transform: none !important;
 }
@@ -511,5 +523,144 @@ html[data-family="utility"] body .export-page-sigil:not(#ring-x#ring-x) > i {
     ):hover {
     translate: 0 -1.5px;
     scale: 1.025;
+  }
+}
+
+/* ---------------------------------------------------------------
+   7. Wave-9 Chronograph Archive Rail & Obsidian Instrument Optics
+   --------------------------------------------------------------- */
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher.liquid-swipe-tabs:not(#ring-x#ring-x) {
+  --liquid-shell-radius: 999px !important;
+  --liquid-control-radius: 999px !important;
+  border-radius: 999px !important;
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher:not(#ring-x#ring-x)
+  > .liquid-rail-surface {
+  border-radius: 999px !important;
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher:not(#ring-x#ring-x)
+  > .liquid-selection-lens,
+html[data-family="archive"]
+  body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher:not(#ring-x#ring-x)
+  > .liquid-selection-lens
+  > .liquid-selection-surface,
+html[data-family="archive"]
+  body
+  .form-archive-page
+  #archive-switcher.form-archive-switcher:not(#ring-x#ring-x)
+  > button[role="tab"] {
+  border-radius: 999px !important;
+}
+
+@media (min-width: 561px) {
+  html[data-family="archive"]
+    body
+    .form-archive-page
+    #archive-switcher.form-archive-switcher:not(#ring-x#ring-x)
+    > button[role="tab"] {
+    padding-inline: 14px;
+  }
+}
+
+html[data-family="archive"]
+  body
+  .form-archive-page
+  .side-panel-trigger.form-archive-menu-trigger.ios26-glass:not(#ring-x#ring-x) {
+  border-radius: 50% !important;
+}
+
+@media (min-width: 700px) {
+  html[data-family="archive"]
+    body
+    main.form-archive-page[data-archive-kind]
+    .form-archive-toolbar:not(#ring-x#ring-x)::before {
+    border-radius: 999px;
+  }
+}
+
+html[data-family="utility"]
+  body
+  :is(.lab-seek output, .lab-stage-status):not(#ring-x#ring-x) {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (forced-colors: none) {
+  html[data-family="archive"]
+    body
+    .form-archive-page[data-archive-kind="saga"]
+    #archive-switcher.form-archive-switcher:not(#ring-x#ring-x)
+    > .liquid-rail-surface {
+    border-color: rgb(var(--ring-key-rgb) / 0.44);
+    border-top-color: rgb(232 251 255 / 0.62);
+    background:
+      radial-gradient(ellipse 84% 72% at 50% 0%, rgb(var(--ring-key-rgb) / 0.16), transparent 70%),
+      linear-gradient(180deg, rgb(12 24 40 / 0.97), rgb(4 9 18 / 0.99)) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 0 -1px 0 rgb(var(--ring-gold-rgb) / 0.2),
+      inset 0 3px 10px rgb(0 0 0 / 0.64),
+      0 10px 26px -4px rgb(0 0 0 / 0.62),
+      0 0 24px -8px rgb(var(--ring-key-rgb) / 0.28) !important;
+  }
+
+  html[data-family="utility"]
+    body
+    :is(
+      .wm-tools,
+      .wm-index,
+      .lab-selectors,
+      .lab-controls,
+      .tl-part-record
+    ):not(#ring-x#ring-x) {
+    border-color: rgb(var(--ring-key-rgb) / 0.34);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(var(--ring-key-rgb) / 0.86) 26%,
+          #ffffff 50%,
+          rgb(var(--ring-gold-rgb) / 0.86) 74%,
+          transparent 96%
+        )
+        0 0 / 100% 2px no-repeat,
+      radial-gradient(ellipse 76% 52% at 18% 0%, rgb(var(--ring-key-rgb) / 0.14), transparent 68%),
+      radial-gradient(ellipse 68% 48% at 86% 100%, rgb(var(--ring-gold-rgb) / 0.11), transparent 70%),
+      linear-gradient(164deg, #0c1829 0%, #060e1a 56%, #030811 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      inset 0 -1px 0 rgb(var(--ring-gold-rgb) / 0.22),
+      0 0 0 1px rgb(2 6 12 / 0.88),
+      0 22px 52px -12px rgb(0 0 0 / 0.78),
+      0 0 36px -14px rgb(var(--ring-key-rgb) / 0.22);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="utility"]
+    body
+    :is(
+      .wm-tools,
+      .wm-index,
+      .lab-selectors,
+      .lab-controls,
+      .tl-part-record
+    ):not(#ring-x#ring-x) {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }

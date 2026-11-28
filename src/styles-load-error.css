@@ -337,6 +337,61 @@
   }
 }
 
+/* Wave-9 Museum Monolith & Pill Recovery Controls (static, zero blur/motion) */
+.app-load-error-panel {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.app-load-error-actions button,
+.app-load-error-actions a {
+  border-radius: 999px;
+}
+
+.app-load-error-actions button::before {
+  display: none;
+}
+
+@media (forced-colors: none) {
+  .app-load-error-panel {
+    background:
+      linear-gradient(90deg, transparent 4%, #7ae8ff 24%, #ffffff 48%, #f0cf86 76%, transparent 96%)
+        0 0 / 100% 2px no-repeat,
+      radial-gradient(ellipse 76% 48% at 50% 0%, rgb(122 232 255 / 18%), transparent 70%),
+      radial-gradient(ellipse 72% 42% at 50% 100%, rgb(240 207 134 / 12%), transparent 72%),
+      linear-gradient(172deg, rgb(244 251 255 / 8.5%) 0, rgb(122 232 255 / 4%) 10%, transparent 36%),
+      linear-gradient(160deg, #0d1a2c 0%, #07101d 58%, #040912 100%);
+    box-shadow:
+      0 0 0 1px rgb(3 6 12 / 92%),
+      inset 0 1px 0 rgb(255 255 255 / 30%),
+      inset 0 -1px 0 rgb(240 207 134 / 24%),
+      inset 0 0 42px rgb(122 232 255 / 6%),
+      0 38px 96px rgb(0 0 0 / 76%),
+      0 0 48px -10px rgb(122 232 255 / 22%);
+  }
+
+  .app-load-error h1 {
+    background: linear-gradient(174deg, #ffffff 0%, #e4f9ff 52%, #f3d796 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .app-load-error-actions a {
+    border-left-width: 1px;
+    background:
+      radial-gradient(ellipse 80% 90% at 24% 0%, rgb(122 232 255 / 18%), transparent 66%),
+      linear-gradient(180deg, rgb(255 255 255 / 10%) 0%, transparent 50%),
+      linear-gradient(160deg, rgb(16 32 50 / 95%) 0%, rgb(8 16 28 / 98%) 100%);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .app-load-error-panel {
+    box-shadow: none;
+  }
+}
+
 @media (forced-colors: active) {
   .app-load-error {
     background: Canvas;
@@ -359,6 +414,9 @@
   }
 
   .app-load-error h1 {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: currentColor;
     text-shadow: none;
   }
 

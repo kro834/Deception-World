@@ -439,6 +439,70 @@ body:has(.side-panel[data-open="true"]) .inquiry-navigation {
   visibility: hidden;
 }
 
+/* Wave-9 Chronograph Capsule Dock & Astral Folio Optics */
+.inquiry-navigation > summary {
+  padding-inline: 18px 16px;
+  border-radius: 999px;
+}
+
+.inquiry-navigation-panel {
+  border-radius: 20px;
+}
+
+.inquiry-navigation-panel a {
+  border-radius: 14px;
+}
+
+.inquiry-navigation-panel button {
+  border-radius: 999px;
+}
+
+@media (forced-colors: none) {
+  .inquiry-navigation > summary {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 10%,
+          color-mix(in srgb, var(--inquiry-accent) 84%, #ffffff 16%) 36%,
+          #ffffff 50%,
+          color-mix(in srgb, var(--inquiry-ice) 68%, transparent) 72%,
+          transparent 90%
+        )
+        top / 100% 1.5px no-repeat,
+      radial-gradient(
+        ellipse 72% 92% at 16% 36%,
+        color-mix(in srgb, var(--inquiry-accent) 24%, transparent),
+        transparent 72%
+      ),
+      linear-gradient(132deg, rgb(255 255 255 / 10%) 0%, transparent 44%),
+      linear-gradient(
+        165deg,
+        var(--inquiry-surface-top) 0%,
+        var(--inquiry-surface-mid) 56%,
+        var(--inquiry-surface-bottom) 100%
+      );
+  }
+
+  .inquiry-navigation-panel h2 {
+    background: linear-gradient(
+      174deg,
+      #ffffff 0%,
+      #f8f2e4 52%,
+      color-mix(in srgb, var(--inquiry-accent) 86%, #ffffff) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .inquiry-navigation > summary,
+  .inquiry-navigation-panel {
+    box-shadow: none;
+  }
+}
+
 @media (forced-colors: active) {
   .inquiry-navigation {
     --inquiry-accent: LinkText;
@@ -451,6 +515,12 @@ body:has(.side-panel[data-open="true"]) .inquiry-navigation {
     color: CanvasText;
     border-color: ButtonText;
     box-shadow: none;
+  }
+
+  .inquiry-navigation-panel h2 {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: currentColor;
   }
 
   .inquiry-navigation-panel > p:not([class]) {

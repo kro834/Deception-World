@@ -1,25 +1,33 @@
 /* The presentation wall and the catalogue share a ground, with the artwork
-   providing the colour. All material treatments stop at the image edge. */
+   providing the colour. World-class Night Museum edition (Wave-8):
+   architectural downlight cones, metallic display typography, and gilded
+   obsidian-glass consoles. All material treatments stop at the image edge. */
 main.exhibition-room-curated {
-  --room-ink: #fbf6ec;
-  --room-muted: #c9d0dc;
-  --room-key: #f0d59f;
-  --room-gold-bright: #fff3d6;
+  --room-ink: #fcf8ef;
+  --room-muted: #cfd7e3;
+  --room-key: #f4dba6;
+  --room-gold-bright: #fff6de;
   --room-cyan: #9ee8fa;
-  --room-rule: rgb(240 214 164 / 34%);
-  --room-surface: #141e2e;
+  --room-rule: rgb(244 218 166 / 38%);
+  --room-surface: #131d2e;
   --room-serif: "Yu Mincho", "Hiragino Mincho ProN", serif;
   color-scheme: dark;
   background:
-    radial-gradient(
-      ellipse 72% 480px at 34% -2%,
-      rgb(252 224 166 / 32%),
-      rgb(204 160 94 / 12%) 50%,
-      transparent 78%
+    conic-gradient(
+      from 154deg at 34% -8%,
+      transparent 0deg,
+      rgb(255 236 190 / 18%) 26deg,
+      transparent 52deg
     ),
-    radial-gradient(ellipse 54% 420px at 88% 4%, rgb(146 226 250 / 20%), transparent 72%),
-    radial-gradient(ellipse 48% 360px at 14% 44%, rgb(236 202 146 / 10%), transparent 70%),
-    linear-gradient(160deg, #1b2536 0, #0d1420 40rem, #060910 78rem);
+    radial-gradient(
+      ellipse 76% 540px at 34% -3%,
+      rgb(255 230 174 / 36%),
+      rgb(208 164 96 / 14%) 52%,
+      transparent 80%
+    ),
+    radial-gradient(ellipse 58% 460px at 90% 4%, rgb(146 228 252 / 24%), transparent 72%),
+    radial-gradient(ellipse 52% 400px at 12% 42%, rgb(242 206 148 / 12%), transparent 70%),
+    linear-gradient(162deg, #192438 0, #0b121f 40rem, #04070e 78rem);
   color: var(--room-ink);
   min-width: 0;
   padding: calc(clamp(28px, 4vw, 62px) + env(safe-area-inset-top))
@@ -52,8 +60,8 @@ main.exhibition-room-curated {
   align-items: end;
   flex-wrap: wrap;
   padding-bottom: clamp(18px, 3vw, 34px);
-  border-bottom: 1px solid rgb(242 216 164 / 44%);
-  box-shadow: inset 0 -3px 0 -2px rgb(158 232 250 / 22%);
+  border-bottom: 1px solid rgb(246 220 168 / 52%);
+  box-shadow: inset 0 -3px 0 -2px rgb(158 232 250 / 26%);
 }
 
 .exhibition-room-curated .exhibition-room-heading::after {
@@ -61,10 +69,10 @@ main.exhibition-room-curated {
   position: absolute;
   left: 0;
   bottom: -1px;
-  width: min(192px, 46%);
+  width: min(220px, 50%);
   height: 2px;
-  background: linear-gradient(90deg, #fae4b8 0%, #e6c588 48%, #9ee8fa 82%, transparent 100%);
-  box-shadow: 0 0 20px rgb(246 218 164 / 52%);
+  background: linear-gradient(90deg, #fff5d8 0%, #efd298 46%, #9ee8fa 84%, transparent 100%);
+  box-shadow: 0 0 24px rgb(248 220 164 / 62%);
   pointer-events: none;
 }
 
@@ -74,24 +82,37 @@ main.exhibition-room-curated {
   color: var(--room-ink);
   font-family: var(--room-serif);
   font-weight: 500;
-  line-height: 1.4;
+  line-height: 1.38;
   margin: 0;
   overflow-wrap: anywhere;
 }
 
+/* Platinum × champagne metallic spotlight lustre on primary display titles */
 .exhibition-room-curated .exhibition-room-heading h1 {
   font-size: clamp(29px, 4.25vw, 67px);
-  text-shadow:
-    0 2px 30px rgb(248 220 166 / 28%),
-    0 1px 2px rgb(0 0 0 / 68%);
+  background: linear-gradient(180deg, #ffffff 0%, #fcf4e4 48%, #dfc088 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 4px 28px rgb(248 220 162 / 30%));
+}
+
+.exhibition-room-curated .exhibition-shelf-heading h2 {
+  background: linear-gradient(180deg, #ffffff 0%, #f9efe0 50%, #dec08a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 22px rgb(246 216 156 / 26%));
 }
 
 .exhibition-room-curated .exhibition-room-heading p {
   font-size: 13px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.055em;
   line-height: 1.8;
-  color: #dfd7c8;
+  color: #e6dfd2;
   margin: 10px 0 0;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 65%);
 }
 
 .exhibition-room-entrances {
@@ -114,7 +135,7 @@ main.exhibition-room-curated {
   font-weight: 550;
   line-height: 1.6;
   text-decoration: underline;
-  text-decoration-color: rgb(240 214 164 / 62%);
+  text-decoration-color: rgb(244 218 166 / 68%);
   text-underline-offset: 6px;
 }
 
@@ -124,17 +145,17 @@ main.exhibition-room-curated {
   justify-content: center;
   min-height: 44px;
   padding: 9px 18px;
-  border: 1px solid rgb(242 216 164 / 56%);
-  border-top-color: rgb(255 240 202 / 82%);
+  border: 1px solid rgb(246 220 168 / 62%);
+  border-top-color: #fff6dc;
   border-radius: 2px;
   background:
-    radial-gradient(ellipse 84% 84% at 50% 0%, rgb(248 224 176 / 24%), transparent 70%),
-    linear-gradient(180deg, #1e2b3e 0%, #0f1726 100%);
+    radial-gradient(ellipse 88% 88% at 50% 0%, rgb(252 228 178 / 28%), transparent 70%),
+    linear-gradient(180deg, #213046 0%, #0e1626 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 245 / 38%),
-    inset 0 -1px 0 rgb(158 232 250 / 18%),
-    0 10px 26px rgb(0 0 0 / 46%);
-  color: #fcf7ed;
+    inset 0 1px 0 rgb(255 254 248 / 44%),
+    inset 0 -1px 0 rgb(158 232 250 / 24%),
+    0 12px 28px rgb(0 0 0 / 54%);
+  color: #fdf9f1;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.5;
@@ -146,15 +167,15 @@ main.exhibition-room-curated {
 }
 
 .exhibition-room-curated .exhibition-room-entrances a:last-child {
-  border-color: #f8e3b8;
-  border-top-color: #fffaf0;
-  background: linear-gradient(180deg, #fff9ec 0%, #efd6a4 52%, #d4b278 100%);
+  border-color: #fae6be;
+  border-top-color: #ffffff;
+  background: linear-gradient(180deg, #fffdf6 0%, #f3dba8 50%, #d4af70 100%);
   box-shadow:
-    inset 0 1px 0 #ffffff,
-    inset 0 -1px 0 rgb(96 70 28 / 32%),
-    0 10px 26px rgb(0 0 0 / 48%),
-    0 0 24px -6px rgb(242 212 154 / 40%);
-  color: #131720;
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1px 0 rgb(92 66 24 / 36%),
+    0 12px 28px rgb(0 0 0 / 54%),
+    0 0 28px -4px rgb(248 218 156 / 48%);
+  color: #10141e;
   font-weight: 700;
 }
 
@@ -166,55 +187,68 @@ main.exhibition-room-curated {
   scroll-margin-top: 16px;
 }
 
-/* Museum Double-Bevel Presentation Shadowbox */
+/* Museum Double-Bevel Presentation Shadowbox with Downlight Cone */
 .exhibition-room-curated .exhibition-room-view {
   width: 100%;
   margin: 0;
   min-width: 0;
   padding: clamp(10px, 1.3vw, 18px);
-  border: 1px solid rgb(244 218 166 / 62%);
-  border-top-color: rgb(255 240 202 / 88%);
+  border: 1px solid rgb(248 222 168 / 72%);
+  border-top: 2px solid #fff5d8;
   border-radius: 2px;
   background:
-    radial-gradient(
-      ellipse 72% 52% at 50% -2%,
-      rgb(254 232 186 / 38%),
-      rgb(214 176 112 / 14%) 48%,
-      transparent 74%
+    conic-gradient(
+      from 154deg at 50% -18%,
+      transparent 0deg,
+      rgb(255 238 196 / 22%) 26deg,
+      transparent 52deg
     ),
-    radial-gradient(ellipse 56% 44% at 86% 14%, rgb(158 232 250 / 16%), transparent 70%),
-    linear-gradient(180deg, #162234 0%, #09101a 58%, #04070d 100%);
+    radial-gradient(
+      ellipse 74% 56% at 50% -3%,
+      rgb(255 236 190 / 44%),
+      rgb(218 178 112 / 16%) 48%,
+      transparent 76%
+    ),
+    radial-gradient(ellipse 58% 46% at 86% 14%, rgb(158 232 250 / 18%), transparent 70%),
+    linear-gradient(180deg, #18263b 0%, #09101b 56%, #04060c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 48%),
-    inset 0 0 0 5px #05080f,
-    inset 0 0 0 6px rgb(242 216 164 / 38%),
-    0 0 0 4px #060a12,
-    0 0 0 5px rgb(238 212 162 / 26%),
-    0 38px 92px -8px rgb(0 0 0 / 82%),
-    0 0 80px -14px rgb(244 214 156 / 36%);
+    inset 0 1.5px 0 rgb(255 254 248 / 54%),
+    inset 0 0 0 5px #04070d,
+    inset 0 0 0 6.5px rgb(246 220 168 / 46%),
+    0 0 0 4px #050911,
+    0 0 0 5px rgb(242 216 164 / 32%),
+    0 44px 108px -10px rgb(0 0 0 / 88%),
+    0 0 92px -14px rgb(248 216 154 / 42%),
+    0 0 56px -18px rgb(158 232 250 / 22%);
 }
 
 .exhibition-room-curated .exhibition-room-view .exhibition-studio-stage,
 .exhibition-room-curated .exhibition-room-source {
   height: clamp(380px, 57svh, 730px);
   background:
-    radial-gradient(
-      ellipse 74% 58% at 50% 4%,
-      rgb(252 228 182 / 28%),
-      rgb(200 162 98 / 10%) 48%,
-      transparent 74%
+    conic-gradient(
+      from 154deg at 50% -18%,
+      transparent 0deg,
+      rgb(255 238 196 / 20%) 26deg,
+      transparent 52deg
     ),
-    radial-gradient(ellipse 68% 60% at 50% 34%, #1d2a3d 0%, #070b13 84%);
+    radial-gradient(
+      ellipse 76% 62% at 50% 2%,
+      rgb(255 234 188 / 34%),
+      rgb(206 166 98 / 12%) 48%,
+      transparent 76%
+    ),
+    radial-gradient(ellipse 70% 62% at 50% 34%, #1f2e44 0%, #060a12 84%);
   border-radius: 0;
 }
 
 .exhibition-room-curated .exhibition-room-view .exhibition-studio-stage {
-  border: 1px solid rgb(242 216 164 / 46%);
+  border: 1px solid rgb(246 220 168 / 54%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 245 / 28%),
-    inset 0 0 0 4px rgb(5 8 14 / 82%),
-    inset 0 0 0 5px rgb(158 232 250 / 20%),
-    0 18px 44px rgb(0 0 0 / 58%);
+    inset 0 1px 0 rgb(255 254 248 / 36%),
+    inset 0 0 0 4px rgb(4 7 13 / 86%),
+    inset 0 0 0 5px rgb(158 232 250 / 26%),
+    0 20px 48px rgb(0 0 0 / 64%);
 }
 
 .exhibition-room-curated .exhibition-room-source {
@@ -228,22 +262,22 @@ main.exhibition-room-curated {
   min-width: 0;
   align-self: center;
   padding: clamp(22px, 2.5vw, 32px);
-  border: 1px solid rgb(244 218 166 / 54%);
-  border-top: 2px solid #f7e1b4;
-  border-left: 3px solid #f0d59f;
+  border: 1px solid rgb(246 220 168 / 62%);
+  border-top: 2px solid #fff4d6;
+  border-left: 3px solid #f4dba6;
   border-radius: 28px;
-  background-color: #0b121e;
+  background-color: #09101b;
   background-image:
-    radial-gradient(ellipse 86% 64% at 24% -4%, rgb(252 228 178 / 28%), transparent 70%),
-    radial-gradient(ellipse 68% 52% at 88% 100%, rgb(158 232 250 / 16%), transparent 72%),
-    linear-gradient(162deg, #1f2d42 0%, #111a29 56%, #080d16 100%);
+    radial-gradient(ellipse 90% 68% at 24% -6%, rgb(255 234 184 / 34%), transparent 70%),
+    radial-gradient(ellipse 70% 56% at 88% 100%, rgb(158 232 250 / 20%), transparent 72%),
+    linear-gradient(162deg, #213048 0%, #101929 54%, #060a13 100%);
   box-shadow:
-    inset 0 1.5px 0 rgb(255 254 248 / 44%),
-    inset 0 -1px 0 rgb(158 232 250 / 16%),
-    0 0 0 4px #060911,
-    0 0 0 5px rgb(240 214 164 / 26%),
-    0 28px 64px -8px rgb(0 0 0 / 74%),
-    0 0 48px -10px rgb(242 212 154 / 30%);
+    inset 0 1.5px 0 rgb(255 254 248 / 52%),
+    inset 0 -1px 0 rgb(158 232 250 / 22%),
+    0 0 0 4px #050810,
+    0 0 0 5px rgb(244 218 166 / 34%),
+    0 34px 78px -8px rgb(0 0 0 / 82%),
+    0 0 58px -10px rgb(248 218 156 / 38%);
 }
 
 .exhibition-room-work-title {
@@ -264,23 +298,28 @@ main.exhibition-room-curated {
 }
 
 .exhibition-room-work-number span {
-  color: #fae3b6;
+  color: #fff2d4;
   font-size: clamp(40px, 4.8vw, 74px);
   font-variant-numeric: lining-nums tabular-nums;
   text-shadow:
-    0 2px 26px rgb(246 216 160 / 42%),
-    0 1px 2px rgb(0 0 0 / 70%);
+    0 2px 26px rgb(248 218 160 / 48%),
+    0 1px 2px rgb(0 0 0 / 75%);
 }
 
 .exhibition-room-curated .exhibition-room-work-title h2 {
   font-size: clamp(24px, 2.5vw, 38px);
+  background: linear-gradient(180deg, #ffffff 0%, #fbf2e1 54%, #e2c590 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 16px rgb(246 216 156 / 24%));
 }
 
 .exhibition-room-curated .exhibition-room-caption {
   margin: 16px 0;
-  padding: 12px 0 0;
-  border-top: 1px solid rgb(240 214 164 / 24%);
-  color: #d6dde7;
+  padding: 14px 0 0;
+  border-top: 1px solid rgb(244 218 166 / 30%);
+  color: #dfe6f0;
 }
 
 .exhibition-room-curated .exhibition-room-caption p {
@@ -409,26 +448,27 @@ main.exhibition-room-curated {
   align-items: stretch;
   gap: 16px;
   margin-top: 28px;
-  padding: 18px 0 0;
-  border-top: 1px solid rgb(240 214 164 / 38%);
+  padding: 20px 0 0;
+  border-top: 1px solid rgb(246 220 168 / 46%);
 }
 
 .exhibition-room-adjacent button {
   display: grid;
   gap: 5px;
   min-width: 0;
-  min-height: 54px;
-  padding: 12px 16px;
-  border: 1px solid rgb(238 212 162 / 40%);
-  border-top-color: rgb(252 234 194 / 62%);
+  min-height: 56px;
+  padding: 12px 20px;
+  border: 1px solid rgb(244 218 166 / 52%);
+  border-top-color: #fff4d6;
   border-radius: 2px;
   color: var(--room-ink);
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(246 220 168 / 14%), transparent 72%),
-    linear-gradient(180deg, #172334 0%, #0c1320 100%);
+    radial-gradient(ellipse 84% 88% at 50% 0%, rgb(252 228 178 / 22%), transparent 72%),
+    linear-gradient(180deg, #1b283d 0%, #0b1220 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 22%),
-    0 10px 24px rgb(0 0 0 / 42%);
+    inset 0 1px 0 rgb(255 253 246 / 34%),
+    inset 0 -1px 0 rgb(158 232 250 / 16%),
+    0 12px 28px rgb(0 0 0 / 52%);
   text-align: left;
   overflow-wrap: anywhere;
 }
@@ -439,13 +479,14 @@ main.exhibition-room-curated {
 
 .exhibition-room-adjacent button span:first-child {
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 650;
+  letter-spacing: 0.06em;
   color: var(--room-key);
 }
 
 .exhibition-room-adjacent button span:last-child {
   font-size: 14px;
+  font-weight: 500;
 }
 
 .exhibition-room-curated button:disabled {
@@ -459,16 +500,16 @@ main.exhibition-room-curated {
   align-self: center;
   min-height: 48px;
   padding: 8px 16px;
-  border: 1px solid rgb(244 218 166 / 54%);
-  border-top-color: rgb(255 240 202 / 78%);
+  border: 1px solid rgb(246 220 168 / 60%);
+  border-top-color: #fff6dc;
   border-radius: 2px;
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(248 224 176 / 22%), transparent 72%),
-    linear-gradient(180deg, #1b283c 0%, #0b111d 100%);
+    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(252 228 178 / 26%), transparent 72%),
+    linear-gradient(180deg, #1d2b40 0%, #0a101c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 245 / 30%),
-    0 10px 24px rgb(0 0 0 / 48%);
-  color: #fae3b6;
+    inset 0 1px 0 rgb(255 253 246 / 38%),
+    0 12px 28px rgb(0 0 0 / 54%);
+  color: #fff2d4;
   font:
     20px/1 Georgia,
     serif;
@@ -487,7 +528,8 @@ main.exhibition-room-curated {
   align-items: end;
   flex-wrap: wrap;
   padding-bottom: 18px;
-  border-bottom: 1px solid rgb(240 214 164 / 38%);
+  border-bottom: 1px solid rgb(246 220 168 / 46%);
+  box-shadow: inset 0 -3px 0 -2px rgb(158 232 250 / 22%);
 }
 
 .exhibition-room-curated .exhibition-shelf-heading h2 {
@@ -499,14 +541,16 @@ main.exhibition-room-curated {
   flex-direction: column;
   align-items: end;
   justify-content: center;
-  padding: 8px 14px;
-  border: 1px solid rgb(240 214 164 / 42%);
-  border-top-color: rgb(254 238 200 / 64%);
+  padding: 9px 18px;
+  border: 1px solid rgb(244 218 166 / 52%);
+  border-top-color: #fff4d6;
   border-radius: 2px;
-  background: linear-gradient(180deg, #172334, #0c1320);
+  background:
+    radial-gradient(ellipse 84% 88% at 50% 0%, rgb(252 228 178 / 20%), transparent 72%),
+    linear-gradient(180deg, #1b283d, #0b1220);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 22%),
-    0 8px 20px rgb(0 0 0 / 38%);
+    inset 0 1px 0 rgb(255 253 246 / 32%),
+    0 10px 24px rgb(0 0 0 / 48%);
   text-decoration: none;
   overflow-wrap: anywhere;
 }
@@ -522,19 +566,20 @@ main.exhibition-room-curated {
   align-items: end;
   gap: 14px;
   margin-top: 22px;
-  padding: clamp(18px, 2.2vw, 26px);
-  border: 1px solid rgb(240 214 164 / 46%);
-  border-top: 2px solid #f0d59f;
+  padding: clamp(18px, 2.2vw, 28px);
+  border: 1px solid rgb(246 220 168 / 58%);
+  border-top: 2px solid #fff3d4;
   border-radius: 3px;
   background:
-    radial-gradient(ellipse 80% 66% at 50% 0%, rgb(248 224 176 / 18%), transparent 70%),
-    radial-gradient(ellipse 60% 50% at 88% 100%, rgb(158 232 250 / 10%), transparent 72%),
-    linear-gradient(180deg, #182538 0%, #0d1523 62%, #080d16 100%);
+    radial-gradient(ellipse 84% 70% at 48% -4%, rgb(254 230 182 / 26%), transparent 70%),
+    radial-gradient(ellipse 62% 54% at 88% 100%, rgb(158 232 250 / 16%), transparent 72%),
+    linear-gradient(180deg, #1b2a40 0%, #0c1422 60%, #060a13 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 245 / 34%),
-    0 0 0 3px #060911,
-    0 0 0 4px rgb(238 212 162 / 18%),
-    0 22px 50px -8px rgb(0 0 0 / 62%);
+    inset 0 1.5px 0 rgb(255 254 248 / 46%),
+    0 0 0 4px #050810,
+    0 0 0 5px rgb(242 216 164 / 26%),
+    0 28px 66px -8px rgb(0 0 0 / 74%),
+    0 0 46px -12px rgb(246 216 156 / 28%);
 }
 
 .exhibition-shelf-search-field {
@@ -561,7 +606,7 @@ main.exhibition-room-curated {
 
 .exhibition-shelf-count {
   font-size: 13px;
-  color: #d8dfe8;
+  color: #e0e7f0;
   margin: 18px 0;
 }
 
@@ -578,18 +623,20 @@ main.exhibition-room-curated {
   display: grid;
   width: 100%;
   min-width: 0;
-  padding: 8px 8px 12px;
+  padding: 9px 9px 13px;
   text-align: left;
   color: var(--room-ink);
   background:
-    radial-gradient(ellipse 84% 58% at 50% 0%, rgb(248 224 176 / 14%), transparent 70%),
-    linear-gradient(180deg, #162233 0%, #0b121e 68%, #070c14 100%);
-  border: 1px solid rgb(238 212 162 / 38%);
-  border-top-color: rgb(252 234 194 / 64%);
+    radial-gradient(ellipse 88% 62% at 50% -4%, rgb(252 230 182 / 22%), transparent 70%),
+    radial-gradient(ellipse 64% 48% at 88% 100%, rgb(158 232 250 / 12%), transparent 72%),
+    linear-gradient(180deg, #18263a 0%, #0b1220 66%, #050911 100%);
+  border: 1px solid rgb(244 218 166 / 48%);
+  border-top-color: #fff3d4;
   border-radius: 3px;
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 26%),
-    0 18px 40px -8px rgb(0 0 0 / 60%);
+    inset 0 1px 0 rgb(255 254 248 / 38%),
+    inset 0 0 0 1px rgb(158 232 250 / 10%),
+    0 22px 48px -8px rgb(0 0 0 / 72%);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease;
@@ -604,14 +651,20 @@ main.exhibition-room-curated {
   box-sizing: border-box;
   padding: clamp(10px, 1.6vw, 22px);
   background:
-    radial-gradient(ellipse 78% 58% at 50% 4%, rgb(252 230 184 / 26%), transparent 68%),
-    radial-gradient(circle at 50% 38%, #223248 0%, #080d16 84%);
-  border: 1px solid rgb(240 214 164 / 42%);
-  border-bottom: 2px solid rgb(158 232 250 / 32%);
+    conic-gradient(
+      from 156deg at 50% -18%,
+      transparent 0deg,
+      rgb(255 238 196 / 20%) 24deg,
+      transparent 48deg
+    ),
+    radial-gradient(ellipse 80% 60% at 50% 2%, rgb(255 234 188 / 34%), transparent 68%),
+    radial-gradient(circle at 50% 38%, #24364e 0%, #060a12 84%);
+  border: 1px solid rgb(244 218 166 / 52%);
+  border-bottom: 2px solid rgb(158 232 250 / 38%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 245 / 26%),
-    inset 0 0 0 3px rgb(5 8 14 / 86%),
-    inset 0 10px 24px rgb(0 0 0 / 52%);
+    inset 0 1px 0 rgb(255 254 248 / 34%),
+    inset 0 0 0 3px rgb(4 7 13 / 88%),
+    inset 0 12px 28px rgb(0 0 0 / 58%);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease;
@@ -626,37 +679,39 @@ main.exhibition-room-curated {
 }
 
 .exhibition-shelf-work[aria-pressed="true"] {
-  border-color: #fae4b8;
-  border-top-color: #fffaf0;
+  border-color: #fae5b8;
+  border-top-color: #ffffff;
   box-shadow:
-    inset 0 1px 0 rgb(255 254 248 / 52%),
-    inset 0 -2px 0 #f0d59f,
-    0 0 32px -4px rgb(244 214 156 / 48%),
-    0 22px 48px -6px rgb(0 0 0 / 70%);
+    inset 0 1.5px 0 rgb(255 254 248 / 62%),
+    inset 0 -2px 0 #f4dba6,
+    0 0 0 2px #050810,
+    0 0 0 3px rgb(158 232 250 / 36%),
+    0 0 38px -4px rgb(248 218 156 / 56%),
+    0 26px 56px -6px rgb(0 0 0 / 80%);
 }
 
 .exhibition-shelf-work[aria-pressed="true"] .exhibition-shelf-image {
-  border-color: #fae4b8;
+  border-color: #fae5b8;
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 42%),
+    inset 0 1px 0 rgb(255 254 248 / 48%),
     inset 0 0 0 1px var(--room-key),
-    0 12px 28px rgb(0 0 0 / 54%);
+    0 14px 32px rgb(0 0 0 / 60%);
 }
 
 .exhibition-shelf-selected {
   position: absolute;
   right: 8px;
   bottom: 8px;
-  padding: 4px 10px;
-  border: 1px solid #fae4b8;
+  padding: 4px 11px;
+  border: 1px solid #fae6be;
   border-radius: 2px;
   font-size: 12px;
   font-weight: 700;
-  color: #131720;
-  background: linear-gradient(180deg, #fffaf0, #e6ca96);
+  color: #10141e;
+  background: linear-gradient(180deg, #fffdf6, #ebd09c);
   box-shadow:
     inset 0 1px 0 #ffffff,
-    0 6px 14px rgb(0 0 0 / 48%);
+    0 8px 18px rgb(0 0 0 / 54%);
 }
 
 .exhibition-shelf-work-caption {
@@ -666,6 +721,7 @@ main.exhibition-room-curated {
   align-items: baseline;
   padding: 10px 4px 0;
   font-size: 14px;
+  font-weight: 500;
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
@@ -689,8 +745,8 @@ main.exhibition-room-curated {
   align-items: center;
   justify-content: center;
   gap: 18px;
-  padding-top: 20px;
-  margin-top: 32px;
+  padding-top: 22px;
+  margin-top: 34px;
   border-top: 1px solid var(--room-rule);
 }
 
@@ -710,7 +766,7 @@ main.exhibition-room-curated {
 
 @media (hover: hover) and (pointer: fine) {
   .exhibition-room-curated :is(button:enabled, a):hover {
-    color: #fff8ea;
+    color: #fffaf0;
     text-decoration: underline;
     text-underline-offset: 4px;
   }
@@ -718,35 +774,35 @@ main.exhibition-room-curated {
   .exhibition-room-curated .exhibition-room-entrances a:hover,
   .exhibition-room-curated .exhibition-shelf-return:hover,
   .exhibition-room-adjacent button:enabled:hover {
-    border-color: #fae4b8;
+    border-color: #fae5b8;
     box-shadow:
-      inset 0 1px 0 rgb(255 253 246 / 46%),
-      0 12px 28px rgb(0 0 0 / 52%),
-      0 0 22px -6px rgb(242 214 158 / 36%);
+      inset 0 1px 0 rgb(255 254 248 / 54%),
+      0 14px 32px rgb(0 0 0 / 58%),
+      0 0 26px -4px rgb(246 216 156 / 44%);
     text-decoration: none;
   }
 
   .exhibition-room-curated .exhibition-room-entrances a:last-child:hover {
-    color: #10131c;
-    background: linear-gradient(180deg, #ffffff 0%, #f5e1b8 52%, #dfc088 100%);
+    color: #0e121b;
+    background: linear-gradient(180deg, #ffffff 0%, #f8e4b8 52%, #dfbe82 100%);
   }
 
   .exhibition-room-curated .exhibition-studio-tools button:not([aria-pressed="true"]):enabled:hover {
-    border-color: rgb(250 228 184 / 82%);
+    border-color: #fae5b8;
     text-decoration: none;
   }
 
   .exhibition-room-curated .exhibition-studio-tools button[aria-pressed="true"]:hover {
-    color: #131720;
+    color: #10141e;
     text-decoration: none;
   }
 
   .exhibition-shelf-work:hover {
-    border-color: #fae4b8;
+    border-color: #fae5b8;
     box-shadow:
-      inset 0 1px 0 rgb(255 254 248 / 44%),
-      0 22px 48px -4px rgb(0 0 0 / 68%),
-      0 0 28px -8px rgb(244 214 156 / 38%);
+      inset 0 1px 0 rgb(255 254 248 / 54%),
+      0 26px 56px -4px rgb(0 0 0 / 76%),
+      0 0 34px -6px rgb(248 218 156 / 46%);
     text-decoration: none;
   }
 }
@@ -917,6 +973,20 @@ main.exhibition-room-curated {
 @media (forced-colors: active) {
   .exhibition-room-curated .exhibition-room-heading::after {
     display: none;
+  }
+
+  .exhibition-room-curated
+    :is(
+      .exhibition-room-heading h1,
+      .exhibition-shelf-heading h2,
+      .exhibition-room-work-title h2
+    ) {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: CanvasText;
+    color: CanvasText;
+    filter: none;
   }
 
   .exhibition-room-curated :is(.exhibition-room-choose, .exhibition-shelf-filters) select {

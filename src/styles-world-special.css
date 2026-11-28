@@ -401,27 +401,27 @@ html[data-family="world"]:root
     > .world-annex
     .wa-chapter {
     background:
-      var(--ws-prism) 0 100% / min(520px, 68%) 2px no-repeat,
+      var(--ws-prism) 0 100% / min(560px, 72%) 2px no-repeat,
       linear-gradient(
           270deg,
-          rgb(var(--sw-gold-rgb, 240 207 134) / 72%) 0%,
-          rgb(var(--sw-light-rgb) / 36%) 46%,
+          rgb(var(--sw-gold-rgb, 240 207 134) / 86%) 0%,
+          rgb(var(--sw-light-rgb) / 48%) 48%,
           transparent 100%
         )
-        100% 100% / min(260px, 32%) 1px no-repeat,
+        100% 100% / min(280px, 34%) 1.5px no-repeat,
       radial-gradient(
-          56% 100% at 18% 100%,
-          rgb(var(--sw-light-rgb) / 20%),
-          rgb(var(--ws-pink-rgb) / 14%) 46%,
+          58% 100% at 18% 100%,
+          rgb(var(--sw-light-rgb) / 26%),
+          rgb(var(--ws-pink-rgb) / 18%) 46%,
           transparent 100%
         )
-        0 100% / min(640px, 82%) 28px no-repeat,
+        0 100% / min(680px, 84%) 32px no-repeat,
       radial-gradient(
-          42% 100% at 92% 100%,
-          rgb(var(--sw-gold-rgb, 240 207 134) / 14%),
+          44% 100% at 92% 100%,
+          rgb(var(--sw-gold-rgb, 240 207 134) / 20%),
           transparent 100%
         )
-        100% 100% / min(300px, 38%) 18px no-repeat;
+        100% 100% / min(320px, 40%) 22px no-repeat;
   }
 }
 
@@ -1461,10 +1461,12 @@ html[data-family="world"]:root
     left: 22px;
     z-index: 3;
     display: block;
-    width: min(460px, 52%);
+    width: min(520px, 58%);
     height: 2px;
     background: var(--ws-prism);
-    box-shadow: 0 0 14px rgb(var(--sw-light-rgb) / 38%);
+    box-shadow:
+      0 0 18px rgb(var(--sw-light-rgb) / 52%),
+      0 0 34px rgb(var(--ws-pink-rgb) / 28%);
     pointer-events: none;
     animation: none;
   }

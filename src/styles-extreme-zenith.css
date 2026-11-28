@@ -1797,15 +1797,37 @@ html[data-family="special"]
     0 0 18px -4px rgb(255 214 114 / 44%);
 }
 
-/* Cold Open — Molten Gold Radial Burst × Electric Cobalt Arena Spotlight */
+/* Cold Open — Heavyweight Title-Match Colosseum: Molten Solar-Gold Flame × Electric Cobalt Lightning */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page#top[data-command-special] > .exs-hero {
   background:
-    radial-gradient(66% 72% at 64% 40%, rgb(255 214 116 / 46%), transparent 64%),
-    radial-gradient(50% 48% at 18% 22%, rgb(232 148 36 / 30%), transparent 62%),
-    radial-gradient(58% 54% at 88% 22%, rgb(46 152 255 / 36%), transparent 62%),
-    radial-gradient(56% 48% at 14% 86%, rgb(30 118 242 / 28%), transparent 66%),
-    radial-gradient(68% 36% at 52% 100%, rgb(255 204 102 / 38%), transparent 68%),
-    linear-gradient(180deg, #070b17 0%, #15120f 50%, #060a14 100%);
+    radial-gradient(64% 72% at 62% 40%, rgb(255 204 82 / 56%), transparent 62%),
+    radial-gradient(48% 50% at 18% 20%, rgb(242 146 24 / 38%), transparent 60%),
+    radial-gradient(56% 56% at 88% 18%, rgb(42 162 255 / 48%), transparent 60%),
+    radial-gradient(54% 48% at 10% 88%, rgb(28 122 248 / 38%), transparent 64%),
+    radial-gradient(72% 38% at 54% 100%, rgb(255 196 72 / 46%), transparent 66%),
+    linear-gradient(180deg, #040814 0%, #140f0b 48%, #040710 100%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > .exs-hero
+  > .exf-billing {
+  background: linear-gradient(
+    180deg,
+    rgb(255 250 228 / 74%) 0%,
+    rgb(255 216 112 / 52%) 42%,
+    rgb(176 106 20 / 26%) 78%,
+    rgb(58 180 255 / 18%) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter:
+    drop-shadow(0 2px 0 rgb(110 66 12 / 78%))
+    drop-shadow(0 18px 42px rgb(0 0 0 / 92%))
+    drop-shadow(0 0 46px rgb(255 204 82 / 34%));
 }
 
 html[data-family="special"]
@@ -1813,7 +1835,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > .exs-hero
   > .exi-rays {
-  color: rgb(255 218 126 / 52%);
+  color: rgb(255 216 116 / 62%);
 }
 
 html[data-family="special"]
@@ -1821,11 +1843,11 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > .exs-hero
   .exs-dial {
-  border-color: rgb(255 220 134 / 52%);
+  border-color: rgb(255 228 148 / 68%);
   box-shadow:
-    0 0 68px rgb(54 166 255 / 34%),
-    0 0 38px rgb(255 212 114 / 28%),
-    inset 0 0 46px rgb(255 216 124 / 24%);
+    0 0 84px rgb(46 172 255 / 44%),
+    0 0 46px rgb(255 204 86 / 38%),
+    inset 0 0 56px rgb(255 214 112 / 32%);
 }
 
 html[data-family="special"]
@@ -1835,9 +1857,9 @@ html[data-family="special"]
   .rxs-hero-visual
   img {
   filter:
-    drop-shadow(0 36px 76px rgb(0 0 0 / 94%))
-    drop-shadow(0 0 72px rgb(255 212 114 / 48%))
-    drop-shadow(0 0 42px rgb(58 176 255 / 34%));
+    drop-shadow(0 38px 80px rgb(0 0 0 / 96%))
+    drop-shadow(0 0 78px rgb(255 204 86 / 54%))
+    drop-shadow(0 0 46px rgb(52 178 255 / 42%));
 }
 
 html[data-family="special"]
@@ -1846,10 +1868,19 @@ html[data-family="special"]
   .exs-hero
   .rxs-hero-copy
   > p:first-child {
+  border: 1px solid rgb(255 250 226 / 84%);
+  background: linear-gradient(
+    180deg,
+    #fffdf5 0%,
+    #fff0bf 26%,
+    #ffd162 58%,
+    #d68a1e 100%
+  );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 72%),
-    0 10px 30px rgb(255 206 104 / 42%),
-    0 0 24px -4px rgb(56 172 255 / 26%);
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 0 rgb(118 66 8 / 62%),
+    0 12px 34px rgb(255 198 76 / 52%),
+    0 0 28px -4px rgb(56 178 255 / 32%);
 }
 
 html[data-family="special"]
@@ -1857,11 +1888,21 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-hero
   h1 {
+  background-image: linear-gradient(
+    102deg,
+    #ffffff 0%,
+    #fff3c4 18%,
+    #ffd05a 36%,
+    #b66e14 52%,
+    #ffe496 68%,
+    #ffd05e 84%,
+    #ffffff 100%
+  );
   filter:
-    drop-shadow(0 2px 0 rgb(104 66 16 / 98%))
-    drop-shadow(0 6px 0 rgb(34 22 6 / 94%))
-    drop-shadow(0 20px 44px rgb(0 0 0 / 92%))
-    drop-shadow(0 0 44px rgb(255 212 114 / 46%));
+    drop-shadow(0 2px 0 rgb(124 74 14 / 98%))
+    drop-shadow(0 6px 0 rgb(38 22 4 / 96%))
+    drop-shadow(0 22px 48px rgb(0 0 0 / 96%))
+    drop-shadow(0 0 48px rgb(255 204 82 / 58%));
 }
 
 html[data-family="special"]
@@ -1869,16 +1910,26 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-hero
   .rxs-hero-lede {
-  border: 1px solid rgb(255 218 134 / 44%);
-  border-left: 4px solid #ffe49c;
+  border: 1px solid rgb(255 228 148 / 76%);
+  border-top: 3px solid #fff5cf;
+  border-left: 5px solid #fff0b8;
+  border-radius: 16px;
+  clip-path: none;
+  color: #fffaf2;
   background:
-    radial-gradient(ellipse 72% 84% at 0% 50%, rgb(255 214 114 / 24%), transparent 62%),
-    radial-gradient(ellipse 64% 76% at 100% 50%, rgb(54 166 255 / 18%), transparent 64%),
-    linear-gradient(96deg, rgb(28 24 18 / 96%), rgb(10 15 28 / 92%));
+    radial-gradient(ellipse 76% 86% at 0% 42%, rgb(255 204 82 / 36%), transparent 62%),
+    radial-gradient(ellipse 68% 78% at 100% 54%, rgb(46 172 255 / 30%), transparent 62%),
+    linear-gradient(108deg, rgb(38 28 14 / 98%) 0%, rgb(14 17 28 / 96%) 56%, rgb(8 16 32 / 96%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 240 / 34%),
-    inset 0 -1px 0 rgb(72 184 255 / 24%),
-    0 20px 46px rgb(0 0 0 / 78%);
+    0 28px 64px -10px rgb(0 0 0 / 94%),
+    0 0 42px -8px rgb(255 198 72 / 46%),
+    0 0 32px -10px rgb(54 178 255 / 32%),
+    inset 0 2px 0 rgb(255 255 250 / 82%),
+    inset 0 0 0 2px rgb(255 216 112 / 46%),
+    inset 0 0 0 5px rgb(8 10 16 / 92%),
+    inset 0 0 0 6px rgb(86 208 255 / 30%),
+    inset 0 -2px 0 rgb(58 182 255 / 46%);
+  text-shadow: 0 2px 12px rgb(0 0 0 / 92%);
 }
 
 html[data-family="special"]
@@ -1886,19 +1937,33 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > .exs-hero
   .rxs-scroll-cue {
-  border: 1px solid rgb(255 228 152 / 86%);
+  border: 1.5px solid rgb(255 234 166 / 94%);
   background:
-    radial-gradient(ellipse 76% 86% at 16% 0%, rgb(255 222 134 / 38%), transparent 64%),
-    radial-gradient(ellipse 60% 78% at 92% 100%, rgb(64 184 255 / 26%), transparent 64%),
-    linear-gradient(135deg, rgb(52 40 22 / 97%), rgb(12 18 30 / 99%));
+    radial-gradient(ellipse 80% 88% at 16% 0%, rgb(255 224 128 / 48%), transparent 62%),
+    radial-gradient(ellipse 64% 80% at 92% 100%, rgb(58 184 255 / 36%), transparent 62%),
+    linear-gradient(135deg, rgb(60 44 20 / 98%), rgb(10 18 32 / 99%));
   box-shadow:
-    0 20px 46px rgb(0 0 0 / 84%),
-    0 0 34px -6px rgb(255 214 114 / 50%),
-    inset 0 1px 0 rgb(255 254 246 / 58%),
-    inset 0 -1px 0 rgb(92 206 255 / 24%);
+    0 24px 52px -6px rgb(0 0 0 / 90%),
+    0 0 40px -4px rgb(255 204 82 / 58%),
+    0 0 28px -8px rgb(58 184 255 / 36%),
+    inset 0 2px 0 rgb(255 255 252 / 76%),
+    inset 0 0 0 3px rgb(10 13 20 / 88%),
+    inset 0 0 0 4px rgb(255 218 122 / 36%),
+    inset 0 -1px 0 rgb(96 212 255 / 36%);
 }
 
-/* 4-Bout Fight Card Strip — Alternating Molten Gold (01/03) × Electric Cobalt (02/04) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > .exs-hero
+  .rxs-scroll-cue
+  > span::before {
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 0 16px rgb(255 204 82 / 64%);
+}
+
+/* 4-Bout Fight Card Strip — Heavyweight Alternating Molten Gold (01/03) × Electric Cobalt (02/04) */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -1906,19 +1971,20 @@ html[data-family="special"]
   background:
     linear-gradient(
       90deg,
-      rgb(255 214 114 / 20%) 0%,
-      rgb(20 18 16 / 98%) 22%,
-      rgb(12 18 32 / 98%) 52%,
-      rgb(20 18 16 / 98%) 78%,
-      rgb(56 172 255 / 22%) 100%
+      rgb(255 208 92 / 28%) 0%,
+      rgb(20 17 13 / 98%) 22%,
+      rgb(10 18 34 / 98%) 52%,
+      rgb(20 17 13 / 98%) 78%,
+      rgb(48 174 255 / 28%) 100%
     ),
-    #0b0d14;
-  border-block: 2px solid rgb(255 218 134 / 72%);
+    #080b12;
+  border-top: 3px solid #ffe8a6;
+  border-bottom: 2px solid rgb(92 212 255 / 72%);
   box-shadow:
-    0 32px 72px rgb(0 0 0 / 88%),
-    0 0 42px -16px rgb(56 172 255 / 32%),
-    inset 0 1px 0 rgb(255 252 240 / 34%),
-    inset 0 -1px 0 rgb(78 192 255 / 34%);
+    0 36px 78px rgb(0 0 0 / 92%),
+    0 0 48px -14px rgb(56 178 255 / 38%),
+    inset 0 1px 0 rgb(255 254 246 / 54%),
+    inset 0 -1px 0 rgb(96 214 255 / 44%);
 }
 
 html[data-family="special"]
@@ -1929,9 +1995,11 @@ html[data-family="special"]
   border: 0;
   border-radius: 0;
   background:
-    radial-gradient(96% 70% at 18% 0%, rgb(255 216 122 / 24%), transparent 64%),
-    linear-gradient(180deg, rgb(34 27 17 / 92%), rgb(12 11 10 / 97%));
-  box-shadow: inset 0 1px 0 rgb(255 252 240 / 24%);
+    radial-gradient(96% 74% at 18% 0%, rgb(255 214 108 / 32%), transparent 64%),
+    linear-gradient(180deg, rgb(42 32 16 / 94%), rgb(12 10 8 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 254 246 / 38%),
+    inset 0 -1px 0 rgb(224 142 28 / 28%);
 }
 
 html[data-family="special"]
@@ -1940,9 +2008,11 @@ html[data-family="special"]
   > .exs-chapter-index
   a:nth-child(even) {
   background:
-    radial-gradient(96% 70% at 18% 0%, rgb(58 176 255 / 26%), transparent 64%),
-    linear-gradient(180deg, rgb(14 28 52 / 92%), rgb(8 13 24 / 97%));
-  box-shadow: inset 0 1px 0 rgb(232 252 255 / 26%);
+    radial-gradient(96% 74% at 18% 0%, rgb(54 182 255 / 34%), transparent 64%),
+    linear-gradient(180deg, rgb(14 32 62 / 94%), rgb(7 12 24 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(240 253 255 / 40%),
+    inset 0 -1px 0 rgb(42 154 255 / 30%);
 }
 
 html[data-family="special"]
@@ -1951,7 +2021,7 @@ html[data-family="special"]
   > .exs-chapter-index
   a:nth-child(even)::after {
   background: var(--exe-rail-cyan);
-  opacity: 0.9;
+  opacity: 0.96;
 }
 
 html[data-family="special"]
@@ -1962,7 +2032,9 @@ html[data-family="special"]
   small {
   color: #06111e;
   background: var(--exe-cyan-pill);
-  box-shadow: 0 4px 14px rgb(58 176 255 / 38%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 72%),
+    0 4px 16px rgb(54 182 255 / 48%);
 }
 
 html[data-family="special"]
@@ -1971,9 +2043,9 @@ html[data-family="special"]
   > .exs-chapter-index
   a:nth-child(even)
   i {
-  border-color: rgb(114 228 255 / 66%);
-  color: #9ef0ff;
-  background: rgb(58 176 255 / 16%);
+  border-color: rgb(118 232 255 / 76%);
+  color: #aef4ff;
+  background: rgb(54 182 255 / 22%);
 }
 
 html[data-family="special"]
@@ -1982,18 +2054,19 @@ html[data-family="special"]
   > .exs-chapter-index
   a
   + a {
-  border-left: 1px solid rgb(255 218 134 / 36%);
+  border-left: 1px solid rgb(255 220 134 / 42%);
 }
 
-/* Chapter Stadium Backdrops & Illuminated Round Stamps */
+/* Chapter Stadium Backdrops, Sculpted Platinum-Gold Titles & Illuminated Round Stamps */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #performance {
   background:
-    radial-gradient(56% 42% at 14% 12%, rgb(255 206 102 / 18%), transparent 66%),
-    radial-gradient(56% 42% at 86% 24%, rgb(46 154 255 / 18%), transparent 66%),
-    linear-gradient(180deg, #0b0c12 0%, #090b10 56%, #08090e 100%);
+    radial-gradient(54% 38% at 16% 10%, rgb(255 198 68 / 28%), transparent 64%),
+    radial-gradient(54% 38% at 86% 14%, rgb(42 162 255 / 28%), transparent 64%),
+    radial-gradient(62% 44% at 50% 42%, rgb(255 184 48 / 12%), transparent 70%),
+    linear-gradient(180deg, #070a14 0%, #090b12 54%, #06080f 100%);
 }
 
 html[data-family="special"]
@@ -2001,9 +2074,9 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #p14 {
   background:
-    radial-gradient(54% 44% at 20% 24%, rgb(255 206 102 / 18%), transparent 66%),
-    radial-gradient(58% 48% at 82% 48%, rgb(42 152 255 / 22%), transparent 66%),
-    linear-gradient(180deg, #080b14 0%, #0a0f1c 52%, #070910 100%);
+    radial-gradient(54% 42% at 18% 18%, rgb(255 198 68 / 26%), transparent 64%),
+    radial-gradient(58% 46% at 84% 42%, rgb(42 162 255 / 30%), transparent 64%),
+    linear-gradient(180deg, #060a14 0%, #0a1020 52%, #050810 100%);
 }
 
 html[data-family="special"]
@@ -2011,9 +2084,9 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #stages {
   background:
-    radial-gradient(56% 46% at 18% 36%, rgb(44 156 255 / 20%), transparent 66%),
-    radial-gradient(56% 46% at 84% 58%, rgb(255 208 106 / 20%), transparent 66%),
-    linear-gradient(180deg, #070b14 0%, #0b0d14 54%, #070910 100%);
+    radial-gradient(56% 44% at 16% 30%, rgb(42 164 255 / 28%), transparent 64%),
+    radial-gradient(56% 44% at 84% 56%, rgb(255 200 76 / 28%), transparent 64%),
+    linear-gradient(180deg, #060a14 0%, #0b0d16 54%, #050810 100%);
 }
 
 html[data-family="special"]
@@ -2021,9 +2094,9 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #system {
   background:
-    radial-gradient(54% 44% at 22% 72%, rgb(255 206 102 / 18%), transparent 66%),
-    radial-gradient(56% 46% at 80% 76%, rgb(46 156 255 / 20%), transparent 66%),
-    linear-gradient(180deg, #090c14 0%, #0c0e14 58%, #07080d 100%);
+    radial-gradient(54% 42% at 20% 68%, rgb(255 198 68 / 26%), transparent 64%),
+    radial-gradient(56% 44% at 82% 74%, rgb(42 164 255 / 28%), transparent 64%),
+    linear-gradient(180deg, #070b14 0%, #0b0e16 58%, #05070d 100%);
 }
 
 html[data-family="special"]
@@ -2032,8 +2105,8 @@ html[data-family="special"]
   > :is(#performance, #p14, #stages, #system)
   > .rxs-section-heading {
   background:
-    linear-gradient(90deg, #fff5d2 0%, #fad47a 42%, #4cc2ff 74%, transparent 100%) 0 100% / 100% 3px
-      no-repeat;
+    linear-gradient(90deg, #ffffff 0%, #ffe69c 26%, #ffd05a 46%, #4cc8ff 72%, rgb(46 154 255 / 24%) 92%, transparent 100%)
+      0 100% / 100% 3px no-repeat;
 }
 
 html[data-family="special"]
@@ -2041,10 +2114,21 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > :is(#performance, #p14, #stages, #system)
   > .rxs-section-heading::before {
+  background: linear-gradient(180deg, #fffdf5 0%, #ffefb8 24%, #ffd05e 56%, #c87b16 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 72%),
-    0 14px 32px rgb(255 206 104 / 42%),
-    0 0 24px -4px rgb(58 176 255 / 24%);
+    inset 0 2px 0 #ffffff,
+    inset 0 -2px 0 rgb(118 66 8 / 72%),
+    0 16px 38px rgb(255 196 68 / 58%),
+    0 0 28px -2px rgb(255 218 118 / 46%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading::after {
+  color: #ffe8a2;
+  text-shadow: 0 0 16px rgb(255 204 82 / 64%);
 }
 
 html[data-family="special"]
@@ -2052,30 +2136,77 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > :is(#p14, #system)
   > .rxs-section-heading::before {
-  color: #06111e;
-  background: var(--exe-cyan-pill);
+  color: #05101e;
+  background: linear-gradient(180deg, #f4fdff 0%, #bdf4ff 26%, #4cc8ff 58%, #166ec8 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 72%),
-    0 14px 32px rgb(54 168 255 / 44%),
-    0 0 24px -4px rgb(255 212 114 / 24%);
+    inset 0 2px 0 #ffffff,
+    inset 0 -2px 0 rgb(10 56 108 / 72%),
+    0 16px 38px rgb(46 174 255 / 58%),
+    0 0 28px -2px rgb(118 232 255 / 46%);
 }
 
-/* 01 IMPACT — Dual heavy forged stat plates (205.6 t〜 Gold / 0.002 SEC Electric Cobalt) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading
+  > h2 {
+  filter:
+    drop-shadow(0 2px 0 rgb(118 70 12 / 98%))
+    drop-shadow(0 5px 0 rgb(34 18 4 / 94%))
+    drop-shadow(0 16px 36px rgb(0 0 0 / 92%))
+    drop-shadow(0 0 36px rgb(255 204 82 / 42%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading
+  > h2
+  > .exo-line {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fff4cc 24%,
+    #ffd364 56%,
+    #c07a18 84%,
+    #ffe69c 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > :is(#performance, #p14, #stages, #system)
+  > .rxs-section-heading
+  > span {
+  color: #f0ebe0;
+  border-inline-start-color: rgb(255 224 134 / 68%);
+  text-shadow: 0 2px 12px rgb(0 0 0 / 88%);
+}
+
+/* 01 IMPACT — Heavyweight Colosseum Metric Plates: Golden Flame Aura (t〜) × Electric Cyan Lightning Aura (SEC) */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #performance
   > .rxs-headline-metrics {
   background:
-    radial-gradient(56% 74% at 22% 34%, rgb(255 210 104 / 36%), transparent 68%),
-    radial-gradient(56% 74% at 78% 64%, rgb(46 162 255 / 34%), transparent 68%),
-    linear-gradient(180deg, #110f0d 0%, #090d17 100%);
-  border-top: 2px solid rgb(255 220 134 / 76%);
-  border-bottom: 2px solid rgb(92 204 255 / 64%);
+    radial-gradient(52% 82% at 24% 48%, rgb(255 186 44 / 48%), transparent 66%),
+    radial-gradient(44% 62% at 16% 18%, rgb(255 226 132 / 28%), transparent 62%),
+    radial-gradient(52% 82% at 76% 52%, rgb(38 172 255 / 48%), transparent 66%),
+    radial-gradient(44% 62% at 86% 18%, rgb(118 236 255 / 26%), transparent 62%),
+    linear-gradient(180deg, #0d0b09 0%, #070c17 100%);
+  border-top: 3px solid #ffe8a6;
+  border-bottom: 3px solid #78ddff;
   box-shadow:
-    inset 0 1px 0 rgb(255 252 240 / 34%),
-    inset 0 -1px 0 rgb(114 228 255 / 30%),
-    0 36px 86px rgb(0 0 0 / 86%);
+    inset 0 1px 0 rgb(255 255 250 / 56%),
+    inset 0 -1px 0 rgb(168 244 255 / 48%),
+    0 40px 92px rgb(0 0 0 / 92%);
 }
 
 html[data-family="special"]
@@ -2095,14 +2226,24 @@ html[data-family="special"]
   #performance
   .exi-stage
   > article {
-  border-top: 4px solid #ffebb3;
-  background: var(--exe-surface-gold);
+  border: 1px solid rgb(255 220 122 / 86%);
+  border-top: 5px solid #fff7d8;
+  border-radius: 22px;
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 92% 62% at 28% 0%, rgb(255 234 148 / 60%), transparent 60%),
+    radial-gradient(ellipse 76% 74% at 56% 50%, rgb(255 148 18 / 38%), transparent 62%),
+    radial-gradient(ellipse 84% 50% at 24% 100%, rgb(255 196 64 / 36%), transparent 68%),
+    linear-gradient(156deg, #34220a 0%, #160f07 52%, #080604 100%);
   box-shadow:
-    0 36px 88px -18px rgb(0 0 0 / 98%),
-    0 0 64px -8px rgb(255 208 106 / 46%),
-    inset 0 1px 0 rgb(255 253 246 / 68%),
-    inset 0 -2px 0 rgb(222 142 36 / 48%),
-    inset 0 0 0 1px rgb(255 218 134 / 80%);
+    0 42px 96px -14px rgb(0 0 0 / 98%),
+    0 0 88px -6px rgb(255 184 42 / 64%),
+    0 0 38px -4px rgb(255 230 138 / 48%),
+    inset 0 2px 0 rgb(255 255 255 / 94%),
+    inset 0 0 0 2px rgb(255 214 104 / 88%),
+    inset 0 0 0 6px rgb(14 9 4 / 94%),
+    inset 0 0 0 7px rgb(255 186 54 / 46%),
+    inset 0 -4px 0 rgb(226 128 18 / 76%);
 }
 
 html[data-family="special"]
@@ -2111,14 +2252,125 @@ html[data-family="special"]
   #performance
   .exi-stage
   > article:nth-child(2) {
-  border-top: 4px solid #bef5ff;
-  background: var(--exe-surface-cyan);
+  border: 1px solid rgb(96 226 255 / 88%);
+  border-top: 5px solid #e6fdff;
+  border-radius: 22px;
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 92% 62% at 28% 0%, rgb(122 238 255 / 58%), transparent 60%),
+    radial-gradient(ellipse 76% 74% at 64% 50%, rgb(22 134 255 / 46%), transparent 62%),
+    radial-gradient(ellipse 84% 50% at 74% 100%, rgb(72 214 255 / 38%), transparent 68%),
+    linear-gradient(156deg, #08244a 0%, #061328 52%, #030812 100%);
   box-shadow:
-    0 36px 88px -18px rgb(0 0 0 / 98%),
-    0 0 64px -8px rgb(54 176 255 / 48%),
-    inset 0 1px 0 rgb(242 254 255 / 68%),
-    inset 0 -2px 0 rgb(34 136 244 / 48%),
-    inset 0 0 0 1px rgb(104 222 255 / 80%);
+    0 42px 96px -14px rgb(0 0 0 / 98%),
+    0 0 90px -6px rgb(38 184 255 / 66%),
+    0 0 40px -4px rgb(148 244 255 / 50%),
+    inset 0 2px 0 rgb(255 255 255 / 94%),
+    inset 0 0 0 2px rgb(86 220 255 / 90%),
+    inset 0 0 0 6px rgb(4 11 22 / 94%),
+    inset 0 0 0 7px rgb(46 164 255 / 48%),
+    inset 0 -4px 0 rgb(22 124 248 / 78%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article
+  > strong {
+  color: #fffdf6;
+  text-shadow:
+    0 2px 0 #b86c0e,
+    0 5px 0 #582e04,
+    0 10px 24px rgb(0 0 0 / 96%),
+    0 0 36px rgb(255 224 126 / 86%),
+    0 0 76px rgb(255 154 24 / 60%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong {
+  color: #f4fdff;
+  text-shadow:
+    0 2px 0 #0c6ab0,
+    0 5px 0 #052e56,
+    0 10px 24px rgb(0 0 0 / 96%),
+    0 0 38px rgb(118 238 255 / 88%),
+    0 0 78px rgb(28 148 255 / 64%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article
+  > strong
+  > span {
+  color: #ffe48e;
+  text-shadow:
+    0 2px 0 #6e3d06,
+    0 0 24px rgb(255 204 82 / 78%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > strong
+  > span {
+  color: #9ef2ff;
+  text-shadow:
+    0 2px 0 #084474,
+    0 0 24px rgb(86 224 255 / 82%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article
+  > p {
+  color: #fff5de;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 94%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article:nth-child(2)
+  > p {
+  color: #ebfcff;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  .exi-rays {
+  color: rgb(255 210 92 / 48%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  .exi-streaks {
+  color: rgb(96 228 255 / 50%);
 }
 
 html[data-family="special"]
@@ -2127,11 +2379,16 @@ html[data-family="special"]
   #performance
   .exi-stage
   > article:first-child::after {
-  height: 14px;
+  height: 16px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 80%) 0%, transparent 48%),
+    linear-gradient(90deg, #9c4a06 0%, #e88e1a 28%, #ffd45e 68%, #fff8dc 92%, #ffffff 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 72%),
-    inset 0 -1px 0 rgb(118 66 12 / 82%),
-    0 0 28px rgb(255 208 106 / 68%);
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 0 rgb(118 54 6 / 86%),
+    0 0 34px rgb(255 196 64 / 86%),
+    0 0 14px rgb(255 242 186 / 74%);
 }
 
 html[data-family="special"]
@@ -2140,36 +2397,54 @@ html[data-family="special"]
   #performance
   .exi-stage
   > article:nth-child(2)::after {
-  height: 14px;
+  height: 16px;
+  border-radius: 999px;
   background:
-    linear-gradient(180deg, rgb(244 254 255 / 70%) 0%, transparent 48%),
-    linear-gradient(90deg, #165ec8 0%, #34b4ff 42%, #9ef0ff 84%, #ffffff 100%);
+    linear-gradient(180deg, rgb(255 255 255 / 82%) 0%, transparent 48%),
+    linear-gradient(90deg, #0d4db8 0%, #24a4ff 32%, #86ecff 72%, #e6fdff 92%, #ffffff 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 72%),
-    inset 0 -1px 0 rgb(12 58 118 / 82%),
-    0 0 28px rgb(58 184 255 / 68%);
+    inset 0 1px 0 #ffffff,
+    inset 0 -2px 0 rgb(8 48 112 / 86%),
+    0 0 36px rgb(54 192 255 / 88%),
+    0 0 14px rgb(188 248 255 / 78%);
 }
 
-/* Tale of the Tape console & comparison cards (harmonized with Ring card/pill geometry) */
+/* Tale of the Tape console & challenger duel cards — Heavyweight Metallic Bezels & High-Contrast Auras */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #performance
   .rxs-comparison {
-  border: 1px solid rgb(255 220 138 / 54%);
-  border-top: 2px solid rgb(255 236 178 / 76%);
+  border: 1.5px solid rgb(255 224 142 / 72%);
+  border-top: 4px solid #fff5cf;
   border-radius: 0;
   background:
-    radial-gradient(ellipse 68% 28% at 18% 0%, rgb(255 222 134 / 30%), transparent 66%),
-    radial-gradient(ellipse 66% 28% at 84% 0%, rgb(62 184 255 / 28%), transparent 66%),
-    radial-gradient(ellipse 56% 36% at 50% 100%, rgb(255 206 104 / 12%), transparent 72%),
-    var(--exe-surface-1);
+    radial-gradient(ellipse 68% 30% at 18% 0%, rgb(255 216 112 / 40%), transparent 64%),
+    radial-gradient(ellipse 66% 30% at 84% 0%, rgb(54 184 255 / 38%), transparent 64%),
+    radial-gradient(ellipse 58% 38% at 50% 100%, rgb(255 196 76 / 16%), transparent 70%),
+    linear-gradient(180deg, #15120d 0%, #0b0e18 52%, #070a12 100%);
   box-shadow:
-    0 38px 90px -20px rgb(0 0 0 / 98%),
-    0 0 58px -14px rgb(255 212 114 / 32%),
-    0 0 58px -14px rgb(54 168 255 / 26%),
-    inset 0 1px 0 rgb(255 254 246 / 54%),
-    inset 0 -1px 0 rgb(94 210 255 / 24%);
+    0 42px 96px -18px rgb(0 0 0 / 98%),
+    0 0 68px -12px rgb(255 204 86 / 38%),
+    0 0 68px -12px rgb(46 172 255 / 34%),
+    inset 0 2px 0 rgb(255 255 250 / 74%),
+    inset 0 0 0 4px rgb(8 10 16 / 90%),
+    inset 0 0 0 5px rgb(94 212 255 / 28%),
+    inset 0 -2px 0 rgb(86 208 255 / 34%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison
+  > .rxs-comparison-key
+  > span:first-child {
+  background: linear-gradient(180deg, #fffdf4 0%, #ffefb8 24%, #ffd05e 56%, #c87b16 100%);
+  box-shadow:
+    inset 0 2px 0 #ffffff,
+    inset 0 -2px 0 rgb(118 66 8 / 68%),
+    0 14px 36px rgb(255 198 72 / 46%);
 }
 
 html[data-family="special"]
@@ -2179,16 +2454,17 @@ html[data-family="special"]
   .rxs-comparison
   > .rxs-comparison-key
   > .exf-vs {
-  border: 2px solid #ffebb3;
+  border: 2px solid #fff3c6;
   background:
-    radial-gradient(circle at 28% 28%, rgb(255 220 128 / 42%), transparent 56%),
-    radial-gradient(circle at 74% 74%, rgb(64 188 255 / 38%), transparent 56%),
-    #0b0e16;
+    radial-gradient(circle at 26% 26%, rgb(255 218 116 / 54%), transparent 56%),
+    radial-gradient(circle at 76% 76%, rgb(54 186 255 / 48%), transparent 56%),
+    #080c16;
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 84%),
-    0 0 26px rgb(255 214 114 / 50%),
-    0 0 30px rgb(58 176 255 / 38%),
-    inset 0 1px 0 rgb(255 254 246 / 48%);
+    0 0 0 4px rgb(255 214 108 / 22%),
+    0 14px 32px rgb(0 0 0 / 88%),
+    0 0 32px rgb(255 204 82 / 64%),
+    0 0 36px rgb(54 184 255 / 48%),
+    inset 0 1px 0 rgb(255 255 250 / 64%);
 }
 
 html[data-family="special"]
@@ -2196,15 +2472,16 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-opponent-options
   button {
-  border: 1px solid rgb(134 214 255 / 36%);
+  border: 1px solid rgb(134 218 255 / 46%);
   background:
-    radial-gradient(88% 72% at 18% 0%, rgb(114 220 255 / 16%), transparent 64%),
-    linear-gradient(180deg, rgb(24 34 54 / 96%), rgb(10 15 26 / 98%));
-  color: #e6ecf5;
+    radial-gradient(88% 72% at 18% 0%, rgb(118 224 255 / 22%), transparent 62%),
+    linear-gradient(180deg, rgb(26 38 62 / 96%), rgb(9 14 26 / 99%));
+  color: #edf4fc;
   box-shadow:
-    inset 0 1px 0 rgb(236 251 255 / 30%),
-    inset 0 -1px 0 rgb(54 166 255 / 18%),
-    0 10px 24px -10px rgb(0 0 0 / 86%);
+    inset 0 1px 0 rgb(242 253 255 / 44%),
+    inset 0 0 0 2px rgb(8 14 24 / 72%),
+    inset 0 -1px 0 rgb(54 176 255 / 26%),
+    0 12px 26px -10px rgb(0 0 0 / 88%);
 }
 
 html[data-family="special"]
@@ -2212,19 +2489,19 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-opponent-options
   button[aria-pressed="true"] {
-  border-color: #ffe8a8;
+  border: 1.5px solid #fff0bc;
   background:
-    radial-gradient(92% 84% at 16% 0%, rgb(255 224 138 / 42%), transparent 66%),
-    radial-gradient(64% 68% at 92% 100%, rgb(244 176 58 / 22%), transparent 64%),
-    linear-gradient(148deg, rgb(58 43 20 / 97%), rgb(20 15 10 / 99%));
+    radial-gradient(92% 84% at 16% 0%, rgb(255 228 134 / 54%), transparent 64%),
+    radial-gradient(66% 70% at 92% 100%, rgb(246 164 36 / 30%), transparent 64%),
+    linear-gradient(148deg, rgb(66 48 18 / 98%), rgb(20 14 8 / 99%));
   color: #ffffff;
   box-shadow:
-    inset 0 1px 0 rgb(255 254 246 / 62%),
-    inset 0 -2px 0 #ffd875,
-    inset 0 0 0 1px rgb(255 234 168 / 38%),
-    0 12px 30px -6px rgb(255 208 106 / 54%),
-    0 0 22px -4px rgb(255 218 128 / 38%);
-  text-shadow: 0 0 18px rgb(255 218 126 / 72%);
+    inset 0 2px 0 rgb(255 255 250 / 78%),
+    inset 0 -2px 0 #ffd86b,
+    inset 0 0 0 2px rgb(255 234 162 / 46%),
+    0 14px 34px -6px rgb(255 202 82 / 64%),
+    0 0 28px -2px rgb(255 218 118 / 48%);
+  text-shadow: 0 0 20px rgb(255 218 118 / 82%);
 }
 
 html[data-family="special"]
@@ -2232,7 +2509,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   .exs-opponent-options
   button[aria-pressed="true"]::before {
-  box-shadow: 0 0 14px rgb(255 218 126 / 82%);
+  box-shadow: 0 0 16px rgb(255 218 118 / 92%);
 }
 
 html[data-family="special"]
@@ -2241,12 +2518,12 @@ html[data-family="special"]
   > #performance
   .rxs-comparison
   > .rxs-comparison-formula {
-  border-left: 4px solid #ffebb3;
+  border-left: 5px solid #fff2c2;
   background:
-    linear-gradient(90deg, rgb(255 216 122 / 24%) 0%, rgb(58 176 255 / 14%) 56%, transparent 94%);
+    linear-gradient(90deg, rgb(255 212 104 / 30%) 0%, rgb(54 180 255 / 18%) 56%, transparent 94%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 244 / 22%),
-    inset 0 -1px 0 rgb(94 210 255 / 14%);
+    inset 0 1px 0 rgb(255 254 246 / 32%),
+    inset 0 -1px 0 rgb(94 212 255 / 20%);
 }
 
 html[data-family="special"]
@@ -2255,21 +2532,24 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   > article {
-  border: 1px solid rgb(255 222 140 / 62%);
-  border-top: 2px solid #fff0be;
-  background-color: #120f0b;
+  border: 1px solid rgb(255 224 138 / 80%);
+  border-top: 4px solid #fff6d4;
+  background-color: #120e09;
   background-image:
-    radial-gradient(ellipse 92% 62% at 14% 0%, rgb(255 222 132 / 32%), transparent 60%),
-    radial-gradient(ellipse 64% 50% at 94% 100%, rgb(58 176 255 / 14%), transparent 62%),
-    linear-gradient(162deg, rgb(46 37 22 / 97%), rgb(12 11 10 / 99%));
+    radial-gradient(ellipse 92% 62% at 14% 0%, rgb(255 224 128 / 44%), transparent 58%),
+    radial-gradient(ellipse 68% 54% at 92% 100%, rgb(246 154 24 / 22%), transparent 62%),
+    linear-gradient(160deg, rgb(52 38 18 / 98%), rgb(12 10 8 / 99%));
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: 100% 100%;
   box-shadow:
-    0 26px 58px -18px rgb(0 0 0 / 96%),
-    0 0 42px -10px rgb(255 210 108 / 36%),
-    inset 0 1px 0 rgb(255 254 246 / 58%),
-    inset 0 -1px 0 rgb(222 142 36 / 34%);
+    0 30px 66px -16px rgb(0 0 0 / 98%),
+    0 0 54px -8px rgb(255 198 72 / 48%),
+    inset 0 2px 0 rgb(255 255 250 / 82%),
+    inset 0 0 0 1px rgb(255 216 112 / 48%),
+    inset 0 0 0 5px rgb(12 9 5 / 92%),
+    inset 0 0 0 6px rgb(255 196 76 / 34%),
+    inset 0 -3px 0 rgb(224 134 22 / 54%);
 }
 
 html[data-family="special"]
@@ -2278,18 +2558,53 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   > article[data-exf-win="rival"] {
-  border-color: rgb(118 228 255 / 64%);
-  border-top-color: #d4f8ff;
-  background-color: #08101c;
+  border-color: rgb(104 228 255 / 82%);
+  border-top-color: #e6fdff;
+  background-color: #07101e;
   background-image:
-    radial-gradient(ellipse 92% 62% at 14% 0%, rgb(104 224 255 / 32%), transparent 60%),
-    radial-gradient(ellipse 68% 54% at 94% 100%, rgb(38 136 252 / 24%), transparent 62%),
-    linear-gradient(162deg, rgb(17 36 66 / 97%), rgb(7 13 24 / 99%));
+    radial-gradient(ellipse 92% 62% at 14% 0%, rgb(112 232 255 / 44%), transparent 58%),
+    radial-gradient(ellipse 70% 56% at 94% 100%, rgb(32 138 255 / 32%), transparent 62%),
+    linear-gradient(160deg, rgb(16 38 74 / 98%), rgb(6 12 24 / 99%));
   box-shadow:
-    0 26px 58px -18px rgb(0 0 0 / 96%),
-    0 0 42px -10px rgb(54 176 255 / 40%),
-    inset 0 1px 0 rgb(244 254 255 / 58%),
-    inset 0 -1px 0 rgb(38 144 248 / 38%);
+    0 30px 66px -16px rgb(0 0 0 / 98%),
+    0 0 56px -8px rgb(42 182 255 / 52%),
+    inset 0 2px 0 rgb(250 255 255 / 84%),
+    inset 0 0 0 1px rgb(92 222 255 / 50%),
+    inset 0 0 0 5px rgb(5 11 22 / 92%),
+    inset 0 0 0 6px rgb(54 182 255 / 36%),
+    inset 0 -3px 0 rgb(28 136 250 / 58%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  > article
+  > header
+  > div
+  > strong {
+  color: #fffdf6;
+  text-shadow:
+    0 2px 0 rgb(114 66 10 / 94%),
+    0 6px 18px rgb(0 0 0 / 92%),
+    0 0 26px rgb(255 214 112 / 46%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  > article[data-exf-win="rival"]
+  > header
+  > div
+  > strong {
+  color: #f4fdff;
+  text-shadow:
+    0 2px 0 rgb(12 72 114 / 94%),
+    0 6px 18px rgb(0 0 0 / 92%),
+    0 0 28px rgb(86 220 255 / 50%);
 }
 
 html[data-family="special"]
@@ -2298,14 +2613,15 @@ html[data-family="special"]
   > #performance
   .rxs-comparison-metrics
   .rxs-comparison-result {
-  border: 1px solid rgb(255 236 172 / 94%);
+  border: 1.5px solid #fff0bc;
   background:
-    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(255 252 232 / 34%), transparent 66%),
-    linear-gradient(180deg, rgb(255 248 220 / 30%) 0%, rgb(255 210 108 / 16%) 48%, rgb(168 102 18 / 34%) 100%),
-    rgb(26 19 10 / 96%);
+    radial-gradient(ellipse 88% 58% at 50% 0%, rgb(255 254 240 / 48%), transparent 64%),
+    linear-gradient(180deg, rgb(255 248 220 / 38%) 0%, rgb(255 206 94 / 22%) 48%, rgb(174 102 14 / 42%) 100%),
+    rgb(28 19 8 / 98%);
   box-shadow:
-    inset 0 1px 0 rgb(255 254 248 / 70%),
-    0 12px 30px -6px rgb(255 208 106 / 64%);
+    inset 0 2px 0 rgb(255 255 252 / 84%),
+    inset 0 -2px 0 rgb(186 112 16 / 62%),
+    0 14px 34px -4px rgb(255 204 82 / 74%);
 }
 
 html[data-family="special"]
@@ -2315,14 +2631,15 @@ html[data-family="special"]
   .rxs-comparison-metrics
   > article[data-exf-win="rival"]
   .rxs-comparison-result {
-  border-color: rgb(172 246 255 / 94%);
+  border-color: #d6f9ff;
   background:
-    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(240 254 255 / 34%), transparent 66%),
-    linear-gradient(180deg, rgb(232 253 255 / 30%) 0%, rgb(86 214 255 / 18%) 48%, rgb(22 104 202 / 36%) 100%),
-    rgb(10 24 44 / 96%);
+    radial-gradient(ellipse 88% 58% at 50% 0%, rgb(246 255 255 / 48%), transparent 64%),
+    linear-gradient(180deg, rgb(232 254 255 / 38%) 0%, rgb(78 216 255 / 24%) 48%, rgb(18 104 212 / 44%) 100%),
+    rgb(8 22 44 / 98%);
   box-shadow:
-    inset 0 1px 0 rgb(248 254 255 / 70%),
-    0 12px 30px -6px rgb(54 176 255 / 64%);
+    inset 0 2px 0 rgb(252 255 255 / 84%),
+    inset 0 -2px 0 rgb(24 122 232 / 64%),
+    0 14px 34px -4px rgb(46 184 255 / 74%);
 }
 
 html[data-family="special"]
@@ -2331,14 +2648,14 @@ html[data-family="special"]
   > #performance
   .rxs-comparison
   .rxs-bars {
-  height: 16px;
-  border: 1px solid rgb(255 220 138 / 42%);
+  height: 18px;
+  border: 1.5px solid rgb(255 222 138 / 52%);
   border-radius: 999px;
   overflow: clip;
-  background: rgb(6 8 14 / 94%);
+  background: rgb(5 7 12 / 96%);
   box-shadow:
-    inset 0 1px 5px rgb(0 0 0 / 90%),
-    0 1px 0 rgb(255 252 240 / 10%);
+    inset 0 2px 6px rgb(0 0 0 / 94%),
+    0 1px 0 rgb(255 254 246 / 14%);
 }
 
 html[data-family="special"]
@@ -2420,25 +2737,27 @@ html[data-family="special"]
     0 18px 40px -16px rgb(0 0 0 / 88%);
 }
 
-/* 02 P14 — Dual Reactor Core, Optical Readouts & Causal Flow */
+/* 02 P14 — Dual Reactor Core, Heavyweight Metallic Readouts & Causal Flow */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #p14
   .rxs-p14-overview {
-  border: 1px solid rgb(138 228 255 / 46%);
-  border-top: 2px solid rgb(255 236 178 / 74%);
+  border: 1.5px solid rgb(138 232 255 / 58%);
+  border-top: 4px solid #fff4ca;
   background:
-    radial-gradient(ellipse 66% 30% at 18% 0%, rgb(255 220 128 / 32%), transparent 66%),
-    radial-gradient(ellipse 68% 36% at 84% 12%, rgb(64 188 255 / 34%), transparent 66%),
-    radial-gradient(ellipse 56% 62% at 78% 58%, rgb(54 176 255 / 26%), transparent 66%),
-    var(--exe-surface-1);
+    radial-gradient(ellipse 66% 32% at 18% 0%, rgb(255 216 112 / 40%), transparent 64%),
+    radial-gradient(ellipse 68% 38% at 84% 12%, rgb(54 186 255 / 44%), transparent 64%),
+    radial-gradient(ellipse 56% 62% at 78% 58%, rgb(46 172 255 / 32%), transparent 64%),
+    linear-gradient(180deg, #131214 0%, #090e1c 56%, #060912 100%);
   box-shadow:
-    0 38px 90px -20px rgb(0 0 0 / 98%),
-    0 0 58px -12px rgb(54 176 255 / 34%),
-    0 0 54px -12px rgb(255 212 114 / 28%),
-    inset 0 1px 0 rgb(255 254 246 / 54%),
-    inset 0 -1px 0 rgb(104 222 255 / 26%);
+    0 42px 96px -18px rgb(0 0 0 / 98%),
+    0 0 68px -10px rgb(46 178 255 / 42%),
+    0 0 62px -12px rgb(255 204 86 / 34%),
+    inset 0 2px 0 rgb(255 255 250 / 74%),
+    inset 0 0 0 4px rgb(8 11 18 / 90%),
+    inset 0 0 0 5px rgb(104 224 255 / 32%),
+    inset 0 -2px 0 rgb(94 214 255 / 36%);
 }
 
 html[data-family="special"]
@@ -2449,11 +2768,11 @@ html[data-family="special"]
   figure {
   border-radius: 20px;
   box-shadow:
-    0 36px 80px rgb(0 0 0 / 92%),
-    0 0 80px rgb(54 176 255 / 48%),
-    0 0 50px rgb(255 212 114 / 34%),
-    inset 0 1px 0 rgb(244 254 255 / 54%),
-    inset 0 0 0 1px rgb(138 232 255 / 66%);
+    0 38px 84px rgb(0 0 0 / 94%),
+    0 0 88px rgb(46 180 255 / 56%),
+    0 0 56px rgb(255 204 86 / 40%),
+    inset 0 2px 0 rgb(248 254 255 / 68%),
+    inset 0 0 0 2px rgb(138 234 255 / 74%);
 }
 
 html[data-family="special"]
@@ -2463,17 +2782,20 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div {
-  border: 1px solid rgb(255 220 136 / 74%);
-  border-left: 4px solid #fff0be;
+  border: 1px solid rgb(255 222 136 / 82%);
+  border-top: 3px solid #fff5cf;
+  border-left: 5px solid #fff2be;
   background:
-    radial-gradient(96% 78% at 4% 0%, rgb(255 222 132 / 36%), transparent 60%),
-    radial-gradient(56% 52% at 96% 100%, rgb(232 148 36 / 16%), transparent 64%),
-    linear-gradient(150deg, rgb(46 35 19 / 97%), rgb(12 10 8 / 99%));
+    radial-gradient(96% 78% at 4% 0%, rgb(255 224 126 / 46%), transparent 58%),
+    radial-gradient(58% 54% at 96% 100%, rgb(242 148 22 / 24%), transparent 62%),
+    linear-gradient(150deg, rgb(52 38 18 / 98%), rgb(12 9 7 / 99%));
   box-shadow:
-    inset 0 1px 0 rgb(255 254 246 / 54%),
-    inset 0 -1px 0 rgb(222 142 36 / 28%),
-    0 18px 42px -16px rgb(0 0 0 / 94%),
-    0 0 32px -10px rgb(255 210 108 / 38%);
+    inset 0 2px 0 rgb(255 255 250 / 76%),
+    inset 0 0 0 4px rgb(12 9 5 / 88%),
+    inset 0 0 0 5px rgb(255 198 76 / 34%),
+    inset 0 -2px 0 rgb(224 134 22 / 46%),
+    0 22px 48px -14px rgb(0 0 0 / 96%),
+    0 0 42px -8px rgb(255 198 72 / 48%);
 }
 
 html[data-family="special"]
@@ -2483,17 +2805,20 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div:nth-child(2) {
-  border-color: rgb(118 228 255 / 74%);
-  border-left: 4px solid #d4f8ff;
+  border-color: rgb(112 230 255 / 84%);
+  border-top: 3px solid #e6fdff;
+  border-left: 5px solid #dcfbff;
   background:
-    radial-gradient(96% 78% at 4% 0%, rgb(104 224 255 / 36%), transparent 60%),
-    radial-gradient(56% 52% at 96% 100%, rgb(38 136 252 / 20%), transparent 64%),
-    linear-gradient(150deg, rgb(17 37 68 / 97%), rgb(8 14 26 / 99%));
+    radial-gradient(96% 78% at 4% 0%, rgb(112 232 255 / 46%), transparent 58%),
+    radial-gradient(58% 54% at 96% 100%, rgb(32 138 255 / 28%), transparent 62%),
+    linear-gradient(150deg, rgb(16 38 74 / 98%), rgb(7 13 24 / 99%));
   box-shadow:
-    inset 0 1px 0 rgb(244 254 255 / 54%),
-    inset 0 -1px 0 rgb(38 144 248 / 32%),
-    0 18px 42px -16px rgb(0 0 0 / 94%),
-    0 0 32px -10px rgb(54 176 255 / 40%);
+    inset 0 2px 0 rgb(250 255 255 / 76%),
+    inset 0 0 0 4px rgb(5 11 22 / 88%),
+    inset 0 0 0 5px rgb(54 182 255 / 36%),
+    inset 0 -2px 0 rgb(28 136 250 / 50%),
+    0 22px 48px -14px rgb(0 0 0 / 96%),
+    0 0 44px -8px rgb(42 182 255 / 50%);
 }
 
 html[data-family="special"]
@@ -2503,16 +2828,17 @@ html[data-family="special"]
   .rxs-p14-copy
   dl
   > div:last-child {
-  border-color: rgb(232 242 255 / 50%);
-  border-left: 4px solid #fff5d4;
+  border-color: rgb(238 246 255 / 62%);
+  border-top: 3px solid #fff7dc;
+  border-left: 5px solid #fff6d4;
   background:
-    radial-gradient(48% 80% at 8% 0%, rgb(255 218 128 / 22%), transparent 64%),
-    radial-gradient(48% 80% at 92% 100%, rgb(68 192 255 / 24%), transparent 64%),
-    linear-gradient(96deg, rgb(24 21 16 / 97%) 0%, rgb(14 20 34 / 97%) 100%);
+    radial-gradient(50% 84% at 8% 0%, rgb(255 216 116 / 30%), transparent 62%),
+    radial-gradient(50% 84% at 92% 100%, rgb(58 190 255 / 32%), transparent 62%),
+    linear-gradient(96deg, rgb(28 22 14 / 98%) 0%, rgb(12 20 38 / 98%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 254 248 / 46%),
-    inset 0 -1px 0 rgb(94 210 255 / 22%),
-    0 16px 38px -16px rgb(0 0 0 / 92%);
+    inset 0 2px 0 rgb(255 255 250 / 64%),
+    inset 0 -2px 0 rgb(86 208 255 / 32%),
+    0 20px 44px -14px rgb(0 0 0 / 94%);
 }
 
 html[data-family="special"]
@@ -2627,17 +2953,20 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > article {
-  border: 1px solid rgb(255 222 140 / 68%);
-  border-top: 2px solid #fff2c6;
+  border: 1px solid rgb(255 224 138 / 82%);
+  border-top: 4px solid #fff6d4;
   background:
-    radial-gradient(ellipse 84% 62% at 10% 0%, rgb(255 220 128 / 32%), transparent 62%),
-    radial-gradient(ellipse 62% 54% at 92% 96%, rgb(232 148 36 / 18%), transparent 64%),
-    var(--exe-surface-gold);
+    radial-gradient(ellipse 88% 64% at 10% 0%, rgb(255 224 126 / 44%), transparent 60%),
+    radial-gradient(ellipse 64% 56% at 92% 96%, rgb(246 154 24 / 26%), transparent 62%),
+    linear-gradient(156deg, #30200b 0%, #150f08 54%, #090705 100%);
   box-shadow:
-    0 34px 80px -20px rgb(0 0 0 / 98%),
-    0 0 58px -10px rgb(255 210 108 / 42%),
-    inset 0 1px 0 rgb(255 254 246 / 60%),
-    inset 0 -1px 0 rgb(222 142 36 / 32%);
+    0 38px 86px -18px rgb(0 0 0 / 98%),
+    0 0 68px -8px rgb(255 198 72 / 52%),
+    inset 0 2px 0 rgb(255 255 250 / 84%),
+    inset 0 0 0 1px rgb(255 216 112 / 52%),
+    inset 0 0 0 5px rgb(12 9 5 / 92%),
+    inset 0 0 0 6px rgb(255 196 76 / 36%),
+    inset 0 -3px 0 rgb(224 134 22 / 56%);
 }
 
 html[data-family="special"]
@@ -2646,17 +2975,20 @@ html[data-family="special"]
   > #p14
   .exs-p14-comparison
   > article:last-of-type {
-  border: 1px solid rgb(118 228 255 / 68%);
-  border-top: 2px solid #d6f8ff;
+  border: 1px solid rgb(104 228 255 / 84%);
+  border-top: 4px solid #e6fdff;
   background:
-    radial-gradient(ellipse 76% 64% at 88% 50%, rgb(92 218 255 / 32%), transparent 60%),
-    radial-gradient(ellipse 72% 52% at 14% 0%, rgb(58 176 255 / 26%), transparent 62%),
-    var(--exe-surface-cyan);
+    radial-gradient(ellipse 78% 66% at 88% 50%, rgb(96 226 255 / 44%), transparent 58%),
+    radial-gradient(ellipse 74% 54% at 14% 0%, rgb(46 178 255 / 38%), transparent 60%),
+    linear-gradient(156deg, #082348 0%, #061328 54%, #040914 100%);
   box-shadow:
-    0 34px 80px -20px rgb(0 0 0 / 98%),
-    0 0 58px -10px rgb(54 176 255 / 44%),
-    inset 0 1px 0 rgb(244 254 255 / 60%),
-    inset 0 -1px 0 rgb(38 144 248 / 34%);
+    0 38px 86px -18px rgb(0 0 0 / 98%),
+    0 0 70px -8px rgb(42 182 255 / 56%),
+    inset 0 2px 0 rgb(250 255 255 / 84%),
+    inset 0 0 0 1px rgb(92 222 255 / 54%),
+    inset 0 0 0 5px rgb(5 11 22 / 92%),
+    inset 0 0 0 6px rgb(54 182 255 / 38%),
+    inset 0 -3px 0 rgb(28 136 250 / 60%);
 }
 
 html[data-family="special"]
@@ -2720,18 +3052,20 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #stages
   #exs-stage-panel {
-  border: 1px solid rgb(255 222 140 / 72%);
-  border-top: 2px solid #fff2c6;
+  border: 1.5px solid rgb(255 224 140 / 82%);
+  border-top: 4px solid #fff6d4;
   background:
-    radial-gradient(ellipse 66% 76% at 76% 42%, rgb(255 218 122 / 38%), transparent 64%),
-    radial-gradient(ellipse 56% 58% at 16% 18%, rgb(232 148 36 / 26%), transparent 64%),
-    radial-gradient(ellipse 48% 44% at 88% 92%, rgb(54 176 255 / 18%), transparent 64%),
-    var(--exe-surface-gold);
+    radial-gradient(ellipse 68% 76% at 76% 42%, rgb(255 212 104 / 46%), transparent 62%),
+    radial-gradient(ellipse 58% 60% at 16% 18%, rgb(242 152 28 / 32%), transparent 62%),
+    radial-gradient(ellipse 48% 46% at 88% 92%, rgb(54 182 255 / 24%), transparent 64%),
+    linear-gradient(156deg, #30200b 0%, #150f08 54%, #090705 100%);
   box-shadow:
-    0 36px 88px -18px rgb(0 0 0 / 98%),
-    0 0 66px -10px rgb(255 210 108 / 44%),
-    inset 0 1px 0 rgb(255 254 246 / 60%),
-    inset 0 -1px 0 rgb(222 142 36 / 32%);
+    0 42px 96px -18px rgb(0 0 0 / 98%),
+    0 0 76px -8px rgb(255 202 82 / 54%),
+    inset 0 2px 0 rgb(255 255 250 / 80%),
+    inset 0 0 0 4px rgb(12 9 5 / 90%),
+    inset 0 0 0 5px rgb(255 198 76 / 34%),
+    inset 0 -3px 0 rgb(224 134 22 / 52%);
 }
 
 html[data-family="special"]
@@ -2739,18 +3073,20 @@ html[data-family="special"]
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #stages
   #exs-stage-panel:has(> figure[data-form="middle"]) {
-  border-color: rgb(118 228 255 / 72%);
-  border-top-color: #d6f8ff;
+  border-color: rgb(104 228 255 / 84%);
+  border-top-color: #e6fdff;
   background:
-    radial-gradient(ellipse 66% 76% at 76% 42%, rgb(84 210 255 / 40%), transparent 64%),
-    radial-gradient(ellipse 56% 62% at 16% 18%, rgb(38 136 252 / 32%), transparent 64%),
-    radial-gradient(ellipse 48% 44% at 88% 92%, rgb(255 212 114 / 16%), transparent 64%),
-    var(--exe-surface-cyan);
+    radial-gradient(ellipse 68% 76% at 76% 42%, rgb(78 214 255 / 48%), transparent 62%),
+    radial-gradient(ellipse 58% 64% at 16% 18%, rgb(32 138 255 / 38%), transparent 62%),
+    radial-gradient(ellipse 48% 46% at 88% 92%, rgb(255 208 98 / 20%), transparent 64%),
+    linear-gradient(156deg, #082348 0%, #061328 54%, #040914 100%);
   box-shadow:
-    0 36px 88px -18px rgb(0 0 0 / 98%),
-    0 0 66px -10px rgb(54 176 255 / 46%),
-    inset 0 1px 0 rgb(244 254 255 / 60%),
-    inset 0 -1px 0 rgb(38 144 248 / 34%);
+    0 42px 96px -18px rgb(0 0 0 / 98%),
+    0 0 78px -8px rgb(42 184 255 / 56%),
+    inset 0 2px 0 rgb(250 255 255 / 82%),
+    inset 0 0 0 4px rgb(5 11 22 / 90%),
+    inset 0 0 0 5px rgb(54 182 255 / 36%),
+    inset 0 -3px 0 rgb(28 136 250 / 56%);
 }
 
 html[data-family="special"]
@@ -2872,25 +3208,27 @@ html[data-family="special"]
     0 12px 26px -14px rgb(0 0 0 / 88%);
 }
 
-/* 04 SYSTEM — Tri-Spectrum Armor Pillars (Gold / Electric Cobalt / Convergence) & Twin Reactor Decks */
+/* 04 SYSTEM — Heavyweight Tri-Spectrum Armor Pillars (Gold / Electric Cobalt / Convergence) & Twin Reactor Decks */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.exs-page#top[data-command-special]
   > #system
   .rxs-system-grid
   > article {
-  border: 1px solid rgb(255 222 140 / 68%);
-  border-top: 2px solid #fff2c6;
+  border: 1px solid rgb(255 224 138 / 80%);
+  border-top: 4px solid #fff6d4;
   border-radius: 0;
   background:
-    radial-gradient(ellipse 84% 58% at 14% 0%, rgb(255 222 132 / 30%), transparent 62%),
-    var(--exe-surface-gold);
+    radial-gradient(ellipse 86% 60% at 14% 0%, rgb(255 224 128 / 42%), transparent 60%),
+    linear-gradient(156deg, #30200b 0%, #150f08 54%, #090705 100%);
   clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
   box-shadow:
-    0 32px 78px -18px rgb(0 0 0 / 96%),
-    0 0 50px -10px rgb(255 210 108 / 36%),
-    inset 0 1px 0 rgb(255 254 246 / 58%),
-    inset 0 -1px 0 rgb(222 142 36 / 30%);
+    0 36px 84px -18px rgb(0 0 0 / 98%),
+    0 0 58px -8px rgb(255 202 82 / 46%),
+    inset 0 2px 0 rgb(255 255 250 / 82%),
+    inset 0 0 0 4px rgb(12 9 5 / 90%),
+    inset 0 0 0 5px rgb(255 198 76 / 34%),
+    inset 0 -3px 0 rgb(224 134 22 / 50%);
 }
 
 html[data-family="special"]
@@ -2899,16 +3237,18 @@ html[data-family="special"]
   > #system
   .rxs-system-grid
   > article:nth-child(2) {
-  border-color: rgb(118 228 255 / 68%);
-  border-top: 2px solid #d6f8ff;
+  border-color: rgb(104 228 255 / 82%);
+  border-top: 4px solid #e6fdff;
   background:
-    radial-gradient(ellipse 84% 58% at 14% 0%, rgb(96 220 255 / 30%), transparent 62%),
-    var(--exe-surface-cyan);
+    radial-gradient(ellipse 86% 60% at 14% 0%, rgb(104 228 255 / 42%), transparent 60%),
+    linear-gradient(156deg, #082348 0%, #061328 54%, #040914 100%);
   box-shadow:
-    0 32px 78px -18px rgb(0 0 0 / 96%),
-    0 0 50px -10px rgb(54 176 255 / 40%),
-    inset 0 1px 0 rgb(244 254 255 / 58%),
-    inset 0 -1px 0 rgb(38 144 248 / 32%);
+    0 36px 84px -18px rgb(0 0 0 / 98%),
+    0 0 60px -8px rgb(42 184 255 / 50%),
+    inset 0 2px 0 rgb(250 255 255 / 82%),
+    inset 0 0 0 4px rgb(5 11 22 / 90%),
+    inset 0 0 0 5px rgb(54 182 255 / 36%),
+    inset 0 -3px 0 rgb(28 136 250 / 54%);
 }
 
 html[data-family="special"]
@@ -2917,18 +3257,20 @@ html[data-family="special"]
   > #system
   .rxs-system-grid
   > article:nth-child(3) {
-  border-color: rgb(255 228 156 / 70%);
-  border-top: 2px solid #fff7dc;
+  border-color: rgb(255 232 158 / 82%);
+  border-top: 4px solid #fff9e2;
   background:
-    radial-gradient(ellipse 78% 58% at 12% 0%, rgb(255 222 132 / 30%), transparent 62%),
-    radial-gradient(ellipse 78% 58% at 92% 100%, rgb(68 194 255 / 26%), transparent 64%),
-    linear-gradient(156deg, rgb(42 33 19 / 97%) 0%, rgb(13 18 30 / 99%) 100%);
+    radial-gradient(ellipse 80% 60% at 12% 0%, rgb(255 224 128 / 40%), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 92% 100%, rgb(64 196 255 / 36%), transparent 62%),
+    linear-gradient(156deg, rgb(48 35 18 / 98%) 0%, rgb(10 18 34 / 99%) 100%);
   box-shadow:
-    0 32px 78px -18px rgb(0 0 0 / 96%),
-    0 0 46px -10px rgb(255 212 114 / 34%),
-    0 0 46px -10px rgb(58 180 255 / 30%),
-    inset 0 1px 0 rgb(255 254 248 / 60%),
-    inset 0 -1px 0 rgb(94 210 255 / 32%);
+    0 36px 84px -18px rgb(0 0 0 / 98%),
+    0 0 56px -8px rgb(255 204 86 / 44%),
+    0 0 56px -8px rgb(54 182 255 / 40%),
+    inset 0 2px 0 rgb(255 255 252 / 84%),
+    inset 0 0 0 4px rgb(9 11 18 / 90%),
+    inset 0 0 0 5px rgb(104 224 255 / 34%),
+    inset 0 -3px 0 rgb(86 208 255 / 50%);
 }
 
 html[data-family="special"]
@@ -2970,19 +3312,22 @@ html[data-family="special"]
   > #system
   .rxs-specs
   > div {
-  border: 1px solid rgb(255 222 140 / 74%);
-  border-top: 2px solid #fff3c8;
+  border: 1px solid rgb(255 224 138 / 86%);
+  border-top: 5px solid #fff7d8;
   border-radius: 0;
   background:
-    radial-gradient(ellipse 86% 62% at 14% 0%, rgb(255 224 134 / 36%), transparent 62%),
-    radial-gradient(ellipse 62% 54% at 92% 100%, rgb(232 148 36 / 20%), transparent 64%),
-    var(--exe-surface-gold);
+    radial-gradient(ellipse 88% 64% at 14% 0%, rgb(255 228 134 / 48%), transparent 60%),
+    radial-gradient(ellipse 66% 56% at 92% 100%, rgb(246 152 22 / 28%), transparent 62%),
+    linear-gradient(156deg, #32210a 0%, #160f07 52%, #080604 100%);
   clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
   box-shadow:
-    0 34px 84px -18px rgb(0 0 0 / 98%),
-    0 0 60px -10px rgb(255 210 108 / 44%),
-    inset 0 1px 0 rgb(255 254 248 / 64%),
-    inset 0 -1px 0 rgb(222 142 36 / 34%);
+    0 40px 92px -16px rgb(0 0 0 / 98%),
+    0 0 76px -8px rgb(255 196 68 / 56%),
+    inset 0 2px 0 rgb(255 255 252 / 90%),
+    inset 0 0 0 2px rgb(255 214 104 / 64%),
+    inset 0 0 0 5px rgb(12 9 5 / 92%),
+    inset 0 0 0 6px rgb(255 192 64 / 40%),
+    inset 0 -4px 0 rgb(224 132 20 / 64%);
 }
 
 html[data-family="special"]
@@ -2991,17 +3336,20 @@ html[data-family="special"]
   > #system
   .rxs-specs
   > div:last-child {
-  border-color: rgb(118 228 255 / 74%);
-  border-top: 2px solid #d6f8ff;
+  border-color: rgb(104 228 255 / 88%);
+  border-top: 5px solid #e6fdff;
   background:
-    radial-gradient(ellipse 86% 62% at 14% 0%, rgb(104 224 255 / 36%), transparent 62%),
-    radial-gradient(ellipse 64% 56% at 92% 100%, rgb(38 136 252 / 24%), transparent 64%),
-    var(--exe-surface-cyan);
+    radial-gradient(ellipse 88% 64% at 14% 0%, rgb(118 236 255 / 48%), transparent 60%),
+    radial-gradient(ellipse 68% 58% at 92% 100%, rgb(28 138 255 / 34%), transparent 62%),
+    linear-gradient(156deg, #08244a 0%, #061328 52%, #030812 100%);
   box-shadow:
-    0 34px 84px -18px rgb(0 0 0 / 98%),
-    0 0 60px -10px rgb(54 176 255 / 46%),
-    inset 0 1px 0 rgb(246 254 255 / 64%),
-    inset 0 -1px 0 rgb(38 144 248 / 36%);
+    0 40px 92px -16px rgb(0 0 0 / 98%),
+    0 0 78px -8px rgb(42 184 255 / 60%),
+    inset 0 2px 0 rgb(252 255 255 / 90%),
+    inset 0 0 0 2px rgb(86 220 255 / 68%),
+    inset 0 0 0 5px rgb(4 11 22 / 92%),
+    inset 0 0 0 6px rgb(46 168 255 / 42%),
+    inset 0 -4px 0 rgb(24 128 248 / 68%);
 }
 
 html[data-family="special"]
@@ -3011,10 +3359,12 @@ html[data-family="special"]
   .rxs-specs
   > div
   strong {
+  color: #fffdf6;
   text-shadow:
-    0 2px 0 rgb(94 58 14 / 92%),
-    0 10px 28px rgb(0 0 0 / 86%),
-    0 0 36px rgb(255 214 114 / 38%);
+    0 2px 0 #b86c0e,
+    0 5px 0 #562c04,
+    0 10px 26px rgb(0 0 0 / 94%),
+    0 0 42px rgb(255 216 112 / 64%);
 }
 
 html[data-family="special"]
@@ -3024,10 +3374,12 @@ html[data-family="special"]
   .rxs-specs
   > div:last-child
   strong {
+  color: #f4fdff;
   text-shadow:
-    0 2px 0 rgb(14 68 106 / 92%),
-    0 10px 28px rgb(0 0 0 / 86%),
-    0 0 36px rgb(72 198 255 / 42%);
+    0 2px 0 #0c6ab0,
+    0 5px 0 #052e56,
+    0 10px 26px rgb(0 0 0 / 94%),
+    0 0 44px rgb(78 214 255 / 68%);
 }
 
 html[data-family="special"]
@@ -4151,6 +4503,18 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-hero
+    > .exf-billing,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
     > #stages
     #exs-stage-panel
     > figure[data-form="middle"]
@@ -4178,6 +4542,12 @@ html[data-family="special"]
     nav
     a[aria-current="location"],
   html[data-family="special"] body .rxs-page.rxs-page.exs-page#top[data-command-special] > .exs-hero,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-hero
+    .rxs-hero-copy
+    > p:first-child,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -4217,8 +4587,21 @@ html[data-family="special"]
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
-    > :is(#p14, #system)
+    > :is(#performance, #p14, #stages, #system)
     > .rxs-section-heading::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison
+    > .rxs-comparison-key
+    > span:first-child,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -4500,9 +4883,58 @@ html[data-family="special"]
     color: CanvasText;
     border-color: CanvasText;
     box-shadow: none;
+    text-shadow: none;
     clip-path: none;
   }
 
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    #performance
+    .exi-stage
+    > article
+    > strong,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    #performance
+    .exi-stage
+    > article:nth-child(2)
+    > strong,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    #performance
+    .exi-stage
+    > article
+    > strong
+    > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    #performance
+    .exi-stage
+    > article:nth-child(2)
+    > strong
+    > span,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article
+    > header
+    > div
+    > strong,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article[data-exf-win="rival"]
+    > header
+    > div
+    > strong,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]
@@ -4517,6 +4949,7 @@ html[data-family="special"]
     .rxs-specs
     > div:last-child
     strong {
+    color: CanvasText;
     text-shadow: none;
   }
 
@@ -4525,6 +4958,24 @@ html[data-family="special"]
     .rxs-page.rxs-page.exs-page#top[data-command-special]
     .exs-hero
     h1,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-hero
+    > .exf-billing,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > h2,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading
+    > h2
+    > .exo-line,
   html[data-family="special"]
     body
     .rxs-page.rxs-page.exs-page#top[data-command-special]

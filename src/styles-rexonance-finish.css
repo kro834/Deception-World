@@ -157,13 +157,18 @@
     linear-gradient(
         90deg,
         var(--rf-ice),
-        color-mix(in srgb, var(--rf-violet) 60%, transparent) 50%,
+        color-mix(in srgb, var(--rf-violet) 68%, transparent) 48%,
+        color-mix(in srgb, var(--rf-gold) 44%, transparent) 78%,
         transparent
       )
-      0 0 / 100% 1px,
-    linear-gradient(180deg, var(--rf-plate), var(--rf-ink) 70%);
+      0 0 / 100% 1.5px,
+    radial-gradient(ellipse 72% 48% at 24% 0%, rgb(122 232 255 / 12%), transparent 72%),
+    linear-gradient(180deg, var(--rf-plate), var(--rf-ink) 72%);
   background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 1px var(--rf-rule);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 0 0 1px var(--rf-rule),
+    0 24px 52px -24px rgb(0 0 0 / 82%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector {
@@ -171,7 +176,7 @@
   border-color: var(--rf-rule);
   background:
     linear-gradient(var(--rf-gold) 0 0) 0 100% / 36px 2px no-repeat,
-    rgb(240 246 255 / 3%);
+    linear-gradient(90deg, rgb(122 232 255 / 6%), rgb(240 246 255 / 3%) 64%, transparent);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector > span,
@@ -195,18 +200,21 @@
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-comparison-selector select,
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-native-select select {
   border-radius: 2px;
-  border-color: color-mix(in srgb, var(--rf-ice) 42%, transparent);
+  border-color: color-mix(in srgb, var(--rf-ice) 48%, transparent);
   background-color: #0a1119;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-comparator > header output {
   border-radius: 2px;
-  border-color: color-mix(in srgb, var(--rf-ice) 55%, transparent);
+  border-color: color-mix(in srgb, var(--rf-ice) 62%, transparent);
   color: var(--rf-ivory);
   background:
-    linear-gradient(var(--rf-ice) 0 0) 0 0 / 14px 2px no-repeat,
-    linear-gradient(var(--rf-gold) 0 0) 100% 100% / 14px 2px no-repeat,
-    color-mix(in srgb, var(--rf-ice) 8%, var(--rf-ink));
+    linear-gradient(var(--rf-ice) 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(var(--rf-gold) 0 0) 100% 100% / 16px 2px no-repeat,
+    color-mix(in srgb, var(--rf-ice) 12%, var(--rf-ink));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 0 16px -6px rgb(122 232 255 / 32%);
   font-family: var(--sc-mono);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -215,12 +223,12 @@
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-control {
   border-radius: 2px;
   border-color: var(--rf-rule);
-  background: rgb(0 0 0 / 30%);
+  background: rgb(0 0 0 / 34%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button {
   border-radius: 2px;
-  color: rgb(240 246 255 / 64%);
+  color: rgb(240 246 255 / 68%);
   font-family: var(--sc-mono);
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -229,7 +237,10 @@
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button.is-active {
   color: var(--rf-ink);
   background: linear-gradient(180deg, #fff, var(--rf-ivory));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rf-ice) 70%, transparent);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 0 0 1px color-mix(in srgb, var(--rf-ice) 74%, transparent),
+    0 0 14px -4px rgb(122 232 255 / 38%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button:active {

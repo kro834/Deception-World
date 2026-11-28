@@ -10,27 +10,28 @@
    the full gate; reduced motion, economy and forced colours keep it still. */
 
 .rxs-page.rxs-page.ffs-page {
-  --ffz-ice: 138 234 255;
-  --ffz-violet: 192 142 255;
+  --ffz-ice: 146 238 255;
+  --ffz-violet: 196 148 255;
   --ffz-gold: 255 218 134;
-  --ffz-crimson: 214 54 96;
+  --ffz-crimson: 218 58 100;
   --ffz-plate:
-    radial-gradient(ellipse 78% 34% at 50% 0%, rgb(255 250 238 / 0.16), transparent 68%),
-    radial-gradient(125% 92% at 10% 0%, rgb(var(--ffz-ice) / 0.18), transparent 56%),
+    radial-gradient(ellipse 78% 34% at 50% 0%, rgb(255 252 242 / 0.22), transparent 66%),
+    radial-gradient(125% 92% at 10% 0%, rgb(var(--ffz-ice) / 0.22), transparent 56%),
     radial-gradient(112% 86% at 92% 100%, rgb(var(--ffz-crimson) / 0.16), transparent 58%),
-    radial-gradient(58% 42% at 76% 6%, rgb(var(--ffz-gold) / 0.1), transparent 60%),
+    radial-gradient(58% 42% at 76% 6%, rgb(var(--ffz-gold) / 0.15), transparent 60%),
     linear-gradient(
-      162deg,
-      rgb(16 26 56 / 0.96) 0%,
-      rgb(8 13 30 / 0.98) 56%,
-      rgb(4 7 18 / 0.99) 100%
+      160deg,
+      rgb(12 21 50 / 0.97) 0%,
+      rgb(5 9 24 / 0.99) 56%,
+      rgb(3 5 14 / 1) 100%
     );
   --ffz-rail: linear-gradient(
     90deg,
     transparent,
-    rgb(var(--ffz-ice) / 0.96) 14%,
-    rgb(var(--ffz-gold) / 0.96) 52%,
-    rgb(var(--ffz-crimson) / 0.88) 84%,
+    rgb(var(--ffz-ice) / 0.98) 14%,
+    #ffffff 38%,
+    rgb(var(--ffz-gold) / 0.98) 64%,
+    rgb(var(--ffz-crimson) / 0.9) 88%,
     transparent
   );
   --ffz-cut: 22px;
@@ -47,16 +48,18 @@
   position: absolute;
   inset: auto 0 0;
   height: 2px;
+  border-radius: var(--ring-radius-pill, 999px);
   background: linear-gradient(
     90deg,
-    rgb(var(--ffz-ice) / 0.98),
-    rgb(var(--ffz-violet) / 0.72) 48%,
-    rgb(var(--ffz-gold) / 0.82) 82%,
+    rgb(var(--ffz-ice) / 1),
+    #ffffff 24%,
+    rgb(var(--ffz-gold) / 0.94) 60%,
+    rgb(var(--ffz-ice) / 0.42) 84%,
     transparent
   );
   box-shadow:
-    0 0 18px rgb(var(--ffz-ice) / 0.52),
-    0 0 34px rgb(var(--ffz-violet) / 0.3);
+    0 0 20px rgb(var(--ffz-ice) / 0.58),
+    0 0 36px rgb(var(--ffz-gold) / 0.34);
   pointer-events: none;
 }
 .rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-suitup) > .rxs-section-heading h2 {
@@ -495,20 +498,22 @@
     mask-image: none;
     pointer-events: none;
     background:
-      radial-gradient(2px 2px at 14% 20%, rgb(242 252 255 / 76%), transparent 60%),
-      radial-gradient(1.5px 1.5px at 78% 15%, rgb(255 234 184 / 72%), transparent 60%),
-      radial-gradient(1.5px 1.5px at 62% 31%, rgb(156 238 255 / 68%), transparent 60%),
-      radial-gradient(2px 2px at 88% 44%, rgb(214 176 255 / 64%), transparent 60%),
-      radial-gradient(1.5px 1.5px at 24% 72%, rgb(156 238 255 / 56%), transparent 60%),
-      radial-gradient(1.5px 1.5px at 80% 80%, rgb(255 234 184 / 52%), transparent 60%),
-      radial-gradient(ellipse 74% 58% at 62% 26%, rgb(104 220 255 / 28%), transparent 64%),
-      radial-gradient(ellipse 68% 54% at 86% 70%, rgb(168 112 255 / 24%), transparent 66%),
-      radial-gradient(ellipse 56% 42% at 24% 86%, rgb(255 218 134 / 13%), transparent 66%),
-      radial-gradient(ellipse 92% 76% at 38% 44%, rgb(28 56 138 / 50%), transparent 74%),
-      linear-gradient(156deg, #060e26 0%, #0c1840 42%, #08102c 74%, #030716 100%);
+      radial-gradient(closest-side at 76% 42%, transparent calc(94% - 1px), rgb(146 238 255 / 22%) calc(94% - 1px) 94%, transparent 94.5%),
+      radial-gradient(closest-side at 76% 42%, transparent calc(74% - 1px), rgb(255 224 148 / 20%) calc(74% - 1px) 74%, transparent 74.5%),
+      radial-gradient(2px 2px at 14% 20%, rgb(248 253 255 / 88%), transparent 60%),
+      radial-gradient(2px 2px at 78% 15%, rgb(255 238 188 / 86%), transparent 60%),
+      radial-gradient(1.5px 1.5px at 62% 31%, rgb(156 242 255 / 82%), transparent 60%),
+      radial-gradient(2px 2px at 88% 44%, rgb(220 186 255 / 78%), transparent 60%),
+      radial-gradient(1.5px 1.5px at 24% 72%, rgb(156 242 255 / 72%), transparent 60%),
+      radial-gradient(1.5px 1.5px at 80% 80%, rgb(255 234 184 / 72%), transparent 60%),
+      radial-gradient(ellipse 74% 58% at 62% 26%, rgb(104 220 255 / 32%), transparent 64%),
+      radial-gradient(ellipse 68% 54% at 86% 70%, rgb(168 112 255 / 26%), transparent 66%),
+      radial-gradient(ellipse 56% 42% at 24% 86%, rgb(255 218 134 / 18%), transparent 66%),
+      radial-gradient(ellipse 92% 76% at 38% 44%, rgb(24 52 134 / 54%), transparent 74%),
+      linear-gradient(156deg, #050c22 0%, #0a153a 42%, #060d24 74%, #02040d 100%);
     box-shadow:
-      inset 1px 0 40px -14px rgb(138 234 255 / 30%),
-      inset 0 -40px 64px -32px rgb(3 7 22 / 90%);
+      inset 1px 0 42px -12px rgb(146 238 255 / 38%),
+      inset 0 -40px 68px -32px rgb(2 5 16 / 94%);
   }
 
   .rxs-page.rxs-page.ffs-page > .ffs-hero > .rxs-hero-ambient {
@@ -526,11 +531,11 @@
     height: max(620px, calc(100svh - var(--ffz-nav)));
     min-height: 0;
     background:
-      radial-gradient(76% 30% at 50% 100%, rgb(138 234 255 / 28%), transparent 72%),
-      radial-gradient(circle at 46% 38%, rgb(74 128 242 / 28%), rgb(192 142 255 / 16%) 50%, transparent 32rem),
-      linear-gradient(180deg, #04091b 0%, #07112b 64%, var(--fft-ink));
-    border-right: 1px solid rgb(var(--ffz-ice) / 0.34);
-    box-shadow: inset -1px 0 28px -8px rgb(var(--ffz-ice) / 0.32);
+      radial-gradient(76% 30% at 50% 100%, rgb(146 238 255 / 34%), transparent 72%),
+      radial-gradient(circle at 46% 38%, rgb(74 134 250 / 34%), rgb(255 215 122 / 14%) 46%, transparent 32rem),
+      linear-gradient(180deg, #030716 0%, #060f28 64%, var(--fft-ink));
+    border-right: 1px solid rgb(var(--ffz-ice) / 0.44);
+    box-shadow: inset -1px 0 32px -8px rgb(var(--ffz-ice) / 0.38);
   }
 
   /* Owner (2026-10-24, iPad): 「画像表示に余白があるので直して。」 The

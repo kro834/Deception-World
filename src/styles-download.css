@@ -1162,23 +1162,23 @@ html[data-world-effects="economy"] .export-page h1 {
   }
 }
 
-/* Reading edition & Wave-6 Crystal-Brass Museum Monolith (outranks styles-command-support.css cleanly) */
+/* Reading edition & Wave-8 Obsidian × Celestial Ring Monolith (outranks styles-command-support.css cleanly) */
 .export-page.command-support-download {
   --dl-ice: #9deafa;
-  --dl-lock: #e8fcff;
-  --dl-gold: #f4d388;
-  --dl-specular: rgb(252 255 255 / 76%);
-  --dl-chrome: linear-gradient(180deg, #ffffff 0%, #fff9ea 36%, #f5d690 72%, #cfa04c 100%);
+  --dl-lock: #eefdff;
+  --dl-gold: #f5d68e;
+  --dl-specular: rgb(252 255 255 / 82%);
+  --dl-chrome: linear-gradient(180deg, #ffffff 0%, #fff9ea 34%, #f5d690 72%, #cfa04c 100%);
   background:
-    radial-gradient(circle at 82% 8%, transparent 0 184px, rgb(157 234 250 / 15%) 185px 186.5px, transparent 188px),
-    radial-gradient(circle at 16% 88%, transparent 0 228px, rgb(244 211 136 / 14%) 229px 230.5px, transparent 232px),
-    radial-gradient(ellipse 76% 48% at 84% 4%, rgb(48 138 186 / 48%), transparent 70%),
-    radial-gradient(ellipse 64% 46% at 12% 90%, rgb(208 156 74 / 28%), transparent 70%),
-    radial-gradient(ellipse 62% 50% at 50% 48%, rgb(42 104 156 / 40%), transparent 72%),
-    linear-gradient(155deg, #06111f 0%, #0f243a 48%, #060e1b 100%);
+    radial-gradient(circle at 82% 8%, transparent 0 184px, rgb(157 234 250 / 18%) 185px 186.5px, transparent 188px),
+    radial-gradient(circle at 16% 88%, transparent 0 228px, rgb(245 214 142 / 16%) 229px 230.5px, transparent 232px),
+    radial-gradient(ellipse 76% 48% at 84% 4%, rgb(48 148 202 / 52%), transparent 70%),
+    radial-gradient(ellipse 64% 46% at 12% 90%, rgb(214 162 78 / 32%), transparent 70%),
+    radial-gradient(ellipse 62% 50% at 50% 48%, rgb(38 106 162 / 44%), transparent 72%),
+    linear-gradient(155deg, #030913 0%, #0a1a2d 48%, #02070f 100%);
 }
 .export-page.command-support-download::after {
-  border-color: rgb(244 211 136 / 68%);
+  border-color: rgb(245 214 142 / 72%);
   border-radius: 5px;
   background:
     var(--dl-prism) top / 100% 3px no-repeat,
@@ -1193,37 +1193,37 @@ html[data-world-effects="economy"] .export-page h1 {
     linear-gradient(
         180deg,
         rgb(5 12 22 / 0%) 0,
-        rgb(6 15 28 / 34%) calc(var(--dl-art) * 0.45),
-        #0c1e31 calc(var(--dl-art) + 30px)
+        rgb(5 13 24 / 38%) calc(var(--dl-art) * 0.45),
+        #081626 calc(var(--dl-art) + 30px)
       )
       0 0 / 100% calc(var(--dl-art) + 31px),
-    radial-gradient(ellipse 84% 42% at 50% calc(var(--dl-art) + 64px), rgb(244 211 136 / 22%), transparent 70%),
-    radial-gradient(ellipse 76% 48% at 86% 62%, rgb(72 178 220 / 22%), transparent 72%),
-    linear-gradient(148deg, #152d46 0%, #091626 52%, #10243a 100%) 0 calc(var(--dl-art) + 30px) /
+    radial-gradient(ellipse 84% 42% at 50% calc(var(--dl-art) + 64px), rgb(245 214 142 / 24%), transparent 70%),
+    radial-gradient(ellipse 76% 48% at 86% 62%, rgb(72 184 228 / 24%), transparent 72%),
+    linear-gradient(150deg, #0e2238 0%, #050e1a 52%, #0a192c 100%) 0 calc(var(--dl-art) + 30px) /
       100% 100%,
     url("/poster-card-03-delivery.webp") 50% 0 / 100% auto,
-    #0b1b2d;
+    #071423;
   background-repeat: no-repeat;
   box-shadow:
-    0 54px 124px rgb(0 0 0 / 90%),
-    0 0 88px -10px rgb(122 232 255 / 32%),
-    0 0 120px -24px rgb(244 211 136 / 24%),
-    0 0 0 1px rgb(2 6 12 / 95%),
-    0 0 0 5px #071220,
-    0 0 0 6px rgb(244 211 136 / 62%),
-    inset 0 1px 0 rgb(255 253 244 / 48%),
-    inset 0 -1px 0 rgb(244 211 136 / 38%),
-    inset 0 0 0 6px rgb(5 12 22 / 78%),
-    inset 0 0 0 7px rgb(157 234 250 / 20%),
-    inset 0 0 56px rgb(122 232 255 / 12%);
+    0 58px 132px rgb(0 0 0 / 94%),
+    0 0 96px -10px rgb(122 232 255 / 38%),
+    0 0 128px -22px rgb(245 214 142 / 28%),
+    0 0 0 1px rgb(2 6 12 / 96%),
+    0 0 0 5px #050e1a,
+    0 0 0 6px rgb(245 214 142 / 68%),
+    inset 0 1.5px 0 rgb(255 253 244 / 54%),
+    inset 0 -1.5px 0 rgb(245 214 142 / 42%),
+    inset 0 0 0 6px rgb(4 10 18 / 82%),
+    inset 0 0 0 7px rgb(157 234 250 / 24%),
+    inset 0 0 64px rgb(122 232 255 / 14%);
 }
 @media (min-width: 960px) and (min-height: 600px) {
   .export-page.command-support-download::before {
     box-shadow:
-      inset 0 1px 0 rgb(255 253 244 / 36%),
-      inset 0 -1px 0 rgb(244 211 136 / 32%),
-      inset -2px 0 0 rgb(244 211 136 / 52%),
-      inset 0 0 42px rgb(6 16 28 / 48%);
+      inset 0 1.5px 0 rgb(255 253 244 / 42%),
+      inset 0 -1.5px 0 rgb(245 214 142 / 36%),
+      inset -2px 0 0 rgb(245 214 142 / 58%),
+      inset 0 0 48px rgb(4 12 22 / 54%);
   }
   .export-page.command-support-download::after {
     background:
@@ -1236,11 +1236,11 @@ html[data-world-effects="economy"] .export-page h1 {
       linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 32px,
       linear-gradient(var(--dl-lock) 0 0) 100% 100% / 32px 2px,
       linear-gradient(var(--dl-lock) 0 0) 100% 100% / 2px 32px,
-      linear-gradient(132deg, rgb(255 254 248 / 16%) 0%, rgb(157 234 250 / 8%) 18%, transparent 42%),
-      radial-gradient(ellipse 68% 44% at 74% 12%, rgb(244 211 136 / 26%), transparent 68%),
-      radial-gradient(ellipse 72% 52% at 88% 52%, rgb(64 168 214 / 26%), transparent 70%),
-      radial-gradient(ellipse 66% 48% at 74% 92%, rgb(224 176 92 / 20%), transparent 70%),
-      linear-gradient(148deg, #17314c 0%, #091728 52%, #11263e 100%);
+      linear-gradient(132deg, rgb(255 254 248 / 18%) 0%, rgb(157 234 250 / 10%) 18%, transparent 42%),
+      radial-gradient(ellipse 68% 44% at 74% 12%, rgb(245 214 142 / 28%), transparent 68%),
+      radial-gradient(ellipse 72% 52% at 88% 52%, rgb(64 176 224 / 28%), transparent 70%),
+      radial-gradient(ellipse 66% 48% at 74% 92%, rgb(228 180 96 / 22%), transparent 70%),
+      linear-gradient(150deg, #10253c 0%, #050f1c 52%, #0b1c30 100%);
     background-repeat: no-repeat;
   }
 }
@@ -1304,59 +1304,52 @@ html[data-world-effects="economy"] .export-page.command-support-download > h1 {
   filter: none;
 }
 .export-page.command-support-download > b {
-  border-color: rgb(244 211 136 / 74%);
+  border-color: rgb(245 214 142 / 78%);
   border-left: 3px solid var(--dl-gold);
   background:
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 12px 1.5px no-repeat,
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 1.5px 12px no-repeat,
-    linear-gradient(125deg, rgb(255 252 240 / 18%) 0%, transparent 48%),
+    linear-gradient(90deg, transparent 12%, var(--dl-gold), #ffffff 50%, var(--dl-ice), transparent 88%) 50% 0 / 82% 1.5px no-repeat,
+    linear-gradient(125deg, rgb(255 252 240 / 20%) 0%, transparent 48%),
     linear-gradient(
       90deg,
-      rgb(244 211 136 / 32%) 0%,
-      rgb(122 232 255 / 20%) 54%,
-      rgb(12 28 46 / 95%) 100%
+      rgb(245 214 142 / 34%) 0%,
+      rgb(122 232 255 / 22%) 54%,
+      rgb(8 20 34 / 96%) 100%
     );
   box-shadow:
     0 0 0 1px rgb(3 8 15 / 92%),
-    inset 0 1px 0 rgb(255 253 242 / 44%),
-    inset 0 -1px 0 rgb(157 234 250 / 30%),
-    0 12px 28px -10px rgb(0 0 0 / 82%);
-  color: #fffbf0;
+    inset 0 1.5px 0 rgb(255 253 242 / 50%),
+    inset 0 -1px 0 rgb(157 234 250 / 34%),
+    0 14px 32px -10px rgb(0 0 0 / 86%);
+  color: #fffcf2;
 }
 .export-page.command-support-download .export-page-btn {
   min-height: 56px;
   line-height: 1.7;
   border-radius: 3px;
-  border: 1px solid #fff8e2;
+  border: 1px solid #fff9e6;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 66%) 0%, transparent 46%),
-    linear-gradient(135deg, #fffef8 0%, #fbe4b0 34%, #efc46e 70%, #dca94c 100%);
-  color: #160f04;
-  font-weight: 600;
+    linear-gradient(180deg, rgb(255 255 255 / 72%) 0%, transparent 46%),
+    linear-gradient(135deg, #ffffff 0%, #fce7b6 34%, #f1c872 70%, #dda94a 100%);
+  color: #140d03;
+  font-weight: 700;
   box-shadow:
     0 0 0 1px rgb(4 10 18 / 92%),
-    0 0 0 2px rgb(244 211 136 / 58%),
+    0 0 0 2px rgb(245 214 142 / 64%),
     inset 0 1.5px 0 #ffffff,
-    inset 0 -1px 0 rgb(138 92 24 / 45%),
-    0 16px 42px -4px rgb(244 211 136 / 46%),
-    0 0 32px -6px rgb(122 232 255 / 32%);
+    inset 0 -1.5px 0 rgb(138 92 24 / 48%),
+    0 18px 46px -4px rgb(245 214 142 / 52%),
+    0 0 36px -6px rgb(122 232 255 / 38%);
 }
 .export-page.command-support-download .export-page-btn::before {
   content: "";
   background:
-    linear-gradient(#fff4d4 0 0) 0 0 / 15px 2px,
-    linear-gradient(#fff4d4 0 0) 0 0 / 2px 15px,
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 15px 2px,
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 2px 15px,
-    linear-gradient(var(--dl-ice) 0 0) 0 100% / 15px 2px,
-    linear-gradient(var(--dl-ice) 0 0) 0 100% / 2px 15px,
-    linear-gradient(#fff4d4 0 0) 100% 100% / 15px 2px,
-    linear-gradient(#fff4d4 0 0) 100% 100% / 2px 15px;
+    linear-gradient(90deg, transparent 14%, #ffffff 50%, transparent 86%) 50% 0 / 76% 1.5px no-repeat,
+    linear-gradient(90deg, transparent 20%, var(--dl-ice) 50%, transparent 80%) 50% 100% / 64% 1px no-repeat;
   background-repeat: no-repeat;
 }
 .export-page.command-support-download .export-page-alt {
-  color: #e8f6fd;
-  text-decoration-color: rgb(244 211 136 / 76%);
+  color: #ecf8fe;
+  text-decoration-color: rgb(245 214 142 / 80%);
 }
 .export-page small#export-scope {
   justify-self: stretch;
@@ -1364,23 +1357,19 @@ html[data-world-effects="economy"] .export-page.command-support-download > h1 {
   box-sizing: border-box;
   padding: 20px clamp(16px, 4vw, 28px);
   margin-inline: var(--dl-inset);
-  border: 1px solid rgb(157 234 250 / 54%);
+  border: 1px solid rgb(157 234 250 / 58%);
   border-left: 3px solid var(--dl-gold);
   background:
-    linear-gradient(90deg, var(--dl-gold), var(--dl-ice) 54%, transparent 96%) 0 0 / 100% 1.5px no-repeat,
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 16px 2px no-repeat,
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 2px 16px no-repeat,
-    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 16px 2px no-repeat,
-    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 16px no-repeat,
-    linear-gradient(128deg, rgb(255 253 242 / 12%) 0%, rgb(122 232 255 / 6%) 28%, transparent 52%),
-    radial-gradient(ellipse 80% 60% at 92% 14%, rgb(72 178 220 / 20%), transparent 70%),
-    linear-gradient(165deg, rgb(26 56 82 / 88%), rgb(10 24 40 / 95%));
+    linear-gradient(90deg, transparent 6%, var(--dl-gold), #ffffff 48%, var(--dl-ice) 76%, transparent 94%) 0 0 / 100% 1.5px no-repeat,
+    linear-gradient(128deg, rgb(255 253 242 / 14%) 0%, rgb(122 232 255 / 8%) 28%, transparent 52%),
+    radial-gradient(ellipse 80% 60% at 92% 14%, rgb(72 184 228 / 24%), transparent 70%),
+    linear-gradient(168deg, rgb(18 40 62 / 94%), rgb(6 15 27 / 98%));
   box-shadow:
-    0 0 0 1px rgb(2 6 12 / 92%),
-    inset 0 1px 0 rgb(250 254 255 / 32%),
-    inset 0 -1px 0 rgb(244 211 136 / 28%),
-    0 18px 38px -14px rgb(0 0 0 / 84%);
-  color: #eaf3f9;
+    0 0 0 1px rgb(2 6 12 / 94%),
+    inset 0 1.5px 0 rgb(250 254 255 / 38%),
+    inset 0 -1px 0 rgb(245 214 142 / 32%),
+    0 20px 44px -14px rgb(0 0 0 / 88%);
+  color: #edf6fb;
   font-size: 14px;
   line-height: 1.9;
   text-align: left;
@@ -1400,28 +1389,26 @@ html[data-world-effects="economy"] .export-page.command-support-download > h1 {
   padding-bottom: 4px;
 }
 .export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
-  border: 1px solid rgb(157 234 250 / 56%);
+  border: 1px solid rgb(157 234 250 / 60%);
   border-radius: 3px;
   background:
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 12px 1.5px no-repeat,
-    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 1.5px 12px no-repeat,
-    linear-gradient(128deg, rgb(255 255 255 / 13%) 0%, transparent 48%),
-    linear-gradient(180deg, rgb(28 60 88 / 88%), rgb(11 26 42 / 96%));
+    linear-gradient(90deg, transparent 14%, var(--dl-ice) 50%, transparent 86%) 50% 0 / 78% 1.5px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 15%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(20 46 70 / 92%), rgb(7 18 31 / 98%));
   box-shadow:
-    0 0 0 1px rgb(2 6 12 / 90%),
-    inset 0 1px 0 rgb(250 254 255 / 34%),
-    inset 0 -1px 0 rgb(244 211 136 / 24%),
-    0 14px 28px -12px rgb(0 0 0 / 84%);
+    0 0 0 1px rgb(2 6 12 / 92%),
+    inset 0 1px 0 rgb(250 254 255 / 38%),
+    inset 0 -1px 0 rgb(245 214 142 / 28%),
+    0 16px 32px -12px rgb(0 0 0 / 88%);
 }
 .export-page .export-page-navigation > .export-page-back {
-  border-color: rgb(244 211 136 / 78%);
+  border-color: rgb(245 214 142 / 82%);
   border-left: 3px solid var(--dl-gold);
   background:
-    linear-gradient(var(--dl-gold) 0 0) 100% 0 / 12px 1.5px no-repeat,
-    linear-gradient(var(--dl-gold) 0 0) 100% 0 / 1.5px 12px no-repeat,
-    linear-gradient(128deg, rgb(255 248 226 / 18%) 0%, transparent 48%),
-    linear-gradient(165deg, rgb(54 52 38 / 90%), rgb(18 34 50 / 96%));
-  color: #fff6df;
+    linear-gradient(90deg, transparent 14%, var(--dl-gold) 50%, transparent 86%) 50% 0 / 78% 1.5px no-repeat,
+    linear-gradient(128deg, rgb(255 248 226 / 20%) 0%, transparent 48%),
+    linear-gradient(165deg, rgb(48 46 34 / 94%), rgb(12 26 42 / 98%));
+  color: #fff8e4;
 }
 .export-page .export-page-navigation > .export-page-context {
   border-color: rgb(157 234 250 / 50%);

@@ -105,16 +105,17 @@
   align-items: center;
   gap: 4px;
   padding: 4px 12px;
-  border: 1px solid rgb(255 215 122 / 62%);
+  border: 1px solid rgb(255 224 148 / 76%);
   border-radius: 999px;
-  color: #fff0c4;
+  color: #fff6dc;
   background:
-    linear-gradient(180deg, rgb(255 228 158 / 24%), rgb(255 215 122 / 8%)),
-    rgb(22 18 10 / 74%);
+    radial-gradient(ellipse 84% 52% at 50% 0%, rgb(255 252 238 / 28%), transparent 64%),
+    linear-gradient(180deg, rgb(255 224 148 / 26%), rgb(255 215 122 / 10%)),
+    rgb(18 16 14 / 86%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 252 238 / 34%),
-    inset 0 -1px 0 0 rgb(118 76 16 / 40%),
-    0 0 16px rgb(255 215 122 / 26%);
+    inset 0 1px 0 0 rgb(255 252 240 / 48%),
+    inset 0 -1px 0 0 rgb(118 76 16 / 44%),
+    0 0 20px rgb(255 215 122 / 34%);
   font-family: var(--fft-mono, "Oxanium", var(--fft-jp-display));
   font-size: 12px;
   font-weight: 700;
@@ -130,16 +131,17 @@
 
 .ffs-page .ffs-console {
   padding: clamp(18px, 3vw, 36px);
-  border: 1px solid rgb(127 230 255 / 26%);
+  border: 1px solid rgb(138 232 255 / 34%);
   border-radius: var(--sc-radius, 22px);
   background:
-    radial-gradient(ellipse 72% 48% at 18% 0%, rgb(127 230 255 / 16%), transparent 62%),
-    radial-gradient(ellipse 64% 44% at 88% 100%, rgb(186 138 255 / 14%), transparent 64%),
-    linear-gradient(160deg, rgb(14 26 52 / 94%), rgb(6 12 28 / 96%) 55%, rgb(4 8 20 / 98%));
+    radial-gradient(ellipse 74% 30% at 50% 0%, rgb(255 252 242 / 18%), transparent 66%),
+    radial-gradient(ellipse 72% 48% at 18% 0%, rgb(127 230 255 / 20%), transparent 62%),
+    radial-gradient(ellipse 64% 44% at 88% 100%, rgb(255 215 122 / 14%), transparent 64%),
+    linear-gradient(160deg, rgb(12 22 50 / 97%), rgb(5 10 24 / 99%) 56%, rgb(3 6 16 / 100%));
   box-shadow:
-    inset 0 1px 0 rgb(224 248 255 / 22%),
-    inset 0 0 0 1px rgb(201 155 255 / 10%),
-    0 24px 56px -18px rgb(0 4 18 / 82%);
+    inset 0 1px 0 rgb(255 252 242 / 36%),
+    inset 0 0 0 1px rgb(255 215 122 / 12%),
+    0 28px 64px -18px rgb(0 3 16 / 94%);
 }
 
 .ffs-page .ffs-console-head {
@@ -169,16 +171,16 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgb(138 232 255 / 32%);
+  border: 1px solid transparent;
   border-radius: 999px;
   background:
-    radial-gradient(ellipse 74% 52% at 50% 0%, rgb(255 250 238 / 14%), transparent 68%),
-    linear-gradient(180deg, rgb(255 255 255 / 10%) 0%, transparent 44%),
-    rgb(5 10 24 / 82%);
+    radial-gradient(ellipse 76% 52% at 50% 0%, rgb(255 252 242 / 18%), transparent 66%) padding-box,
+    linear-gradient(180deg, rgb(12 22 50 / 92%) 0%, rgb(4 8 20 / 98%) 100%) padding-box,
+    linear-gradient(148deg, rgb(255 250 232 / 64%), rgb(138 232 255 / 58%) 48%, rgb(255 215 122 / 56%)) border-box;
   box-shadow:
-    inset 0 1px 0 0 rgb(255 250 238 / 32%),
-    inset 0 2px 12px rgb(0 4 16 / 74%),
-    0 10px 28px -6px rgb(0 4 18 / 76%);
+    inset 0 1px 0 0 rgb(255 252 242 / 40%),
+    inset 0 2px 14px rgb(0 3 14 / 84%),
+    0 12px 30px -6px rgb(0 3 16 / 86%);
 }
 
 .ffs-page .ffs-p16-switch > div {
@@ -235,18 +237,19 @@
 
 .ffs-page .ffs-views label.is-active {
   background:
-    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(255 254 246 / 46%), transparent 64%),
-    radial-gradient(ellipse 80% 60% at 88% 100%, rgb(214 54 96 / 26%), transparent 64%),
-    linear-gradient(180deg, rgb(127 230 255 / 44%), rgb(104 176 255 / 24%) 54%, rgb(214 54 96 / 22%)),
-    rgb(14 36 72 / 92%);
+    radial-gradient(ellipse 84% 56% at 50% 0%, rgb(255 254 246 / 54%), transparent 62%) padding-box,
+    radial-gradient(ellipse 80% 60% at 88% 100%, rgb(255 215 122 / 26%), transparent 64%) padding-box,
+    linear-gradient(180deg, rgb(127 230 255 / 52%), rgb(96 176 255 / 26%) 54%, rgb(214 54 96 / 24%)) padding-box,
+    rgb(12 32 68 / 96%) padding-box,
+    linear-gradient(146deg, #ffffff 0%, #9ef2ff 44%, #ffd77a 100%) border-box;
   color: #ffffff;
-  border: 1px solid rgb(255 244 214 / 72%);
+  border: 1px solid transparent;
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 72%),
-    inset 0 -2px 0 0 rgb(255 215 122 / 72%),
-    0 0 24px rgb(127 230 255 / 44%),
-    0 4px 16px -2px rgb(0 4 18 / 76%);
-  text-shadow: 0 0 14px rgb(127 230 255 / 62%);
+    inset 0 1px 0 0 rgb(255 255 255 / 82%),
+    inset 0 -2px 0 0 rgb(255 218 128 / 86%),
+    0 0 28px rgb(127 230 255 / 54%),
+    0 6px 18px -2px rgb(0 3 16 / 86%);
+  text-shadow: 0 0 14px rgb(127 230 255 / 72%);
 }
 
 /* The native radio stays in the tab order and keeps arrow-key selection. */
@@ -408,18 +411,20 @@
   gap: 14px;
   min-width: 0;
   padding: 20px;
-  border: 1px solid rgb(138 232 255 / 28%);
+  border: 1px solid transparent;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 250 238 / 18%), transparent 68%),
-    radial-gradient(ellipse 84% 56% at 14% 0%, rgb(127 230 255 / 15%), transparent 62%),
-    radial-gradient(ellipse 76% 52% at 92% 100%, rgb(214 54 96 / 14%), transparent 64%),
-    linear-gradient(160deg, rgb(255 255 255 / 7%) 0%, rgb(127 230 255 / 3%) 45%, transparent 100%),
-    linear-gradient(180deg, rgb(15 24 52 / 90%), rgb(6 10 24 / 96%));
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgb(255 252 242 / 22%), transparent 66%) padding-box,
+    radial-gradient(ellipse 84% 56% at 14% 0%, rgb(127 230 255 / 20%), transparent 62%) padding-box,
+    radial-gradient(ellipse 76% 52% at 92% 100%, rgb(255 215 122 / 14%), transparent 64%) padding-box,
+    linear-gradient(164deg, rgb(12 22 50 / 96%), rgb(4 8 20 / 99%)) padding-box,
+    linear-gradient(148deg, rgb(255 250 232 / 68%) 0%, rgb(138 232 255 / 60%) 44%, rgb(255 215 122 / 56%) 100%)
+      border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 36%),
-    inset 0 0 0 1px rgb(255 215 122 / 10%),
-    0 18px 40px -14px rgb(0 4 18 / 86%);
+    inset 0 1px 0 rgb(255 252 244 / 44%),
+    inset 0 -1px 0 rgb(2 4 12 / 88%),
+    0 20px 46px -14px rgb(0 3 16 / 92%),
+    0 0 24px -14px rgb(127 230 255 / 30%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -561,13 +566,13 @@
   height: 100%;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, transparent 78%, rgb(255 255 255 / 72%) 94%, #ffffff 100%),
-    linear-gradient(180deg, rgb(255 255 255 / 44%) 0%, rgb(255 255 255 / 8%) 48%, rgb(0 4 16 / 26%) 100%),
+    linear-gradient(90deg, transparent 74%, rgb(255 255 255 / 84%) 92%, #ffffff 100%),
+    linear-gradient(180deg, rgb(255 255 255 / 56%) 0%, rgb(255 255 255 / 10%) 48%, rgb(0 4 16 / 30%) 100%),
     var(--ffs-col-accent);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 60%),
-    0 0 14px color-mix(in srgb, var(--ffs-col-accent) 68%, transparent),
-    0 0 28px color-mix(in srgb, var(--ffs-col-accent) 30%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 74%),
+    0 0 18px color-mix(in srgb, var(--ffs-col-accent) 78%, transparent),
+    0 0 32px color-mix(in srgb, var(--ffs-col-accent) 38%, transparent);
   transform: scaleX(var(--ffs-bar, 0));
   transform-origin: left center;
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -653,15 +658,16 @@
 .ffs-page .ffs-text-row {
   min-width: 0;
   padding: 18px 20px;
-  border: 1px solid rgb(138 232 255 / 24%);
+  border: 1px solid transparent;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse 78% 36% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%),
-    radial-gradient(ellipse 80% 50% at 12% 0%, rgb(127 230 255 / 12%), transparent 60%),
-    linear-gradient(160deg, rgb(14 24 50 / 88%), rgb(6 10 24 / 94%));
+    radial-gradient(ellipse 78% 36% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 80% 50% at 12% 0%, rgb(127 230 255 / 18%), transparent 60%) padding-box,
+    linear-gradient(160deg, rgb(12 22 50 / 95%), rgb(4 8 20 / 98%)) padding-box,
+    linear-gradient(148deg, rgb(255 250 232 / 60%), rgb(138 232 255 / 54%) 48%, rgb(255 215 122 / 48%)) border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 30%),
-    0 12px 28px -12px rgb(0 4 18 / 76%);
+    inset 0 1px 0 rgb(255 252 242 / 38%),
+    0 16px 34px -12px rgb(0 3 16 / 88%);
 }
 
 .ffs-page .ffs-text-row h4 {
@@ -719,16 +725,17 @@
   grid-column: 1 / -1;
   min-width: 0;
   padding: 18px 20px;
-  border: 1px solid rgb(138 232 255 / 26%);
+  border: 1px solid transparent;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse 74% 34% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%),
-    radial-gradient(110% 80% at 0% 0%, rgb(127 230 255 / 12%), transparent 56%),
-    radial-gradient(90% 70% at 100% 100%, rgb(214 54 96 / 12%), transparent 58%),
-    linear-gradient(166deg, rgb(13 22 48 / 90%), rgb(5 10 24 / 95%));
+    radial-gradient(ellipse 74% 34% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(110% 80% at 0% 0%, rgb(127 230 255 / 18%), transparent 56%) padding-box,
+    radial-gradient(90% 70% at 100% 100%, rgb(255 215 122 / 14%), transparent 58%) padding-box,
+    linear-gradient(164deg, rgb(12 22 50 / 95%), rgb(4 8 20 / 98%)) padding-box,
+    linear-gradient(148deg, rgb(255 250 232 / 64%), rgb(138 232 255 / 58%) 48%, rgb(255 215 122 / 52%)) border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 30%),
-    0 12px 28px -14px rgb(0 4 16 / 82%);
+    inset 0 1px 0 rgb(255 252 242 / 38%),
+    0 16px 36px -14px rgb(0 3 16 / 90%);
 }
 
 .ffs-page .ffs-accel-compare > header {
@@ -2087,15 +2094,17 @@
 .ffs-page .ffs-p16-table {
   margin: 20px 0 0;
   padding: 20px 22px;
-  border: 1px solid rgb(138 232 255 / 30%);
+  border: 1px solid transparent;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 250 238 / 15%), transparent 68%),
-    radial-gradient(ellipse 76% 52% at 10% 0%, rgb(127 230 255 / 14%), transparent 60%),
-    linear-gradient(164deg, rgb(13 24 52 / 92%), rgb(5 10 24 / 96%));
+    radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 252 242 / 20%), transparent 66%) padding-box,
+    radial-gradient(ellipse 76% 52% at 10% 0%, rgb(127 230 255 / 20%), transparent 60%) padding-box,
+    radial-gradient(ellipse 68% 48% at 92% 100%, rgb(255 215 122 / 14%), transparent 62%) padding-box,
+    linear-gradient(162deg, rgb(12 22 50 / 96%), rgb(4 8 20 / 99%)) padding-box,
+    linear-gradient(148deg, rgb(255 250 232 / 64%), rgb(138 232 255 / 58%) 48%, rgb(255 215 122 / 56%)) border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 250 236 / 34%),
-    0 16px 38px -18px rgb(0 4 18 / 86%);
+    inset 0 1px 0 rgb(255 252 242 / 40%),
+    0 18px 42px -18px rgb(0 3 16 / 92%);
 }
 
 .ffs-page .ffs-p16-table figcaption {
@@ -2698,8 +2707,23 @@
     background: CanvasText;
   }
 
+  .ffs-page .ffs-views > div,
+  .ffs-page .ffs-metric,
+  .ffs-page .ffs-text-row,
+  .ffs-page .ffs-accel-compare,
+  .ffs-page .ffs-p16-table {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
   .ffs-page .ffs-views label.is-active {
+    border: 1px solid Highlight;
+    background: Canvas;
+    color: CanvasText;
     outline: 2px solid Highlight;
+    box-shadow: none;
+    text-shadow: none;
   }
 
   .ffs-page .ffs-p16-core-specular {

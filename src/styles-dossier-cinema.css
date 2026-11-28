@@ -95,34 +95,34 @@ main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
     linear-gradient(
         90deg,
         transparent 0%,
-        var(--dm-rim) 12%,
-        #7ae8ff 26%,
-        var(--dm-violet, #ff5fc8) 48%,
-        var(--dm-magenta, #ff5cc8) 66%,
-        var(--dm-gold, #f0cf86) 84%,
+        var(--dm-rim) 10%,
+        #7ae8ff 24%,
+        #ffffff 48%,
+        var(--dm-magenta, #ff5cc8) 68%,
+        var(--dm-gold, #f0cf86) 86%,
         transparent 100%
       )
-      bottom / 100% 2px no-repeat,
+      bottom / 100% 2.5px no-repeat,
     linear-gradient(
         90deg,
-        transparent 0%,
-        rgb(255 255 255 / 75%) 50%,
-        transparent 100%
+        transparent 4%,
+        rgb(255 255 255 / 94%) 50%,
+        transparent 96%
       )
       bottom / 100% 1px no-repeat,
     radial-gradient(
-        ellipse 70% 32px at 50% 100%,
-        color-mix(in srgb, var(--dm-key) 32%, rgb(255 255 255 / 24%)),
-        transparent 72%
+        ellipse 76% 38px at 50% 100%,
+        color-mix(in srgb, var(--dm-key) 42%, rgb(255 255 255 / 32%)),
+        transparent 74%
       )
-      bottom / 100% 48px no-repeat,
+      bottom / 100% 56px no-repeat,
     linear-gradient(
         0deg,
-        color-mix(in srgb, var(--dm-key) 24%, transparent),
-        color-mix(in srgb, var(--dm-rim) 8%, transparent) 42px,
-        transparent 84px
+        color-mix(in srgb, var(--dm-key) 32%, transparent),
+        color-mix(in srgb, var(--dm-rim) 12%, transparent) 46px,
+        transparent 96px
       )
-      bottom / 100% 84px no-repeat;
+      bottom / 100% 96px no-repeat;
   opacity: 0;
   translate: 0 -100%;
   pointer-events: none;
@@ -133,33 +133,34 @@ main.manager-page.rider-dossier-page:not(.is-sovereign) .dossier-arrive-scan {
     linear-gradient(
         90deg,
         transparent 0%,
-        var(--dm-key) 10%,
-        color-mix(in srgb, var(--dm-key) 52%, var(--dm-rim)) 34%,
-        var(--dm-rim) 68%,
-        var(--dm-gold, #f0cf86) 88%,
+        var(--dm-key) 8%,
+        color-mix(in srgb, var(--dm-key) 56%, #ffffff) 32%,
+        #ffffff 50%,
+        var(--dm-rim) 70%,
+        var(--dm-gold, #f0cf86) 90%,
         transparent 100%
       )
-      bottom / 100% 2px no-repeat,
+      bottom / 100% 2.5px no-repeat,
     linear-gradient(
         90deg,
-        transparent 0%,
-        rgb(255 255 255 / 80%) 50%,
-        transparent 100%
+        transparent 4%,
+        rgb(255 255 255 / 95%) 50%,
+        transparent 96%
       )
       bottom / 100% 1px no-repeat,
     radial-gradient(
-        ellipse 75% 36px at 50% 100%,
-        color-mix(in srgb, var(--dm-key) 36%, rgb(240 207 134 / 28%)),
-        transparent 75%
+        ellipse 78% 40px at 50% 100%,
+        color-mix(in srgb, var(--dm-key) 44%, rgb(240 207 134 / 34%)),
+        transparent 76%
       )
-      bottom / 100% 54px no-repeat,
+      bottom / 100% 60px no-repeat,
     linear-gradient(
         0deg,
-        color-mix(in srgb, var(--dm-key) 30%, transparent),
-        color-mix(in srgb, var(--dm-rim) 12%, transparent) 44px,
-        transparent 96px
+        color-mix(in srgb, var(--dm-key) 36%, transparent),
+        color-mix(in srgb, var(--dm-rim) 15%, transparent) 48px,
+        transparent 104px
       )
-      bottom / 100% 96px no-repeat;
+      bottom / 100% 104px no-repeat;
 }
 
 main.manager-page.ciel-dossier-page:not(.is-sovereign) .dossier-arrive-scan {

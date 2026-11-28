@@ -2406,12 +2406,12 @@ html:not([data-world-effects="economy"])
   }
 
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-hero .ics-title-ultra {
-    animation: ics-hero-rule 820ms cubic-bezier(0.6, 0, 0.2, 1) 520ms backwards;
+    animation: ics-hero-rule 560ms cubic-bezier(0.6, 0, 0.2, 1) 280ms backwards;
   }
 
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-hero-calls > li {
-    animation: ics-hero-call 460ms cubic-bezier(0.2, 0.7, 0.1, 1) backwards;
-    animation-delay: calc(820ms + var(--ics-i, 0) * 110ms);
+    animation: ics-hero-call 380ms cubic-bezier(0.2, 0.7, 0.1, 1) backwards;
+    animation-delay: calc(340ms + var(--ics-i, 0) * 85ms);
   }
 
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-hero-calls > li:nth-child(2) { --ics-i: 1; }
@@ -6776,5 +6776,748 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="spe
     border-color: CanvasText;
     box-shadow: none;
     color: CanvasText;
+  }
+}
+
+/* ================================================================
+   2026-11 Wave-8 Obsidian x Celestial Crimson-Gold Luxury Edition:
+   - Restores .rxs-hero-ambient (overriding styles-saga-showcase's
+     display: none) to bathe the right hero stage in deep crimson,
+     sovereign champagne gold & royal sapphire radiance plus crisp
+     concentric celestial compass rings (zero straight scanlines).
+   - Elevates 「イリュージョンクルムサーガ」 & chapter headings to
+     crystal-platinum metallic gradient typography (explicitly
+     restoring sovereign gold fill on child .ics-title-prefix).
+   - Upgrades calls, overview diagram/projection, specs, articles,
+     evaluations, finishers, table & forms into jewel-cut heavy dark
+     crystal plates with vivid 2px top luminous filaments.
+   - Keeps .ics-proj-shear hidden, Ring 28px/22px/pill geometry intact,
+     suit-up / .ics-ignition untouched, 0 loops, 0 blurs.
+   ================================================================ */
+
+@media (forced-colors: none) {
+  /* 1. Celestial Obsidian Sanctuary Ground (Hero + 01..06 Script Field) */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c) {
+    background:
+      radial-gradient(64rem 42rem at 76% 18rem, rgb(196 34 68 / 22%), transparent 68%),
+      radial-gradient(72rem 48rem at 64% 48rem, rgb(47 79 216 / 26%), transparent 72%),
+      radial-gradient(48rem 34rem at 82% 84rem, rgb(255 216 142 / 14%), transparent 70%),
+      radial-gradient(56rem 38rem at 24% 66rem, rgb(142 36 88 / 14%), transparent 72%),
+      linear-gradient(180deg, #040511 0%, #030512 42%, #02030a 100%);
+  }
+
+  /* 2. Hero Ambient Revival — Crimson x Champagne Gold x Sapphire Celestial Stage */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > .rxs-hero-ambient {
+    display: block;
+    overflow: hidden;
+    background:
+      radial-gradient(52rem 38rem at 76% 42%, rgb(212 38 74 / 42%) 0%, rgb(156 20 52 / 18%) 42%, transparent 72%),
+      radial-gradient(60rem 44rem at 62% 52%, rgb(47 79 216 / 44%) 0%, rgb(26 44 148 / 18%) 48%, transparent 76%),
+      radial-gradient(38rem 28rem at 72% 14%, rgb(255 220 146 / 30%) 0%, rgb(233 184 102 / 12%) 46%, transparent 70%),
+      radial-gradient(32rem 26rem at 92% 78%, rgb(166 230 255 / 22%) 0%, transparent 68%);
+    pointer-events: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > .rxs-hero-ambient
+    > i {
+    opacity: 0.56;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > .rxs-hero-ambient
+    > i:nth-child(2) {
+    opacity: 0.34;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > .rxs-hero-ambient
+    > i:nth-child(3) {
+    opacity: 0.2;
+  }
+
+  /* Crisp concentric celestial compass rings floating behind the right hero copy. */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > .rxs-hero-ambient::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+      radial-gradient(
+        circle at 74% 44%,
+        transparent 16.6%,
+        rgb(255 228 168 / 46%) 16.82%,
+        rgb(255 228 168 / 42%) 17.08%,
+        transparent 17.42%
+      ),
+      radial-gradient(
+        circle at 74% 44%,
+        transparent 24.4%,
+        rgb(255 112 136 / 38%) 24.62%,
+        rgb(255 112 136 / 34%) 24.88%,
+        transparent 25.24%
+      ),
+      radial-gradient(
+        circle at 74% 44%,
+        transparent 33%,
+        rgb(166 230 255 / 30%) 33.2%,
+        rgb(166 230 255 / 26%) 33.44%,
+        transparent 33.8%
+      ),
+      radial-gradient(
+        circle at 74% 44%,
+        transparent 42.6%,
+        rgb(233 184 102 / 22%) 42.8%,
+        rgb(233 184 102 / 18%) 43.02%,
+        transparent 43.38%
+      ),
+      radial-gradient(
+        circle at 74% 44%,
+        rgb(255 218 148 / 18%) 0%,
+        rgb(212 38 74 / 18%) 24%,
+        rgb(47 79 216 / 12%) 44%,
+        transparent 62%
+      );
+    pointer-events: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > .rxs-hero-ambient::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+      radial-gradient(48% 56% at 72% 38%, rgb(255 224 156 / 22%), rgb(218 46 82 / 20%) 44%, transparent 74%),
+      radial-gradient(36% 44% at 58% 72%, rgb(166 230 255 / 16%), transparent 70%);
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1099.98px) {
+    html[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      > .ics-hero
+      > .rxs-hero-ambient {
+      background:
+        radial-gradient(34rem 26rem at 50% 76%, rgb(212 38 74 / 36%) 0%, rgb(156 20 52 / 14%) 46%, transparent 74%),
+        radial-gradient(38rem 30rem at 50% 66%, rgb(47 79 216 / 38%) 0%, transparent 76%),
+        radial-gradient(24rem 18rem at 50% 56%, rgb(255 220 146 / 22%) 0%, transparent 72%);
+    }
+
+    html[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      > .ics-hero
+      > .rxs-hero-ambient::before {
+      background:
+        radial-gradient(
+          circle at 50% 76%,
+          transparent 21.6%,
+          rgb(255 228 168 / 38%) 21.85%,
+          rgb(255 228 168 / 32%) 22.1%,
+          transparent 22.45%
+        ),
+        radial-gradient(
+          circle at 50% 76%,
+          transparent 31.6%,
+          rgb(255 112 136 / 30%) 31.85%,
+          rgb(255 112 136 / 24%) 32.1%,
+          transparent 32.45%
+        ),
+        radial-gradient(
+          circle at 50% 76%,
+          transparent 42.4%,
+          rgb(166 230 255 / 24%) 42.65%,
+          transparent 43.1%
+        ),
+        radial-gradient(
+          circle at 50% 76%,
+          rgb(255 218 148 / 14%) 0%,
+          rgb(212 38 74 / 14%) 30%,
+          transparent 62%
+        );
+    }
+
+    html[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      > .ics-hero
+      > .rxs-hero-ambient::after {
+      background:
+        radial-gradient(76% 42% at 50% 74%, rgb(255 224 156 / 18%), rgb(218 46 82 / 14%) 48%, transparent 76%);
+    }
+  }
+
+  @media (min-width: 1100px) {
+    html[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      > .ics-hero
+      > .ics-hero-visual {
+      border-right: 1.5px solid rgb(255 228 168 / 78%);
+      box-shadow:
+        inset -1px 0 0 0 rgb(255 248 228 / 64%),
+        inset -3px 0 0 0 rgb(212 38 74 / 46%),
+        inset -24px 0 48px -12px rgb(233 184 102 / 42%),
+        inset 0 1px 0 0 rgb(255 248 228 / 38%),
+        1px 0 0 0 rgb(2 3 10 / 98%),
+        4px 0 0 0 rgb(218 46 82 / 34%),
+        26px 0 84px -20px rgb(212 38 74 / 72%),
+        16px 0 54px -16px rgb(255 212 132 / 54%);
+    }
+  }
+
+  /* 3. Crystal-Platinum Metallic Hero & Chapter Typography */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero
+    .ics-mark {
+    -webkit-text-stroke: 1.25px rgb(255 228 168 / 46%);
+    filter: drop-shadow(0 0 24px rgb(218 46 82 / 36%));
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero
+    h1
+    .ics-title-name {
+    background: linear-gradient(176deg, #ffffff 0%, #ffffff 36%, #eef7ff 56%, #bce6ff 78%, #ffe5ad 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter:
+      drop-shadow(0 6px 24px rgb(0 0 0 / 92%))
+      drop-shadow(0 0 28px rgb(166 230 255 / 40%))
+      drop-shadow(0 0 14px rgb(255 214 138 / 28%));
+  }
+
+  /* Restore vivid opaque sovereign gold on the child prefix inside .ics-title-name. */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero
+    h1
+    .ics-title-name
+    .ics-title-prefix {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #ffefc6;
+    -webkit-text-fill-color: #ffefc6;
+    filter: none;
+    text-shadow:
+      0 0 24px rgb(255 204 114 / 80%),
+      0 2px 8px rgb(0 0 0 / 92%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero
+    .ics-title-ultra {
+    overflow: clip;
+    padding: 13px 18px 12px 20px;
+    border: 1.5px solid transparent;
+    border-radius: 16px;
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 24%, #ff6b80 56%, #a6e6ff 100%) 16px 0 /
+        calc(100% - 32px) 2px no-repeat padding-box,
+      linear-gradient(180deg, #ffffff 0%, #ffe1a3 36%, #ff6b80 78%, #b81f3a 100%) 0 0 / 4px 100%
+        no-repeat padding-box,
+      radial-gradient(92% 130% at 8% 0%, rgb(212 38 74 / 32%), transparent 68%) padding-box,
+      radial-gradient(76% 120% at 94% 100%, rgb(255 214 138 / 18%), transparent 72%) padding-box,
+      linear-gradient(135deg, #211026 0%, #0b0d1f 58%, #150b1c 100%) padding-box,
+      conic-gradient(
+          from 200deg,
+          rgb(255 225 163 / 84%),
+          rgb(255 255 255 / 54%) 0.16turn,
+          rgb(255 107 128 / 74%) 0.48turn,
+          rgb(166 230 255 / 62%) 0.78turn,
+          rgb(255 225 163 / 84%)
+        )
+        border-box;
+    color: #f8faff;
+    -webkit-text-fill-color: #f8faff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 40%),
+      inset 0 -1px 0 rgb(218 46 82 / 40%),
+      inset 20px 0 30px -16px rgb(212 38 74 / 54%),
+      0 14px 34px -14px rgb(0 0 0 / 94%),
+      0 0 32px -8px rgb(218 46 82 / 44%);
+    text-shadow: 0 2px 12px rgb(0 0 0 / 88%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-hero, .ics-footer)
+    .ics-ultra-word {
+    color: #ff9cb0;
+    -webkit-text-fill-color: #ff9cb0;
+    text-shadow:
+      0 0 24px rgb(255 96 128 / 82%),
+      0 0 10px rgb(255 225 163 / 48%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-heading {
+    padding-bottom: 18px;
+    background:
+      linear-gradient(
+          90deg,
+          #ffe5ad 0%,
+          #ffffff 18%,
+          #ff6b80 42%,
+          #a6e6ff 72%,
+          rgb(166 230 255 / 16%) 90%,
+          transparent 100%
+        )
+        0 100% / 100% 2.5px no-repeat;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-numeral {
+    color: rgb(255 226 164 / 12%);
+    -webkit-text-stroke: 1.5px rgb(255 224 152 / 94%);
+    filter:
+      drop-shadow(0 0 22px rgb(218 46 82 / 48%))
+      drop-shadow(0 0 10px rgb(255 214 134 / 36%));
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-heading
+    h2 {
+    background: linear-gradient(178deg, #ffffff 0%, #edf6ff 52%, #ffe3aa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter:
+      drop-shadow(0 4px 16px rgb(0 0 0 / 88%))
+      drop-shadow(0 0 20px rgb(233 184 102 / 30%));
+  }
+
+  /* 4. Jewel-Cut Call Plates (01..04) — Vivid 2px Top Specular Filaments */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-calls, .ics-hero-calls)
+    > li::before {
+    border: 1.5px solid transparent;
+    background:
+      radial-gradient(84% 84% at 32% 20%, rgb(255 228 168 / 34%), transparent 68%) padding-box,
+      linear-gradient(155deg, #271a3c, #0a0e24) padding-box,
+      conic-gradient(from 200deg, #ffe5ad, #ffffff 0.16turn, #ff6b80 0.48turn, #a6e6ff 0.78turn, #ffe5ad)
+        border-box;
+    color: #fff6dc;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 48%),
+      0 6px 18px -6px rgb(0 0 0 / 92%),
+      0 0 20px -2px rgb(255 204 118 / 66%);
+    text-shadow: 0 0 10px rgb(255 225 163 / 62%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-calls, .ics-hero-calls)
+    b {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 28%, #a6e6ff 66%, #ff6b80 100%) 16px 0 /
+        calc(100% - 32px) 2px no-repeat padding-box,
+      linear-gradient(180deg, #ffffff 0%, #ffe1a3 30%, #a6e6ff 68%, #ff6b80 100%) 0 0 / 4px 100%
+        no-repeat padding-box,
+      radial-gradient(115% 135% at 0% 50%, rgb(58 96 240 / 54%) 0%, rgb(166 230 255 / 22%) 38%, transparent 74%)
+        padding-box,
+      radial-gradient(70% 115% at 98% 100%, rgb(212 38 74 / 28%), transparent 70%) padding-box,
+      linear-gradient(135deg, #162048 0%, #090e24 58%, #190e28 100%) padding-box,
+      conic-gradient(
+          from 200deg,
+          rgb(255 228 168 / 88%),
+          rgb(255 255 255 / 60%) 0.14turn,
+          rgb(166 230 255 / 72%) 0.42turn,
+          rgb(255 107 128 / 68%) 0.72turn,
+          rgb(255 228 168 / 88%)
+        )
+        border-box;
+    color: #f8fbff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 44%),
+      inset 0 -1px 0 rgb(218 46 82 / 44%),
+      inset 22px 0 34px -16px rgb(58 96 240 / 68%),
+      0 18px 38px -14px rgb(0 0 0 / 95%),
+      0 0 32px -8px rgb(233 184 102 / 48%);
+    text-shadow: 0 2px 10px rgb(0 0 0 / 84%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero-calls
+    > li:last-child
+    b {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 28%, #ff6b80 66%, #ffe5ad 100%) 16px 0 /
+        calc(100% - 32px) 2.5px no-repeat padding-box,
+      linear-gradient(180deg, #ffffff 0%, #ffe1a3 36%, #ff6b80 74%, #b81f3a 100%) 0 0 / 4.5px 100%
+        no-repeat padding-box,
+      radial-gradient(115% 135% at 0% 50%, rgb(212 38 74 / 62%) 0%, rgb(255 112 136 / 26%) 44%, transparent 78%)
+        padding-box,
+      radial-gradient(78% 115% at 96% 100%, rgb(255 214 134 / 32%), transparent 70%) padding-box,
+      linear-gradient(135deg, #341328 0%, #140b22 58%, #261020 100%) padding-box,
+      conic-gradient(
+          from 200deg,
+          #ffe5ad,
+          #ffffff 0.16turn,
+          #ff6b80 0.46turn,
+          #d4264a 0.74turn,
+          #ffe5ad
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 54%),
+      inset 0 -1px 0 rgb(255 214 138 / 52%),
+      inset 26px 0 38px -16px rgb(218 46 82 / 78%),
+      0 20px 42px -14px rgb(0 0 0 / 96%),
+      0 0 44px -8px rgb(218 46 82 / 68%);
+  }
+
+  /* 5. Overview Diagram, Projection Frames & Disclosure Pills */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-diagram, .ics-projection) {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 24%, #ff6b80 56%, #a6e6ff 100%) 22px 0 /
+        calc(100% - 44px) 2px no-repeat padding-box,
+      radial-gradient(76% 68% at 72% 44%, rgb(54 92 236 / 36%), transparent 72%) padding-box,
+      radial-gradient(56% 52% at 14% 12%, rgb(255 220 146 / 18%), transparent 68%) padding-box,
+      radial-gradient(52% 52% at 88% 88%, rgb(212 38 74 / 20%), transparent 70%) padding-box,
+      linear-gradient(166deg, #141c3c 0%, #080d22 58%, #060816 100%) padding-box,
+      conic-gradient(
+          from 210deg,
+          rgb(255 228 168 / 82%),
+          rgb(255 255 255 / 54%) 0.16turn,
+          rgb(166 230 255 / 78%) 0.44turn,
+          rgb(255 107 128 / 64%) 0.72turn,
+          rgb(255 228 168 / 82%)
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 38%),
+      inset 0 -1px 0 rgb(54 92 236 / 44%),
+      inset 0 0 48px -16px rgb(47 79 216 / 48%),
+      0 26px 56px -18px rgb(0 0 0 / 95%),
+      0 0 42px -14px rgb(166 230 255 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-more
+    > summary {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 36%, #a6e6ff 100%) 20px 0 / calc(100% - 40px) 2px
+        no-repeat padding-box,
+      radial-gradient(110% 130% at 18% 0%, rgb(255 220 146 / 28%), transparent 64%) padding-box,
+      linear-gradient(180deg, #1a2146 0%, #090d22 100%) padding-box,
+      conic-gradient(from 200deg, #ffe5ad, #ffffff 0.16turn, #a6e6ff 0.5turn, #ff6b80 0.82turn, #ffe5ad)
+        border-box;
+    color: #fff3d4;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      inset 0 -1px 0 rgb(218 46 82 / 42%),
+      0 14px 30px -10px rgb(0 0 0 / 92%),
+      0 0 28px -6px rgb(255 204 118 / 54%);
+    text-shadow: 0 0 12px rgb(255 218 140 / 48%);
+  }
+
+  /* 6. Jewel-Cut Spec Cards — Vivid 2px Top Filaments & Metallic Contrast */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs
+    > div {
+    background:
+      linear-gradient(90deg, #a6e6ff 0%, #ffffff 34%, #ffe5ad 100%) 22px 0 / calc(100% - 44px) 2px
+        no-repeat padding-box,
+      radial-gradient(88% 72% at 14% 0%, rgb(166 230 255 / 20%), transparent 66%) padding-box,
+      radial-gradient(72% 72% at 90% 100%, rgb(47 79 216 / 18%), transparent 68%) padding-box,
+      linear-gradient(168deg, #161f40 0%, #090f24 58%, #060918 100%) padding-box,
+      conic-gradient(
+          from 210deg,
+          rgb(166 230 255 / 80%),
+          rgb(255 248 228 / 56%) 0.16turn,
+          rgb(255 220 146 / 74%) 0.48turn,
+          rgb(218 46 82 / 44%) 0.78turn,
+          rgb(166 230 255 / 80%)
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 38%),
+      inset 0 -1px 0 rgb(47 79 216 / 40%),
+      inset 0 0 36px -14px rgb(47 79 216 / 44%),
+      0 22px 46px -18px rgb(0 0 0 / 95%),
+      0 0 34px -12px rgb(166 230 255 / 34%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs
+    > div:nth-child(-n + 4) {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 22%, #ff6b80 58%, #a6e6ff 100%) 22px 0 /
+        calc(100% - 44px) 2.5px no-repeat padding-box,
+      radial-gradient(88% 74% at 12% 0%, rgb(255 224 156 / 24%), transparent 64%) padding-box,
+      radial-gradient(84% 76% at 92% 100%, rgb(218 46 82 / 30%), transparent 68%) padding-box,
+      radial-gradient(72% 62% at 50% 42%, rgb(54 92 236 / 24%), transparent 70%) padding-box,
+      linear-gradient(166deg, #211c42 0%, #0d1128 56%, #08091a 100%) padding-box,
+      conic-gradient(
+          from 200deg,
+          #ffe5ad 0turn,
+          #ffffff 0.14turn,
+          #ff6b80 0.42turn,
+          #a6e6ff 0.72turn,
+          #ffe5ad 1turn
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 50%),
+      inset 0 -1px 0 rgb(218 46 82 / 50%),
+      inset 0 18px 36px -18px rgb(218 46 82 / 50%),
+      0 26px 52px -18px rgb(0 0 0 / 96%),
+      0 0 44px -12px rgb(255 204 118 / 52%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs
+    > div:nth-child(-n + 4)
+    dd
+    > b {
+    background: linear-gradient(180deg, #ffffff 0%, #ffffff 34%, #d6f0ff 68%, #ffdc96 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter:
+      drop-shadow(0 0 22px rgb(255 206 118 / 54%))
+      drop-shadow(0 4px 12px rgb(0 0 0 / 92%));
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs
+    > div:nth-child(n + 5)
+    dd
+    > b {
+    color: #f6faff;
+    text-shadow:
+      0 0 14px rgb(166 230 255 / 34%),
+      0 2px 6px rgb(0 0 0 / 88%);
+  }
+
+  /* 7. Articles, Evaluations, Finishers, Comparison Table & Forms — Heavy Crystal Luxury */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-articles > article, .ics-evaluations > article, .ics-finisher) {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 22%, #a6e6ff 64%, #ff6b80 100%) 28px 0 /
+        calc(100% - 56px) 2px no-repeat padding-box,
+      radial-gradient(68% 54% at 10% 0%, rgb(166 230 255 / 20%), transparent 66%) padding-box,
+      radial-gradient(58% 54% at 92% 100%, rgb(255 214 134 / 18%), transparent 68%) padding-box,
+      linear-gradient(168deg, #162040 0%, #0a1026 58%, #060918 100%) padding-box,
+      conic-gradient(
+          from 210deg,
+          rgb(166 230 255 / 84%),
+          rgb(255 248 228 / 62%) 0.16turn,
+          rgb(255 220 146 / 80%) 0.44turn,
+          rgb(255 107 128 / 58%) 0.72turn,
+          rgb(166 230 255 / 84%)
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 42%),
+      inset 0 -1px 0 rgb(54 92 236 / 44%),
+      inset 0 0 50px -18px rgb(47 79 216 / 44%),
+      0 28px 60px -20px rgb(0 0 0 / 96%),
+      0 0 46px -14px rgb(166 230 255 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-finisher {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 22%, #ff6b80 58%, #a6e6ff 100%) 28px 0 /
+        calc(100% - 56px) 2.5px no-repeat padding-box,
+      radial-gradient(68% 54% at 10% 0%, rgb(255 224 156 / 22%), transparent 66%) padding-box,
+      radial-gradient(60% 56% at 92% 100%, rgb(218 46 82 / 24%), transparent 68%) padding-box,
+      linear-gradient(166deg, #1d1c42 0%, #0c1026 58%, #080818 100%) padding-box,
+      conic-gradient(
+          from 200deg,
+          #ffe5ad,
+          #ffffff 0.14turn,
+          #ff6b80 0.44turn,
+          #a6e6ff 0.74turn,
+          #ffe5ad
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 48%),
+      inset 0 -1px 0 rgb(218 46 82 / 48%),
+      inset 0 0 54px -18px rgb(218 46 82 / 44%),
+      0 30px 64px -20px rgb(0 0 0 / 96%),
+      0 0 52px -14px rgb(255 204 118 / 46%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-table-scroll {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 22%, #ff6b80 56%, #a6e6ff 100%) 24px 0 /
+        calc(100% - 48px) 2.5px no-repeat padding-box,
+      radial-gradient(68% 44% at 50% 0%, rgb(212 38 74 / 26%), transparent 72%) padding-box,
+      linear-gradient(164deg, #161d40 0%, #090d22 58%, #060816 100%) padding-box,
+      conic-gradient(from 200deg, #ffe5ad, #ffffff 0.16turn, #ff6b80 0.46turn, #a6e6ff 0.76turn, #ffe5ad)
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 46%),
+      inset 0 -1px 0 rgb(255 214 134 / 42%),
+      inset 0 24px 44px -20px rgb(212 38 74 / 42%),
+      0 30px 68px -18px rgb(0 0 0 / 96%),
+      0 0 54px -14px rgb(255 204 118 / 44%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-form-panel {
+    background:
+      linear-gradient(90deg, #ffe5ad 0%, #ffffff 24%, var(--ics-accent, #a6e6ff) 62%, #ff6b80 100%)
+        28px 0 / calc(100% - 56px) 2.5px no-repeat padding-box,
+      radial-gradient(
+          68% 64% at 0% 0%,
+          color-mix(in srgb, var(--ics-accent, #a6e6ff) 28%, transparent),
+          transparent 70%
+        )
+        padding-box,
+      radial-gradient(58% 58% at 16% 100%, rgb(212 38 74 / 24%), transparent 72%) padding-box,
+      radial-gradient(52% 54% at 50% 42%, rgb(255 218 144 / 16%), transparent 70%) padding-box,
+      linear-gradient(166deg, #171f42 0%, #0a0f26 58%, #060816 100%) padding-box,
+      conic-gradient(
+          from 205deg,
+          #ffe5ad 0turn,
+          #ffffff 0.15turn,
+          var(--ics-accent, #a6e6ff) 0.44turn,
+          #ff6b80 0.74turn,
+          #ffe5ad 1turn
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 46%),
+      inset 0 -1px 0 rgb(218 46 82 / 44%),
+      inset 0 0 60px -18px color-mix(in srgb, var(--ics-accent, #a6e6ff) 50%, transparent),
+      0 32px 72px -18px rgb(0 0 0 / 96%),
+      0 0 62px -14px color-mix(in srgb, var(--ics-accent, #a6e6ff) 54%, transparent);
+  }
+
+  @media (max-width: 560px) {
+    html[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      .ics-specs {
+      gap: 10px;
+    }
+
+    html[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      .ics-specs
+      > div {
+      padding: 14px 12px;
+    }
+  }
+}
+
+html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+  :is(.ics-hero .ics-mark, .ics-hero h1 .ics-title-name, .ics-numeral, .ics-heading h2, .ics-specs > div:nth-child(-n + 4) dd > b) {
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    > .ics-hero
+    > :is(.rxs-hero-ambient, .rxs-hero-ambient::before, .rxs-hero-ambient::after) {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .ics-hero h1 .ics-title-name,
+      .ics-hero h1 .ics-title-name .ics-title-prefix,
+      .ics-heading h2,
+      .ics-specs > div dd > b
+    ) {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+    text-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero
+    .ics-title-ultra {
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
   }
 }

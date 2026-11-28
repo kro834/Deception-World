@@ -3170,15 +3170,18 @@ html[data-family="special"]
   color: rgb(var(--rzn-white));
   background: linear-gradient(
     135deg,
-    rgb(var(--rzn-ice) / 14%),
-    rgb(var(--rzn-violet) / 8%) 55%,
-    rgb(var(--rzn-pink) / 12%)
+    rgb(var(--rzn-ice) / 22%),
+    rgb(var(--rzn-violet) / 14%) 55%,
+    rgb(var(--rzn-gold) / 18%)
   );
-  border: 1px solid rgb(var(--rzn-ice) / 44%);
+  border: 1px solid rgb(var(--rzn-ice) / 58%);
   box-shadow:
-    0 0 18px rgb(var(--rzn-ice) / 20%),
-    inset 0 1px 0 rgb(var(--rzn-white) / 22%);
-  text-shadow: 0 0 12px rgb(var(--rzn-ice) / 42%);
+    0 0 24px rgb(var(--rzn-ice) / 30%),
+    0 0 38px rgb(var(--rzn-gold) / 18%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 34%);
+  text-shadow:
+    0 0 12px rgb(var(--rzn-ice) / 54%),
+    0 0 24px rgb(var(--rzn-gold) / 28%);
   clip-path: none;
 }
 
@@ -3190,10 +3193,10 @@ html[data-family="special"]
   > .rzn-frame
   > .rzn-aura {
   background:
-    radial-gradient(ellipse at 34% 44%, rgb(var(--rzn-emerald) / 26%), transparent 50%),
-    radial-gradient(ellipse at 66% 42%, rgb(var(--rzn-ice) / 18%), transparent 48%),
-    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 14%), transparent 40%);
-  opacity: 0.88;
+    radial-gradient(ellipse at 34% 44%, rgb(var(--rzn-emerald) / 30%), transparent 50%),
+    radial-gradient(ellipse at 66% 42%, rgb(var(--rzn-ice) / 22%), transparent 48%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 18%), transparent 42%);
+  opacity: 0.92;
 }
 
 html[data-family="special"]
@@ -3202,10 +3205,10 @@ html[data-family="special"]
   > .rzn-suitup[data-form="max"][data-rzn-form-complete]
   > .rzn-frame
   > .rzn-crown {
-  border-color: rgb(var(--rzn-emerald) / 30%);
+  border-color: rgb(var(--rzn-emerald) / 42%);
   box-shadow:
-    0 0 32px rgb(var(--rzn-emerald) / 14%),
-    inset 0 0 22px rgb(var(--rzn-gold) / 10%);
+    0 0 36px rgb(var(--rzn-emerald) / 22%),
+    inset 0 0 26px rgb(var(--rzn-gold) / 16%);
 }
 
 html[data-family="special"]
@@ -3214,11 +3217,12 @@ html[data-family="special"]
   > .rzn-suitup[data-form="max"][data-rzn-form-complete]
   .rzn-stamp
   > b {
-  border-color: rgb(var(--rzn-emerald) / 50%);
+  border-color: rgb(var(--rzn-emerald) / 62%);
   box-shadow:
-    0 0 20px rgb(var(--rzn-emerald) / 24%),
-    inset 0 1px 0 rgb(var(--rzn-white) / 24%);
-  text-shadow: 0 0 12px rgb(var(--rzn-emerald) / 45%);
+    0 0 24px rgb(var(--rzn-emerald) / 32%),
+    0 0 38px rgb(var(--rzn-gold) / 18%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 34%);
+  text-shadow: 0 0 14px rgb(var(--rzn-emerald) / 56%);
 }
 
 html[data-family="special"]
@@ -3228,11 +3232,11 @@ html[data-family="special"]
   > .rzn-frame
   > .rzn-aura {
   background:
-    radial-gradient(ellipse at 30% 42%, rgb(var(--rzn-ice) / 28%), transparent 50%),
-    radial-gradient(ellipse at 70% 42%, rgb(var(--rzn-pink) / 26%), transparent 50%),
-    radial-gradient(ellipse at 50% 22%, rgb(var(--rzn-gold) / 16%), transparent 42%),
-    radial-gradient(ellipse at 50% 54%, rgb(var(--rzn-violet) / 16%), transparent 56%);
-  opacity: 0.92;
+    radial-gradient(ellipse at 30% 42%, rgb(var(--rzn-ice) / 32%), transparent 50%),
+    radial-gradient(ellipse at 70% 42%, rgb(var(--rzn-pink) / 30%), transparent 50%),
+    radial-gradient(ellipse at 50% 22%, rgb(var(--rzn-gold) / 22%), transparent 44%),
+    radial-gradient(ellipse at 50% 54%, rgb(var(--rzn-violet) / 20%), transparent 56%);
+  opacity: 0.95;
 }
 
 html[data-family="special"]
@@ -3241,14 +3245,14 @@ html[data-family="special"]
   > .rzn-suitup[data-form="ultra"][data-rzn-form-complete]
   .rzn-stamp
   > b {
-  border-color: rgb(var(--rzn-pink) / 48%);
+  border-color: rgb(var(--rzn-pink) / 60%);
   box-shadow:
-    0 0 22px rgb(var(--rzn-pink) / 24%),
-    0 0 36px rgb(var(--rzn-ice) / 16%),
-    inset 0 1px 0 rgb(var(--rzn-white) / 26%);
+    0 0 26px rgb(var(--rzn-pink) / 32%),
+    0 0 42px rgb(var(--rzn-ice) / 22%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 36%);
   text-shadow:
-    0 0 12px rgb(var(--rzn-ice) / 48%),
-    0 0 22px rgb(var(--rzn-pink) / 32%);
+    0 0 14px rgb(var(--rzn-ice) / 56%),
+    0 0 26px rgb(var(--rzn-pink) / 40%);
 }
 
 html[data-family="special"]
@@ -3257,11 +3261,12 @@ html[data-family="special"]
   > .rzn-suitup[data-form="excelsior"][data-rzn-form-complete]
   .rzn-stamp
   > b {
-  border-color: rgb(var(--rzn-gold) / 52%);
+  border-color: rgb(var(--rzn-gold) / 64%);
   box-shadow:
-    0 0 22px rgb(var(--rzn-gold) / 24%),
-    inset 0 1px 0 rgb(var(--rzn-white) / 28%);
-  text-shadow: 0 0 14px rgb(var(--rzn-gold) / 48%);
+    0 0 26px rgb(var(--rzn-gold) / 34%),
+    0 0 40px rgb(var(--rzn-ice) / 18%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 38%);
+  text-shadow: 0 0 16px rgb(var(--rzn-gold) / 58%);
 }
 
 @media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {

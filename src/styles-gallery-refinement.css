@@ -421,25 +421,147 @@
   }
 }
 
-/* Obsidian Glass × Brass Specular Rim Instrument Console Elevation */
+/* Obsidian Glass × Brass Specular Rim Instrument Console Elevation (Wave-8) */
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   .gallery-browse-panel {
   position: relative;
-  padding: clamp(18px, 2.4vw, 28px);
-  border: 1px solid rgb(238 212 162 / 0.46);
-  border-top: 2px solid rgb(252 234 194 / 0.82);
+  padding: clamp(18px, 2.4vw, 30px);
+  border: 1px solid rgb(246 220 168 / 0.56);
+  border-top: 2px solid #fff2d0;
   border-radius: 3px;
   background:
-    radial-gradient(ellipse 76% 52% at 38% -4%, rgb(246 220 170 / 0.16), transparent 68%),
-    radial-gradient(ellipse 58% 44% at 88% 0%, rgb(158 232 250 / 0.08), transparent 68%),
-    linear-gradient(164deg, #162030 0%, #0b111b 54%, #060a11 100%);
+    radial-gradient(ellipse 84% 58% at 38% -6%, rgb(255 232 182 / 0.26), transparent 68%),
+    radial-gradient(ellipse 64% 50% at 88% 0%, rgb(158 232 250 / 0.14), transparent 70%),
+    linear-gradient(166deg, #19263a 0%, #0c1320 52%, #050911 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 242 / 0.36),
-    inset 0 0 0 4px rgb(4 7 12 / 0.8),
-    inset 0 0 0 5px rgb(238 210 156 / 0.18),
-    0 28px 64px -8px rgb(0 0 0 / 0.68),
-    0 0 42px -14px rgb(240 208 148 / 0.2);
+    inset 0 1.5px 0 rgb(255 254 248 / 0.48),
+    inset 0 0 0 4px rgb(4 7 13 / 0.86),
+    inset 0 0 0 5px rgb(244 216 162 / 0.26),
+    0 32px 76px -8px rgb(0 0 0 / 0.78),
+    0 0 54px -12px rgb(246 214 152 / 0.3);
+}
+
+/* Right curatorial controls: 24K gold ingot save plaque & dark sapphire 3D room portal */
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-save {
+  border: 1px solid #fae6be;
+  border-top-color: #ffffff;
+  background: linear-gradient(180deg, #fffdf6 0%, #f4dba8 48%, #d1aa68 100%);
+  box-shadow:
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1px 0 rgb(92 64 22 / 0.38),
+    0 12px 28px -4px rgb(0 0 0 / 0.58),
+    0 0 32px -4px rgb(248 216 152 / 0.52);
+  color: #10141e;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-save[aria-pressed="true"] {
+  border-color: rgb(244 218 166 / 0.56);
+  border-top-color: rgb(255 242 208 / 0.78);
+  background:
+    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 222 170 / 0.2), transparent 72%),
+    linear-gradient(180deg, #212e44 0%, #111928 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 0.32),
+    0 8px 20px rgb(0 0 0 / 0.48);
+  color: #fbf7ee;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .exhibition-room-entry {
+  border: 1px solid rgb(158 232 250 / 0.56);
+  border-top-color: rgb(232 250 255 / 0.86);
+  background:
+    radial-gradient(ellipse 88% 92% at 50% 0%, rgb(158 232 250 / 0.24), transparent 70%),
+    radial-gradient(ellipse 70% 80% at 50% 100%, rgb(246 218 162 / 0.14), transparent 72%),
+    linear-gradient(180deg, #1b2c42 0%, #0d1626 62%, #070d17 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 255 / 0.44),
+    inset 0 -1px 0 rgb(246 218 162 / 0.24),
+    0 12px 26px -4px rgb(0 0 0 / 0.56),
+    0 0 26px -6px rgb(158 232 250 / 0.34);
+  color: #fbf9f3;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-stage-candidates
+  button {
+  border: 1px solid rgb(244 218 166 / 0.46);
+  border-top-color: rgb(255 240 202 / 0.72);
+  background:
+    radial-gradient(ellipse 88% 68% at 50% -6%, rgb(252 228 178 / 0.24), transparent 70%),
+    linear-gradient(180deg, #1a273c 0%, #0c1321 64%, #060a13 100%);
+  color: #f3ede0;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-stage-candidates
+  button[aria-pressed="true"] {
+  border-color: #fae5b8;
+  border-top-color: #ffffff;
+  background:
+    radial-gradient(ellipse 92% 76% at 50% -6%, rgb(255 238 196 / 0.48), transparent 72%),
+    linear-gradient(180deg, #2b3f5c 0%, #162438 62%, #0b1320 100%);
+  color: #ffffff;
+}
+
+/* Luxury dark-glass × gold control pills across discovery & topbar */
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  :is(
+    .gallery-topbar-actions > a,
+    .gallery-refresh,
+    .gallery-screening-nav > a:not(.gallery-enter),
+    .gallery-filters button:not([aria-pressed="true"]),
+    .gallery-favorites-filter:not([aria-pressed="true"]),
+    .gallery-reset-filter,
+    .gallery-search-clear,
+    .gallery-display-reset
+  ) {
+  border: 1px solid rgb(242 216 164 / 0.46);
+  border-top-color: rgb(255 240 202 / 0.74);
+  background:
+    radial-gradient(ellipse 84% 88% at 50% 0%, rgb(250 226 176 / 0.18), transparent 70%),
+    linear-gradient(180deg, #1b283c 0%, #0d1523 62%, #070c15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 0.32),
+    inset 0 -1px 0 rgb(158 232 250 / 0.14),
+    0 8px 20px rgb(0 0 0 / 0.44);
+  color: #faf6ee;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-shuffle-start {
+  border: 1px solid rgb(158 232 250 / 0.62);
+  border-top-color: #eefbff;
+  background:
+    radial-gradient(ellipse 88% 90% at 50% 0%, rgb(158 232 250 / 0.28), transparent 72%),
+    radial-gradient(ellipse 70% 80% at 50% 100%, rgb(246 218 162 / 0.14), transparent 72%),
+    linear-gradient(180deg, #1e354c 0%, #0f1d2e 64%, #08111d 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(246 253 255 / 0.46),
+    0 10px 26px rgb(0 0 0 / 0.5),
+    0 0 26px -6px rgb(158 232 250 / 0.32);
+  color: #fcfaf4;
+  font-weight: 600;
 }
 
 html[data-family="gallery"]
@@ -448,27 +570,27 @@ html[data-family="gallery"]
   .gallery-personal-controls {
   margin-top: 8px;
   padding: clamp(16px, 2vw, 22px);
-  border: 1px solid rgb(238 212 162 / 0.34);
-  border-top-color: rgb(250 230 190 / 0.56);
+  border: 1px solid rgb(242 216 164 / 0.42);
+  border-top-color: rgb(254 236 196 / 0.68);
   border-radius: 3px;
   background:
-    radial-gradient(ellipse 74% 60% at 24% 0%, rgb(244 218 168 / 0.12), transparent 70%),
-    linear-gradient(165deg, #131c2b 0%, #090e17 100%);
+    radial-gradient(ellipse 78% 64% at 24% 0%, rgb(250 224 174 / 0.16), transparent 70%),
+    linear-gradient(165deg, #152032 0%, #080d16 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 0.2),
-    0 14px 32px -6px rgb(0 0 0 / 0.5);
+    inset 0 1px 0 rgb(255 252 244 / 0.26),
+    0 16px 36px -6px rgb(0 0 0 / 0.58);
 }
 
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   .gallery-submission-specs
   span {
-  border: 1px solid rgb(238 212 162 / 0.34);
-  border-top-color: rgb(250 230 190 / 0.52);
-  border-radius: 2px;
-  background: linear-gradient(180deg, #141e2d, #090e16);
-  box-shadow: inset 0 1px 0 rgb(255 251 240 / 0.14);
-  color: #eed7aa;
+  border: 1px solid rgb(240 214 164 / 0.4);
+  border-top-color: rgb(252 234 194 / 0.6);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #162234, #090f18);
+  box-shadow: inset 0 1px 0 rgb(255 252 244 / 0.18);
+  color: #f3dba8;
 }
 
 html[data-family="gallery"]
@@ -476,16 +598,16 @@ html[data-family="gallery"]
   .gallery-personal-controls
   > .gallery-personal-add {
   border: 1px solid #fae6be;
-  border-top-color: #fff9eb;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 52%, #cfa968 100%);
+  border-top-color: #ffffff;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf6 0%, #f2d9a4 52%, #cfa968 100%);
   box-shadow:
     inset 0 1px 0 #ffffff,
-    inset 0 -1px 0 rgb(104 74 28 / 0.32),
-    0 10px 24px -4px rgb(0 0 0 / 0.48),
-    0 0 20px -6px rgb(242 210 150 / 0.34);
-  color: #151410;
-  font-weight: 650;
+    inset 0 -1px 0 rgb(104 74 28 / 0.34),
+    0 12px 26px -4px rgb(0 0 0 / 0.52),
+    0 0 24px -6px rgb(246 214 152 / 0.42);
+  color: #12141c;
+  font-weight: 700;
 }
 
 html[data-family="gallery"]
@@ -501,98 +623,106 @@ html[data-family="gallery"]
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   .gallery-favorite-toggle {
-  border: 1px solid rgb(236 210 160 / 0.36);
-  border-top-color: rgb(250 230 190 / 0.58);
+  border: 1px solid rgb(242 216 164 / 0.44);
+  border-top-color: rgb(254 236 196 / 0.68);
   border-radius: 999px;
   background:
-    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(244 218 168 / 0.12), transparent 70%),
-    linear-gradient(180deg, rgb(24 34 48 / 0.92), rgb(11 16 25 / 0.96));
+    radial-gradient(ellipse 84% 90% at 50% 0%, rgb(248 222 172 / 0.16), transparent 70%),
+    linear-gradient(180deg, rgb(25 36 52 / 0.94), rgb(10 15 25 / 0.98));
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 0.2),
-    0 4px 12px rgb(0 0 0 / 0.34);
-  color: #f2eadb;
+    inset 0 1px 0 rgb(255 253 245 / 0.26),
+    0 6px 16px rgb(0 0 0 / 0.42);
+  color: #f7f1e5;
 }
 
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   .gallery-favorite-toggle[aria-pressed="true"] {
   border-color: #fae6be;
-  border-top-color: #fff9eb;
-  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 54%, #cfa968 100%);
+  border-top-color: #ffffff;
+  background: linear-gradient(180deg, #fffdf6 0%, #f2d9a4 52%, #cfa968 100%);
   box-shadow:
     inset 0 1px 0 #ffffff,
-    0 6px 16px rgb(0 0 0 / 0.42),
-    0 0 18px -4px rgb(244 212 150 / 0.4);
-  color: #151410;
-  font-weight: 650;
+    0 8px 20px rgb(0 0 0 / 0.48),
+    0 0 22px -4px rgb(246 214 152 / 0.48);
+  color: #12141c;
+  font-weight: 700;
 }
 
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   :is(.gallery-viewer-close, .gallery-viewer-footer button) {
-  border: 1px solid rgb(236 210 160 / 0.38);
-  border-top-color: rgb(250 230 190 / 0.62);
+  border: 1px solid rgb(242 216 164 / 0.44);
+  border-top-color: rgb(254 236 196 / 0.68);
   border-radius: 3px;
   background:
-    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(244 218 168 / 0.12), transparent 70%),
-    linear-gradient(180deg, #1b2738 0%, #0d1420 62%, #080d16 100%);
+    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 222 172 / 0.16), transparent 70%),
+    linear-gradient(180deg, #1d2a3d 0%, #0d1522 62%, #070c15 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 0.22),
-    0 5px 14px rgb(0 0 0 / 0.38);
-  color: #f6f1e6;
+    inset 0 1px 0 rgb(255 253 245 / 0.28),
+    0 6px 16px rgb(0 0 0 / 0.44);
+  color: #faf6ee;
 }
 
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   .gallery-close-primary {
-  border-color: rgb(246 220 170 / 0.64);
-  border-top-color: #fff4da;
+  border-color: rgb(248 222 172 / 0.7);
+  border-top-color: #fff6de;
   background:
-    radial-gradient(ellipse 85% 90% at 50% 0%, rgb(248 222 172 / 0.24), transparent 70%),
-    linear-gradient(180deg, #243348 0%, #121c2a 100%);
-  color: #fffaf0;
+    radial-gradient(ellipse 85% 90% at 50% 0%, rgb(250 226 176 / 0.28), transparent 70%),
+    linear-gradient(180deg, #26364d 0%, #121c2c 100%);
+  color: #fffcf4;
 }
 
 html[data-family="gallery"]
   #gallery-top.world.gallery-page[data-gallery-page]
   .gallery-viewer-close[aria-pressed="true"] {
   border-color: #fae6be;
-  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 54%, #cfa968 100%);
+  background: linear-gradient(180deg, #fffdf6 0%, #f2d9a4 52%, #cfa968 100%);
   box-shadow:
     inset 0 1px 0 #ffffff,
-    0 6px 16px rgb(0 0 0 / 0.42);
-  color: #151410;
-  font-weight: 650;
+    0 8px 18px rgb(0 0 0 / 0.46);
+  color: #12141c;
+  font-weight: 700;
 }
 
 @media (hover: hover) and (pointer: fine) {
   html[data-family="gallery"]
     #gallery-top.world.gallery-page[data-gallery-page]
-    :is(.gallery-favorite-toggle, .gallery-viewer-close, .gallery-viewer-footer button):not(
-      [aria-pressed="true"]
-    ):hover:not(:disabled) {
-    border-color: rgb(248 224 176 / 0.82);
+    :is(
+      .gallery-topbar-actions > a,
+      .gallery-refresh,
+      .gallery-screening-nav > a:not(.gallery-enter),
+      .gallery-artwork-intro .exhibition-room-entry,
+      .gallery-favorite-toggle,
+      .gallery-viewer-close,
+      .gallery-viewer-footer button
+    ):not([aria-pressed="true"]):hover:not(:disabled) {
+    border-color: #fae5b8;
     background:
-      radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 224 176 / 0.22), transparent 70%),
-      linear-gradient(180deg, #243448 0%, #131d2c 100%);
+      radial-gradient(ellipse 84% 90% at 50% 0%, rgb(252 228 178 / 0.26), transparent 70%),
+      linear-gradient(180deg, #263850 0%, #131e30 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 253 246 / 0.36),
-      0 8px 20px rgb(0 0 0 / 0.46),
-      0 0 16px -4px rgb(242 210 150 / 0.28);
-    color: #fffaf0;
+      inset 0 1px 0 rgb(255 254 248 / 0.46),
+      0 10px 24px rgb(0 0 0 / 0.52),
+      0 0 22px -4px rgb(246 214 152 / 0.38);
+    color: #ffffff;
   }
 
   html[data-family="gallery"]
     #gallery-top.world.gallery-page[data-gallery-page]
-    .gallery-personal-controls
-    > .gallery-personal-add:hover:not(:disabled) {
-    border-color: #fff8e6;
-    background: linear-gradient(180deg, #ffffff 0%, #f6e1b6 52%, #dfbc7e 100%);
+    :is(
+      .gallery-personal-controls > .gallery-personal-add,
+      .gallery-artwork-intro .gallery-feature-save:not([aria-pressed="true"])
+    ):hover:not(:disabled) {
+    border-color: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #f8e4b8 52%, #e0be80 100%);
     box-shadow:
       inset 0 1px 0 #ffffff,
-      0 14px 30px -4px rgb(0 0 0 / 0.54),
-      0 0 24px -4px rgb(248 220 164 / 0.46);
-    color: #12100c;
+      0 14px 32px -4px rgb(0 0 0 / 0.58),
+      0 0 28px -4px rgb(250 222 164 / 0.54);
+    color: #0e121b;
   }
 }
 
@@ -756,6 +886,10 @@ html[data-family="gallery"]
     #gallery-top.world.gallery-page[data-gallery-page]
     :is(
       .gallery-personal-controls > .gallery-personal-add,
+      .gallery-artwork-intro .gallery-feature-save,
+      .gallery-artwork-intro .exhibition-room-entry,
+      .gallery-artwork-intro .gallery-stage-candidates button,
+      .gallery-shuffle-start,
       .gallery-favorite-toggle,
       .gallery-viewer-close,
       .gallery-viewer-footer button
@@ -768,7 +902,12 @@ html[data-family="gallery"]
 
   html[data-family="gallery"]
     #gallery-top.world.gallery-page[data-gallery-page]
-    :is(.gallery-favorite-toggle[aria-pressed="true"], .gallery-viewer-close[aria-pressed="true"]) {
+    :is(
+      .gallery-artwork-intro .gallery-feature-save[aria-pressed="true"],
+      .gallery-artwork-intro .gallery-stage-candidates button[aria-pressed="true"],
+      .gallery-favorite-toggle[aria-pressed="true"],
+      .gallery-viewer-close[aria-pressed="true"]
+    ) {
     border-color: Highlight;
     background: Highlight;
     color: HighlightText;

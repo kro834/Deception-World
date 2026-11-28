@@ -4,21 +4,21 @@
    so the astrolabe optics, meridian arcs, declination hairlines, constellation
    sector keys, and observation specimen plates govern the surface cleanly. */
 html[data-family="library"] .world.command-records.search-page.search-observatory {
-  --search-ink: #eef8fc;
-  --search-muted: #bcd0dd;
-  --search-faint: #93abc0;
+  --search-ink: #f4fbff;
+  --search-muted: #c6d8e6;
+  --search-faint: #98b2c6;
   --search-accent: #9deafa;
   --search-gold: #f2cf8d;
   --search-prism: linear-gradient(90deg, #7ae8ff 0%, #5c88ff 34%, #ff58c6 68%, #f2cf8d 100%);
   color: var(--search-ink);
   background:
-    radial-gradient(circle at 86% 6%, transparent 0 138px, rgb(157 234 250 / 8%) 139px 140px, transparent 141px),
-    radial-gradient(circle at 86% 6%, transparent 0 264px, rgb(242 207 141 / 6.5%) 265px 266px, transparent 267px),
-    radial-gradient(circle at 86% 6%, transparent 0 412px, rgb(157 234 250 / 5%) 413px 414px, transparent 415px),
-    radial-gradient(ellipse 72% 44% at 84% -2%, rgb(42 100 136 / 44%), transparent 72%),
-    radial-gradient(ellipse 54% 36% at 8% 16%, rgb(242 207 141 / 10%), transparent 68%),
-    radial-gradient(ellipse 62% 46% at 50% 64%, rgb(20 56 82 / 24%), transparent 74%),
-    linear-gradient(155deg, #040912 0%, #0a1826 48%, #050c16 100%);
+    radial-gradient(circle at 84% 6%, transparent 0 148px, rgb(157 234 250 / 13%) 149px 150px, transparent 151px),
+    radial-gradient(circle at 84% 6%, transparent 0 284px, rgb(242 207 141 / 11%) 285px 286px, transparent 287px),
+    radial-gradient(circle at 84% 6%, transparent 0 438px, rgb(255 110 198 / 8%) 439px 440px, transparent 441px),
+    radial-gradient(ellipse 76% 46% at 84% -2%, rgb(46 124 192 / 50%), transparent 72%),
+    radial-gradient(ellipse 56% 38% at 8% 16%, rgb(242 207 141 / 15%), transparent 68%),
+    radial-gradient(ellipse 64% 48% at 50% 64%, rgb(24 70 116 / 30%), transparent 74%),
+    linear-gradient(155deg, #030710 0%, #081526 48%, #040913 100%);
 }
 html[data-family="library"] .world.command-records.search-page.search-observatory .search-topbar {
   border-bottom: 1px solid rgb(157 234 250 / 32%);
@@ -106,7 +106,14 @@ html[data-family="library"] .world.command-records.search-page.search-observator
 }
 html[data-family="library"] .world.command-records.search-page.search-observatory h1 {
   display: block;
+  color: #f7fcff;
+  background: linear-gradient(174deg, #ffffff 0%, #eefaff 38%, #bbe8ff 68%, #f6dca0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 8px 24px rgb(0 0 0 / 74%));
   font-size: clamp(34px, 3.8vw, 58px);
+  font-weight: 800;
   line-height: 1.32;
   letter-spacing: -0.035em;
   text-align: left;
@@ -1352,6 +1359,14 @@ html[data-family="library"]
     border-color: currentColor;
     background: transparent;
     color: inherit;
+  }
+  html[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    h1 {
+    color: CanvasText;
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
   }
   html[data-family="library"]
     .world.command-records.search-page.search-observatory

@@ -46,17 +46,24 @@ html[data-family="dream"]
   main#top.dream-page.dream-image-cinema:not(#ring-b)
   > .dream-chapter-nav
   a[aria-current] {
-  border-color: rgb(var(--ring-key-rgb) / 0.78);
-  color: #fff7e6;
+  border-color: rgb(252 224 162 / 0.88);
+  color: #fff9ec;
   background:
-    radial-gradient(96% 80% at 50% 0%, rgb(255 246 218 / 24%), transparent 68%),
-    radial-gradient(120% 130% at 50% 100%, rgb(var(--ring-pink-rgb) / 0.3), transparent 72%),
-    rgb(24 12 26 / 0.92);
+    linear-gradient(
+        90deg,
+        transparent 14%,
+        rgb(255 250 228 / 86%) 50%,
+        transparent 86%
+      )
+      top / 100% 1px no-repeat,
+    radial-gradient(96% 80% at 50% 0%, rgb(255 248 222 / 28%), transparent 68%),
+    radial-gradient(120% 130% at 50% 100%, rgb(var(--ring-pink-rgb) / 0.38), transparent 72%),
+    rgb(18 9 22 / 0.96);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 224 / 38%),
-    inset 0 0 0 1.5px rgb(var(--ring-key-rgb) / 0.86),
-    0 0 0 1px rgb(var(--ring-pink-rgb) / 0.36),
-    0 0 18px rgb(var(--ring-key-rgb) / 0.24);
+    inset 0 1px 0 rgb(255 250 226 / 46%),
+    inset 0 0 0 1.5px rgb(var(--ring-key-rgb) / 0.92),
+    0 0 0 1px rgb(var(--ring-pink-rgb) / 0.44),
+    0 0 22px rgb(var(--ring-key-rgb) / 0.34);
 }
 
 html[data-family="dream"]
@@ -127,13 +134,13 @@ html[data-family="dream"]
   main#top.dream-page.dream-image-cinema:not(#ring-b)
   .dream-poster-thumbnails
   button[aria-selected="true"] {
-  border-color: #fff0c2;
-  outline: 2px solid var(--ring-key);
+  border-color: #fff4ce;
+  outline: 2px solid #fae09c;
   outline-offset: -2px;
   box-shadow:
-    0 0 0 2px rgb(var(--ring-pink-rgb) / 0.46),
-    0 0 22px rgb(var(--ring-key-rgb) / 0.52),
-    0 10px 22px rgb(0 0 0 / 0.6);
+    0 0 0 2px rgb(var(--ring-pink-rgb) / 0.56),
+    0 0 26px rgb(var(--ring-key-rgb) / 0.62),
+    0 12px 26px rgb(0 0 0 / 0.7);
 }
 
 html[data-family="dream"]
@@ -160,13 +167,20 @@ html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-switcher :is
 html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-plate-controls :is(a, button) {
   border-radius: var(--ring-radius-pill) !important;
   clip-path: none !important;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.52);
+  border: 1px solid rgb(240 206 136 / 0.6);
   background:
-    radial-gradient(90% 80% at 50% 0%, rgb(255 244 214 / 16%), transparent 70%),
-    linear-gradient(180deg, #271734 0%, #150c1e 100%);
+    linear-gradient(
+        90deg,
+        transparent 14%,
+        rgb(255 248 220 / 68%) 50%,
+        transparent 86%
+      )
+      top / 100% 1px no-repeat,
+    radial-gradient(90% 80% at 50% 0%, rgb(255 244 214 / 18%), transparent 70%),
+    linear-gradient(180deg, #221330 0%, #100818 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 244 212 / 24%),
-    0 6px 16px rgb(0 0 0 / 0.42);
+    inset 0 1px 0 rgb(255 248 220 / 28%),
+    0 8px 20px rgb(0 0 0 / 0.52);
 }
 
 html[data-family="dream"]
@@ -174,30 +188,38 @@ html[data-family="dream"]
   .dream-dossier-dialog
   :is(.dream-dossier-switcher, .dream-dossier-plate-controls)
   :is(button[aria-current="true"], button[aria-pressed="true"]) {
-  border-color: #fff0c2;
-  color: #fff8ea;
+  border-color: #fff4ce;
+  color: #fffaf0;
   background:
-    radial-gradient(90% 80% at 50% 0%, rgb(255 232 178 / 34%), transparent 70%),
-    linear-gradient(135deg, #922a30 0%, #651b24 56%, #41111a 100%);
+    linear-gradient(
+        90deg,
+        transparent 12%,
+        rgb(255 250 228 / 90%) 50%,
+        transparent 88%
+      )
+      top / 100% 1.5px no-repeat,
+    radial-gradient(90% 80% at 50% 0%, rgb(255 236 184 / 40%), transparent 70%),
+    linear-gradient(135deg, #a22c33 0%, #6d1924 56%, #3f0e18 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 224 / 44%),
-    0 0 0 1px rgb(var(--ring-key-rgb) / 0.65),
-    0 0 18px rgb(var(--ring-pink-rgb) / 0.34),
-    0 10px 22px rgb(0 0 0 / 0.54);
+    inset 0 1px 0 rgb(255 250 226 / 52%),
+    0 0 0 1px rgb(var(--ring-key-rgb) / 0.74),
+    0 0 22px rgb(var(--ring-pink-rgb) / 0.42),
+    0 12px 26px rgb(0 0 0 / 0.64);
 }
 
 html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-close {
   border-radius: 50% !important;
   clip-path: none !important;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.8);
+  border: 1px solid rgb(246 214 146 / 0.88);
   background:
-    radial-gradient(84% 84% at 32% 24%, rgb(255 242 206 / 24%), transparent 68%),
-    linear-gradient(155deg, #2a1838 0%, #140b1d 100%);
+    radial-gradient(84% 84% at 32% 24%, rgb(255 246 216 / 28%), transparent 68%),
+    linear-gradient(155deg, #261434 0%, #0f0716 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 246 218 / 36%),
-    0 0 0 3px #120919,
-    0 0 0 4.5px rgb(var(--ring-pink-rgb) / 0.56),
-    0 12px 26px rgb(0 0 0 / 0.66);
+    inset 0 1px 0 rgb(255 250 224 / 44%),
+    0 0 0 3px #0c0612,
+    0 0 0 4.5px rgb(var(--ring-pink-rgb) / 0.68),
+    0 0 20px rgb(var(--ring-key-rgb) / 0.24),
+    0 14px 30px rgb(0 0 0 / 0.76);
 }
 
 /* ---------------------------------------------------------------
@@ -260,21 +282,24 @@ html[data-family="dream"]
   .dream-character-grid
   button.ios26-glass
   > img {
-  width: min(100% - 36px, 340px);
+  width: min(100% - 42px, 340px);
   height: auto;
   aspect-ratio: 1;
-  margin: 18px auto 30px;
+  margin: 20px auto 32px;
   border-radius: 50%;
   object-fit: cover;
-  /* Gilt double-ring window: deep lacquer moat, bright gilt ring, second moat,
-     vermilion hairline, and soft warm gold outer halation (no filter on art). */
+  /* Imperial Theatre triple-halo round window: obsidian lacquer moat,
+     burnished gold-leaf ring, second lacquer moat, vermilion ring, outer moat,
+     fine ivory-gold halo ring, and warm amber luminescence (no filter on art). */
   box-shadow:
-    0 0 0 6px #150b1a,
-    0 0 0 8.5px var(--ring-key),
-    0 0 0 15px #150b1a,
-    0 0 0 16.5px rgb(var(--ring-pink-rgb) / 0.78),
-    0 0 32px rgb(var(--ring-key-rgb) / 0.22),
-    0 26px 46px -12px rgb(0 0 0 / 0.84);
+    0 0 0 5px #0b0612,
+    0 0 0 8px #f6db96,
+    0 0 0 14px #0e0717,
+    0 0 0 16.5px rgb(var(--ring-pink-rgb) / 0.92),
+    0 0 0 20px #0b0612,
+    0 0 0 21px rgb(255 246 218 / 0.52),
+    0 0 42px rgb(var(--ring-key-rgb) / 0.34),
+    0 30px 56px -10px rgb(0 0 0 / 0.9);
 }
 
 html[data-family="dream"]
@@ -284,16 +309,23 @@ html[data-family="dream"]
   .dream-character-copy {
   box-sizing: border-box;
   align-items: center;
-  border: 1px solid rgb(var(--ring-key-rgb) / 0.44);
-  border-top: 2px solid rgb(var(--ring-key-rgb) / 0.78);
+  border: 1px solid rgb(240 206 136 / 0.56);
+  border-top: 2px solid rgb(252 224 162 / 0.9);
   border-radius: 22px;
   background:
-    radial-gradient(88% 60% at 50% 0%, rgb(255 232 178 / 14%), transparent 70%),
-    radial-gradient(66% 52% at 50% 100%, rgb(var(--ring-pink-rgb) / 0.1), transparent 72%),
-    linear-gradient(180deg, #21132d 0%, #130b1c 100%);
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        rgb(255 250 228 / 86%) 50%,
+        transparent 90%
+      )
+      top / 100% 1.5px no-repeat,
+    radial-gradient(88% 60% at 50% 0%, rgb(255 236 184 / 18%), transparent 70%),
+    radial-gradient(66% 52% at 50% 100%, rgb(var(--ring-pink-rgb) / 0.14), transparent 72%),
+    linear-gradient(180deg, #1b0f26 0%, #0d0715 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 246 218 / 26%),
-    0 18px 36px -10px rgb(0 0 0 / 0.66);
+    inset 0 1px 0 rgb(255 250 226 / 34%),
+    0 22px 46px -10px rgb(0 0 0 / 0.78);
   text-align: center;
 }
 
@@ -307,7 +339,7 @@ html[data-family="dream"]
   text-align: center;
 }
 
-/* The gilt twin arc behind the three round windows: text-free ornament. */
+/* The celestial gilt twin arc behind the three round windows: text-free ornament. */
 html[data-family="dream"]
   body
   main#top.dream-page.dream-image-cinema:not(#ring-b)
@@ -321,28 +353,28 @@ html[data-family="dream"]
   margin-left: calc(min(1500px, 190%) / -2);
   border-radius: 50%;
   background: conic-gradient(
-    from -64deg,
+    from -66deg,
     transparent 0turn,
-    rgb(var(--ring-pink-rgb) / 0.56) 0.05turn,
-    rgb(var(--ring-key-rgb) / 0.85) 0.11turn,
-    rgb(var(--ring-gold-rgb) / 0.98) 0.178turn,
-    rgb(var(--ring-key-rgb) / 0.85) 0.246turn,
-    rgb(var(--ring-pink-rgb) / 0.56) 0.306turn,
-    transparent 0.356turn
+    rgb(var(--ring-pink-rgb) / 0.72) 0.048turn,
+    rgb(var(--ring-key-rgb) / 0.96) 0.11turn,
+    rgb(255 250 228 / 1) 0.183turn,
+    rgb(var(--ring-key-rgb) / 0.96) 0.256turn,
+    rgb(var(--ring-pink-rgb) / 0.72) 0.318turn,
+    transparent 0.366turn
   );
   -webkit-mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 11px),
-    rgb(0 0 0 / 0.42) calc(100% - 10.4px) calc(100% - 9.2px),
-    transparent calc(100% - 8.6px) calc(100% - 3px),
-    #000 calc(100% - 2.2px)
+    transparent calc(100% - 14px),
+    rgb(0 0 0 / 0.58) calc(100% - 13.2px) calc(100% - 11.4px),
+    transparent calc(100% - 10.6px) calc(100% - 3.6px),
+    #000 calc(100% - 2.6px)
   );
   mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 11px),
-    rgb(0 0 0 / 0.42) calc(100% - 10.4px) calc(100% - 9.2px),
-    transparent calc(100% - 8.6px) calc(100% - 3px),
-    #000 calc(100% - 2.2px)
+    transparent calc(100% - 14px),
+    rgb(0 0 0 / 0.58) calc(100% - 13.2px) calc(100% - 11.4px),
+    transparent calc(100% - 10.6px) calc(100% - 3.6px),
+    #000 calc(100% - 2.6px)
   );
   pointer-events: none;
 }
@@ -414,13 +446,15 @@ html[data-family="dream"]
     button.ios26-glass:hover
     > img {
     box-shadow:
-      0 0 0 5px #150b1a,
-      0 0 0 8.5px #fff0c2,
-      0 0 0 14.5px #150b1a,
-      0 0 0 16.5px rgb(var(--ring-pink-rgb) / 0.96),
-      0 0 42px rgb(var(--ring-key-rgb) / 0.48),
-      0 0 68px rgb(var(--ring-pink-rgb) / 0.24),
-      0 30px 54px -12px rgb(0 0 0 / 0.9);
+      0 0 0 5px #0b0612,
+      0 0 0 8.5px #fff6d6,
+      0 0 0 14px #0e0717,
+      0 0 0 17px rgb(var(--ring-pink-rgb) / 1),
+      0 0 0 20px #0b0612,
+      0 0 0 21.5px rgb(255 248 220 / 0.85),
+      0 0 52px rgb(var(--ring-key-rgb) / 0.58),
+      0 0 82px rgb(var(--ring-pink-rgb) / 0.3),
+      0 34px 62px -10px rgb(0 0 0 / 0.94);
   }
 
   html[data-family="dream"]
@@ -429,12 +463,12 @@ html[data-family="dream"]
     .dream-character-grid
     button.ios26-glass:hover
     .dream-character-copy {
-    border-color: rgb(255 236 184 / 0.72);
-    border-top-color: #fff0c2;
+    border-color: rgb(255 242 198 / 0.84);
+    border-top-color: #fff6d6;
     box-shadow:
-      inset 0 1px 0 rgb(255 248 224 / 38%),
-      0 0 26px rgb(var(--ring-key-rgb) / 0.18),
-      0 22px 42px -10px rgb(0 0 0 / 0.78);
+      inset 0 1px 0 rgb(255 250 228 / 46%),
+      0 0 32px rgb(var(--ring-key-rgb) / 0.24),
+      0 26px 48px -10px rgb(0 0 0 / 0.86);
   }
 
   html[data-family="dream"]
@@ -783,8 +817,8 @@ html[data-family="dream"]
     .dream-character-grid
     button.ios26-glass:hover
     > img {
-    scale: 1.06;
-    translate: 0 -5px;
+    scale: 1.065;
+    translate: 0 -6px;
   }
 
   html[data-family="dream"]:not([data-world-effects="economy"])

@@ -494,15 +494,16 @@ html[data-family="world"]:root
     > .hero
     > .zn-hero-light
     > .zn-bloom {
-    left: 60%;
+    left: 58%;
     right: -10%;
-    top: 46%;
+    top: 42%;
     bottom: -8%;
     background: radial-gradient(
-      55% 50% at 50% 62%,
-      rgb(255 79 195 / 30%),
-      rgb(122 232 255 / 16%) 46%,
-      transparent 74%
+      56% 52% at 50% 60%,
+      rgb(255 79 195 / 36%),
+      rgb(122 232 255 / 22%) 46%,
+      rgb(240 207 134 / 10%) 64%,
+      transparent 78%
     );
   }
 
@@ -519,9 +520,9 @@ html[data-family="world"]:root
     height: 84px;
     background: radial-gradient(
       50% 50% at 50% 30%,
-      rgb(255 79 195 / 34%),
-      rgb(122 232 255 / 16%) 48%,
-      transparent 72%
+      rgb(255 79 195 / 38%),
+      rgb(122 232 255 / 20%) 48%,
+      transparent 74%
     );
   }
 
@@ -532,11 +533,11 @@ html[data-family="world"]:root
     > .poster-stage
     .poster-frame {
     box-shadow:
-      0 0 0 6px rgb(3 6 12 / 84%),
-      0 0 0 7px rgb(122 232 255 / 26%),
-      0 40px 60px -30px rgb(0 0 0 / 92%),
-      0 0 76px -14px rgb(255 79 195 / 40%),
-      0 0 128px -30px rgb(122 232 255 / 36%);
+      0 0 0 6px rgb(2 5 11 / 92%),
+      0 0 0 7px rgb(122 232 255 / 34%),
+      0 42px 68px -28px rgb(0 0 0 / 95%),
+      0 0 82px -12px rgb(255 79 195 / 44%),
+      0 0 134px -28px rgb(122 232 255 / 40%);
   }
 }
 
@@ -669,19 +670,20 @@ html[data-family="world"]:root
       linear-gradient(
           90deg,
           var(--sw-light) 0%,
-          #4f7bff 26%,
-          #ff4fc3 56%,
-          var(--sw-gold) 82%,
+          #ffffff 14%,
+          #4f7bff 32%,
+          #ff4fc3 60%,
+          var(--sw-gold) 84%,
           transparent 100%
         )
-        0 100% / min(480px, 68%) 1.5px no-repeat,
+        0 100% / min(520px, 72%) 2px no-repeat,
       radial-gradient(
-          64% 100% at 24% 100%,
-          rgb(255 79 195 / 22%),
-          rgb(var(--sw-light-rgb) / 11%) 52%,
+          66% 100% at 24% 100%,
+          rgb(255 79 195 / 28%),
+          rgb(var(--sw-light-rgb) / 16%) 52%,
           transparent 100%
         )
-        0 100% / min(600px, 80%) 26px no-repeat;
+        0 100% / min(640px, 84%) 32px no-repeat;
   }
 
   /* The outlined numeral's pink echo: the wordmark's misregistered
@@ -699,8 +701,9 @@ html[data-family="world"]:root
     .wa-chapter
     > span {
     text-shadow:
-      0.06em 0.03em 0 rgb(255 79 195 / 22%),
-      -0.03em 0 0 rgb(var(--sw-light-rgb) / 14%);
+      0.06em 0.03em 0 rgb(255 79 195 / 32%),
+      -0.03em 0 0 rgb(var(--sw-light-rgb) / 22%),
+      0 0 24px rgb(var(--sw-light-rgb) / 18%);
   }
 
   /* The kicker's short rule over each chapter title. */
@@ -711,7 +714,7 @@ html[data-family="world"]:root
     :is(.story-heading, .section-title, .records-heading)
     > .eyebrow
     > i {
-    background: linear-gradient(90deg, var(--sw-light), #ff4fc3);
+    background: linear-gradient(90deg, var(--sw-light), #ff4fc3 64%, var(--sw-gold));
   }
 
   /* The annex headings' line between kicker and count. */
@@ -722,9 +725,9 @@ html[data-family="world"]:root
     .wa-heading::before {
     background: linear-gradient(
       90deg,
-      rgb(var(--sw-light-rgb) / 44%),
-      rgb(255 79 195 / 40%) 48%,
-      rgb(var(--sw-gold-rgb) / 34%) 80%,
+      rgb(var(--sw-light-rgb) / 56%),
+      rgb(255 79 195 / 48%) 48%,
+      rgb(var(--sw-gold-rgb) / 42%) 80%,
       transparent
     );
   }
@@ -1150,10 +1153,10 @@ html[data-family="world"]:root
     > #episode-notes
     .wa-episode-art {
     box-shadow:
-      0 0 0 5px rgb(3 8 7 / 70%),
-      0 0 0 6px rgb(var(--sw-light-rgb) / 12%),
-      0 24px 44px -24px rgb(0 0 0 / 90%),
-      0 14px 48px -20px rgb(255 79 195 / 28%);
+      0 0 0 5px rgb(2 5 11 / 88%),
+      0 0 0 6px rgb(var(--sw-light-rgb) / 24%),
+      0 26px 46px -22px rgb(0 0 0 / 94%),
+      0 14px 48px -18px rgb(255 79 195 / 36%);
   }
 
   html[data-family="world"]:root
@@ -1168,11 +1171,11 @@ html[data-family="world"]:root
     pointer-events: none;
     z-index: 1;
     background:
-      linear-gradient(90deg, var(--sw-light), transparent 32px) top left / 32px 1px no-repeat,
-      linear-gradient(180deg, var(--sw-light), transparent 32px) top left / 1px 32px no-repeat,
-      linear-gradient(270deg, #ff4fc3, transparent 32px) bottom right / 32px 1px no-repeat,
-      linear-gradient(0deg, #ff4fc3, transparent 32px) bottom right / 1px 32px no-repeat;
-    opacity: 0.85;
+      linear-gradient(90deg, var(--sw-light), transparent 32px) top left / 32px 1.5px no-repeat,
+      linear-gradient(180deg, var(--sw-light), transparent 32px) top left / 1.5px 32px no-repeat,
+      linear-gradient(270deg, #ff4fc3, transparent 32px) bottom right / 32px 1.5px no-repeat,
+      linear-gradient(0deg, #ff4fc3, transparent 32px) bottom right / 1.5px 32px no-repeat;
+    opacity: 0.94;
   }
 
   html[data-family="world"]:root
@@ -1189,9 +1192,9 @@ html[data-family="world"]:root
           var(--sw-gold) 86%,
           transparent
         )
-        0 100% / 100% 1px no-repeat,
-      radial-gradient(60% 34% at 50% 100%, rgb(255 79 195 / 16%), transparent 100%),
-      linear-gradient(0deg, rgb(3 8 7 / 56%), transparent 34%);
+        0 100% / 100% 1.5px no-repeat,
+      radial-gradient(60% 36% at 50% 100%, rgb(255 79 195 / 22%), transparent 100%),
+      linear-gradient(0deg, rgb(2 6 12 / 68%), transparent 36%);
   }
 
   /* The title block's seam: the key visual's prism under the title, a
@@ -1211,7 +1214,7 @@ html[data-family="world"]:root
           var(--sw-gold) 72%,
           transparent
         )
-        0 100% / min(420px, 70%) 1px no-repeat,
+        0 100% / min(440px, 74%) 1.5px no-repeat,
       linear-gradient(var(--sw-line) 0 0) 0 100% / 100% 1px no-repeat;
   }
 
@@ -1728,11 +1731,11 @@ html[data-family="world"]:root
           90deg,
           var(--sw-gold),
           #ff4fc3 34%,
-          rgb(var(--sw-light-rgb) / 40%) 62%,
-          transparent 86%
+          rgb(var(--sw-light-rgb) / 56%) 64%,
+          transparent 88%
         )
-        0 0 / 100% 1px no-repeat,
-      radial-gradient(40% 50% at 100% 0%, rgb(255 79 195 / 10%), transparent 100%),
+        0 0 / 100% 1.5px no-repeat,
+      radial-gradient(44% 54% at 100% 0%, rgb(255 79 195 / 14%), transparent 100%),
       linear-gradient(180deg, var(--sw-deck), var(--sw-deck-2));
   }
 }

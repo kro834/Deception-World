@@ -31,6 +31,7 @@
   --atmosphere-warm: #ff5cc8;
   --atmosphere-aurora: #4fd5ff;
   --atmosphere-horizon: #90b8ff;
+  --atmosphere-gold: #f0cf86;
   position: absolute;
   inset: 0;
   opacity: 0;
@@ -38,30 +39,31 @@
     linear-gradient(
         90deg,
         transparent 2%,
-        color-mix(in srgb, var(--atmosphere-light) 36%, transparent) 18%,
-        color-mix(in srgb, var(--atmosphere-aurora) 30%, transparent) 50%,
-        color-mix(in srgb, var(--atmosphere-warm) 30%, transparent) 82%,
+        color-mix(in srgb, var(--atmosphere-light) 48%, transparent) 18%,
+        color-mix(in srgb, var(--atmosphere-aurora) 42%, transparent) 44%,
+        color-mix(in srgb, var(--atmosphere-gold) 38%, transparent) 66%,
+        color-mix(in srgb, var(--atmosphere-warm) 42%, transparent) 84%,
         transparent 98%
       )
-      0 0 / 100% 1.5px no-repeat,
+      0 0 / 100% 2px no-repeat,
     radial-gradient(
-      ellipse 88% 92% at 14% -4%,
-      color-mix(in srgb, var(--atmosphere-light) 20%, transparent) 0%,
-      color-mix(in srgb, var(--atmosphere-light) 9.5%, transparent) 38%,
-      color-mix(in srgb, var(--atmosphere-light) 2.8%, transparent) 66%,
-      transparent 84%
+      ellipse 88% 94% at 14% -4%,
+      color-mix(in srgb, var(--atmosphere-light) 26%, transparent) 0%,
+      color-mix(in srgb, var(--atmosphere-light) 12%, transparent) 38%,
+      color-mix(in srgb, var(--atmosphere-light) 3.6%, transparent) 66%,
+      transparent 86%
     ),
     radial-gradient(
-      ellipse 62% 70% at 50% -10%,
-      color-mix(in srgb, var(--atmosphere-aurora) 14%, transparent) 0%,
-      color-mix(in srgb, var(--atmosphere-horizon) 5.6%, transparent) 46%,
-      transparent 78%
+      ellipse 66% 74% at 50% -10%,
+      color-mix(in srgb, var(--atmosphere-aurora) 18%, transparent) 0%,
+      color-mix(in srgb, var(--atmosphere-horizon) 7.4%, transparent) 46%,
+      transparent 80%
     ),
     radial-gradient(
-      ellipse 62% 82% at 94% -2%,
-      color-mix(in srgb, var(--atmosphere-warm) 14%, transparent) 0%,
-      color-mix(in srgb, var(--atmosphere-warm) 5.2%, transparent) 42%,
-      transparent 78%
+      ellipse 64% 84% at 94% -2%,
+      color-mix(in srgb, var(--atmosphere-warm) 18%, transparent) 0%,
+      color-mix(in srgb, var(--atmosphere-gold) 6.8%, transparent) 42%,
+      transparent 80%
     );
 }
 
@@ -81,23 +83,24 @@
     background-color: var(--world-atmosphere-base, #03060c);
     border-bottom-color: color-mix(
       in srgb,
-      var(--world-atmosphere-accent, #7ae8ff) 56%,
+      var(--world-atmosphere-accent, #7ae8ff) 66%,
       transparent
     );
     box-shadow:
-      inset 0 1px 0 color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 24%, transparent),
-      0 14px 32px -12px rgb(0 0 0 / 78%),
-      0 2px 18px -6px color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 28%, transparent);
+      inset 0 1px 0 color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 32%, transparent),
+      inset 0 -1px 0 rgb(240 207 134 / 18%),
+      0 18px 38px -12px rgb(0 0 0 / 86%),
+      0 2px 22px -6px color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 36%, transparent);
   }
 
   .site-shell.film-edition.mirage-edition[data-world-phase]
     .topbar
     :is(.brand-sigil, .side-panel-trigger) {
     color: var(--world-atmosphere-bar-accent, #7ae8ff);
-    border-color: color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 64%, transparent);
+    border-color: color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 72%, transparent);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 18%),
-      0 0 16px -6px color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 44%, transparent);
+      inset 0 1px 0 rgb(255 255 255 / 24%),
+      0 0 20px -6px color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 52%, transparent);
   }
 }
 
