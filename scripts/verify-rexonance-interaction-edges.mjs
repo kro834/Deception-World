@@ -236,9 +236,24 @@ async function verifySwipeMenu(page, context) {
   assert.equal(afterCancel.locked, true, "pointercancel keeps the open menu scroll lock active");
   const pageScrollBefore = await page.evaluate(() => scrollY);
   const menuScrollBefore = await panel.evaluate((element) => element.scrollTop);
-  const verticalX = Math.round(box.x + box.width * 0.72);
-  const verticalStartY = Math.round(box.height * 0.76);
-  const verticalEndY = Math.round(box.height * 0.34);
+  // 2026-11-28: the menu is an orbital dial (2026-11-23, owner: 「m1 d1で。」). Its list sits above
+  // the dial and the panel scrolls under a finger on the list; a vertical drag on the dial itself
+  // turns the dial (touch-action: none) and is not a scroll. Measured: the swipe formerly aimed
+  // at 34-76% of the panel height landed on the dial. Drag along the visible list instead.
+  const list = await page.evaluate(() => {
+    const group = [...document.querySelectorAll("#site-side-panel [data-atlas-group]")].find(
+      (node) => node.getClientRects().length > 0,
+    );
+    const rect = group?.getBoundingClientRect();
+    const panelNode = document.getElementById("site-side-panel");
+    return rect
+      ? { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width, scrollable: panelNode.scrollHeight > panelNode.clientHeight + 1 }
+      : null;
+  });
+  assert.ok(list, "the menu list should be visible");
+  const verticalX = Math.round(list.left + list.width * 0.72);
+  const verticalStartY = Math.round(list.bottom - 12);
+  const verticalEndY = Math.round(Math.max(list.top + 8, list.bottom - 12 - Math.min(160, list.bottom - list.top - 20)));
   await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: verticalX, y: verticalStartY }] });
   for (let step = 1; step <= 8; step += 1) {
     await session.send("Input.dispatchTouchEvent", {
@@ -266,7 +281,9 @@ async function verifySwipeMenu(page, context) {
     pageScrollBefore,
     `vertical touch must not scroll the page behind the menu (${JSON.stringify({ pageScrollBefore, verticalScroll, box })})`,
   );
-  assert.ok(verticalScroll.menuY > menuScrollBefore, "vertical touch should scroll the menu list");
+  // Where the whole menu fits (e.g. a short landscape phone) there is nothing to scroll.
+  if (list.scrollable)
+    assert.ok(verticalScroll.menuY > menuScrollBefore, "vertical touch should scroll the menu list");
   await session.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: startX, y }] });
   for (let step = 1; step <= 8; step += 1) {
     await session.send("Input.dispatchTouchEvent", {
@@ -323,6 +340,14 @@ async function verifyStageSwipe(page, context) {
   await page.waitForFunction(
     (stage) => document.querySelector(".rxs-stage-tabs")?.getAttribute("data-stage") === stage,
     target,
+  );
+  // 2026-11-28: the form burst (2026-11-12) swaps the panel picture, and its alt with it, about
+  // 300 ms after the tab is selected, so the alt is read once it has settled.
+  const altWord = { max: "マックス", ultra: "ウルトラ", excelsior: "エクセルシア" }[target];
+  await page.waitForFunction(
+    (word) => document.querySelector(".rxs-stage-panel img")?.getAttribute("alt")?.includes(word),
+    altWord,
+    { timeout: 5000 },
   );
   const result = await page.evaluate(() => ({
     stage: document.querySelector(".rxs-stage-tabs")?.getAttribute("data-stage"),
@@ -677,7 +702,11 @@ async function verifySlowStageSelection() {
   }));
   console.log("slow-stage-pre-assert", JSON.stringify({ pending, delayedRequests }));
   assert.equal(pending.stage, "max", "the Max stage selection responds immediately while its image is delayed");
-  assert.equal(pending.imageComplete, false, "the active Max artwork remains pending during the delay");
+  // 2026-11-28: since the form burst (2026-11-12) the panel keeps the previous form's picture on
+  // screen, complete, until the new art has arrived, rather than showing an unfinished <img>.
+  // Measured: during the 8 s delay the panel shows the standard figure; it never shows a half-loaded Max.
+  assert.equal(pending.imageComplete, true, "the panel keeps a finished picture while Max's artwork is delayed");
+  assert.ok(!/rider-rexonance-max-20260923/.test(pending.currentSrc), "Max's artwork is not shown before it has loaded");
   assert.equal(pending.overlay?.stage, "max", "the short stage call corresponds to the selected stage");
   assert.equal(pending.overlay?.ariaHidden, "true", "the stage call remains decorative to assistive technology");
   await page.locator('.rx-call-sequence[data-mode="stage"]').waitFor({ state: "detached", timeout: 1600 });
@@ -689,11 +718,11 @@ async function verifySlowStageSelection() {
     scrollY,
   }));
   assert.equal(afterCall.stage, "max", "the selected stage remains active after the call ends");
-  assert.equal(afterCall.imageComplete, false, "the call ends without gating on the delayed artwork");
+  assert.equal(afterCall.imageComplete, true, "the call ends without gating on the delayed artwork");
   assert.equal(afterCall.overlayCount, 0, "no stage overlay is stranded after the burst");
   await page.waitForFunction(() => {
     const image = document.querySelector(".rxs-stage-panel img");
-    return image?.complete && image.naturalWidth > 0;
+    return image?.complete && image.naturalWidth > 0 && /rider-rexonance-max-20260923/.test(image.currentSrc);
   }, null, { timeout: 12000 });
   assert.ok(delayedRequests.length > 0, "the test intercepted at least one Max image request");
   assert.deepEqual(pageErrors, [], "slow stage image loading should not cause a page error");
