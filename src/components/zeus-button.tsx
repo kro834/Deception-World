@@ -324,6 +324,9 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".ics-evaluation p",
   // 2026-11-16 polish: search intro, library stats, MUS saga hero, FFS copy
   ".search-intro p",
+  // 2026-11-28: each result section's count pill (「46」 at the head's right
+  // end). It is a b under the display floor, so the button rested on it at 402.
+  ".search-group-head :is(span, b)",
   ".library-stats dd",
   ".library-stats dt",
   ".mus-hero-ultra",
@@ -352,6 +355,13 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // left: counted as words, not as whole boxes, so a spot beside a label
   // stays open (as whole boxes the 111 rows left none and hid the button).
   ".wm-index-grid > button",
+  // 2026-11-28: the map's node labels. A node's own box is its glyph (about
+  // 30x19px); its label is an SVG text beside it that the box does not
+  // include in WebKit, so the button could rest on the words.
+  ".wm-node text",
+  // The map's colour key (人物 / 組織 / 形態 …), which the button rested on
+  // at the foot of the map on a sideways phone.
+  ".wm-legend > span",
 ].join(",");
 /* Where no spot is clear of words on a saga page (the .rxs-page family: Rexonance,
    Extreme, Illusionculum, Meta Unitas, Far From), the Form Archive or the world map
