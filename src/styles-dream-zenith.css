@@ -1409,3 +1409,220 @@ html[data-family="dream"] :is(
     color: CanvasText;
   }
 }
+
+/* === Wave-11 Taisho Kinema & Lamplight Tactile Optics === */
+html[data-family="dream"]
+  main.dream-page.dream-page
+  :is(
+    .dream-record-telemetry-head strong,
+    .dream-record-count,
+    .dream-record-meta,
+    .dream-story-case-number b,
+    .dream-reader-bookmark small,
+    .dream-programme-ticket,
+    .dream-glossary-jump a small
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-ticket,
+      .dream-record-card,
+      .dream-glossary-jump a,
+      .dream-record-quick-tags button,
+      .dream-reader-index-actions button,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a
+    ) {
+    border-color: rgb(238 202 132 / 54%);
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 8%,
+        rgb(246 218 156 / 54%) 26%,
+        rgb(255 248 220 / 88%) 50%,
+        rgb(246 218 156 / 54%) 74%,
+        transparent 92%
+      ),
+      radial-gradient(84% 72% at 50% 0%, rgb(252 214 142 / 14%), transparent 70%),
+      linear-gradient(180deg, rgb(28 16 38 / 96%) 0%, rgb(14 8 22 / 98%) 100%);
+    background-size: 100% 1.5px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 220 / 28%),
+      inset 0 -1px 0 rgb(198 58 50 / 26%),
+      0 14px 32px -10px rgb(3 1 8 / 76%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-dossier-chip,
+      .dream-programme-ticket,
+      .dream-record-quick-tags button,
+      .dream-record-card nav a,
+      .dream-reader-index > ol > li > a,
+      .dream-reader-index-actions button,
+      .dream-glossary-jump a,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a,
+      .dream-story-case-body .dream-reader-pagination a:not(.dream-reader-return)
+    ):focus-visible {
+    outline: 2px solid #fff2c6;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px #0c0714,
+      0 0 0 6px rgb(242 206 136 / 78%),
+      0 0 20px rgb(252 212 132 / 46%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-ticket,
+      .dream-record-quick-tags button,
+      .dream-reader-index-actions button,
+      .dream-glossary-jump a,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a
+    ):hover {
+    border-color: rgb(255 242 198 / 86%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 232 / 48%),
+      inset 0 -1px 0 rgb(224 76 58 / 44%),
+      0 16px 36px -8px rgb(2 1 6 / 84%),
+      0 0 22px rgb(246 206 128 / 28%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-dossier-chip,
+      .dream-programme-ticket,
+      .dream-record-quick-tags button,
+      .dream-record-card nav a,
+      .dream-reader-index > ol > li > a,
+      .dream-reader-index-actions button,
+      .dream-glossary-jump a,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a,
+      .dream-story-case-body .dream-reader-pagination a:not(.dream-reader-return)
+    ) {
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      color 180ms ease;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-dossier-chip,
+      .dream-programme-ticket,
+      .dream-record-quick-tags button,
+      .dream-record-card nav a,
+      .dream-reader-index > ol > li > a,
+      .dream-reader-index-actions button,
+      .dream-glossary-jump a,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a,
+      .dream-story-case-body .dream-reader-pagination a:not(.dream-reader-return)
+    ):active {
+    transform: translateY(0) scale(0.985);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-dossier-chip,
+      .dream-programme-ticket,
+      .dream-record-quick-tags button,
+      .dream-record-card nav a,
+      .dream-reader-index-actions button,
+      .dream-glossary-jump a,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a,
+      .dream-story-case-body .dream-reader-pagination a:not(.dream-reader-return)
+    ):hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-ticket,
+      .dream-record-card,
+      .dream-glossary-jump a,
+      .dream-record-quick-tags button,
+      .dream-reader-index-actions button,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a
+    ) {
+    background-color: #120b1a;
+    background-image: none;
+    border-color: rgb(248 220 156 / 88%);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-ticket,
+      .dream-record-card,
+      .dream-glossary-jump a,
+      .dream-record-quick-tags button,
+      .dream-reader-index-actions button,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a
+    ) {
+    forced-color-adjust: auto;
+    background-color: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border-color: ButtonBorder;
+    box-shadow: none;
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-programme-dossier-chip,
+      .dream-programme-ticket,
+      .dream-record-quick-tags button,
+      .dream-record-card nav a,
+      .dream-reader-index > ol > li > a,
+      .dream-reader-index-actions button,
+      .dream-glossary-jump a,
+      .dream-screening-trigger,
+      .dream-footer-nav a,
+      .dream-credits dd a,
+      .dream-story-case-body .dream-reader-pagination a:not(.dream-reader-return)
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}

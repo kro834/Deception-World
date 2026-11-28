@@ -4464,3 +4464,302 @@ html[data-family="dossier"] main.manager-page.manager-page.manager-page .dossier
     background-image: none;
   }
 }
+
+/* ==========================================================================
+   === Wave-11 Zenith Engraved Plates, Tabular Telemetry & Tactile Dock ===
+   ========================================================================== */
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(
+    .dossier-file-numeral,
+    .dossier-nav-numeral,
+    .manager-copy-heading > span,
+    .dossier-contents-number,
+    .form-pickup-calls > li > i,
+    .dossier-form-pills > a > i
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  /* ① Quote card (.manager-quotes): 3px vertical prism light blade + upper specular
+       rim + deep multi-layer obsidian glass + crisp typographic contrast. */
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .ciel-dossier-page
+    ):not(.dante-page)
+    #dossier-profile
+    .manager-quotes {
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 34%, rgb(231 198 119 / 20%));
+    border-left: 0;
+    border-radius: 2px 10px 10px 2px;
+    background:
+      linear-gradient(
+          180deg,
+          #ffffff 0%,
+          var(--sd-accent) 30%,
+          var(--dz-w10-brass-bright, #e7c677) 68%,
+          color-mix(in srgb, var(--sd-accent-2, var(--sd-accent)) 84%, #ff5fc8) 100%
+        )
+        0 0 / 3px 100% no-repeat,
+      linear-gradient(
+          90deg,
+          #ffffff 0%,
+          color-mix(in srgb, var(--sd-accent) 76%, var(--dz-w10-brass-bright, #e7c677)) 36%,
+          rgb(231 198 119 / 34%) 74%,
+          transparent 97%
+        )
+        3px 0 / calc(100% - 3px) 1.5px no-repeat,
+      radial-gradient(
+        74% 140% at 0% 50%,
+        color-mix(in srgb, var(--sd-accent) 24%, transparent),
+        transparent 72%
+      ),
+      linear-gradient(
+        114deg,
+        color-mix(in srgb, var(--sd-accent) 16%, rgb(11 19 34 / 96%)) 0%,
+        rgb(6 11 20 / 95%) 54%,
+        rgb(4 7 14 / 92%) 100%
+      );
+    box-shadow:
+      -6px 0 28px -4px color-mix(in srgb, var(--sd-accent) 54%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      inset 0 -1px 0 rgb(231 198 119 / 22%),
+      0 22px 52px rgb(2 5 11 / 64%);
+  }
+
+  /* ② Profile specification ledger (.manager-facts): engraved top prism crown,
+       refined cell depth, legible pale-accent keys & crisp #ffffff values. */
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .ciel-dossier-page
+    ):not(.dante-page)
+    :is(#dossier-profile, #dossier-index .manager-copy-body)
+    .manager-facts {
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 38%, rgb(231 198 119 / 20%));
+    border-top: 0;
+    background:
+      linear-gradient(
+          90deg,
+          #ffffff 0%,
+          var(--sd-accent) 34%,
+          var(--dz-w10-brass-bright, #e7c677) 72%,
+          color-mix(in srgb, var(--sd-accent) 56%, transparent) 100%
+        )
+        0 0 / 100% 2px no-repeat,
+      radial-gradient(
+        76% 136px at 14% 0%,
+        color-mix(in srgb, var(--sd-accent) 20%, transparent),
+        transparent 72%
+      ),
+      linear-gradient(166deg, rgb(10 17 30 / 97%) 0%, rgb(5 8 16 / 99%) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 20%),
+      inset 0 -1px 0 rgb(231 198 119 / 24%),
+      0 26px 60px rgb(2 5 11 / 66%),
+      0 0 34px -6px color-mix(in srgb, var(--sd-accent) 20%, transparent);
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .ciel-dossier-page
+    ):not(.dante-page)
+    #dossier-profile
+    .manager-facts
+    > div {
+    background-image:
+      linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--sd-accent) 44%, rgb(231 198 119 / 34%)) 0%,
+          transparent 44%
+        )
+        0 0 / 100% 1px no-repeat,
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--sd-accent) 11%, transparent),
+        transparent 58%
+      );
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  }
+
+  /* ③ Reading tab switcher dock (.dossier-reader) & form pills: engraved specular
+       rim, opaque #040811 ground & jewel-lit active tab. */
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .dante-page
+    )
+    > .dossier-reader
+    .dossier-reader-links
+    a:not([aria-current]) {
+    color: #d6e5f5;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .dante-page
+    )
+    > .dossier-reader
+    .dossier-reader-links
+    a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]) {
+    color: #ffffff;
+    box-shadow:
+      0 8px 20px rgb(0 0 0 / 60%),
+      0 0 24px -5px color-mix(in srgb, var(--sd-accent) 50%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 48%),
+      inset 0 -2px 0 color-mix(in srgb, var(--dz-w10-brass-bright, #e7c677) 76%, var(--sd-accent));
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .dossier-form-pills
+    > a {
+    border-color: color-mix(in srgb, var(--sd-accent) 38%, rgb(231 198 119 / 24%));
+    background:
+      linear-gradient(
+          90deg,
+          transparent 8%,
+          rgb(255 255 255 / 44%) 32%,
+          var(--sd-accent) 62%,
+          transparent 92%
+        )
+        50% 0 / 100% 1px no-repeat,
+      linear-gradient(164deg, #0d1729 0%, #060b15 100%);
+    box-shadow:
+      0 10px 24px rgb(0 0 0 / 48%),
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      inset 0 -1px 0 rgb(231 198 119 / 20%);
+  }
+}
+
+/* ④ Dual-halo :focus-visible rings across reading tabs, form pills & chapter tools. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  :is(
+    .dossier-reader-links > a,
+    .dossier-form-pills > a,
+    #dossier-index .dossier-contents > a,
+    .manager-copy-section .character-chapter-tools a
+  ):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--sd-accent) 56%, rgb(231 198 119 / 44%)),
+    0 10px 24px rgb(0 0 0 / 56%);
+}
+
+/* ⑤ Gated tactile hover float & :active press compression (scale: 0.985). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(
+      .dossier-reader-links > a,
+      .dossier-form-pills > a,
+      #dossier-index .dossier-contents > a,
+      .manager-copy-section .character-chapter-next
+    ) {
+    transition:
+      scale 160ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 160ms ease,
+      color 160ms ease,
+      box-shadow 180ms ease;
+  }
+
+  html:not([data-world-effects="economy"])[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(
+      .dossier-reader-links > a:active,
+      .dossier-form-pills > a:active,
+      #dossier-index .dossier-contents > a:active,
+      .manager-copy-section .character-chapter-next:active
+    ) {
+    scale: 0.985;
+    translate: 0 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-world-effects="economy"])[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      :is(
+        .dossier-reader-links > a:not([aria-current]):hover,
+        .dossier-form-pills > a:hover,
+        #dossier-index .dossier-contents > a:hover,
+        .manager-copy-section .character-chapter-next:hover
+      ) {
+      translate: 0 -1.5px;
+      scale: 1.01;
+    }
+  }
+}
+
+/* ⑥ Reduced-transparency, high-contrast & forced-colors fallbacks. */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(
+      #dossier-profile .manager-quotes,
+      #dossier-profile .manager-facts,
+      #dossier-index .manager-copy-body .manager-facts,
+      #dossier-index .manager-copy-section,
+      #dossier-index .dossier-contents > a,
+      #identity-records > .rider-archive-civilian,
+      #identity-records > .rider-nightmare-card,
+      .dossier-form-pills > a,
+      .form-pickup-record .form-pickup-spec > div,
+      .form-pickup-record .form-pickup-calls > li
+    ) {
+    background-color: #090e18;
+    background-image: none;
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 68%, #ffffff);
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader {
+    background: #060a12;
+    background-color: #060a12;
+    border-top: 1px solid color-mix(in srgb, var(--sd-accent) 68%, #ffffff);
+    border-bottom: 1px solid color-mix(in srgb, var(--sd-accent) 68%, #ffffff);
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(#dossier-profile .manager-facts dt, .form-pickup-record .form-pickup-spec dt) {
+    color: #e6f2ff;
+    text-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(#dossier-profile .manager-quotes q, #dossier-profile .manager-facts dd:not(.is-redacted)) {
+    color: #ffffff;
+    text-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(
+      .dossier-reader-links > a,
+      .dossier-form-pills > a,
+      #dossier-index .dossier-contents > a,
+      .manager-copy-section .character-chapter-tools a
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

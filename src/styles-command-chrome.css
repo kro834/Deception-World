@@ -2746,3 +2746,249 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
       0 6px 18px -12px rgb(var(--ring-key-rgb) / 0.64);
   }
 }
+
+/* ==========================================================================
+   Wave-11 Shared Header, Command Atlas & Announcement Optical / Tactile Polish
+   Appended safely after phone orbit protections; preserves all grid areas and
+   Android shadow blur budgets (<= 28px).
+   ========================================================================== */
+
+html[data-family]
+  body
+  :is(
+    main.site-shell.film-edition.mirage-edition > header.topbar,
+    .manager-page > header.manager-topbar,
+    main.dream-page.dream-page > header.dream-site-header,
+    .library-page > header.library-topbar,
+    .search-page > header.search-topbar,
+    .form-archive-page > header.form-archive-toolbar,
+    .gallery-page > header.gallery-topbar,
+    .saga-cinema .site-header,
+    .rxs-page.rxs-page.rxs-page > header.rxs-local-nav
+  )
+  :is(a, button),
+html[data-family]
+  body
+  #site-side-panel.side-panel
+  :is(.command-atlas-index > button, .side-panel-links > :is(a, button) > i),
+html[data-family]
+  body
+  #site-announcement-dialog
+  :is(time, .site-announcement-meta, .site-announcement-list > li a) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  /* Shared machined topbars: crisper platinum top specular & prism bottom lip. */
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header
+    ),
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
+    box-shadow:
+      inset 0 1px 0 rgb(248 253 255 / 0.46),
+      inset 0 -1px 0 rgb(var(--sh-l1-rgb) / 0.56),
+      0 10px 26px -10px rgb(var(--sh-l1-rgb) / 0.44),
+      0 10px 24px rgb(0 0 0 / 0.58);
+  }
+
+  /* Announcement hub: layered obsidian crystal bevel & specular crown. */
+  html[data-family] body #site-announcement-dialog .site-announcement-hub {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      inset 0 -1px 0 rgb(242 207 141 / 0.2),
+      inset 0 0 0 1px rgb(var(--sh-l1-rgb) / 0.22),
+      0 26px 56px -14px rgb(0 0 0 / 0.88),
+      0 0 32px -12px rgb(var(--sh-l1-rgb) / 0.34);
+  }
+
+  /* Dual optical :focus-visible halo for shared header links, atlas controls & announcements. */
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav
+    )
+    :is(a, button):focus-visible,
+  html[data-family]
+    body
+    #site-announcement-dialog
+    :is(a, button):focus-visible {
+    outline: 2px solid #f6fcff;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px rgb(4 10 20 / 0.92),
+      0 0 0 6px rgb(var(--sh-l1-rgb) / 0.74),
+      0 0 18px -4px rgb(var(--sh-l1-rgb) / 0.58);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel[data-command-atlas]:not([data-orbit-menu])
+    :is(a, button):focus-visible {
+    outline: 2px solid #f6fcff;
+    outline-offset: -2px;
+    box-shadow:
+      inset 0 0 0 4px rgb(4 10 20 / 0.84),
+      inset 0 0 0 5.5px rgb(var(--sh-l1-rgb) / 0.84),
+      0 0 16px -4px rgb(var(--sh-l1-rgb) / 0.52);
+  }
+}
+
+@media (forced-colors: none) and (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav
+    )
+    a:not([aria-current="page"]):not([aria-current="location"]):hover {
+    box-shadow:
+      inset 0 1px 0 rgb(248 253 255 / 0.28),
+      inset 0 0 12px rgb(var(--sh-l1-rgb) / 0.16),
+      0 0 14px -6px rgb(var(--sh-l1-rgb) / 0.42);
+  }
+
+  html[data-family]
+    body
+    #site-announcement-dialog
+    .site-announcement-close.ios26-glass:hover:not(:active) {
+    border-color: rgb(var(--sh-l1-rgb) / 0.78);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.44),
+      0 0 18px -4px rgb(var(--sh-l1-rgb) / 0.5) !important;
+  }
+}
+
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    :is(
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav
+    )
+    :is(a, button),
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-announcement-dialog
+    :is(a, button) {
+    transition:
+      scale 220ms var(--command-ease),
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    :is(
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav
+    )
+    :is(a, button):active,
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-announcement-dialog
+    :is(a, button):active {
+    scale: 0.982;
+    transition: scale 110ms ease-out;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header
+    ),
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
+    border-bottom: 1.5px solid rgb(232 246 255 / 0.72);
+    background-color: #050b14;
+    background-image: none;
+  }
+
+  html[data-family] body #site-announcement-dialog .site-announcement-hub {
+    border: 1.5px solid rgb(232 246 255 / 0.76);
+    background: #08111c;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav
+    ),
+  html[data-family] body #site-announcement-dialog .site-announcement-hub {
+    forced-color-adjust: auto;
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header,
+      .rxs-page.rxs-page.rxs-page > header.rxs-local-nav,
+      #site-announcement-dialog
+    )
+    :is(a, button):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}

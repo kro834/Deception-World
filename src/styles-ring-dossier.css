@@ -2269,3 +2269,332 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     color: HighlightText;
   }
 }
+
+/* ==========================================================================
+   === Wave-11 Dossier Hollow Dual-Orbit, Engraved Plates & Tactile Focus ===
+   ========================================================================== */
+
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  :is(
+    .dossier-file-numeral,
+    .dossier-nav-numeral,
+    .manager-pagination .dossier-roster > li > :is(a, span) > i
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  /* Hollow dual concentric orbit rings: 100% clear center over the portrait. */
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page:not(.ciel-dossier-page)
+    .dossier-orbit-track {
+    border: 0;
+    background: none;
+    box-shadow: 0 0 38px -8px color-mix(in srgb, var(--ring-key) 28%, transparent);
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page:not(.ciel-dossier-page)
+    .dossier-orbit-track::before {
+    content: "";
+    inset: 0;
+    box-sizing: border-box;
+    padding: 1.5px;
+    border: 0;
+    background: conic-gradient(
+      from 135deg,
+      color-mix(in srgb, var(--ring-key) 92%, #ffffff) 0turn,
+      rgb(var(--ring-gold-rgb) / 0.86) 0.25turn,
+      color-mix(in srgb, var(--ring-key) 48%, rgb(255 255 255 / 28%)) 0.5turn,
+      #ffffff 0.76turn,
+      color-mix(in srgb, var(--ring-key) 92%, #ffffff) 1turn
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page:not(.ciel-dossier-page)
+    .dossier-orbit-track::after {
+    content: "";
+    inset: calc(var(--d1-node) * -0.5 - 12px);
+    box-sizing: border-box;
+    padding: 1px;
+    border: 0;
+    background: conic-gradient(
+      from -45deg,
+      rgb(var(--ring-gold-rgb) / 0.74) 0turn,
+      color-mix(in srgb, var(--ring-key) 52%, transparent) 0.34turn,
+      rgb(255 255 255 / 0.44) 0.68turn,
+      rgb(var(--ring-gold-rgb) / 0.74) 1turn
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    box-shadow: 0 0 42px -10px color-mix(in srgb, var(--ring-key) 22%, transparent);
+  }
+
+  /* Engraved dark-glass orbit medallions & museum portrait bezel. */
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page:not(.ciel-dossier-page)
+    .dossier-orbit-ring
+    > button {
+    background:
+      radial-gradient(
+          circle at 32% 20%,
+          rgb(255 255 255 / 24%) 0%,
+          color-mix(in srgb, var(--ring-key) 20%, #182940) 38%,
+          #070f1c 78%
+        )
+        padding-box,
+      var(--ring-prism) border-box;
+    box-shadow:
+      0 12px 28px rgb(0 0 0 / 56%),
+      inset 0 1px 0 rgb(255 255 255 / 36%),
+      inset 0 -1px 0 rgb(var(--ring-gold-rgb) / 0.28);
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page:not(.ciel-dossier-page)
+    .dossier-orbit-ring
+    > button[aria-selected="true"] {
+    color: #07101c;
+    background:
+      radial-gradient(
+          circle at 32% 20%,
+          #ffffff 0%,
+          color-mix(in srgb, var(--ring-key) 54%, #eef9ff) 44%,
+          color-mix(in srgb, var(--ring-key) 76%, #cfe8fa) 100%
+        )
+        padding-box,
+      var(--ring-prism) border-box;
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--ring-key) 32%, transparent),
+      0 0 0 8px rgb(var(--ring-gold-rgb) / 0.16),
+      0 14px 32px rgb(0 0 0 / 58%),
+      inset 0 1.5px 0 rgb(255 255 255 / 72%);
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page:not(.ciel-dossier-page):not(.dante-page)
+    #dossier-profile
+    .manager-portrait-frame {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--ring-key) 54%, rgb(255 255 255 / 26%)),
+      0 0 0 5px rgb(5 10 20 / 88%),
+      0 0 0 6px rgb(var(--ring-gold-rgb) / 0.42),
+      0 32px 76px -12px rgb(0 0 0 / 78%),
+      0 0 46px -8px color-mix(in srgb, var(--ring-key) 32%, transparent),
+      inset 0 1.5px 0 rgb(255 255 255 / 34%);
+  }
+}
+
+/* Dual-halo :focus-visible rings across orbit nodes, roster tiles & pagination. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  :is(
+    .dossier-orbit-ring > button,
+    .dossier-reader-links > a,
+    .manager-pagination > a,
+    .manager-pagination .dossier-index-return,
+    .manager-pagination .dossier-roster > li > a
+  ):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--ring-key) 58%, rgb(var(--ring-gold-rgb) / 0.44)),
+    0 12px 28px rgb(0 0 0 / 58%);
+}
+
+/* Tactile spring hover lift & :active press compression (gated on motion & economy). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button {
+    transition:
+      transform var(--ring-dur-elastic) var(--ring-spring-elastic),
+      box-shadow 200ms ease,
+      color 180ms ease;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button:not([aria-selected="true"]):active {
+    --d1-s: 0.94;
+    transition:
+      transform 90ms ease-out,
+      box-shadow 140ms ease;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button[aria-selected="true"]:active {
+    --d1-s: 1.13;
+    transition:
+      transform 90ms ease-out,
+      box-shadow 140ms ease;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(.manager-pagination > a, .manager-pagination .dossier-index-return) {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      translate var(--ring-dur-spring) var(--ring-spring),
+      background-color 180ms ease,
+      box-shadow 200ms ease;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(.manager-pagination > a:active, .manager-pagination .dossier-index-return:active) {
+    scale: 0.985;
+    transition:
+      scale 90ms ease-out,
+      translate 90ms ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button:not([aria-selected="true"]):hover {
+    --d1-s: 1.07;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button[aria-selected="true"]:hover {
+    --d1-s: 1.24;
+  }
+
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(.manager-pagination > a:hover, .manager-pagination .dossier-index-return:hover) {
+    translate: 0 -2px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-track {
+    border: 1.5px solid color-mix(in srgb, var(--ring-key) 64%, #ffffff);
+    background: none;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(.dossier-orbit-track::before, .dossier-orbit-track::after, .dossier-orbit-stage::before) {
+    content: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button {
+    border-color: color-mix(in srgb, var(--ring-key) 72%, #ffffff);
+    background: #080d16;
+    color: #ffffff;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button[aria-selected="true"] {
+    background: color-mix(in srgb, var(--ring-key) 36%, #eef8ff);
+    color: #050a12;
+    box-shadow: 0 0 0 2px #ffffff;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    :is(
+      .dossier-orbit-track,
+      .dossier-orbit-track::before,
+      .dossier-orbit-track::after,
+      .dossier-orbit-stage::before
+    ) {
+    display: none;
+    content: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button {
+    forced-color-adjust: none;
+    border: 2px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-orbit-ring
+    > button[aria-selected="true"] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+}

@@ -1911,3 +1911,419 @@ html
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   Wave-11 Global Chrome & Orbital Astrolabe Optical / Tactile Refinement
+   Paint, focus halos, tabular engraving and accessibility fallbacks only;
+   preserves all orbit geometry, 7-planet link transparency and safe-area pins.
+   ========================================================================== */
+
+html[data-family="world"] body main.site-shell.film-edition > header.topbar > nav > a,
+html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil,
+html[data-family="dossier"] body .manager-page > header.manager-topbar .manager-back,
+#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button):not(.side-panel-zeus-toggle) > i {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  /* Menu trigger: sculpted dark crystal lens with top specular rim & scroll-arc depth. */
+  html[data-family]:not([data-button-style="liquid"])
+    body
+    .side-panel-trigger:not(#ring-x#ring-x) {
+    background:
+      radial-gradient(ellipse 68% 42% at 34% 18%, rgb(255 255 255 / 0.18), transparent 64%),
+      var(--ring-graphite) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      inset 0 -2px 5px rgb(0 0 0 / 0.48),
+      0 0 0 1px rgb(255 255 255 / 0.1),
+      0 8px 18px -8px rgb(0 0 0 / 0.82) !important;
+  }
+
+  /* Shared round DW sigil & topbar track: crisper platinum specular bevel. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    .brand-sigil.brand-sigil,
+  html[data-family="dossier"]
+    body
+    .manager-page
+    > header.manager-topbar
+    .brand-sigil.brand-sigil {
+    background:
+      radial-gradient(ellipse 66% 42% at 32% 18%, rgb(255 255 255 / 0.2), transparent 64%),
+      var(--ring-graphite);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 0 -2px 6px rgb(0 0 0 / 0.5),
+      0 0 16px -8px rgb(var(--ring-key-rgb) / 0.46),
+      0 6px 16px -10px #000;
+  }
+
+  html[data-family="dossier"]:not([data-button-style="liquid"])
+    body
+    .manager-page
+    > header.manager-topbar
+    .manager-back:not(#ring-x) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      inset 0 -1px 0 rgb(0 0 0 / 0.38),
+      0 6px 18px -10px rgb(0 0 0 / 0.78);
+  }
+
+  /* 7-Planet Astrolabe Dial: luminous metallic orbit halo & connecting filament. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index::before {
+    opacity: 0.84;
+    box-shadow:
+      0 0 22px -6px rgb(var(--ring-key-rgb) / 0.34),
+      inset 0 0 18px -8px rgb(var(--ring-gold-rgb, 242 207 141) / 0.26);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index::after {
+    height: 1.5px;
+    background: linear-gradient(
+      90deg,
+      #fff7e2 0%,
+      var(--ring-gold, #f2cf8d) 38%,
+      rgb(var(--ring-key-rgb) / 0.62) 78%,
+      transparent 100%
+    );
+    box-shadow: 0 0 10px rgb(var(--ring-gold-rgb, 242 207 141) / 0.46);
+  }
+
+  /* 7 Planet Orbs: curved glass specular dome + double optical rim. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button {
+    border-color: rgb(216 226 232 / 0.42);
+    background:
+      radial-gradient(ellipse 68% 42% at 34% 18%, rgb(255 255 255 / 0.16), transparent 64%),
+      var(--orbit-face);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 0 -2px 5px rgb(0 0 0 / 0.46),
+      0 0 0 1px rgb(var(--ring-key-rgb) / 0.14),
+      0 8px 18px -10px #000;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button[aria-selected="true"] {
+    border-color: #f6ecd4;
+    background:
+      radial-gradient(ellipse 66% 40% at 32% 16%, rgb(255 255 255 / 0.54), transparent 62%),
+      linear-gradient(142deg, #f5eee0 0%, #ded7c6 44%, #b9b8ac 100%);
+    box-shadow:
+      inset 0 1.5px 0 #fffef7,
+      inset 0 -2px 6px rgb(36 28 16 / 0.24),
+      0 0 0 2px rgb(255 248 228 / 0.36),
+      0 0 0 5px rgb(var(--ring-key-rgb) / 0.2),
+      0 10px 24px -8px rgb(0 0 0 / 0.84),
+      0 0 24px -4px rgb(var(--ring-gold-rgb, 242 207 141) / 0.44);
+    color: #161a1d;
+  }
+
+  /* Orbit link pills: keep translucent glass backdrop (never solid opaque slab)
+     while sharpening the top specular hairline, engraved badge & active beam. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button) {
+    background: linear-gradient(
+      100deg,
+      rgb(222 234 242 / 0.085) 0%,
+      rgb(var(--ring-key-rgb) / 0.03) 48%,
+      transparent 100%
+    );
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)
+    > span {
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button):not(.side-panel-zeus-toggle)
+    > i {
+    border: 1px solid rgb(224 234 240 / 0.2);
+    background: rgb(12 18 26 / 0.42);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)
+    > img,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-scene
+    > img {
+    border-color: rgb(232 244 252 / 0.46);
+    box-shadow:
+      0 0 0 1px rgb(var(--ring-key-rgb) / 0.22),
+      0 4px 12px -4px rgb(0 0 0 / 0.72);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)[aria-current] {
+    background: linear-gradient(
+      100deg,
+      rgb(var(--ring-gold-rgb, 242 207 141) / 0.18) 0%,
+      rgb(var(--ring-key-rgb) / 0.08) 56%,
+      rgb(255 255 255 / 0.02) 100%
+    );
+    box-shadow:
+      inset 3px 0 0 var(--ring-gold),
+      inset 0 1px 0 rgb(255 250 234 / 0.24),
+      0 6px 16px -12px rgb(0 0 0 / 0.74);
+    border-bottom-color: rgb(var(--ring-gold-rgb, 242 207 141) / 0.56);
+    color: #ffffff;
+  }
+
+  /* Hub search pill, close ring & bookmark plate: sculpted specular bevel. */
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > *,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > .library-current-control
+    > button {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 0 -1px 0 rgb(0 0 0 / 0.44),
+      0 8px 18px -10px rgb(0 0 0 / 0.8);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-close {
+    border-color: rgb(224 236 244 / 0.38);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.32),
+      inset 0 -2px 5px rgb(0 0 0 / 0.44),
+      0 8px 18px -10px rgb(0 0 0 / 0.82) !important;
+  }
+
+  /* Dual optical :focus-visible halo on global chrome & orbit menu controls. */
+  html[data-family]:not([data-button-style="liquid"])
+    body
+    .side-panel-trigger:not(#ring-x#ring-x):focus-visible,
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    .brand:focus-visible,
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    > nav
+    > a:focus-visible,
+  html[data-family="dossier"]
+    body
+    .manager-page
+    > header.manager-topbar
+    :is(.brand, .manager-back):focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px rgb(6 12 20 / 0.92),
+      0 0 0 6px rgb(var(--ring-key-rgb) / 0.78),
+      0 0 18px -3px rgb(var(--ring-key-rgb) / 0.62) !important;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    :is(.side-panel-head, .command-atlas-index)
+    :is(a, button):focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px rgb(8 14 20 / 0.92),
+      0 0 0 6px rgb(var(--ring-key-rgb) / 0.8),
+      0 0 20px -3px rgb(var(--ring-key-rgb) / 0.62);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button[aria-selected="true"]:focus-visible {
+    outline: 2px solid #161b20;
+    outline-offset: -3px;
+    box-shadow:
+      inset 0 1.5px 0 #fffef7,
+      0 0 0 2px #fffef7,
+      0 0 0 5px rgb(var(--ring-key-rgb) / 0.84),
+      0 0 22px -3px rgb(var(--ring-key-rgb) / 0.64);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    :is(a, button):focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: -2px;
+    box-shadow:
+      inset 0 0 0 4px rgb(8 14 22 / 0.72),
+      inset 0 0 0 5.5px rgb(var(--ring-key-rgb) / 0.86),
+      0 0 16px -4px rgb(var(--ring-key-rgb) / 0.56);
+  }
+}
+
+@media (forced-colors: none) and (min-width: 761px) {
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar > nav {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.32),
+      inset 0 -1px 0 rgb(0 0 0 / 0.44),
+      inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.28),
+      0 8px 20px -14px rgb(0 0 0 / 0.8);
+  }
+}
+
+@media (forced-colors: none) and (hover: hover) and (pointer: fine) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button:not([aria-selected="true"]):hover:not(:active) {
+    border-color: rgb(var(--ring-key-rgb) / 0.68);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.36),
+      0 0 0 1px rgb(var(--ring-key-rgb) / 0.34),
+      0 0 18px -6px rgb(var(--ring-key-rgb) / 0.54),
+      0 8px 18px -10px #000;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button):hover {
+    border-color: rgb(var(--ring-key-rgb) / 0.38);
+    background: linear-gradient(
+      100deg,
+      rgb(var(--ring-key-rgb) / 0.14) 0%,
+      rgb(222 234 242 / 0.08) 54%,
+      rgb(255 255 255 / 0.02) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      inset 3px 0 0 rgb(var(--ring-key-rgb) / 0.72),
+      0 6px 16px -12px rgb(0 0 0 / 0.72);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-close:hover:not(:active) {
+    border-color: rgb(var(--ring-key-rgb) / 0.76);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.4),
+      0 0 18px -4px rgb(var(--ring-key-rgb) / 0.54),
+      0 8px 18px -10px rgb(0 0 0 / 0.84) !important;
+  }
+}
+
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > fieldset
+    > button {
+    transition:
+      scale var(--ring-dur-spring) var(--ring-spring),
+      border-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > fieldset
+    > button:active {
+    scale: 0.97;
+    transition: scale 110ms ease-out;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family]:not([data-family="dream"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] {
+    background-color: #090e14 !important;
+    background-image: none !important;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > *,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-close {
+    border-color: rgb(236 248 255 / 0.78);
+    background: #141c24 !important;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button[aria-selected="true"] {
+    border-color: #ffffff;
+    background: #f5efe0 !important;
+    color: #0c1014;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button) {
+    border-color: rgb(220 238 248 / 0.36);
+    background: rgb(16 24 34 / 0.88);
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)[aria-current] {
+    border-color: var(--ring-gold, #f2cf8d);
+    background: #1d2630;
+    box-shadow: inset 4px 0 0 var(--ring-gold, #f2cf8d);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family] body .side-panel-trigger:not(#ring-x#ring-x),
+  html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil.brand-sigil,
+  html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil.brand-sigil,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .command-atlas-index > button,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-search-dock > *,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-close,
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu] .side-panel-links > :is(a, button) {
+    forced-color-adjust: auto;
+    border: 1px solid ButtonText;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    box-shadow: none !important;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > button[aria-selected="true"],
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-links
+    > :is(a, button)[aria-current] {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight !important;
+    color: HighlightText !important;
+    box-shadow: none !important;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    :is(.side-panel-links, .command-atlas-index, .side-panel-head)
+    :is(a, button):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none !important;
+  }
+}

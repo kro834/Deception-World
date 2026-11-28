@@ -3287,3 +3287,207 @@ html body #world-column-pickup .world-column-dialog-tabs button.is-active {
 html body #world-column-pickup .world-column-dialog-tabs button.is-active small {
   color: #e8f2f8;
 }
+
+/* === Wave-11 Pickup Dialog Tactile Optics & High-Contrast Engraving === */
+@media (forced-colors: none) {
+  /* World column tabs sit above the sliding liquid lens: preserve rail transparency,
+     refine specular border edges and tactile shadow depth on the active pill. */
+  html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"] {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
+  }
+
+  html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"].is-active {
+    border-color: color-mix(in srgb, var(--pc-gold) 44%, rgb(156 238 255 / 72%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 54%),
+      inset 0 0 0 1px rgb(122 232 255 / 38%),
+      0 0 24px -2px rgb(122 232 255 / 38%);
+  }
+
+  html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"] small,
+  html body #episode-pickup-dialog .episode-pickup-item figure > span,
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats
+    dd,
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .rider-nightmare-dialog-record
+    > dl
+    dd {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Engraved bottom seam on stat bays */
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats
+    > div,
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .rider-nightmare-dialog-record
+    > dl
+    > div {
+    box-shadow:
+      inset 1px 0 0 rgb(255 255 255 / 11%),
+      inset 0 1px 0 rgb(255 255 255 / 24%),
+      inset 0 -1px 0 color-mix(in srgb, var(--pc-gold) 22%, rgb(255 255 255 / 8%)),
+      0 18px 38px -12px rgb(0 0 0 / 74%);
+  }
+
+  /* End-close plate obsidian glass layering & specular crest */
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-end-close,
+  html[data-mode="world"] .rider-nightmare-dialog.rider-nightmare-dialog .form-pickup-end-close {
+    border-color: color-mix(in srgb, var(--pc-lock) 52%, rgb(240 207 134 / 28%));
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 8%,
+        color-mix(in srgb, var(--pc-lock) 74%, #ffffff) 50%,
+        transparent 92%
+      ),
+      linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 20%, transparent), transparent 64%);
+    background-size: 90% 1.5px, 100% 100%;
+    background-position: top center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 28%),
+      0 16px 34px -10px rgb(0 0 0 / 78%);
+  }
+
+  /* Dual-halo :focus-visible outer framing alongside pinned 2px outline */
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    :is(.form-pickup-close, .form-pickup-end-close):focus-visible,
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    :is(.rider-nightmare-dialog-close, .form-pickup-end-close):focus-visible,
+  html body #episode-pickup-dialog :is(.episode-pickup-close, .episode-pickup-item):focus-visible,
+  html body
+    #world-column-pickup
+    :is(.world-column-dialog-close, .world-column-dialog-tabs > button[role="tab"]):focus-visible {
+    box-shadow:
+      0 0 0 3px #030710,
+      0 0 0 6px rgb(255 240 181 / 42%),
+      0 14px 32px rgb(0 0 0 / 76%) !important;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-mode="world"]
+      .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+      .form-pickup-end-close:hover,
+    html[data-mode="world"]
+      .rider-nightmare-dialog.rider-nightmare-dialog
+      .form-pickup-end-close:hover,
+    html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"]:hover {
+      border-color: color-mix(in srgb, var(--pc-gold) 46%, var(--pc-lock));
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 38%),
+        0 14px 32px -6px rgb(0 0 0 / 78%),
+        0 0 24px -6px color-mix(in srgb, var(--pc-lock) 44%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"])
+      body
+      #world-column-pickup
+      .world-column-dialog-tabs
+      > button[role="tab"] {
+      transition:
+        transform 280ms var(--ring-spring, cubic-bezier(0.25, 1.25, 0.4, 1)),
+        border-color 180ms ease,
+        box-shadow 220ms ease;
+    }
+
+    html:not([data-world-effects="economy"])
+      body
+      #world-column-pickup
+      .world-column-dialog-tabs
+      > button[role="tab"]:active {
+      transform: scale(0.985);
+      transition-duration: 85ms;
+      transition-timing-function: ease-out;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      html:not([data-world-effects="economy"])[data-mode="world"]
+        .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+        :is(.form-pickup-close, .form-pickup-end-close):hover,
+      html:not([data-world-effects="economy"])[data-mode="world"]
+        .rider-nightmare-dialog.rider-nightmare-dialog
+        :is(.rider-nightmare-dialog-close, .form-pickup-end-close):hover,
+      html:not([data-world-effects="economy"]) body #episode-pickup-dialog .episode-pickup-close:hover,
+      html:not([data-world-effects="economy"])
+        body
+        #world-column-pickup
+        :is(.world-column-dialog-close, .world-column-dialog-tabs > button[role="tab"]):hover {
+        transform: translateY(-1.5px);
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    :is(
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .form-pickup-stats > div,
+      .form-pickup-sections > section > div
+    ),
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    :is(
+      .rider-nightmare-dialog-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-record > dl > div,
+      .rider-nightmare-dialog-sections section > div
+    ),
+  html body #episode-pickup-dialog :is(.episode-pickup-close, .episode-pickup-item, .episode-pickup-open),
+  html body
+    #world-column-pickup
+    :is(.world-column-dialog-close, .world-column-dialog-copy > div) {
+    background-color: #060b14;
+    background-image: none;
+    border-color: color-mix(in srgb, var(--pc-lock) 84%, #ffffff);
+  }
+
+  html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"].is-active {
+    border-color: color-mix(in srgb, var(--pc-gold) 74%, #ffffff);
+  }
+
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    :is(.form-pickup-overview p, .form-pickup-sections p),
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .rider-nightmare-dialog-sections
+    p,
+  html body #world-column-pickup .world-column-dialog-copy > div p {
+    color: #f4f8ff;
+  }
+}
+
+@media (forced-colors: active) {
+  html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"] {
+    background-color: ButtonFace;
+    background-image: none;
+    border-color: ButtonText;
+    color: ButtonText;
+    box-shadow: none !important;
+  }
+
+  html body #world-column-pickup .world-column-dialog-tabs > button[role="tab"].is-active {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    background-image: none;
+    border-color: Highlight;
+    color: HighlightText;
+    box-shadow: none !important;
+  }
+}

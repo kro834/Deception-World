@@ -6094,3 +6094,371 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="spe
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   Wave-11 Optical Architecture — Meta Unitas Saga
+   Sanctuary Emerald-Teal (#62eee6) x Solar Platinum-Gold (#ffd89b) x Ultra Iris (#f0deff)
+   Strictly preserves .mus-hero-seam resting opacity: 0 and >=44px tap target pins
+   ========================================================================== */
+
+html[data-family="special"]
+  body
+  #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+  :is(
+    .mus-article-no,
+    .mus-specs dd,
+    .mus-specs dd > b,
+    .mus-table th,
+    .mus-table td,
+    .mus-calls li::before
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  /* 1. Section Headings — Sanctuary Emerald x Platinum-Gold x Iris Specular Horizon */
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-chapter:not(.mus-sub)
+    > .mus-head {
+    background:
+      linear-gradient(
+          90deg,
+          #ffdca0 0%,
+          #ffffff 22%,
+          #62eee6 54%,
+          #f0deff 82%,
+          transparent 100%
+        )
+        0 100% / 100% 2.5px no-repeat,
+      radial-gradient(58% 120% at 16% 100%, rgb(98 238 230 / 14%), transparent 72%),
+      radial-gradient(48% 100% at 62% 100%, rgb(240 222 255 / 12%), transparent 72%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.mus-sub > .mus-head, .mus-compare > h3) {
+    padding-block-end: 12px;
+    background:
+      linear-gradient(
+          90deg,
+          rgb(98 238 230 / 84%) 0%,
+          rgb(255 255 255 / 92%) 34%,
+          rgb(255 216 155 / 78%) 68%,
+          transparent 100%
+        )
+        0 100% / 100% 2px no-repeat;
+  }
+
+  /* 2. Call Pills & Finisher Call Tokens — Specular Rim & Inner Bevel Clarity */
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-calls
+    li {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 54%),
+      inset 0 -1px 0 rgb(78 242 232 / 44%),
+      inset 22px 0 36px -16px rgb(64 232 222 / 64%),
+      0 20px 40px -14px rgb(0 0 0 / 95%),
+      0 0 36px -10px rgb(64 232 222 / 52%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-calls
+    li:last-child {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 64%),
+      inset 0 -1px 0 rgb(240 222 255 / 56%),
+      inset 26px 0 40px -14px rgb(240 222 255 / 68%),
+      0 22px 46px -14px rgb(0 0 0 / 96%),
+      0 0 48px -8px rgb(240 222 255 / 64%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-finisher-calls
+    li {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 5%,
+          rgb(98 238 230 / 90%) 28%,
+          rgb(255 255 255 / 96%) 52%,
+          rgb(255 216 155 / 88%) 78%,
+          transparent 95%
+        )
+        top center / 86% 2px no-repeat padding-box,
+      linear-gradient(155deg, rgb(15 40 50 / 95%) 0%, rgb(6 18 24 / 99%) 100%) padding-box,
+      linear-gradient(148deg, rgb(98 238 230 / 76%), rgb(255 216 155 / 68%), rgb(240 222 255 / 62%))
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 48%),
+      inset 0 -1px 0 rgb(4 12 18 / 88%),
+      0 12px 26px -12px rgb(0 0 0 / 92%),
+      0 0 22px -8px rgb(64 232 222 / 36%);
+  }
+
+  /* 3. Dual-Chamber Spec Cards & Timeline / Record / Arsenal / Finisher Plates */
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-spec-forms {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-specs
+    > div {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 48%),
+      inset 0 -1px 0 rgb(78 242 232 / 42%),
+      inset 0 0 40px -16px rgb(64 232 222 / 44%),
+      0 24px 50px -18px rgb(0 0 0 / 95%),
+      0 0 38px -12px rgb(64 232 222 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-specs
+    > div[data-lead] {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 58%),
+      inset 0 -1px 0 rgb(240 222 255 / 50%),
+      inset 0 0 48px -16px rgb(64 232 222 / 50%),
+      0 28px 56px -18px rgb(0 0 0 / 96%),
+      0 0 50px -12px rgb(240 222 255 / 48%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-article-no {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 12px;
+    border: 1px solid rgb(98 238 230 / 54%);
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, transparent 8%, rgb(98 238 230 / 88%) 50%, transparent 92%) top center /
+        80% 1.5px no-repeat,
+      linear-gradient(155deg, rgb(14 42 52 / 92%), rgb(6 18 24 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      0 8px 18px -8px rgb(0 0 0 / 90%),
+      0 0 20px -6px rgb(64 232 222 / 42%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.mus-article, .mus-weapons > li, .mus-finisher) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 52%),
+      inset 0 -1px 0 rgb(78 242 232 / 44%),
+      inset 0 0 52px -18px rgb(64 232 222 / 46%),
+      0 28px 62px -20px rgb(0 0 0 / 96%),
+      0 0 48px -14px rgb(64 232 222 / 42%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .mus-table
+    tbody
+    tr:hover {
+    background-color: rgb(98 238 230 / 7%);
+  }
+
+  /* 4. Double Luminous Focus-Visible Ring */
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .mus-more > summary,
+      .mus-compare-pick button,
+      .mus-finisher-calls button,
+      .mus-tabs button,
+      .mus-watch,
+      .mus-end-doors a
+    ):focus-visible {
+    outline: 2px solid #ffe8b8;
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 3px rgb(4 14 20 / 96%),
+      0 0 0 6px rgb(98 238 230 / 74%),
+      0 0 28px -2px rgb(240 222 255 / 62%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"]
+      body
+      #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+      :is(
+        .mus-calls li,
+        .mus-finisher-calls li,
+        .mus-finisher-calls button,
+        .mus-specs > div,
+        .mus-article,
+        .mus-weapons > li,
+        .mus-finisher,
+        .mus-more > summary,
+        .mus-compare-pick button,
+        .mus-tabs button,
+        .mus-watch,
+        .mus-end-doors a
+      ) {
+      transition:
+        translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+        scale 160ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"]
+      body
+      #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+      :is(
+        .mus-more > summary,
+        .mus-compare-pick button,
+        .mus-finisher-calls button,
+        .mus-tabs button,
+        .mus-watch,
+        .mus-end-doors a
+      ):active {
+      scale: 0.985;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"]
+      body
+      #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+      :is(
+        .mus-calls li,
+        .mus-finisher-calls li,
+        .mus-specs > div,
+        .mus-article,
+        .mus-weapons > li,
+        .mus-finisher,
+        .mus-more > summary
+      ):hover:not(:active) {
+      translate: 0 -2px;
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 66%),
+        inset 0 -1px 0 rgb(240 222 255 / 54%),
+        0 28px 60px -16px rgb(0 0 0 / 96%),
+        0 0 48px -10px rgb(98 238 230 / 54%);
+    }
+  }
+
+  html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .mus-chapter:not(.mus-sub) > .mus-head,
+      .mus-sub > .mus-head,
+      .mus-compare > h3,
+      .mus-calls li,
+      .mus-finisher-calls li,
+      .mus-specs > div,
+      .mus-article,
+      .mus-weapons > li,
+      .mus-finisher,
+      .mus-stage-panel,
+      .mus-table-wrap
+    ) {
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .mus-calls li,
+      .mus-finisher-calls li,
+      .mus-finisher-calls button,
+      .mus-specs > div,
+      .mus-article,
+      .mus-weapons > li,
+      .mus-finisher,
+      .mus-more > summary,
+      .mus-compare-pick button,
+      .mus-tabs button,
+      .mus-watch,
+      .mus-end-doors a
+    ) {
+    transition: none;
+    translate: none;
+    scale: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .mus-calls li,
+      .mus-calls li:last-child,
+      .mus-finisher-calls li,
+      .mus-spec-forms > span,
+      .mus-specs > div,
+      .mus-specs > div[data-dual],
+      .mus-specs > div[data-lead],
+      .mus-article,
+      .mus-weapons > li,
+      .mus-finisher,
+      .mus-finisher[data-tier="2"],
+      .mus-stage-panel,
+      .mus-table-wrap,
+      .mus-more > summary
+    ) {
+    background: #06151c;
+    background-image: none;
+    border: 1.5px solid #88f4ec;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .mus-chapter:not(.mus-sub) > .mus-head,
+      .mus-sub > .mus-head,
+      .mus-compare > h3,
+      .mus-calls li,
+      .mus-finisher-calls li,
+      .mus-spec-forms > span,
+      .mus-specs > div,
+      .mus-article-no,
+      .mus-article,
+      .mus-weapons > li,
+      .mus-finisher,
+      .mus-stage-panel,
+      .mus-table-wrap,
+      .mus-more > summary
+    ) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

@@ -1606,3 +1606,235 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Character Reading Optics, Tactile Controls & Accessibility === */
+@media (forced-colors: none) {
+  /* Specular top prism rim + deep layered obsidian glass on reading pills & TOC deck */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a,
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    .character-chapter-shortcuts
+    a {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 6%,
+        color-mix(in srgb, var(--crt-foil) 72%, #ffffff) 48%,
+        transparent 94%
+      ),
+      radial-gradient(
+        92% 76% at 10% 0%,
+        color-mix(in srgb, var(--crt-accent) 16%, transparent),
+        transparent 68%
+      ),
+      linear-gradient(164deg, color-mix(in srgb, var(--crt-plate) 94%, #10192b) 0%, #050912 100%);
+    background-size: 92% 1.5px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+  }
+
+  /* Engraved tabular-nums index & spec plates */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-number,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section
+    .manager-copy-heading
+    > span,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(#dossier-profile, #dossier-index .manager-copy-body)
+    .manager-facts
+    dd {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-number {
+    border-radius: 3px;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--crt-accent) 14%, transparent) 0%,
+      rgb(4 8 15 / 72%) 100%
+    );
+    padding: 4px 10px 4px 8px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      inset 0 -1px 0 rgb(0 0 0 / 60%);
+  }
+
+  /* Dual-halo keyboard focus rings */
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a:focus-visible,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--crt-foil) 86%, #ffffff);
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 3px #040811,
+      0 0 0 6px color-mix(in srgb, var(--crt-accent) 52%, transparent),
+      0 14px 32px rgb(0 0 0 / 64%);
+  }
+
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    a:focus-visible,
+  .character-related-records li > a:focus-visible {
+    outline: 2px solid var(--sd-accent, var(--manager-accent, #86d9ff));
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 3px #040811,
+      0 0 0 6px color-mix(in srgb, var(--crt-accent) 52%, transparent),
+      0 18px 36px rgb(0 0 0 / 72%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+      .manager-copy-section
+      .character-chapter-tools
+      .character-chapter-next:hover
+      .character-chapter-next-arrow,
+    .character-related-records li > a:hover .character-related-arrow {
+      border-color: color-mix(in srgb, var(--crt-foil) 86%, #ffffff);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 38%),
+        0 0 18px -2px color-mix(in srgb, var(--crt-accent) 44%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"])[data-family="dossier"]
+      main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+      #dossier-index
+      .dossier-contents
+      > a:active,
+    html:not([data-world-effects="economy"])
+      main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+      .manager-copy-section
+      .character-chapter-tools
+      .character-chapter-next:active,
+    html:not([data-world-effects="economy"]) .character-related-records li > a:active {
+      scale: 0.985;
+      transition-duration: 85ms;
+      transition-timing-function: ease-out;
+    }
+
+    html:not([data-world-effects="economy"])[data-family="dossier"]
+      main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+      > .dossier-reader
+      .dossier-reader-links
+      a:active,
+    html:not([data-world-effects="economy"])
+      main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+      .manager-copy-section
+      .character-chapter-tools
+      .character-chapter-shortcuts
+      a:active {
+      scale: 0.965;
+      transition-duration: 85ms;
+      transition-timing-function: ease-out;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      html:not([data-world-effects="economy"])
+        main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+        .manager-copy-section
+        .character-chapter-tools
+        .character-chapter-next:hover
+        .character-chapter-next-arrow {
+        translate: 4px 0;
+        scale: 1.08;
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section,
+  .character-chapter-next,
+  .manager-page .character-related-records,
+  .character-related-records li > a,
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    .character-chapter-shortcuts
+    a {
+    background-color: #080d16;
+    background-image: none;
+    border-color: color-mix(in srgb, var(--crt-foil) 76%, #ffffff);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-copy
+    small,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section
+    .manager-copy-body
+    p,
+  .character-related-copy > span {
+    color: #edf3fa;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-number,
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    .character-chapter-shortcuts
+    a {
+    background-color: Canvas;
+    background-image: none;
+    border-color: ButtonBorder;
+    box-shadow: none;
+  }
+}

@@ -2798,3 +2798,211 @@ html[data-family="special"]
     scale: 1.012;
   }
 }
+
+/* === Wave-11 Final Stage Cinema Contrast & Tactile Optics === */
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  :is(
+    .fst-specs > div,
+    .fst-specs dd,
+    .fst-story-index span,
+    .fst-calls,
+    .fst-cast-tabs > button[role="tab"] span
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
+    background: linear-gradient(
+      170deg,
+      #ffffff 0%,
+      #f2f8ff 26%,
+      #ffe8bc 60%,
+      #f3be62 86%,
+      #fff6df 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter:
+      drop-shadow(0 8px 30px rgb(0 0 0 / 95%))
+      drop-shadow(0 0 42px rgb(var(--fsz-gold-rgb) / 48%))
+      drop-shadow(0 0 68px rgb(var(--fsz-cyan-rgb) / 30%));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-section
+    > .rxs-section-heading
+    > h2 {
+    background: linear-gradient(
+      174deg,
+      #ffffff 0%,
+      #eef7ff 34%,
+      #ffe8bc 72%,
+      #f3c168 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter:
+      drop-shadow(0 6px 26px rgb(0 0 0 / 92%))
+      drop-shadow(0 0 38px rgb(var(--fsz-gold-rgb) / 36%))
+      drop-shadow(0 0 60px rgb(var(--fsz-cyan-rgb) / 24%));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-scroll-cue {
+    border-color: rgb(var(--fsz-gold-rgb) / 78%);
+    background:
+      linear-gradient(
+        90deg,
+        rgb(var(--fsz-gold-rgb) / 24%),
+        rgb(var(--fsz-cyan-rgb) / 14%) 62%,
+        transparent
+      ),
+      linear-gradient(180deg, #212a46 0%, #0e1428 58%, #070b18 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 240 / 48%),
+      inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 36%),
+      0 18px 40px -10px rgb(0 0 0 / 78%),
+      0 0 32px -6px rgb(var(--fsz-gold-rgb) / 36%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    .fst-pickup-dialog
+    :is(.fst-specs > div, .fst-articles > article) {
+    border-color: rgb(var(--fsz-gold-rgb) / 32%);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(var(--fsz-gold-rgb) / 74%) 28%,
+          rgb(var(--fsz-cyan-rgb) / 68%) 72%,
+          transparent 96%
+        )
+        0 0 / 100% 1px no-repeat,
+      linear-gradient(164deg, #121c3a 0%, #091024 56%, #050915 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 26%),
+      inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 20%),
+      0 20px 44px -16px rgb(0 0 0 / 82%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    :is(
+      .fst-hero .rxs-scroll-cue,
+      .fst-site-door > a,
+      .fst-cast-copy > a,
+      .fst-footer > a,
+      .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]
+    ):focus-visible {
+    outline: 2px solid var(--fsz-cyan);
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 5px rgb(5 8 20 / 92%),
+      0 0 0 7px rgb(var(--fsz-gold-rgb) / 74%),
+      0 0 28px rgb(var(--fsz-cyan-rgb) / 42%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.rxs-page.fst-page
+    :is(
+      .fst-hero .rxs-scroll-cue,
+      .fst-site-door > a,
+      .fst-cast-copy > a,
+      .fst-footer > a,
+      .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]
+    ) {
+    transition:
+      scale 210ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 210ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 210ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.rxs-page.fst-page
+    :is(
+      .fst-hero .rxs-scroll-cue,
+      .fst-site-door > a,
+      .fst-cast-copy > a,
+      .fst-footer > a,
+      .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]
+    ):active {
+    scale: 0.985;
+    transition: scale 90ms ease-out;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+      body
+      .rxs-page.rxs-page.fst-page
+      :is(
+        .fst-hero .rxs-scroll-cue,
+        .fst-site-door > a,
+        .fst-cast-copy > a,
+        .fst-footer > a
+      ):hover {
+      scale: 1.018;
+    }
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    :is(
+      .fst-hero .rxs-scroll-cue,
+      .fst-site-door > a,
+      .fst-story-layout,
+      .fst-cast-console,
+      .fst-cast-detail
+    ) {
+    background: #080e20;
+    border-color: var(--fsz-gold);
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-section
+    > .rxs-section-heading
+    > h2 {
+    color: CanvasText;
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    :is(
+      .fst-hero .rxs-scroll-cue,
+      .fst-site-door > a,
+      .fst-cast-copy > a,
+      .fst-footer > a,
+      .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

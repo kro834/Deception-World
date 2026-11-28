@@ -1824,3 +1824,194 @@ html[data-rzn-constrained] .saga-cinema.saga-cinema [data-reveal] {
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Saga Cinema Theater Framing & Controller Tactile Optics === */
+
+.saga-cinema.saga-cinema
+  :is(
+    .project-data,
+    .poster-controls,
+    .chapter-switch button,
+    .chapter-reel button,
+    #hero-chapter,
+    .film-card-top,
+    .detail-data,
+    .information-rows,
+    .gallery-dots button,
+    .gallery-top
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  .saga-cinema.saga-cinema .hero-poster {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 252, 244, 0.58),
+      inset 0 -1px 0 rgba(var(--saga-accent-rgb), 0.52),
+      inset 0 0 0 4px rgba(5, 8, 15, 0.95),
+      inset 0 0 0 5.5px rgba(244, 212, 152, 0.58),
+      0 0 0 1px rgba(4, 6, 12, 0.94),
+      0 0 0 5px rgba(5, 9, 18, 0.9),
+      0 0 0 6.5px rgba(var(--saga-accent-rgb), 0.48),
+      0 44px 118px rgba(0, 0, 0, 0.95),
+      0 20px 46px rgba(0, 0, 0, 0.85),
+      0 0 112px rgba(var(--saga-accent-rgb), 0.44);
+  }
+
+  .saga-cinema.saga-cinema .poster-controls {
+    border-color: rgba(var(--saga-accent-rgb), 0.58);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 6%,
+          rgba(255, 250, 236, 0.34) 34%,
+          rgba(var(--saga-accent-rgb), 0.44) 66%,
+          transparent 94%
+        )
+        0 0 / 100% 1px no-repeat,
+      linear-gradient(180deg, rgba(24, 34, 52, 0.96) 0%, rgba(10, 15, 24, 0.98) 54%, rgba(5, 8, 15, 0.99) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 252, 244, 0.3),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+      0 18px 40px -8px rgba(0, 0, 0, 0.72),
+      0 0 34px -6px rgba(var(--saga-accent-rgb), 0.32);
+  }
+
+  .saga-cinema.saga-cinema .chapter-switch button[aria-pressed="true"] {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 252, 244, 0.42),
+      inset 0 0 0 1.5px rgba(var(--saga-accent-rgb), 0.9),
+      0 0 22px -2px rgba(var(--saga-accent-rgb), 0.62);
+  }
+
+  .saga-cinema.saga-cinema .chapter-reel {
+    border-color: rgba(var(--saga-accent-rgb), 0.62);
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 252, 244, 0.36),
+      0 0 0 1px rgba(4, 6, 12, 0.9),
+      0 36px 92px rgba(0, 0, 0, 0.8),
+      0 0 54px -10px rgba(var(--saga-accent-rgb), 0.28);
+  }
+
+  .saga-cinema.saga-cinema .film-poster {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 252, 244, 0.42),
+      inset 0 0 0 3px rgba(5, 8, 14, 0.94),
+      inset 0 0 0 4.5px rgba(var(--saga-accent-rgb), 0.48),
+      0 38px 92px rgba(0, 0, 0, 0.88),
+      0 0 54px -8px rgba(var(--saga-accent-rgb), 0.3);
+  }
+
+  .saga-cinema.saga-cinema
+    :is(
+      .frame-button,
+      .text-button,
+      .world-return-link,
+      .poster-controls > button,
+      .chapter-switch button,
+      .auto-play,
+      .chapter-reel button,
+      .hero-poster,
+      .film-card,
+      .close-button,
+      .gallery-arrow,
+      .gallery-dots button
+    ):focus-visible {
+    outline: 2px solid #8dccf0;
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 5px rgba(5, 8, 16, 0.92),
+      0 0 0 7px rgba(244, 212, 152, 0.72),
+      0 0 26px rgba(var(--saga-accent-rgb), 0.42);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .saga-cinema.saga-cinema
+    :is(
+      .frame-button,
+      .world-return-link,
+      .auto-play,
+      .hero-poster,
+      .chapter-reel button,
+      .close-button,
+      .gallery-arrow
+    ) {
+    transition:
+      border-color 210ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      scale 210ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 210ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+      .saga-cinema.saga-cinema
+      :is(.frame-button, .world-return-link, .auto-play):hover {
+      translate: 0 -1.5px;
+    }
+
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+      .saga-cinema.saga-cinema
+      .hero-poster:hover {
+      translate: 0 -2px;
+    }
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .saga-cinema.saga-cinema
+    :is(.frame-button, .world-return-link, .auto-play, .chapter-reel button):active {
+    scale: 0.985;
+    translate: 0 1px;
+    transition:
+      scale 90ms ease-out,
+      translate 90ms ease-out;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .saga-cinema.saga-cinema
+    .hero-poster:active {
+    scale: 0.988;
+    transition: scale 90ms ease-out;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .saga-cinema.saga-cinema
+    :is(
+      .hero-project,
+      .project-data,
+      .poster-controls,
+      .auto-play,
+      .chapter-reel,
+      .chapter-reel button,
+      .frame-button,
+      .information-content
+    ) {
+    background: #070c16;
+    border-color: var(--saga-accent);
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .saga-cinema.saga-cinema
+    :is(
+      .frame-button,
+      .text-button,
+      .world-return-link,
+      .poster-controls > button,
+      .chapter-switch button,
+      .auto-play,
+      .chapter-reel button,
+      .hero-poster,
+      .film-card,
+      .close-button,
+      .gallery-arrow,
+      .gallery-dots button
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

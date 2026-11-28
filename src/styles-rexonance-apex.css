@@ -3016,3 +3016,290 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) body .rxs-page.r
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Jewel Optics, Precision Instruments, Resonance Gauges & Right Chapter Orbit Rail === */
+
+/* 1. Tabular-nums engraving across all gauges, chapter nodes, and right orbit rail */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+  :is(
+    > .rxk-rail .rxk-rail-tick > b,
+    > .rxe-chapter-map a > b,
+    > #performance .rxs-headline-metrics strong,
+    > #performance .rxs-comparison-metrics strong,
+    > #p14 .rxs-p14-copy dd,
+    > #p14 .rxs-p14-values :is(b, strong),
+    > #p14 .rxs-p14-metrics article > p > b,
+    > #system .rxs-specs strong
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* 2. Right Chapter Orbit Rail (> .rxk-rail): jewel track, prism fill, diamond head & engraved badge */
+@media (min-width: 1100px) and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-track {
+    width: 1.5px;
+    background: linear-gradient(
+      180deg,
+      rgb(121 232 255 / 18%),
+      rgb(121 232 255 / 48%) 22%,
+      rgb(182 163 255 / 44%) 52%,
+      rgb(242 216 150 / 48%) 82%,
+      rgb(242 216 150 / 18%)
+    );
+    box-shadow: 0 0 10px rgb(121 232 255 / 32%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-track
+    > .rxk-rail-fill {
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #79e8ff 24%,
+      #b6a3ff 54%,
+      #f2d896 86%,
+      #fff5d6 100%
+    );
+    box-shadow:
+      0 0 14px rgb(121 232 255 / 78%),
+      0 0 26px rgb(242 216 150 / 48%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-track
+    > .rxk-rail-head {
+    background: radial-gradient(circle, #ffffff 0 34%, #79e8ff 58%, transparent 78%);
+    box-shadow:
+      0 0 0 1.5px rgb(255 255 255 / 75%),
+      0 0 14px 3px rgb(121 232 255 / 78%),
+      0 0 24px 5px rgb(242 216 150 / 46%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-tick {
+    border: 1.5px solid rgb(138 238 255 / 74%);
+    background: radial-gradient(circle at 35% 30%, rgb(121 232 255 / 36%), #030812 72%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      0 0 0 2px rgb(2 6 13 / 88%),
+      0 0 10px rgb(121 232 255 / 34%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-tick[data-state="passed"] {
+    border-color: #a6f2ff;
+    background: radial-gradient(circle at 35% 30%, #ffffff 0%, #79e8ff 52%, #0a2236 100%);
+    box-shadow:
+      0 0 0 2px rgb(2 6 13 / 88%),
+      0 0 12px 1px rgb(121 232 255 / 70%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-tick[data-state="current"] {
+    border-color: #fff3cb;
+    background: radial-gradient(circle, #ffffff 0 28%, #f2d896 54%, #050c18 78%);
+    box-shadow:
+      0 0 0 2px rgb(2 6 13 / 92%),
+      0 0 0 3.5px rgb(242 216 150 / 48%),
+      0 0 16px 2px rgb(242 216 150 / 84%),
+      0 0 28px 4px rgb(121 232 255 / 48%);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail
+    > .rxk-rail-tick
+    > b {
+    color: #fff6dc;
+    padding: 3px 7px;
+    border-radius: 999px;
+    border: 1px solid rgb(242 216 150 / 72%);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 24%) 0%, transparent 48%),
+      linear-gradient(145deg, rgb(18 36 56 / 95%), rgb(5 12 22 / 97%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 42%),
+      0 6px 16px -4px rgb(0 0 0 / 88%),
+      0 0 14px -3px rgb(242 216 150 / 48%);
+    text-shadow:
+      0 1px 2px rgb(0 4 10 / 92%),
+      0 0 10px rgb(242 216 150 / 56%);
+  }
+}
+
+/* 3. Resonance gauge rings (.rxp-gauge & .rsn-field > i) & Three-Form cards jewel refinement */
+@media (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > #performance
+    .rxs-headline-metrics
+    .rxp-gauge::after {
+    width: 16px;
+    height: 2px;
+    background: linear-gradient(90deg, #ffffff, #f2d896 64%, #79e8ff);
+    box-shadow:
+      0 0 10px rgb(242 216 150 / 78%),
+      0 0 18px rgb(121 232 255 / 54%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > #performance
+    .rxs-headline-metrics
+    > article
+    > .rsn-field
+    > i:nth-child(1) {
+    border-color: rgb(121 232 255 / 42%);
+    box-shadow: inset 0 0 18px rgb(121 232 255 / 16%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > #performance
+    .rxs-headline-metrics
+    > article
+    + article
+    > .rsn-field
+    > i:nth-child(1) {
+    border-color: rgb(255 143 216 / 44%);
+    box-shadow: inset 0 0 18px rgb(255 143 216 / 16%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > #stages
+    .rxe-comparison-card {
+    border: 1.5px solid color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 54%, rgb(242 216 150 / 28%));
+    background:
+      linear-gradient(
+        90deg,
+        transparent,
+        #ffffff 18%,
+        var(--rxs-stage-accent, #63e2ff) 52%,
+        #f2d896 84%,
+        transparent
+      )
+        50% 0 / calc(100% - 34px) 2.5px no-repeat,
+      radial-gradient(
+        92% 56% at 50% 0%,
+        color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 28%, transparent),
+        transparent 76%
+      ),
+      linear-gradient(166deg, rgb(16 32 52 / 94%) 0%, rgb(8 17 32 / 97%) 58%, rgb(4 9 18 / 99%) 100%);
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 42%),
+      inset 0 -1px 0 rgb(0 0 0 / 84%),
+      inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 32%, transparent),
+      0 20px 44px -18px rgb(0 0 0 / 88%),
+      0 0 28px -10px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 34%, transparent);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > #stages
+    .rxe-comparison-card[data-selected="true"] {
+    border-color: rgb(248 224 162 / 84%);
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      inset 0 6px 26px -8px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 86%, transparent),
+      inset 0 0 0 1px rgb(242 216 150 / 48%),
+      0 24px 52px -14px rgb(0 0 0 / 92%),
+      0 0 36px -6px rgb(242 216 150 / 42%),
+      0 0 48px -10px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 48%, transparent);
+  }
+}
+
+/* 4. Double focus-visible optical ring & tactile micro-interactions (:hover float / :active press) */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+  :is(
+    .rxe-hero-primary,
+    .rxe-hero-secondary,
+    > .rxe-chapter-map a,
+    .rxs-comparison-selector select,
+    > #stages .rxe-comparison-card,
+    > #stages .rxe-form-comparison > summary,
+    > .rxs-footer > a
+  ):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px rgb(121 232 255 / 62%),
+    0 0 26px 2px rgb(242 216 150 / 52%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    :is(
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      > .rxe-chapter-map a,
+      > #stages .rxe-comparison-card,
+      > .rxs-footer > a
+    ):active {
+    scale: 0.985;
+  }
+}
+
+/* 5. Reduced transparency & increased contrast solid obsidian surfaces */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    :is(
+      > .rxs-hero .rxs-hero-copy::before,
+      > .rxs-chapter-index.rxe-chapter-map,
+      > .rxe-chapter-map a,
+      > #performance .rxs-headline-metrics > article,
+      > :is(#performance, #p14) :is(.rxs-comparison, .rxs-p14-comparator),
+      > #stages .rxe-comparison-card,
+      > #stages :is(.rxe-form-status, .rxe-form-comparison),
+      > #system > .rxs-system-grid,
+      > #system > .rxs-system-grid > article,
+      > #system > .rxs-specs,
+      > #system > .rxs-specs > div
+    ) {
+    background-color: #050c18;
+    border-color: rgb(172 244 255 / 82%);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl):not(#rxa)
+    > .rxk-rail {
+    display: none;
+  }
+}

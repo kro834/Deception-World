@@ -3580,3 +3580,201 @@ main.manager-page.is-sovereign .dossier-index-return {
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Sovereign File Imperial Gold & Obsidian Tactile Optics === */
+main.manager-page.is-sovereign
+  :is(
+    .manager-numeral,
+    .sovereign-apex-seal strong,
+    .sovereign-scale b,
+    .manager-file-number,
+    .dossier-contents-number,
+    .manager-copy-heading > span,
+    .manager-facts dd
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  main.manager-page.is-sovereign
+    :is(.manager-topbar .manager-back, #dossier-profile .dossier-read-link, .dossier-index-return) {
+    border-color: rgb(247 223 162 / 64%);
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 6%,
+        #ffffff 24%,
+        #f7dfa2 56%,
+        rgb(196 52 70 / 72%) 84%,
+        transparent 96%
+      ),
+      radial-gradient(82% 74% at 50% 0%, rgb(255 244 210 / 22%), transparent 70%),
+      linear-gradient(168deg, #1b1322 0%, #0b0a14 58%, #05060c 100%);
+    background-size: 100% 1.5px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 232 / 40%),
+      inset 0 -1px 0 rgb(186 48 64 / 36%),
+      0 14px 32px -8px rgb(2 3 8 / 78%),
+      0 0 24px -6px rgb(247 223 162 / 24%);
+  }
+
+  main.manager-page.is-sovereign
+    :is(#dossier-profile .sovereign-status, #dossier-profile .manager-facts) {
+    box-shadow:
+      0 28px 66px rgb(0 0 0 / 68%),
+      0 0 42px -4px rgb(247 223 162 / 18%),
+      inset 0 1px 0 rgb(255 252 240 / 34%),
+      inset 0 -1px 0 rgb(186 48 64 / 34%);
+  }
+
+  main.manager-page.is-sovereign > .manager-pagination a {
+    border-color: rgb(247 223 162 / 52%);
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 8%,
+        #ffffff 28%,
+        #f6d786 64%,
+        transparent 94%
+      ),
+      linear-gradient(168deg, rgb(28 19 36 / 94%) 0%, rgb(9 8 16 / 98%) 100%);
+    background-size: 100% 1.5px, 100% 100%;
+    background-position: top center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 232 / 32%),
+      inset 0 -1px 0 rgb(186 48 64 / 28%),
+      0 14px 30px -8px rgb(2 3 8 / 72%);
+  }
+
+  main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .brand,
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .dossier-reader .dossier-reader-links a,
+      #dossier-index .dossier-contents > a,
+      > .manager-pagination a,
+      .dossier-index-return
+    ):focus-visible {
+    outline: 2px solid var(--sv-focus);
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px #04080f,
+      0 0 0 6px rgb(247 223 162 / 84%),
+      0 0 22px rgb(251 227 161 / 48%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .manager-pagination a,
+      .dossier-index-return
+    ):hover {
+    border-color: rgb(255 248 224 / 90%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 56%),
+      inset 0 -1px 0 rgb(212 62 78 / 50%),
+      0 18px 38px -8px rgb(2 3 8 / 86%),
+      0 0 30px -4px rgb(251 227 161 / 38%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .dossier-reader .dossier-reader-links a,
+      #dossier-index .dossier-contents > a,
+      > .manager-pagination a,
+      .dossier-index-return
+    ) {
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      color 180ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .dossier-reader .dossier-reader-links a,
+      #dossier-index .dossier-contents > a,
+      > .manager-pagination a,
+      .dossier-index-return
+    ):active {
+    transform: translateY(0) scale(0.985);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .manager-pagination a,
+      .dossier-index-return
+    ):hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      #dossier-profile .sovereign-status,
+      #dossier-profile .manager-facts,
+      > .manager-pagination a,
+      .dossier-index-return
+    ) {
+    background-color: #090b13;
+    background-image: none;
+    border-color: rgb(251 227 161 / 88%);
+  }
+}
+
+@media (forced-colors: active) {
+  main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .manager-pagination a,
+      .dossier-index-return
+    ) {
+    forced-color-adjust: auto;
+    background-color: ButtonFace;
+    background-image: none;
+    color: LinkText;
+    border-color: ButtonBorder;
+    box-shadow: none;
+  }
+
+  main.manager-page.is-sovereign
+    :is(
+      .manager-topbar .brand,
+      .manager-topbar .manager-back,
+      #dossier-profile .dossier-read-link,
+      > .dossier-reader .dossier-reader-links a,
+      #dossier-index .dossier-contents > a,
+      > .manager-pagination a,
+      .dossier-index-return
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}

@@ -1980,3 +1980,180 @@ html[data-family="utility"] body .transformation-lab :is(.lab-title p, .tl-part-
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Tactical Hologram Bezel, Active Pill Luminescence & Telemetry Tactile Polish === */
+
+.transformation-lab
+  :is(
+    .lab-seek output,
+    .lab-seek-milestone,
+    .lab-stage-status,
+    .tl-part-record,
+    .lab-zoom,
+    .lab-transport
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  .transformation-lab :is(.lab-selectors, .lab-controls, .tl-part-record) {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
+      inset 0 -1.5px 0 rgba(242, 216, 150, 0.22),
+      inset 0 0 0 1px rgb(var(--lab-key-rgb) / 18%),
+      inset 0 0 34px rgb(var(--lab-key-rgb) / 11%),
+      0 24px 52px -14px rgba(2, 6, 16, 0.92),
+      0 0 34px -8px rgb(var(--lab-key-rgb) / 34%);
+  }
+
+  .transformation-lab .lab-stage h2 {
+    border-bottom: 1px solid rgb(var(--lab-stage-key-rgb) / 48%);
+    background:
+      linear-gradient(
+          90deg,
+          rgb(var(--lab-stage-key-rgb) / 92%) 0%,
+          #ffffff 34%,
+          rgb(var(--lab-stage-sub-rgb) / 86%) 74%,
+          transparent 98%
+        )
+        0 0 / 100% 2px no-repeat,
+      linear-gradient(
+        100deg,
+        rgb(var(--lab-stage-key-rgb) / 18%) 0%,
+        #0e2030 38%,
+        #050d16 100%
+      );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.26),
+      inset 0 -1px 0 rgb(var(--lab-stage-sub-rgb) / 26%),
+      0 10px 24px -12px rgba(0, 0, 0, 0.82);
+  }
+
+  .transformation-lab .lab-setup {
+    padding-inline: 14px;
+    border: 1px solid rgb(var(--lab-key-rgb) / 42%);
+    border-radius: 22px;
+    background:
+      linear-gradient(
+          90deg,
+          transparent 6%,
+          rgb(var(--lab-key-rgb) / 78%) 32%,
+          #ffffff 50%,
+          rgb(var(--lab-gold-rgb) / 72%) 68%,
+          transparent 94%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      linear-gradient(168deg, rgba(12, 25, 39, 0.94), rgba(4, 10, 18, 0.98));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 18px 38px -16px rgba(0, 0, 0, 0.86);
+  }
+
+  .transformation-lab .lab-seek output {
+    border-color: rgb(var(--lab-gauge-rgb) / 62%);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 8%,
+          rgb(var(--lab-gauge-rgb) / 86%) 38%,
+          #ffffff 50%,
+          rgb(var(--lab-gauge-sub-rgb) / 76%) 78%,
+          transparent 94%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      linear-gradient(180deg, rgb(var(--lab-gauge-rgb) / 22%), rgba(4, 11, 19, 0.96)),
+      #06101a;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.84),
+      0 6px 16px -4px rgba(0, 0, 0, 0.72),
+      0 0 18px -4px rgb(var(--lab-gauge-rgb) / 38%);
+  }
+
+  .transformation-lab button[aria-pressed="true"] {
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      inset 0 -2px 0 rgba(4, 16, 23, 0.44),
+      0 0 0 1px rgb(var(--lab-key-rgb) / 90%),
+      0 0 28px -2px rgb(var(--lab-key-rgb) / 78%),
+      0 0 44px -6px rgb(var(--lab-gold-rgb) / 52%),
+      0 10px 22px -4px rgba(0, 0, 0, 0.8);
+  }
+}
+
+.transformation-lab
+  :is(button, select, input, a, summary):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px rgb(var(--lab-key-rgb) / 68%),
+    0 0 18px 2px rgb(var(--lab-gold-rgb) / 48%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .transformation-lab
+    :is(
+      button:where(:not(.side-panel-trigger)),
+      .lab-header a,
+      .tl-part-record-heading a
+    ) {
+    transition:
+      scale 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .transformation-lab
+    :is(
+      button:where(:not(.side-panel-trigger)):not(:disabled),
+      .lab-header a,
+      .tl-part-record-heading a
+    ):active {
+    scale: 0.985;
+    translate: 0 1px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .transformation-lab
+    :is(
+      button:where(:not(.side-panel-trigger)):not(:disabled),
+      .lab-header a,
+      .tl-part-record-heading a
+    ):hover {
+    translate: 0 -1.5px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .transformation-lab :is(.lab-selectors, .lab-controls, .tl-part-record, .lab-setup) {
+    background: #071019;
+    box-shadow: none;
+    border-color: #93b4c8;
+  }
+
+  .transformation-lab .lab-stage h2 {
+    background: #08121c;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .transformation-lab :is(.lab-setup, .lab-stage h2, .lab-seek output) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .transformation-lab :is(button, select, input, a, summary):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

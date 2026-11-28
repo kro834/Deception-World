@@ -824,3 +824,188 @@ html[data-world-effects="economy"]
     box-shadow: none;
   }
 }
+
+/* === Wave-11: Quote Exhibition Afterglow Spotlight, Brass-Platinum Portrait Frame & Tactile Resonance === */
+
+@media (forced-colors: none) {
+  /* Lingering spotlight resonance & specular top rim on quote plaques */
+  .quote-scene {
+    border-color: color-mix(in srgb, var(--quote-ink, #f0cf86) 36%, rgb(240 207 134 / 0.34));
+    border-top-color: color-mix(in srgb, var(--quote-ink, #f0cf86) 62%, #fff8e8);
+    background:
+      radial-gradient(
+        ellipse 62% 86% at 14% -6%,
+        color-mix(in srgb, var(--quote-ink, #f0cf86) 24%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(ellipse 48% 60% at 88% 100%, rgb(240 207 134 / 0.1), transparent 72%),
+      linear-gradient(158deg, #16192c 0%, #0a0c17 56%, #05060c 100%);
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 254 248 / 0.42),
+      inset 0 0 0 1px rgb(226 236 248 / 0.1),
+      0 20px 46px -12px rgb(0 0 0 / 0.86);
+  }
+
+  .quote-plaque[data-open="true"],
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-exhibition
+    .quote-plaque[data-open="true"] {
+    border-color: color-mix(in srgb, var(--quote-ink, #f0cf86) 76%, #fae4b6);
+    border-top-color: #ffffff;
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 0.58),
+      inset 0 0 0 1px rgb(226 236 248 / 0.14),
+      0 0 0 3px #04050a,
+      0 0 0 4px color-mix(in srgb, var(--quote-ink, #f0cf86) 40%, rgb(240 207 134 / 0.3)),
+      0 36px 80px -10px rgb(0 0 0 / 0.9),
+      0 0 56px -10px color-mix(in srgb, var(--quote-ink, #f0cf86) 48%, transparent);
+  }
+
+  /* Double brass × platinum museum portrait frame inside expanded quote leaf */
+  .quote-leaf figure,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-leaf
+    figure {
+    border-color: color-mix(in srgb, var(--quote-ink, #f0cf86) 68%, rgb(248 220 164 / 0.68));
+    border-top-color: #fffaf0;
+    background:
+      conic-gradient(
+        from 154deg at 50% -18%,
+        transparent 0deg,
+        color-mix(in srgb, var(--quote-ink, #f0cf86) 28%, rgb(255 238 196 / 0.24)) 26deg,
+        transparent 52deg
+      ),
+      radial-gradient(
+        ellipse 84% 62% at 50% 2%,
+        color-mix(in srgb, var(--quote-ink, #f0cf86) 42%, rgb(252 226 172 / 0.28)),
+        #04060c 84%
+      );
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 0.56),
+      inset 0 0 0 4px rgb(4 6 12 / 0.94),
+      inset 0 0 0 5px color-mix(in srgb, var(--quote-ink, #f0cf86) 44%, rgb(244 216 160 / 0.38)),
+      inset 0 0 0 8px rgb(8 11 20 / 0.9),
+      inset 0 0 0 9px rgb(226 236 248 / 0.16),
+      0 34px 76px -8px rgb(0 0 0 / 0.88),
+      0 0 48px -10px color-mix(in srgb, var(--quote-ink, #f0cf86) 48%, transparent);
+  }
+
+  /* Engraved medallion bezel on quote index & fold trigger */
+  .quote-plaque-index,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-plaque-index {
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 0.52),
+      inset 0 0 0 3px rgb(4 6 12 / 0.9),
+      inset 0 0 0 4px color-mix(in srgb, var(--quote-ink, #f0cf86) 36%, rgb(240 207 134 / 0.3)),
+      0 10px 22px -4px rgb(0 0 0 / 0.76),
+      0 0 20px -4px color-mix(in srgb, var(--quote-ink, #f0cf86) 52%, transparent);
+  }
+
+  /* Dual optical focus halo on quote triggers, source links & ambience controls */
+  .quote-scene
+    :is(
+      h3 button,
+      .quote-leaf-copy a.quote-source,
+      .quote-scene-ambience button
+    ):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--quote-ink, #f0cf86) 76%, #ffffff);
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px rgb(4 6 12 / 0.94),
+      0 0 0 6px rgb(240 207 134 / 0.54),
+      0 0 22px -2px color-mix(in srgb, var(--quote-ink, #f0cf86) 56%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    :is(
+      .quote-scene,
+      .quote-fold,
+      .quote-leaf-copy a.quote-source,
+      .quote-ambience,
+      .quote-scene-ambience button
+    ) {
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      background-color 220ms ease,
+      color 200ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .quote-scene h3 button:active .quote-fold {
+    transform: scale(0.92);
+  }
+
+  html:not([data-world-effects="economy"])
+    :is(.quote-leaf-copy a.quote-source, .quote-ambience:has(button:active)):active,
+  html:not([data-world-effects="economy"]) .quote-leaf-copy a.quote-source:active {
+    transform: scale(0.982);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"]) .quote-scene:not([data-open="true"]):hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--quote-ink, #f0cf86) 72%, #fff2d0);
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 0.52),
+      inset 0 0 0 1px rgb(226 236 248 / 0.16),
+      0 26px 56px -12px rgb(0 0 0 / 0.9),
+      0 0 34px -8px color-mix(in srgb, var(--quote-ink, #f0cf86) 42%, transparent);
+  }
+
+  html:not([data-world-effects="economy"])
+    :is(.quote-leaf-copy a.quote-source, .quote-ambience):hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .quote-scene,
+  .quote-plaque[data-open="true"],
+  .quote-leaf figure,
+  .quote-ambience,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    .quote-exhibition
+    :is(.quote-scene, .quote-plaque[data-open="true"], .quote-leaf figure, .quote-ambience) {
+    background-color: #060811;
+    background-image: none;
+    border-color: #f4da9f;
+  }
+
+  .quote-exhibition h2,
+  .quote-leaf-copy h4,
+  html[data-family="gallery"]
+    body
+    .gallery-tours-page[data-gallery-tours="true"]:not(#ring-g#ring-g#ring-g)
+    :is(.quote-exhibition h2, .quote-leaf-copy h4) {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    -webkit-text-fill-color: #ffffff;
+    color: #ffffff;
+  }
+}
+
+@media (forced-colors: active) {
+  .quote-scene
+    :is(
+      h3 button,
+      .quote-leaf-copy a.quote-source,
+      .quote-scene-ambience button
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

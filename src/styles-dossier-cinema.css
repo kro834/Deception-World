@@ -634,3 +634,36 @@ html[data-world-effects="economy"]
     opacity: 1;
   }
 }
+
+/* ================================================================
+   === Wave-11 Dossier Cinema Specular Stage & Contrast Safety ===
+   ================================================================ */
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  main.manager-page:not(.is-sovereign):not(.dante-page) .manager-hero .manager-portrait-frame {
+    box-shadow:
+      0 32px 84px rgb(0 0 0 / 54%),
+      0 0 0 1px color-mix(in srgb, var(--dm-rim) 34%, rgb(255 255 255 / 14%)),
+      0 0 48px -6px color-mix(in srgb, var(--dm-key) 18%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 26%),
+      inset 0 -1px 0 color-mix(in srgb, var(--dm-rim) 26%, transparent);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
+    background: none;
+    opacity: 0;
+  }
+
+  main.manager-page:not(.is-sovereign):not(.dante-page) .manager-hero .manager-portrait-frame {
+    background: #070c16;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--dm-key) 64%, #ffffff);
+  }
+}
+
+@media (forced-colors: active) {
+  main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
+    display: none;
+    background: none;
+  }
+}

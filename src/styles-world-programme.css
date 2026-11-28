@@ -403,3 +403,122 @@
     outline: 2px solid Highlight;
   }
 }
+
+/* ==========================================================================
+   === Wave-11 Programme Specular Glass, Tabular Numerals & Tactile Polish ===
+   ========================================================================== */
+
+.site-shell.film-edition :is(
+  .poster-controls output,
+  .poster-control-cluster > button,
+  .hero-metadata :is(small, b)
+) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  .site-shell.film-edition .poster-frame {
+    border-color: color-mix(in srgb, var(--programme-gold) 58%, #9aa2b2);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 6%,
+          rgb(230 198 126 / 0.86) 30%,
+          rgb(255 255 255 / 0.92) 50%,
+          rgb(224 64 76 / 0.78) 72%,
+          transparent 94%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      radial-gradient(ellipse 76% 46% at 50% 0%, rgb(224 64 76 / 0.22), transparent 72%),
+      linear-gradient(160deg, #101520 0%, #06090f 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      inset 0 0 32px rgb(224 64 76 / 0.12),
+      8px 8px 0 #06080d,
+      9px 9px 0 rgb(224 64 76 / 0.58),
+      0 30px 48px -12px rgb(0 0 0 / 0.84);
+  }
+
+  .site-shell.film-edition .poster-control-cluster > button {
+    border-color: color-mix(in srgb, var(--programme-gold) 36%, #6e7685);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 8%,
+          rgb(230 198 126 / 0.56) 36%,
+          rgb(224 64 76 / 0.48) 68%,
+          transparent 92%
+        )
+        0 0 / 100% 1px no-repeat,
+      linear-gradient(180deg, rgb(255 255 255 / 0.1) 0%, transparent 56%),
+      linear-gradient(155deg, #151c29 0%, #0a0e16 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      inset 0 -1px 0 rgb(230 198 126 / 0.16),
+      0 10px 24px -6px rgb(0 0 0 / 0.68);
+  }
+}
+
+.site-shell.film-edition :is(.hero a, .hero button, .topbar a, .topbar button):focus-visible {
+  outline: 2px solid #fff3be;
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 5px rgb(224 64 76 / 0.32),
+    0 10px 24px -6px rgb(0 0 0 / 0.72);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site-shell.film-edition :is(
+    .hero .primary-action,
+    .hero .text-action,
+    .poster-control-cluster > button,
+    .topbar .side-panel-trigger
+  ) {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      scale 160ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms ease,
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-shell.film-edition :is(
+    .hero .primary-action,
+    .hero .text-action,
+    .poster-control-cluster > button:not(:disabled),
+    .topbar .side-panel-trigger
+  ):active {
+    scale: 0.985;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .site-shell.film-edition :is(
+    .topbar,
+    .poster-frame,
+    .poster-control-cluster > button,
+    .topbar .side-panel-trigger
+  ) {
+    background-image: none;
+    background-color: #06080d;
+    border-color: var(--programme-gold);
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .site-shell.film-edition :is(
+    .topbar .side-panel-trigger,
+    .poster-frame,
+    .poster-control-cluster > button
+  ) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+  .site-shell.film-edition :is(.hero a, .hero button, .topbar a, .topbar button):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

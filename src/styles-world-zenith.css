@@ -2077,3 +2077,491 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   === Wave-11 Zenith Celestial Optics & Tactile Micro-Interaction Upgrade ===
+   Hero Nebula Portal x Rider Console x Rikuei Ring x #records EP.01-EP.06 Cards
+   (Preserves phone 182px .episode-thumbnail pin & <=48px Android blur budget)
+   ========================================================================== */
+
+html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+  body
+  main.site-shell.film-edition.mirage-edition
+  :is(
+    #top.world-artwork-hero .world-stage-controls output,
+    #story #manager-archive .signal > span,
+    #story #manager-archive .other-card-code,
+    #riders .rider-tabs button[role="tab"] small,
+    #records .episode-controls output,
+    #records .episode-thumbnail > span
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  /* 1. Hero Poster Portal — overrides styles-ring-world flat grey fallback with
+     deep obsidian x concentric celestial prism nebula & specular double rim */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    #top.world-artwork-hero
+    .world-poster-media {
+    border-color: rgb(168 236 255 / 0.54);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 5%,
+          rgb(122 232 255 / 0.86) 24%,
+          rgb(255 255 255 / 0.96) 50%,
+          rgb(240 207 134 / 0.86) 76%,
+          transparent 95%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      linear-gradient(
+          90deg,
+          transparent 8%,
+          rgb(240 207 134 / 0.64) 28%,
+          rgb(255 92 200 / 0.7) 52%,
+          rgb(122 232 255 / 0.68) 76%,
+          transparent 92%
+        )
+        0 100% / 100% 1px no-repeat,
+      radial-gradient(
+        ellipse 52% 66% at 50% 48%,
+        rgb(122 232 255 / 0.36) 0%,
+        rgb(88 158 255 / 0.16) 44%,
+        transparent 76%
+      ),
+      radial-gradient(
+        ellipse 66% 74% at 52% 54%,
+        rgb(255 92 200 / 0.24) 0%,
+        rgb(142 88 246 / 0.12) 50%,
+        transparent 80%
+      ),
+      radial-gradient(ellipse 56% 36% at 50% 10%, rgb(240 207 134 / 0.24) 0%, transparent 72%),
+      linear-gradient(165deg, #040a16 0%, #071326 48%, #02050c 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.48),
+      inset 0 -1px 0 rgb(240 207 134 / 0.34),
+      inset 0 0 42px rgb(122 232 255 / 0.14),
+      0 28px 48px -16px rgb(0 0 0 / 0.94),
+      0 0 44px -10px rgb(122 232 255 / 0.32);
+  }
+
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    #top.world-artwork-hero
+    .world-poster-media::before {
+    background:
+      radial-gradient(
+        ellipse 52% 60% at 50% 48%,
+        rgb(255 255 255 / 0.1) 0%,
+        rgb(122 232 255 / 0.14) 44%,
+        transparent 74%
+      ),
+      radial-gradient(ellipse 64% 34% at 50% 0%, rgb(204 244 255 / 0.22) 0%, transparent 66%),
+      radial-gradient(ellipse 64% 34% at 50% 100%, rgb(240 207 134 / 0.18) 0%, transparent 68%);
+  }
+
+  /* 2. Rikuei Ring (#manager-archive) — celestial astrolabe ring & rank medallions */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array::before {
+    border-color: rgb(240 207 134 / 0.64);
+    box-shadow:
+      inset 0 0 32px rgb(240 207 134 / 0.18),
+      0 0 36px rgb(168 104 255 / 0.26);
+  }
+
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal
+    > span {
+    border-color: rgb(246 218 152 / 0.9);
+    background:
+      radial-gradient(circle at 32% 24%, rgb(255 255 255 / 0.28), transparent 56%),
+      linear-gradient(155deg, #1d1530 0%, #090612 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.52),
+      inset 0 0 0 1px rgb(240 207 134 / 0.42),
+      0 10px 22px -4px rgb(0 0 0 / 0.92),
+      0 0 20px -4px rgb(240 207 134 / 0.56);
+    color: #fff8e4;
+  }
+
+  /* 3. Rider Console (#riders) — dynamic rider-tone prism rim & dial node glow */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    > .rider-console {
+    border-color: rgb(196 226 250 / 0.46);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.42),
+      inset 0 -1px 0 rgb(240 207 134 / 0.24),
+      0 30px 48px -18px rgb(0 0 0 / 0.92),
+      0 0 42px -14px rgb(122 232 255 / 0.28);
+  }
+
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-ring-dial-ring
+    > i.is-on {
+    box-shadow:
+      0 0 0 2px rgb(255 255 255 / 0.92),
+      0 0 18px 2px var(--rider-tone, #7ae8ff),
+      0 0 32px 4px color-mix(in srgb, var(--rider-tone, #7ae8ff) 64%, #f0cf86);
+  }
+
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-copy-block {
+    background:
+      linear-gradient(
+          90deg,
+          var(--rider-tone, #7ae8ff) 0%,
+          rgb(240 207 134 / 0.78) 54%,
+          transparent 96%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      radial-gradient(
+        ellipse 76% 52% at 12% 0%,
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 22%, transparent),
+        transparent 70%
+      ),
+      linear-gradient(155deg, rgb(12 20 32 / 0.94) 0%, rgb(4 8 15 / 0.98) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.38),
+      inset 0 -1px 0 rgb(240 207 134 / 0.18),
+      0 22px 44px -16px rgb(0 0 0 / 0.9);
+  }
+
+  /* 4. #records Episode Cards (EP.01–EP.06) — Engraved EP.0N Chronograph Plate,
+     Anamorphic Vignette, Specular Dark-Glass Surface & Climax EP.05/EP.06 Accents */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card-surface {
+    --ep-accent-rgb: 240 207 134;
+    --ep-secondary-rgb: 122 232 255;
+    border: 1px solid rgb(var(--ep-accent-rgb) / 0.46);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(var(--ep-accent-rgb) / 0.88) 28%,
+          rgb(255 255 255 / 0.92) 50%,
+          rgb(var(--ep-secondary-rgb) / 0.78) 74%,
+          transparent 96%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      linear-gradient(165deg, #16100a 0%, #0b0704 62%, #060403 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 224 / 0.38),
+      inset 0 -1px 0 rgb(var(--ep-accent-rgb) / 0.24),
+      0 20px 44px -14px rgb(0 0 0 / 0.88),
+      0 0 28px -12px rgb(var(--ep-accent-rgb) / 0.26);
+  }
+
+  /* EP.05 (来訪) — Crimson-Ember x Frost-Violet Climax Signature */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card:nth-child(5)
+    .episode-card-surface {
+    --ep-accent-rgb: 255 102 136;
+    --ep-secondary-rgb: 186 142 255;
+  }
+
+  /* EP.06 (REXONANCE) — Sovereign Cyan-Gold x Magenta Apex Signature */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card:nth-child(6)
+    .episode-card-surface {
+    --ep-accent-rgb: 122 232 255;
+    --ep-secondary-rgb: 240 207 134;
+  }
+
+  /* Richer Anamorphic Vignette & Lower Prism Seam on Episode Thumbnail */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-thumbnail
+    > i {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(var(--ep-accent-rgb, 240 207 134) / 0.72) 28%,
+          rgb(var(--ep-secondary-rgb, 122 232 255) / 0.64) 72%,
+          transparent 96%
+        )
+        0 100% / 100% 1.5px no-repeat,
+      radial-gradient(
+        112% 96% at 50% 42%,
+        transparent 46%,
+        rgb(4 3 9 / 0.58) 84%,
+        rgb(2 2 6 / 0.82) 100%
+      ),
+      linear-gradient(
+        180deg,
+        rgb(3 5 12 / 0.34) 0%,
+        transparent 28%,
+        transparent 58%,
+        rgb(7 4 3 / 0.88) 100%
+      );
+  }
+
+  /* Engraved EP.0N Chronograph Plate */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-thumbnail
+    > span {
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid rgb(var(--ep-accent-rgb, 240 207 134) / 0.78);
+    background:
+      linear-gradient(180deg, rgb(255 248 228 / 0.24) 0%, transparent 54%),
+      linear-gradient(145deg, rgb(18 12 8 / 0.92) 0%, rgb(6 4 3 / 0.96) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 0.52),
+      inset 0 -1px 0 rgb(var(--ep-accent-rgb, 240 207 134) / 0.32),
+      0 8px 20px -4px rgb(0 0 0 / 0.9),
+      0 0 18px -4px rgb(var(--ep-accent-rgb, 240 207 134) / 0.42);
+    color: #fff9eb;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.9);
+    letter-spacing: 0.15em;
+  }
+
+  /* Episode Card Copy Deck — Obsidian-Bronze Specular Finish */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-grid
+    > .episode-card
+    > .episode-card-surface
+    > .episode-card-copy {
+    background:
+      linear-gradient(
+          90deg,
+          rgb(var(--ep-accent-rgb, 240 207 134) / 0.62) 0%,
+          rgb(var(--ep-secondary-rgb, 122 232 255) / 0.36) 54%,
+          transparent 92%
+        )
+        0 0 / 100% 1px no-repeat,
+      radial-gradient(
+        ellipse 82% 88% at 18% 0%,
+        rgb(var(--ep-accent-rgb, 240 207 134) / 0.16),
+        transparent 72%
+      ),
+      linear-gradient(180deg, #181008 0%, #0a0604 100%);
+    color: #f8f2e8;
+  }
+
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card-copy
+    > h4 {
+    color: #fffaf0;
+    text-shadow:
+      0 2px 14px rgb(0 0 0 / 0.88),
+      0 0 22px rgb(var(--ep-accent-rgb, 240 207 134) / 0.26);
+  }
+
+  /* Active & Hover Optical Ignition on Episode Cards */
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card.is-active
+    .episode-card-surface {
+    border-color: rgb(255 240 204 / 0.94);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 240 / 0.68),
+      inset 0 0 0 1px rgb(var(--ep-accent-rgb, 240 207 134) / 0.56),
+      0 24px 48px -12px rgb(0 0 0 / 0.94),
+      0 0 42px -6px rgb(var(--ep-accent-rgb, 240 207 134) / 0.52);
+  }
+
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card.is-active
+    .episode-thumbnail
+    > span {
+    border-color: #ffffff;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.34) 0%, transparent 56%),
+      linear-gradient(
+        135deg,
+        rgb(var(--ep-accent-rgb, 240 207 134) / 0.38) 0%,
+        rgb(16 10 6 / 0.95) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 10px 24px -4px rgb(0 0 0 / 0.92),
+      0 0 24px -2px rgb(var(--ep-accent-rgb, 240 207 134) / 0.68);
+    color: #ffffff;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-card:hover
+      .episode-card-surface {
+      border-color: rgb(var(--ep-accent-rgb, 240 207 134) / 0.86);
+      box-shadow:
+        inset 0 1px 0 rgb(255 252 240 / 0.58),
+        inset 0 0 0 1px rgb(var(--ep-accent-rgb, 240 207 134) / 0.44),
+        0 24px 46px -12px rgb(0 0 0 / 0.92),
+        0 0 36px -6px rgb(var(--ep-accent-rgb, 240 207 134) / 0.46);
+    }
+
+    html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-card:hover
+      .episode-thumbnail
+      > span {
+      border-color: rgb(255 248 228 / 0.94);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.64),
+        0 10px 22px -4px rgb(0 0 0 / 0.92),
+        0 0 22px -2px rgb(var(--ep-accent-rgb, 240 207 134) / 0.58);
+    }
+  }
+}
+
+/* 5. Double-Ring Focus Halo (:focus-visible) & Tactile Press (:active) */
+html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+  body
+  main.site-shell.film-edition.mirage-edition
+  :is(
+    #top.world-artwork-hero .world-stage-actions :is(.primary-action, .text-action),
+    #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock),
+    #story #manager-archive .manager-slot-grid > :is(.signal, .dante-archive, .other-archive-card),
+    #riders .rider-tabs button[role="tab"],
+    #riders .rider-dossier-open,
+    #records .episode-controls button,
+    #records .episode-pickup-plus
+  ):focus-visible,
+html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #records
+  .episode-card:has(> .episode-card-select:focus-visible)
+  .episode-card-surface {
+  outline: 2px solid #fff3c4;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px rgb(122 232 255 / 0.34),
+    0 18px 38px -12px rgb(0 0 0 / 0.9);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):root:not(#z):not(#z):not(#z):not(
+      #z
+    ):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card {
+    transition: transform var(--ring-dur-spring, 420ms)
+      var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family="world"]:not([data-world-effects="economy"]):root:not(#z):not(#z):not(#z):not(
+        #z
+      ):not(#z)
+      body
+      main.site-shell.film-edition.mirage-edition
+      > #records
+      .episode-card:hover {
+      transform: translate3d(0, -4px, 0);
+    }
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):root:not(#z):not(#z):not(#z):not(
+      #z
+    ):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    :is(
+      #top.world-artwork-hero .world-stage-actions :is(.primary-action, .text-action),
+      #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock):not(:disabled),
+      #story #manager-archive .manager-slot-grid > :is(.dante-archive, .other-archive-card),
+      #riders .rider-tabs button[role="tab"],
+      #riders .rider-dossier-open,
+      #records .episode-card
+    ):active {
+    scale: 0.985;
+  }
+}
+
+@media (forced-colors: none) and (prefers-reduced-transparency: reduce),
+  (forced-colors: none) and (prefers-contrast: more) {
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    :is(
+      #top.world-artwork-hero .world-poster-media,
+      #riders > .rider-console,
+      #riders .rider-copy-block,
+      #records .episode-card-surface,
+      #records .episode-thumbnail > span
+    ) {
+    background-color: #050912;
+    background-image: none;
+    border-color: #7ae8ff;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="world"]:root:not(#z):not(#z):not(#z):not(#z):not(#z)
+    body
+    main.site-shell.film-edition.mirage-edition
+    :is(
+      #top.world-artwork-hero .world-poster-media,
+      #story #manager-archive .signal > span,
+      #riders > .rider-console,
+      #riders .rider-copy-block,
+      #records .episode-card-surface,
+      #records .episode-thumbnail > span,
+      #records .episode-grid > .episode-card > .episode-card-surface > .episode-card-copy
+    ) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+}

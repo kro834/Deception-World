@@ -7605,3 +7605,314 @@ html[data-family="special"] body #top.rxs-page.ics-page[data-command-special]:no
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   Wave-11 Optical Architecture — Illusionculum Saga
+   Deep Imperial Crimson (#e0284c) x Royal Sovereign Gold (#ffe5ad) x Ice-Prism Indigo
+   Strictly preserves .ics-hero-calls > li entrance animation & timing (zero delay changes)
+   ========================================================================== */
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+  :is(
+    .ics-numeral,
+    .ics-card-no,
+    .ics-specs dd,
+    .ics-specs dd > b,
+    .ics-table th,
+    .ics-table td,
+    :is(.ics-calls, .ics-hero-calls) > li::before
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  /* 1. Section Headings — Crimson-Gold-Ice Specular Horizon & Plate Framing */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-heading {
+    padding-bottom: 20px;
+    background:
+      linear-gradient(
+          90deg,
+          #ffe5ad 0%,
+          #ffffff 20%,
+          #ff6b80 46%,
+          #a6e6ff 76%,
+          rgb(166 230 255 / 14%) 92%,
+          transparent 100%
+        )
+        0 100% / 100% 2.5px no-repeat,
+      radial-gradient(56% 120% at 16% 100%, rgb(224 40 76 / 14%), transparent 72%),
+      radial-gradient(46% 100% at 64% 100%, rgb(255 229 173 / 10%), transparent 72%);
+  }
+
+  /* 2. Call Pills (Inner <b> Only — Never Touches .ics-hero-calls > li Animation/Delay) */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-calls, .ics-hero-calls)
+    b {
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 56%),
+      inset 0 -1px 0 rgb(218 46 82 / 48%),
+      inset 22px 0 34px -16px rgb(58 96 240 / 70%),
+      0 20px 42px -14px rgb(0 0 0 / 95%),
+      0 0 36px -8px rgb(255 214 134 / 50%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-hero-calls
+    > li:last-child
+    b {
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 64%),
+      inset 0 -1px 0 rgb(255 214 138 / 56%),
+      inset 26px 0 38px -16px rgb(218 46 82 / 82%),
+      0 22px 46px -14px rgb(0 0 0 / 96%),
+      0 0 48px -8px rgb(224 40 76 / 70%);
+  }
+
+  /* 3. Spec Cards & Timeline / Article / Evaluation / Table / Finisher Depth */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs
+    > div {
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 48%),
+      inset 0 -1px 0 rgb(47 79 216 / 46%),
+      inset 0 0 36px -14px rgb(47 79 216 / 44%),
+      0 24px 48px -18px rgb(0 0 0 / 95%),
+      0 0 36px -12px rgb(166 230 255 / 38%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-specs
+    > div:nth-child(-n + 4) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 60%),
+      inset 0 -1px 0 rgb(218 46 82 / 54%),
+      inset 0 18px 38px -18px rgb(218 46 82 / 52%),
+      0 28px 54px -18px rgb(0 0 0 / 96%),
+      0 0 48px -12px rgb(255 214 134 / 54%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-card-no {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 12px;
+    border: 1px solid rgb(255 224 152 / 56%);
+    border-radius: 999px;
+    background:
+      linear-gradient(90deg, transparent 8%, rgb(255 229 173 / 88%) 50%, transparent 92%) top center /
+        80% 1.5px no-repeat,
+      linear-gradient(155deg, rgb(42 18 38 / 92%), rgb(12 14 32 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 44%),
+      0 8px 18px -8px rgb(0 0 0 / 90%),
+      0 0 20px -6px rgb(224 40 76 / 44%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(.ics-articles > article, .ics-evaluations > article, .ics-finisher) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 234 / 52%),
+      inset 0 -1px 0 rgb(218 46 82 / 46%),
+      inset 0 0 54px -18px rgb(47 79 216 / 44%),
+      0 30px 64px -20px rgb(0 0 0 / 96%),
+      0 0 48px -14px rgb(255 204 118 / 42%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    .ics-table
+    tbody
+    tr:hover {
+    background-color: rgb(255 224 152 / 7%);
+  }
+
+  /* 4. Double Luminous Focus-Visible Ring */
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .ics-more > summary,
+      .ics-compare-pick button,
+      .ics-form-tabs button,
+      .ics-scroll-cue,
+      .ics-footer a[href]
+    ):focus-visible {
+    outline: 2px solid #ffe5ad;
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 3px rgb(8 10 26 / 96%),
+      0 0 0 6px rgb(255 107 128 / 74%),
+      0 0 28px -2px rgb(255 218 140 / 64%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      :is(
+        :is(.ics-calls, .ics-hero-calls) b,
+        .ics-specs > div,
+        .ics-articles > article,
+        .ics-evaluations > article,
+        .ics-finisher,
+        .ics-more > summary,
+        .ics-compare-pick button,
+        .ics-form-tabs button,
+        .ics-scroll-cue,
+        .ics-footer a[href]
+      ) {
+      transition:
+        translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+        scale 160ms cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      :is(
+        .ics-more > summary,
+        .ics-compare-pick button,
+        .ics-form-tabs button,
+        .ics-scroll-cue,
+        .ics-footer a[href]
+      ):active {
+      scale: 0.985;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"]
+      body
+      #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+      :is(
+        :is(.ics-calls, .ics-hero-calls) b,
+        .ics-specs > div,
+        .ics-articles > article,
+        .ics-evaluations > article,
+        .ics-finisher,
+        .ics-more > summary
+      ):hover:not(:active) {
+      translate: 0 -2px;
+      box-shadow:
+        inset 0 1px 0 rgb(255 252 238 / 68%),
+        inset 0 -1px 0 rgb(224 40 76 / 58%),
+        0 28px 60px -16px rgb(0 0 0 / 96%),
+        0 0 46px -10px rgb(255 214 134 / 52%);
+    }
+  }
+
+  html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .ics-heading,
+      :is(.ics-calls, .ics-hero-calls) b,
+      .ics-specs > div,
+      .ics-articles > article,
+      .ics-evaluations > article,
+      .ics-finisher,
+      .ics-table-scroll,
+      .ics-form-panel
+    ) {
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      :is(.ics-calls, .ics-hero-calls) b,
+      .ics-specs > div,
+      .ics-articles > article,
+      .ics-evaluations > article,
+      .ics-finisher,
+      .ics-more > summary,
+      .ics-compare-pick button,
+      .ics-form-tabs button,
+      .ics-scroll-cue,
+      .ics-footer a[href]
+    ) {
+    transition: none;
+    translate: none;
+    scale: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      :is(.ics-calls, .ics-hero-calls) b,
+      .ics-hero-calls > li:last-child b,
+      .ics-specs > div,
+      .ics-specs > div:nth-child(-n + 4),
+      .ics-articles > article,
+      .ics-evaluations > article,
+      .ics-finisher,
+      .ics-table-scroll,
+      .ics-form-panel,
+      .ics-more > summary
+    ) {
+    background: #090d20;
+    background-image: none;
+    border: 1.5px solid #ffe5ad;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]:not(#ring-b):not(#ring-c)
+    :is(
+      .ics-heading,
+      :is(.ics-calls, .ics-hero-calls) b,
+      .ics-specs > div,
+      .ics-card-no,
+      .ics-articles > article,
+      .ics-evaluations > article,
+      .ics-finisher,
+      .ics-table-scroll,
+      .ics-form-panel,
+      .ics-more > summary
+    ) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

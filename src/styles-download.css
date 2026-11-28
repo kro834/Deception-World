@@ -1613,3 +1613,107 @@ html[data-world-effects="economy"] .export-page.command-support-download > h1 {
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Archival Export Vault Bezel, Telemetry Plate & Tactile Micro-interaction Polish === */
+
+.export-page
+  :is(
+    b,
+    small,
+    .export-page-sigil > i,
+    .export-page-btn,
+    .export-page-alt,
+    .export-page-navigation > a
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  .export-page.command-support-download > b,
+  .export-page small#export-scope,
+  .export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
+    box-shadow:
+      0 0 0 1px rgba(2, 6, 12, 0.94),
+      inset 0 1.5px 0 rgba(255, 253, 244, 0.44),
+      inset 0 -1px 0 rgba(245, 214, 142, 0.34),
+      0 20px 44px -14px rgba(0, 0, 0, 0.9),
+      0 0 28px -10px rgba(122, 232, 255, 0.32);
+  }
+
+  .export-page.command-support-download .export-page-btn {
+    box-shadow:
+      0 0 0 1px rgba(4, 10, 18, 0.92),
+      0 0 0 2px rgba(245, 214, 142, 0.72),
+      inset 0 1.5px 0 #ffffff,
+      inset 0 -1.5px 0 rgba(138, 92, 24, 0.5),
+      0 20px 48px -4px rgba(245, 214, 142, 0.56),
+      0 0 38px -6px rgba(122, 232, 255, 0.42);
+  }
+}
+
+.export-page
+  :is(
+    .export-page-btn,
+    .export-page-alt,
+    .export-page-back,
+    .export-page-context
+  ):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 4px rgba(122, 232, 255, 0.74),
+    0 0 20px 2px rgba(245, 214, 142, 0.56);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .export-page
+    :is(.export-page-btn, .export-page-alt, .export-page-navigation > a) {
+    transition:
+      scale 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease,
+      border-color 200ms ease,
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .export-page
+    :is(.export-page-btn, .export-page-alt, .export-page-navigation > a):active {
+    scale: 0.985;
+    translate: 0 1px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .export-page
+    :is(.export-page-alt, .export-page-navigation > a):hover {
+    translate: 0 -1.5px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .export-page.command-support-download::after,
+  .export-page.command-support-download > b,
+  .export-page small#export-scope,
+  .export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
+    background-color: #081320;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .export-page
+    :is(
+      .export-page-btn,
+      .export-page-alt,
+      .export-page-back,
+      .export-page-context
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

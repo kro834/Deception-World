@@ -5101,3 +5101,491 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-section :is(
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   Wave-11 Optical Architecture — Extreme Saga
+   Molten Solar-Gold (#ffd466) x Electric Cobalt (#6cd4ff) x Crimson Ember
+   Strict zenith pins: every selector starts with
+   html[data-family="special"] body .rxs-page.rxs-page.exs-page,
+   zero animation*, flat prefers-reduced-motion: no-preference around translate,
+   overflow: clip preserved on .exs-opponent-options button.
+   ========================================================================== */
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  :is(
+    #performance .exi-stage > article > strong,
+    #performance .rxs-comparison-metrics > article strong,
+    #performance .rxs-comparison-result,
+    #p14 .rxs-p14-copy dl dd,
+    #p14 .exs-p14-comparison strong,
+    #stages .exs-form-facts dd,
+    #system .rxs-specs > div strong
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  /* 1. Section Headings & Bout Chapter Index — Solar-Gold x Cobalt Prism Horizon */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > :is(#performance, #p14, #stages, #system)
+    > .rxs-section-heading {
+    padding-block-end: clamp(14px, 1.8vw, 22px);
+    background:
+      linear-gradient(
+          90deg,
+          rgb(255 212 102 / 0%) 0%,
+          rgb(255 212 102 / 90%) 16%,
+          rgb(255 255 255 / 96%) 42%,
+          rgb(108 212 255 / 84%) 74%,
+          rgb(239 63 95 / 60%) 90%,
+          rgb(108 212 255 / 0%) 100%
+        )
+        left bottom / 100% 2.5px no-repeat,
+      radial-gradient(60% 110% at 18% 100%, rgb(255 212 102 / 14%), transparent 72%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-chapter-index
+    a {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(255 212 102 / 92%) 28%,
+          rgb(255 255 255 / 96%) 52%,
+          rgb(108 212 255 / 86%) 78%,
+          transparent 96%
+        )
+        top center / 86% 2px no-repeat padding-box,
+      radial-gradient(84% 58% at 50% 0%, rgb(255 244 214 / 18%), transparent 66%) padding-box,
+      linear-gradient(164deg, rgb(22 18 28 / 96%) 0%, rgb(9 10 18 / 99%) 100%) padding-box,
+      linear-gradient(
+          148deg,
+          rgb(255 232 168 / 82%) 0%,
+          rgb(255 196 86 / 74%) 46%,
+          rgb(108 212 255 / 66%) 100%
+        )
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 218 / 48%),
+      inset 0 -1px 0 rgb(4 6 12 / 90%),
+      0 14px 30px -14px rgb(0 0 0 / 92%),
+      0 0 24px -10px rgb(255 196 86 / 34%);
+  }
+
+  /* 2. Challenger Call Pills — Strictly Preserving overflow: clip */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button {
+    overflow: clip;
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(108 212 255 / 88%) 26%,
+          rgb(255 255 255 / 94%) 52%,
+          rgb(255 212 102 / 86%) 78%,
+          transparent 96%
+        )
+        top center / 84% 2px no-repeat padding-box,
+      radial-gradient(84% 60% at 50% 0%, rgb(108 212 255 / 18%), transparent 66%) padding-box,
+      linear-gradient(164deg, rgb(18 22 36 / 96%) 0%, rgb(8 10 18 / 99%) 100%) padding-box,
+      linear-gradient(
+          148deg,
+          rgb(148 224 255 / 72%) 0%,
+          rgb(255 212 102 / 64%) 56%,
+          rgb(108 212 255 / 60%) 100%
+        )
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(242 250 255 / 44%),
+      inset 0 -1px 0 rgb(4 6 12 / 90%),
+      0 12px 26px -12px rgb(0 0 0 / 92%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    .exs-opponent-options
+    button[aria-pressed="true"] {
+    overflow: clip;
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(255 212 102 / 98%) 24%,
+          rgb(255 255 255 / 100%) 50%,
+          rgb(239 63 95 / 92%) 78%,
+          transparent 96%
+        )
+        top center / 90% 2.5px no-repeat padding-box,
+      radial-gradient(88% 64% at 50% 0%, rgb(255 224 138 / 32%), transparent 66%) padding-box,
+      linear-gradient(162deg, rgb(34 24 20 / 97%) 0%, rgb(14 10 16 / 99%) 100%) padding-box,
+      linear-gradient(
+          146deg,
+          rgb(255 246 212 / 96%) 0%,
+          rgb(255 204 88 / 92%) 48%,
+          rgb(239 63 95 / 76%) 100%
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 66%),
+      inset 0 -1px 0 rgb(34 8 14 / 90%),
+      0 16px 34px -12px rgb(0 0 0 / 95%),
+      0 0 32px -8px rgb(255 204 88 / 54%);
+  }
+
+  /* 3. Arena Fight Cards, Metric Plates & Spec Cards — Specular Rim & Obsidian Glass */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      #performance .exi-stage > article,
+      #performance .rxs-comparison-metrics > article,
+      #performance .rxs-comparison-result,
+      #p14 .rxs-p14-copy dl > div,
+      #p14 .exs-p14-comparison > article,
+      #stages #exs-stage-panel > div .exs-form-facts > div,
+      #system .rxs-system-grid > article,
+      #system .rxs-specs > div
+    ) {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 3%,
+          rgb(255 212 102 / 94%) 24%,
+          rgb(255 255 255 / 98%) 48%,
+          rgb(108 212 255 / 86%) 76%,
+          transparent 97%
+        )
+        top center / 90% 2px no-repeat padding-box,
+      radial-gradient(84% 36% at 50% 0%, rgb(255 244 214 / 20%), transparent 66%) padding-box,
+      radial-gradient(76% 58% at 12% 0%, rgb(255 204 88 / 18%), transparent 62%) padding-box,
+      radial-gradient(70% 54% at 90% 100%, rgb(108 212 255 / 14%), transparent 64%) padding-box,
+      linear-gradient(162deg, rgb(20 18 28 / 97%) 0%, rgb(9 10 18 / 99%) 62%, rgb(6 7 14 / 100%) 100%)
+        padding-box,
+      linear-gradient(
+          148deg,
+          rgb(255 244 212 / 78%) 0%,
+          rgb(255 204 88 / 74%) 42%,
+          rgb(108 212 255 / 62%) 78%,
+          rgb(239 63 95 / 54%) 100%
+        )
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 50%),
+      inset 0 -1px 0 rgb(4 6 12 / 92%),
+      0 22px 48px -18px rgb(0 0 0 / 94%),
+      0 0 34px -14px rgb(255 204 88 / 32%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      #performance .exi-stage > article:nth-child(2),
+      #performance .rxs-comparison-metrics > article[data-exf-win="rival"]
+    ) {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 3%,
+          rgb(108 212 255 / 96%) 24%,
+          rgb(255 255 255 / 98%) 50%,
+          rgb(92 148 255 / 88%) 78%,
+          transparent 97%
+        )
+        top center / 90% 2px no-repeat padding-box,
+      radial-gradient(84% 36% at 50% 0%, rgb(224 246 255 / 22%), transparent 66%) padding-box,
+      radial-gradient(76% 58% at 12% 0%, rgb(108 212 255 / 22%), transparent 62%) padding-box,
+      linear-gradient(162deg, rgb(14 22 40 / 97%) 0%, rgb(7 11 22 / 99%) 100%) padding-box,
+      linear-gradient(
+          148deg,
+          rgb(228 248 255 / 82%) 0%,
+          rgb(108 212 255 / 80%) 48%,
+          rgb(255 212 102 / 54%) 100%
+        )
+        border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(236 250 255 / 54%),
+      inset 0 -1px 0 rgb(4 8 18 / 92%),
+      0 22px 48px -18px rgb(0 0 0 / 94%),
+      0 0 36px -12px rgb(108 212 255 / 38%);
+  }
+
+  /* 4. P14 Causal Timeline Flow — Step-Hierarchy Optical Modules */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 3%,
+          rgb(108 212 255 / 88%) 22%,
+          rgb(255 255 255 / 96%) 50%,
+          rgb(255 212 102 / 92%) 78%,
+          transparent 97%
+        )
+        top center / 92% 2px no-repeat padding-box,
+      linear-gradient(160deg, rgb(16 18 30 / 96%) 0%, rgb(7 9 16 / 99%) 100%) padding-box,
+      linear-gradient(
+          148deg,
+          rgb(108 212 255 / 68%) 0%,
+          rgb(255 212 102 / 72%) 56%,
+          rgb(239 63 95 / 64%) 100%
+        )
+        border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 46%),
+      inset 0 -1px 0 rgb(4 6 12 / 92%),
+      0 24px 52px -18px rgb(0 0 0 / 95%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 5%,
+          rgb(108 212 255 / 92%) 30%,
+          rgb(255 255 255 / 96%) 54%,
+          rgb(255 212 102 / 86%) 80%,
+          transparent 95%
+        )
+        top center / 84% 2px no-repeat padding-box,
+      linear-gradient(164deg, rgb(22 24 38 / 96%) 0%, rgb(10 12 22 / 99%) 100%) padding-box,
+      linear-gradient(148deg, rgb(142 224 255 / 74%), rgb(255 212 102 / 64%)) border-box;
+    border: 1px solid transparent;
+    box-shadow:
+      inset 0 1px 0 rgb(246 250 255 / 48%),
+      0 12px 26px -12px rgb(0 0 0 / 92%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:nth-of-type(2) {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 5%,
+          rgb(255 212 102 / 96%) 28%,
+          rgb(255 255 255 / 98%) 52%,
+          rgb(255 184 72 / 90%) 80%,
+          transparent 95%
+        )
+        top center / 86% 2px no-repeat padding-box,
+      linear-gradient(164deg, rgb(32 24 22 / 97%) 0%, rgb(14 11 16 / 99%) 100%) padding-box,
+      linear-gradient(148deg, rgb(255 242 204 / 88%), rgb(255 198 84 / 82%)) border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 224 / 58%),
+      0 14px 30px -12px rgb(0 0 0 / 94%),
+      0 0 28px -8px rgb(255 204 88 / 42%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-core-flow
+    > span:nth-of-type(3) {
+    background:
+      linear-gradient(
+          90deg,
+          transparent 5%,
+          rgb(255 212 102 / 96%) 26%,
+          rgb(255 255 255 / 98%) 50%,
+          rgb(239 63 95 / 94%) 78%,
+          transparent 95%
+        )
+        top center / 88% 2.5px no-repeat padding-box,
+      linear-gradient(164deg, rgb(36 18 26 / 97%) 0%, rgb(16 9 16 / 99%) 100%) padding-box,
+      linear-gradient(148deg, rgb(255 232 178 / 92%), rgb(239 63 95 / 86%)) border-box;
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 226 / 62%),
+      0 16px 34px -12px rgb(0 0 0 / 95%),
+      0 0 32px -8px rgb(239 63 95 / 48%);
+  }
+
+  /* 5. Double Luminous Focus-Visible Ring (Preserving Slanted Footer ::after Ring) */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      .exs-catalog-details > summary,
+      .rxs-scroll-cue
+    ):focus-visible {
+    outline: 2px solid #ffe08a;
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 3px rgb(7 9 16 / 96%),
+      0 0 0 6px rgb(108 212 255 / 74%),
+      0 0 26px -2px rgb(255 212 102 / 64%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      #performance .exi-stage > article,
+      #performance .rxs-comparison-metrics > article,
+      #p14 .rxs-p14-copy dl > div,
+      #p14 .exs-core-flow > span,
+      #p14 .exs-p14-comparison > article,
+      #system .rxs-system-grid > article,
+      #system .rxs-specs > div,
+      .exs-catalog-details > summary,
+      .rxs-scroll-cue,
+      .rxs-footer > a.rxs-footer-return
+    ) {
+    transition:
+      translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      scale 160ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      .exs-catalog-details > summary,
+      .rxs-scroll-cue,
+      .rxs-footer > a.rxs-footer-return
+    ):active {
+    scale: 0.985;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      #performance .exi-stage > article,
+      #performance .rxs-comparison-metrics > article,
+      #p14 .rxs-p14-copy dl > div,
+      #p14 .exs-core-flow > span,
+      #p14 .exs-p14-comparison > article,
+      #system .rxs-system-grid > article,
+      #system .rxs-specs > div,
+      .exs-catalog-details > summary
+    ):hover:not(:active) {
+    translate: 0 -2px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 232 / 64%),
+      inset 0 -1px 0 rgb(4 6 12 / 92%),
+      0 24px 52px -16px rgb(0 0 0 / 96%),
+      0 0 38px -10px rgb(255 204 88 / 46%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      #performance .exi-stage > article,
+      #performance .rxs-comparison-metrics > article,
+      #p14 .rxs-p14-copy dl > div,
+      #p14 .exs-core-flow > span,
+      #p14 .exs-p14-comparison > article,
+      #system .rxs-system-grid > article,
+      #system .rxs-specs > div,
+      .exs-catalog-details > summary,
+      .rxs-scroll-cue,
+      .rxs-footer > a.rxs-footer-return
+    ) {
+    transition: none;
+    scale: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      #performance .exi-stage > article,
+      #performance .rxs-comparison-metrics > article,
+      #performance .rxs-comparison-result,
+      #p14 .rxs-p14-copy dl > div,
+      #p14 .exs-core-flow,
+      #p14 .exs-core-flow > span,
+      #p14 .exs-p14-comparison > article,
+      #stages #exs-stage-panel > div .exs-form-facts > div,
+      #system .rxs-system-grid > article,
+      #system .rxs-specs > div
+    ) {
+    background: #100d14;
+    background-image: none;
+    border: 1.5px solid #ffd87a;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    :is(
+      #performance > .rxs-section-heading,
+      #p14 > .rxs-section-heading,
+      #stages > .rxs-section-heading,
+      #system > .rxs-section-heading,
+      .exs-chapter-index a,
+      .exs-opponent-options button,
+      #performance .exi-stage > article,
+      #performance .rxs-comparison-metrics > article,
+      #performance .rxs-comparison-result,
+      #p14 .rxs-p14-copy dl > div,
+      #p14 .exs-core-flow,
+      #p14 .exs-core-flow > span,
+      #p14 .exs-p14-comparison > article,
+      #stages #exs-stage-panel > div .exs-form-facts > div,
+      #system .rxs-system-grid > article,
+      #system .rxs-specs > div
+    ) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

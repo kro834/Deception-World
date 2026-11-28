@@ -1109,3 +1109,201 @@ main.exhibition-room-curated {
     box-shadow: none;
   }
 }
+
+/* === Wave-11: Night Museum Brass-Platinum Double Bevel, Shelf Tactility & Dual Focus Halos === */
+
+.exhibition-room-curated
+  :is(
+    .exhibition-room-work-number,
+    .exhibition-shelf-caption-num,
+    .exhibition-shelf-count,
+    .exhibition-room-adjacent-number
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  /* Double brass × platinum outer-inner framing on main shadowbox & curatorial lectern */
+  .exhibition-room-curated .exhibition-room-view {
+    border-color: rgb(246 220 168 / 74%);
+    border-top-color: #fffaf0;
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 60%),
+      inset 0 0 0 5px #04070d,
+      inset 0 0 0 6.5px rgb(240 207 134 / 52%),
+      inset 0 0 0 10px rgb(7 11 20 / 88%),
+      inset 0 0 0 11px rgb(226 236 248 / 20%),
+      0 0 0 4px #040810,
+      0 0 0 5px rgb(242 216 164 / 36%),
+      0 46px 112px -10px rgb(0 0 0 / 90%),
+      0 0 96px -14px rgb(248 216 154 / 44%);
+  }
+
+  .exhibition-room-work-heading {
+    border-color: rgb(246 220 168 / 64%);
+    border-top-color: #fffaf0;
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 255 255 / 56%),
+      inset 0 -1px 0 rgb(158 232 250 / 24%),
+      inset 0 0 0 1px rgb(226 236 248 / 12%),
+      0 0 0 4px #04070e,
+      0 0 0 5px rgb(244 218 166 / 38%),
+      0 36px 82px -8px rgb(0 0 0 / 86%),
+      0 0 62px -10px rgb(248 218 156 / 40%);
+  }
+
+  /* Shelf cards: brass-platinum specular rim + engraved number badge */
+  .exhibition-shelf-work {
+    border-color: rgb(240 207 134 / 42%);
+    border-top-color: rgb(255 246 220 / 82%);
+    box-shadow:
+      inset 0 1.5px 0 rgb(255 254 248 / 48%),
+      inset 0 0 0 1px rgb(226 236 248 / 12%),
+      0 20px 46px -12px rgb(0 0 0 / 86%);
+  }
+
+  .exhibition-shelf-image {
+    border-color: rgb(244 218 166 / 54%);
+    border-top-color: rgb(255 246 222 / 78%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 42%),
+      inset 0 0 0 3px rgb(4 7 13 / 90%),
+      inset 0 0 0 4px rgb(240 207 134 / 26%),
+      inset 0 14px 30px rgb(0 0 0 / 62%);
+  }
+
+  .exhibition-shelf-caption-num {
+    padding: 2px 8px;
+    border: 1px solid rgb(240 207 134 / 36%);
+    border-top-color: rgb(255 244 214 / 62%);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgb(24 35 52 / 92%), rgb(9 14 23 / 96%));
+    box-shadow: inset 0 1px 0 rgb(255 253 246 / 26%);
+  }
+
+  /* Dual focus halo across exhibition controls & shelf cards */
+  .exhibition-room-curated
+    :is(
+      .exhibition-room-entrances a,
+      .exhibition-room-choose :is(select, a),
+      .exhibition-studio-tools button,
+      .exhibition-room-adjacent button,
+      .exhibition-shelf-return,
+      .exhibition-shelf-filters :is(input, select, button),
+      .exhibition-shelf-work,
+      .exhibition-shelf-pagination button
+    ):focus-visible {
+    outline: 2px solid #fae3b4;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px rgb(4 8 15 / 94%),
+      0 0 0 6px rgb(158 232 250 / 52%),
+      0 0 24px -2px rgb(240 207 134 / 44%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .exhibition-room-curated
+    :is(
+      .exhibition-room-entrances a,
+      .exhibition-room-adjacent button,
+      .exhibition-shelf-return,
+      .exhibition-shelf-current,
+      .exhibition-shelf-work,
+      .exhibition-shelf-pagination button
+    ) {
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms ease,
+      box-shadow 220ms ease,
+      background-color 220ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .exhibition-room-curated
+    :is(
+      .exhibition-room-entrances a,
+      .exhibition-room-adjacent button:not(:disabled),
+      .exhibition-shelf-return,
+      .exhibition-shelf-current,
+      .exhibition-shelf-pagination button:not(:disabled)
+    ):active {
+    transform: scale(0.982);
+  }
+
+  html:not([data-world-effects="economy"]) .exhibition-shelf-work:active {
+    transform: scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"]) .exhibition-shelf-work:hover {
+    transform: translateY(-3px);
+    border-color: #fff2d0;
+    box-shadow:
+      inset 0 1.5px 0 #ffffff,
+      inset 0 0 0 1px rgb(158 232 250 / 32%),
+      0 26px 56px -10px rgb(0 0 0 / 90%),
+      0 0 32px -6px rgb(246 216 156 / 42%);
+  }
+
+  html:not([data-world-effects="economy"])
+    .exhibition-room-curated
+    :is(
+      .exhibition-room-entrances a,
+      .exhibition-room-adjacent button:not(:disabled),
+      .exhibition-shelf-return,
+      .exhibition-shelf-pagination button:not(:disabled)
+    ):hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .exhibition-room-curated
+    :is(
+      .exhibition-room-view,
+      .exhibition-room-work-heading,
+      .exhibition-shelf-filters,
+      .exhibition-shelf-work,
+      .exhibition-room-adjacent button
+    ) {
+    background-color: #060911;
+    background-image: none;
+    border-color: #f4dba6;
+  }
+
+  .exhibition-room-curated
+    :is(
+      .exhibition-room-heading h1,
+      .exhibition-shelf-heading h2,
+      .exhibition-room-work-title h2
+    ) {
+    background: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #ffffff;
+    filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .exhibition-shelf-caption-num {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .exhibition-room-curated
+    :is(
+      .exhibition-room-entrances a,
+      .exhibition-room-adjacent button,
+      .exhibition-shelf-work,
+      .exhibition-shelf-pagination button
+    ):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}

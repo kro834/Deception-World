@@ -2337,3 +2337,159 @@
     border-top: 2px solid CanvasText;
   }
 }
+
+/* === Wave-11 Taisho Lacquer & Dossier Tactile Polish === */
+.dream-page.dream-page
+  :is(
+    .dream-story-case-number b,
+    .dream-credits dt,
+    .dream-dossier-title > span,
+    .dream-profile-grid dd,
+    .dream-footer-end
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  .dream-page.dream-page .dream-footer > a {
+    border-color: rgb(242 206 136 / 74%);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 8%,
+          rgb(246 218 156 / 58%) 26%,
+          rgb(255 248 220 / 92%) 50%,
+          rgb(246 218 156 / 58%) 74%,
+          transparent 92%
+        )
+        top / 100% 1.5px no-repeat,
+      linear-gradient(var(--ts-kin-light) 0 0) 0 100% / 20px 2px no-repeat,
+      linear-gradient(var(--ts-kin-light) 0 0) 100% 100% / 20px 2px no-repeat,
+      radial-gradient(84% 72% at 50% 0%, rgb(252 214 142 / 20%), transparent 70%),
+      linear-gradient(180deg, #251432 0%, #100818 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 226 / 34%),
+      inset 0 -1px 0 rgb(208 62 52 / 34%),
+      0 16px 38px rgb(0 0 0 / 66%);
+  }
+
+  .dream-page.dream-page .dream-footer-end {
+    background:
+      radial-gradient(circle at 38% 30%, rgb(255 244 206 / 18%), transparent 64%),
+      linear-gradient(160deg, #1f112a 0%, #0b0612 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 226 / 38%),
+      inset 0 0 24px rgb(246 202 118 / 18%),
+      0 0 34px rgb(242 202 124 / 24%),
+      0 20px 44px rgb(0 0 0 / 74%);
+  }
+
+  .dream-page.dream-page .dream-dossier-title > span {
+    border-color: rgb(242 206 136 / 68%);
+    background:
+      linear-gradient(90deg, transparent 10%, rgb(255 248 220 / 76%) 50%, transparent 90%) top /
+        100% 1px no-repeat,
+      linear-gradient(180deg, #241330 0%, #100818 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 220 / 28%),
+      0 6px 16px rgb(0 0 0 / 48%);
+  }
+
+  .dream-page.dream-page
+    :is(.dream-footer > a, .dream-back-link, .dream-dossier-close, .dream-story-case > summary):focus-visible {
+    outline: 2px solid #fff2c6;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 4px #0c0714,
+      0 0 0 6px rgb(242 206 136 / 82%),
+      0 0 22px rgb(252 212 132 / 46%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  .dream-page.dream-page .dream-footer > a:hover {
+    border-color: #fff4ce;
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 232 / 52%),
+      inset 0 -1px 0 rgb(224 76 58 / 48%),
+      0 20px 44px rgb(0 0 0 / 74%),
+      0 0 26px rgb(248 208 128 / 34%);
+  }
+
+  .dream-page.dream-page .dream-ability-list article:hover {
+    border-color: rgb(248 216 148 / 76%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 226 / 34%),
+      0 18px 36px rgb(0 0 0 / 66%),
+      0 0 20px rgb(242 202 124 / 18%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    :is(.dream-footer > a, .dream-back-link, .dream-dossier-close, .dream-ability-list article) {
+    transition:
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms ease,
+      box-shadow 220ms ease,
+      color 180ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    :is(.dream-footer > a, .dream-back-link, .dream-dossier-close):active {
+    transform: translateY(0) scale(0.985);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    :is(.dream-footer > a, .dream-ability-list article):hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .dream-page.dream-page
+    :is(
+      .dream-footer > a,
+      .dream-footer-end,
+      .dream-dossier-shell,
+      .dream-dossier-copy,
+      .dream-dossier-title > span,
+      .dream-profile-grid,
+      .dream-ability-list article
+    ) {
+    background-color: #120b1a;
+    background-image: none;
+    border-color: rgb(248 220 156 / 88%);
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page
+    :is(
+      .dream-footer > a,
+      .dream-footer-end,
+      .dream-dossier-shell,
+      .dream-dossier-copy,
+      .dream-dossier-title > span,
+      .dream-profile-grid,
+      .dream-ability-list article
+    ) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page
+    :is(.dream-footer > a, .dream-back-link, .dream-dossier-close, .dream-story-case > summary):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}

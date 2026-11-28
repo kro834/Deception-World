@@ -1819,3 +1819,165 @@
     box-shadow: none;
   }
 }
+
+/* === Wave-11 Tactical Astrolabe Bezel, Active Filter Pill Luminescence & Telemetry Tactile Polish === */
+
+.wm-page
+  :is(
+    .wm-filter-count,
+    .wm-index-group-head,
+    .wm-index-group-head > span,
+    .wm-view-controls output,
+    .wm-detail h3 span,
+    .wm-index-heading > span
+  ) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  .wm-page :is(.wm-tools, .wm-detail) {
+    box-shadow:
+      inset 0 1.5px 0 rgba(248, 254, 255, 0.36),
+      inset 0 -1.5px 0 rgba(240, 207, 134, 0.22),
+      inset 0 0 0 1px rgba(122, 232, 255, 0.16),
+      0 26px 56px -14px rgba(2, 6, 16, 0.92),
+      0 0 38px -12px rgba(122, 232, 255, 0.36);
+  }
+
+  .wm-page .wm-index-group {
+    padding: 12px 16px 14px;
+    border: 1px solid rgba(122, 232, 255, 0.28);
+    border-radius: 22px;
+    background:
+      linear-gradient(
+          90deg,
+          transparent 6%,
+          rgba(162, 219, 211, 0.72) 28%,
+          #ffffff 50%,
+          rgba(215, 186, 136, 0.74) 72%,
+          transparent 94%
+        )
+        0 0 / 100% 1.5px no-repeat,
+      linear-gradient(168deg, rgba(11, 23, 38, 0.94), rgba(4, 10, 18, 0.98));
+    box-shadow:
+      inset 0 1px 0 rgba(248, 254, 255, 0.26),
+      inset 0 -1px 0 rgba(240, 207, 134, 0.18),
+      0 20px 44px -16px rgba(2, 6, 16, 0.88);
+  }
+
+  .wm-page .wm-index-group-head {
+    border-bottom-color: rgba(240, 207, 134, 0.38);
+    background:
+      linear-gradient(90deg, rgba(240, 207, 134, 0.14), transparent 72%),
+      rgba(5, 11, 20, 0.96);
+  }
+
+  .wm-page :is(.wm-filter-count, .wm-index-group-head > span, .wm-detail h3 span) {
+    border: 1px solid rgba(122, 232, 255, 0.44);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 55%),
+      rgba(4, 11, 20, 0.9);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 4px 10px -4px rgba(0, 0, 0, 0.72);
+  }
+
+  .wm-page .wm-filters button[aria-pressed="true"] {
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.84),
+      inset 0 0 0 1px rgba(122, 232, 255, 0.62),
+      0 12px 28px -6px rgba(0, 0, 0, 0.88),
+      0 0 34px -3px rgba(122, 232, 255, 0.72),
+      0 0 48px -10px rgba(215, 186, 136, 0.44);
+  }
+}
+
+.wm-page :is(button, a, input, .wm-detail):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px rgba(122, 232, 255, 0.68),
+    0 0 18px 2px rgba(215, 186, 136, 0.5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .wm-page
+    :is(
+      .wm-back,
+      .wm-lab-link,
+      .wm-search-clear,
+      .wm-filters button,
+      .wm-view-controls button,
+      .wm-source,
+      .wm-detail li,
+      .wm-detail li > a,
+      .wm-index-grid button,
+      .wm-footer a
+    ) {
+    transition:
+      scale 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 150ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"])
+    .wm-page
+    :is(
+      .wm-back,
+      .wm-lab-link,
+      .wm-search-clear,
+      .wm-filters button,
+      .wm-view-controls button:not(:disabled),
+      .wm-source,
+      .wm-detail li > a,
+      .wm-index-grid button,
+      .wm-footer a
+    ):active {
+    scale: 0.985;
+    translate: 0 1px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .wm-page
+    :is(
+      .wm-back,
+      .wm-lab-link,
+      .wm-filters button:not([aria-pressed="true"]),
+      .wm-view-controls button:not(:disabled),
+      .wm-source,
+      .wm-detail li,
+      .wm-detail li > a,
+      .wm-index-grid button:not([aria-pressed="true"]),
+      .wm-footer a
+    ):hover {
+    translate: 0 -1.5px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .wm-page :is(.wm-tools, .wm-detail, .wm-index-group, .wm-index-group-head) {
+    background: #07101a;
+    box-shadow: none;
+    border-color: #96bac9;
+  }
+}
+
+@media (forced-colors: active) {
+  .wm-page :is(.wm-filter-count, .wm-index-group-head > span, .wm-detail h3 span) {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+
+  .wm-page :is(button, a, input, .wm-detail):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}
