@@ -1,4 +1,4 @@
-import { Suspense, use, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, memo, use, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { importWithRetry } from "@/lib/chunk-retry.js";
 
@@ -49,7 +49,11 @@ function annexHash(hash: string) {
   }
 }
 
-export function WorldAnnexRecords() {
+// Memoised on purpose: it takes no props and nothing in it depends on its parent, but World's
+// own state (opening a dialog, say) re-rendered it while the chunk was still loading, which made
+// React swap the server-rendered chapters for their one-line fallbacks and shortened the page by
+// about 19,000 px under the reader (the saved scroll of a modal then restored to the wrong place).
+export const WorldAnnexRecords = memo(function WorldAnnexRecords() {
   const router = useRouter();
   const [reader] = useState(createReader);
   const [failed, setFailed] = useState(false);
@@ -196,4 +200,4 @@ export function WorldAnnexRecords() {
       </section>
     </>
   );
-}
+});

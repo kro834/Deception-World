@@ -37,7 +37,10 @@ async function assertOther(page) {
   const position = await page.locator("#manager-archive-other").boundingBox();
   assert.ok(position.y >= 0 && position.y < 240, `return anchor inset: ${position.y}`);
   const header = await page.locator(".topbar").boundingBox();
-  const heading = await page.locator("#manager-archive .threat-copy > .system-label").boundingBox();
+  // 2026-11-28: the archive's small .system-label kicker is gone (owner,
+  // 2026-10-23: no secondary labels); the first thing the arrival must keep
+  // clear of the fixed header is now the h3 itself.
+  const heading = await page.locator("#manager-archive .threat-copy > h3").boundingBox();
   assert.ok(heading.y >= header.y + header.height, "archive heading is behind the fixed header");
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
 }
@@ -51,7 +54,9 @@ try {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     for (const name of ["terra", "luna"]) {
-      for (const selector of [".manager-back", ".dossier-index-return"]) {
+      // 2026-11-28: the dossier now also carries a world-map link of the same
+      // class (.is-world-map); the 人物一覧へ戻る return is the other one.
+      for (const selector of [".manager-back", ".dossier-index-return:not(.is-world-map)"]) {
         await page.goto(`${base}/characters/${name}`);
         await ready(page);
         const link = page.locator(selector);
@@ -85,7 +90,10 @@ try {
     assert.equal(await contents.count(), 3);
     assert.ok((await contents.first().textContent()).includes("世界を、勝負の盤面へ。"));
     for (const anchor of await page.locator(".dossier-reader-links a").all()) {
-      assert.ok((await anchor.boundingBox()).height >= 48);
+      // 2026-11-28: the touch-target floor is the owner's 44 px (COMMON.md); the
+      // reading links measure 44 (desktop) to 46 (phone) since the 2026-11-22 dossier
+      // restyle, so the old 48 px bar is stale.
+      assert.ok((await anchor.boundingBox()).height >= 44);
     }
     await contents.last().click();
     await page.waitForURL("**#character-section-03");

@@ -30,10 +30,20 @@ const addFaults = async (page, faults = []) => {
       }
       if (faults.includes("bitmap-stalled")) {
         const createBitmap = window.createImageBitmap?.bind(window);
+        // 2026-11-28: the nanite kit is fetched and decoded from a Blob since 2026-10-17
+        // (ac163b93 / b6c4b046, src/lib/rexonance-nanites-warmup.ts), so the source's URL is
+        // read from the Response and the Blob it yields is remembered.
+        const kitBlobs = new WeakSet();
+        const readBlob = Response.prototype.blob;
+        Response.prototype.blob = async function (...blobArgs) {
+          const result = await readBlob.apply(this, blobArgs);
+          if (/rexonance-nanites.*cells\.webp/i.test(this.url)) kitBlobs.add(result);
+          return result;
+        };
         if (createBitmap) {
           window.createImageBitmap = (...args) => {
             const src = args[0]?.currentSrc || args[0]?.src || "";
-            if (/rexonance-nanites.*cells\.webp/i.test(src)) {
+            if (kitBlobs.has(args[0]) || /rexonance-nanites.*cells\.webp/i.test(src)) {
               diag.bitmapStalled++;
               return new Promise(() => {});
             }
@@ -42,6 +52,17 @@ const addFaults = async (page, faults = []) => {
         }
       }
       if (faults.includes("save-data")) {
+        // 2026-11-28 (stale since 2026-10-31, 6934a2e7): Save-Data alone no longer selects the
+        // still tier; economy is the reader's saved 軽量 choice (html[data-world-effects=economy]),
+        // so the fixture saves that choice as well as reporting Save-Data.
+        try {
+          localStorage.setItem(
+            "deception-world:render-quality:v1",
+            JSON.stringify({ quality: "lightweight", revision: 1 }),
+          );
+        } catch {
+          /* storage blocked */
+        }
         Object.defineProperty(navigator, "connection", {
           configurable: true,
           value: {
@@ -291,10 +312,21 @@ const readVisualState = async (page) =>
   page.evaluate(() => {
     const runway = document.querySelector(".rzn-suitup");
     const canvas = runway?.querySelector(".rzn-canvas");
+    // 2026-11-28: once the skin is live (data-rzn-skin, the nano look, 2026-11-23) the classic
+    // .rzn-canvas stands down at opacity 0 (data-rzn-covered) and the figure is drawn by the
+    // surge layers and the WebGL skin, so painted pixels are counted over every visible 2D canvas
+    // of the runway, and a visible, sized skin canvas counts as drawn (a WebGL canvas has no 2D
+    // pixels to read). Screenshot at scrollY 8548-8914: the suit is visibly assembling at 37-46%.
     let nonzeroAlpha = 0;
-    if (canvas?.width && canvas?.height) {
-      const pixels = canvas.getContext("2d")?.getImageData(0, 0, canvas.width, canvas.height).data;
-      if (pixels) for (let i = 3; i < pixels.length; i += 4) if (pixels[i]) nonzeroAlpha++;
+    let skinVisible = false;
+    for (const layer of runway?.querySelectorAll("canvas") ?? []) {
+      if (!layer.width || !layer.height || Number(getComputedStyle(layer).opacity) <= 0) continue;
+      const pixels = layer.getContext("2d")?.getImageData(0, 0, layer.width, layer.height).data;
+      if (!pixels) {
+        if ("rznSkin" in runway.dataset && getComputedStyle(layer).display !== "none") skinVisible = true;
+        continue;
+      }
+      for (let i = 3; i < pixels.length; i += 4) if (pixels[i]) nonzeroAlpha++;
     }
     return {
       url: location.href,
@@ -312,6 +344,7 @@ const readVisualState = async (page) =>
       canvasHeight: canvas?.height ?? 0,
       display: canvas ? getComputedStyle(canvas).display : "missing",
       nonzeroAlpha,
+      skinVisible,
       idleRequested: window.__rznStartupRecovery?.idleRequested ?? null,
       bitmapStalled: window.__rznStartupRecovery?.bitmapStalled ?? null,
       nativeRIC: typeof window.requestIdleCallback,
@@ -350,7 +383,7 @@ const assertLiveAssembly = async (page, label) => {
     state.canvasWidth <= 0 ||
     state.canvasHeight <= 0 ||
     state.display === "none" ||
-    state.nonzeroAlpha <= 0
+    (state.nonzeroAlpha <= 0 && !state.skinVisible)
   ) {
     throw new Error(
       `${label}: expected visible, progressing assembly; got ${JSON.stringify(state)}`,
@@ -455,6 +488,10 @@ try {
   await runCase("bitmap-stall-recovery", { faults: ["bitmap-stalled"] }, async ({ page }) => {
     await moveIntoAssembly(page);
     const state = await assertLiveAssembly(page, "bitmap-stall-recovery");
+    // 2026-11-28 LEFT (needs a way to trigger the kit's warm): the nanite kit's decode is parked
+    // while the suit page itself is open (heldBySuitPage in rexonance-suit-warmup.ts, 2026-10-16),
+    // so on a direct load this fault never engages; the stall now has to be injected on the
+    // path that warms the kit (the entry call). The suit-up itself goes live (asserted above).
     if (!(state.bitmapStalled > 0))
       throw new Error("bitmap-stall-recovery: the bitmap fault did not engage");
     return { state };

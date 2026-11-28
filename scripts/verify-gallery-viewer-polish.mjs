@@ -44,10 +44,14 @@ for (const engine of ["chromium", "webkit"]) {
       );
       // Wait for the dialog entrance to settle before measuring touch targets.
       await page.getByRole("button", { name: "2倍で鑑賞", exact: true }).click({ trial: true });
+      // 2026-11-28: the fitted viewer shows the artwork's display-size source
+      // (work.medium) and only fetches the full one when zoomed (2026-11-07,
+      // d5bc48b2 "Select gallery artwork by display size"), so the fitted src
+      // is no longer work.full.
       assert.equal(
         await image.getAttribute("src"),
-        navigationWork.full,
-        "original artwork source changed",
+        navigationWork.medium,
+        "fitted artwork source changed",
       );
       assert.equal(await image.evaluate((node) => getComputedStyle(node).objectFit), "contain");
       assert.ok(await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth + 1));
@@ -128,7 +132,7 @@ for (const engine of ["chromium", "webkit"]) {
         ["ArrowLeft", navigationWork],
       ]) {
         await page.keyboard.press(key);
-        assert.equal(await image.getAttribute("src"), expected.full);
+        assert.equal(await image.getAttribute("src"), expected.medium); // 2026-11-28: fitted view = medium source (d5bc48b2)
         assert.ok(
           await dialog.evaluate((node) => node === document.activeElement),
           `focus left the persistent dialog after ${key}`,
@@ -145,7 +149,7 @@ for (const engine of ["chromium", "webkit"]) {
           ["ArrowLeft", navigationWork],
         ]) {
           await page.keyboard.press(key);
-          assert.equal(await image.getAttribute("src"), expected.full);
+          assert.equal(await image.getAttribute("src"), expected.medium); // 2026-11-28: fitted view = medium source (d5bc48b2)
           assert.ok(await control.evaluate((node) => node === document.activeElement));
         }
       }
@@ -167,14 +171,23 @@ for (const engine of ["chromium", "webkit"]) {
         let succeed = false;
         let release;
         let gate;
+        // 2026-11-28: the viewer now requests display-size candidates from the work's
+        // srcSet / fullSrcSet as well as work.medium and work.full (2026-11-07, d5bc48b2),
+        // so every size of this work fails, not only the two named paths. The grid has
+        // already loaded its thumbnails by then, so the route is installed after it.
+        const ladder = new Set(
+          [work.full, work.medium, work.srcSet, work.fullSrcSet]
+            .flatMap((entry) => entry.split(","))
+            .map((entry) => entry.trim().split(" ")[0]),
+        );
+        await recoveryPage.goto(`${base}/gallery`, { waitUntil: "networkidle" });
         await recoveryPage.route("**/gallery/**", async (route) => {
           const url = new URL(route.request().url());
-          if (url.pathname !== work.full && url.pathname !== work.medium) return route.continue();
+          if (!ladder.has(url.pathname)) return route.continue();
           if (url.searchParams.has("retry") && gate) await gate;
           if (succeed || (fallback && url.pathname === work.medium)) return route.continue();
           return route.abort();
         });
-        await recoveryPage.goto(`${base}/gallery`, { waitUntil: "networkidle" });
         await recoveryPage
           .locator(`[data-gallery-artwork="${work.id}"] .gallery-work-open`)
           .click();

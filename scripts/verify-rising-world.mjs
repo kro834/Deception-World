@@ -72,7 +72,18 @@ const warn = (message) => {
   console.warn(`WARN ${message}`);
 };
 
+// 2026-11-28 (stale since 2026-10-31, 6934a2e7): the calm CSS tier is no longer guessed from
+// Save-Data; it is the reader's saved 軽量 choice (html[data-world-effects=economy]). The
+// fixture saves that choice, as the settings menu does, and still reports Save-Data.
 const SAVE_DATA = () => {
+  try {
+    localStorage.setItem(
+      "deception-world:render-quality:v1",
+      JSON.stringify({ quality: "lightweight", revision: 1 }),
+    );
+  } catch {
+    /* storage blocked: the tier assertions below then fail */
+  }
   Object.defineProperty(Navigator.prototype, "connection", {
     configurable: true,
     get: () => ({
@@ -834,7 +845,9 @@ async function checkTiers(browser, name) {
     await page.waitForTimeout(1500);
     const away = await waitBitmaps(0);
     assert.deepEqual(away, [], `${name}: bitmaps outlive /world`);
-    await page.evaluate(() => document.querySelector('a[href^="/world"]').click());
+    // 2026-11-28: a[href^="/world"] now matches the menu's /world-map row first (the world map page);
+    // the way back to the World is the exact /world link.
+    await page.evaluate(() => document.querySelector('a[href="/world"]').click());
     await page.waitForFunction(() => location.pathname === "/world");
     await page.waitForSelector(".site-shell.mirage-edition .rw-gate-button");
     await page.waitForTimeout(1500);

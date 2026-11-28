@@ -56,7 +56,21 @@ const warn = (message) => {
   console.warn(`WARN ${message}`);
 };
 
+// 2026-11-28 (stale since 2026-10-31, 6934a2e7 "explicit render quality"): the
+// economy / CSS tier is no longer guessed from Save-Data or the device; it is
+// only html[data-world-effects="economy"], i.e. the reader's saved 軽量
+// (lightweight) choice. Save-Data merely skips the opening's speculative
+// preloads. The fixture therefore saves the lightweight choice, as the settings
+// menu does, and still reports Save-Data so the no-preload path is exercised too.
 const SAVE_DATA = () => {
+  try {
+    localStorage.setItem(
+      "deception-world:render-quality:v1",
+      JSON.stringify({ quality: "lightweight", revision: 1 }),
+    );
+  } catch {
+    /* storage blocked: the fixture then reports a failure below */
+  }
   Object.defineProperty(Navigator.prototype, "connection", {
     configurable: true,
     get: () => ({

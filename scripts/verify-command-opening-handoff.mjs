@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
+import { openCommandDeck } from "./verify-menu-region.mjs";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8302";
 const engines = (process.env.OPENING_ENGINES || "chromium,webkit").split(",");
@@ -54,8 +55,9 @@ for (const engine of engines) {
       page.on("pageerror", (error) => errors.push(error.message));
       const result = { engine, profile: profile.name };
       try {
-        await page.goto(base, { waitUntil: "domcontentloaded" });
-        await page.locator('.command-deck[data-scene="world"]').waitFor();
+        // 2026-11-28: "/" opened as a document plays the opening first (owner,
+        // 2026-10-27); the dashboard is reached from inside the site.
+        await openCommandDeck(page, base);
         assert.equal(await page.locator("[data-opening-handoff-root]").count(), 0);
         const enter = page.locator(".command-deck-enter");
         const rect = await enter.boundingBox();

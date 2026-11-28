@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { chromium, webkit } from "playwright";
+import sharp from "sharp";
 import { DREAM_CASES } from "../src/components/dream-chapter/dream-chapter-data.ts";
 
 // Run only against a fresh production preview.
@@ -148,13 +149,30 @@ async function verifyWorld(page, viewport) {
   // metadata (FORMAT / WORLD / STATUS) is gone.
   assert.equal(await page.locator(".hero-metadata").count(), 0, `${viewport.name}: no metadata strip`);
 
-  const storyColors = await page.locator(".story-layout").evaluate((node) => ({
-    background: getComputedStyle(node).backgroundColor,
-    ink: getComputedStyle(node.querySelector(".story-heading h2")).color,
-  }));
+  // 2026-11-28: the story panel is pale paper (a gradient painted by .story-layout) with
+  // dark ink; .story-layout's own background-color is transparent, which the old check read
+  // as black (1.28:1). The paper is now sampled from the rendered page, in a strip beside
+  // the heading inside the panel's padding.
+  const heading = page.locator(".story-layout .story-heading h2");
+  await heading.evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
+  await page.waitForTimeout(400);
+  const ink = await heading.evaluate((node) => getComputedStyle(node).color);
+  const headingBox = await heading.boundingBox();
+  const strip = await page.screenshot({
+    clip: { x: Math.max(0, headingBox.x - 12), y: headingBox.y, width: 8, height: Math.max(8, headingBox.height) },
+    scale: "css",
+  });
+  const { data, info } = await sharp(strip).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const median = (channel) => {
+    const values = [];
+    for (let i = channel; i < data.length; i += info.channels) values.push(data[i]);
+    values.sort((x, y) => x - y);
+    return values[values.length >> 1];
+  };
+  const paper = `rgb(${median(0)}, ${median(1)}, ${median(2)})`;
   const contrast =
-    (Math.max(luminance(storyColors.background), luminance(storyColors.ink)) + 0.05) /
-    (Math.min(luminance(storyColors.background), luminance(storyColors.ink)) + 0.05);
+    (Math.max(luminance(paper), luminance(ink)) + 0.05) /
+    (Math.min(luminance(paper), luminance(ink)) + 0.05);
   assert.ok(contrast >= 7, `${viewport.name}: story heading contrast is ${contrast.toFixed(2)}:1`);
 
   const nav = page.locator(".topbar nav a");
@@ -186,7 +204,9 @@ async function verifyWorld(page, viewport) {
     `${viewport.name}: menu control is below 44px`,
   );
 
-  const posterControls = page.locator(".poster-controls button");
+  // 2026-11-28: the three poster controls (shuffle, reset, lock) now live in the shared artwork
+  // stage's .world-stage-control-cluster (2026-10-31, e00e5356); .poster-controls is Saga Cinema's.
+  const posterControls = page.locator(".world-stage-control-cluster button");
   assert.equal(await posterControls.count(), 3, `${viewport.name}: poster controls render`);
   for (const control of await posterControls.all()) {
     const controlBox = await box(control, `${viewport.name} poster control`);
@@ -219,8 +239,10 @@ async function verifyWorldTextZoom(page, viewport) {
   await assertNoHorizontalOverflow(page, `${viewport.name} World text 200%`);
   await page.evaluate(() => scrollTo(0, 0));
   const header = await box(page.locator(".topbar"), `${viewport.name} enlarged header`);
+  // 2026-11-28: .film-hero-identity no longer exists (hero recomposed 2026-10-31, e00e5356;
+  // its CSS dropped 2026-11-07); the hero's masthead is its h1.
   const masthead = await box(
-    page.locator(".film-hero-identity"),
+    page.locator(".hero h1"),
     `${viewport.name} enlarged masthead`,
   );
   assert.equal(
