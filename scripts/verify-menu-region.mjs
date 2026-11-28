@@ -29,3 +29,26 @@ export async function showMenuRow(page, selector) {
     selector.replace(/^\.side-panel\s+/, ""),
   );
 }
+
+/** Reach the command dashboard the way a reader does. 2026-11-28: since the
+ * owner's 2026-10-27 rule the document that opens on "/" plays the opening
+ * first; the dashboard is what "/" shows when reached inside the site. So open
+ * the World, then take the side menu's トップ row. */
+export async function openCommandDeck(page, base) {
+  await page.goto(new URL("/world", base).href, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(
+    () =>
+      !document.querySelector(".load-gate") &&
+      !document.documentElement.hasAttribute("data-loading") &&
+      !document.documentElement.hasAttribute("data-route-scroll-settling"),
+  );
+  await page.locator(".side-panel-trigger").first().click();
+  await showMenuRow(page, 'a[href="/"]');
+  await page.locator('#site-side-panel a[href="/"]').first().click();
+  await page.locator('.command-deck[data-scene="world"]').waitFor({ timeout: 30000 });
+  // The deck arrives with its own entrance; measure it settled, as a reader sees it.
+  await page.waitForFunction(
+    () => document.querySelector(".command-deck-enter")?.getAnimations().length === 0,
+  );
+  await page.waitForTimeout(800);
+}
