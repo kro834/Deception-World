@@ -375,7 +375,8 @@ try {
     await page.close();
   }
 
-  // ---- Phone menu: the first open of a session nudges the dial once ----
+  // ---- Phone menu: opening it never turns the dial on its own ----
+  // 2026-11-28: the owner removed the first-open nudge (「サイドメニュー開いたら丸が勝手に一つ動くのを直して」).
   {
     const context = await browser.newContext({
       viewport: { width: 390, height: 844 },
@@ -401,8 +402,8 @@ try {
       await settle(page, 900);
       return [...seen].filter((value) => value && !Number.isInteger(Number(value))).length;
     };
-    check("phone: the first open nudges the dial", (await turns()) > 0);
-    check("phone: the nudge is once a session", (await turns()) === 0);
+    check("phone: the first open leaves the dial still", (await turns()) === 0);
+    check("phone: a second open leaves the dial still", (await turns()) === 0);
     await context.close();
   }
 

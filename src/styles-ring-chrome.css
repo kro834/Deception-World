@@ -1421,17 +1421,13 @@ html[data-family]:not([data-family="dream"])
   }
 }
 
+/* 2026-11-28 (owner: 「サイドメニュー開いたら丸が勝手に一つ動くのを直して」): the
+   dial no longer spins in; it springs up in place, every planet where it
+   stays. */
 @keyframes ring-orbit-dial {
   from {
     opacity: 0;
-    rotate: -70deg;
     scale: 0.8;
-  }
-}
-
-@keyframes ring-orbit-face {
-  from {
-    rotate: 70deg;
   }
 }
 
@@ -1498,8 +1494,8 @@ html[data-family]:not([data-family="dream"])
     transition: box-shadow 220ms ease;
   }
 
-  /* Opening: the dial spins in and settles, its labels staying upright;
-     the hub and the close ring pop. */
+  /* Opening: the dial springs up in place (no turn); the hub and the close
+     ring pop. */
   html:not([data-world-effects="economy"])
     body
     #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
@@ -1507,14 +1503,6 @@ html[data-family]:not([data-family="dream"])
     animation: ring-orbit-dial var(--ring-dur-bounce) var(--ring-spring-bounce) 60ms backwards;
   }
 
-  html:not([data-world-effects="economy"])
-    body
-    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-open="true"]
-    .command-atlas-index
-    > button
-    > span {
-    animation: ring-orbit-face var(--ring-dur-bounce) var(--ring-spring-bounce) 60ms backwards;
-  }
 
   html:not([data-world-effects="economy"])
     body
@@ -1908,5 +1896,18 @@ html
     > button
     > svg {
     display: none;
+  }
+}
+
+/* 2026-11-28 (owner: 「サイドメニュー開いたら丸が勝手に一つ動くのを直して」): while
+   the menu places its dial on the reader's region (data-orbit-snap, two
+   frames at open), the planets jump there instead of springing round. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-snap]
+    .command-atlas-index
+    > button {
+    transition: none !important;
   }
 }

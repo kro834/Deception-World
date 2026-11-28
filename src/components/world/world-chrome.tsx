@@ -226,13 +226,6 @@ const ORBIT_STEP_DEG = 360 / ORBIT_REGIONS.length;
 // A drag turns the dial once the pointer has swept this far round it.
 const ORBIT_DRAG_SLOP_DEG = 4;
 const ORBIT_WHEEL_LOCK_MS = 160;
-// The first open of a session nudges the dial a little and lets it spring
-// back: the rim's far planets peek in, so the dial reads as something that
-// turns without a caption.
-const ORBIT_NUDGE_KEY = "dw-orbit-nudge";
-const ORBIT_NUDGE_TURN = 0.3;
-const ORBIT_NUDGE_AFTER_MS = 620;
-const ORBIT_NUDGE_HOLD_MS = 300;
 // Side layout: rows hug the circle through their column's edge, never
 // closer to the planets than this, and never pulled in further than MAX.
 const ORBIT_HUG_MIN_GAP_PX = 96;
@@ -760,36 +753,24 @@ export function SideMenuLayer({
       ?.closest<HTMLElement>(".side-panel-group")?.dataset?.atlasGroup;
     const region = group ? (ORBIT_REGION_OF_GROUP[group] ?? group) : "sections";
     const index = ORBIT_REGIONS.findIndex(([id]) => id === region);
+    // 2026-11-28 (owner: 「サイドメニュー開いたら丸が勝手に一つ動くのを直して」):
+    // the dial is already on the reader's region when the menu appears, not
+    // spun there on the bounce spring. The planets' transition is off for the
+    // two frames this placement takes; turns the reader makes still spring.
+    const raf = typeof window.requestAnimationFrame === "function";
+    panel?.setAttribute?.("data-orbit-snap", "");
+    let frame = raf
+      ? window.requestAnimationFrame(() => {
+          frame = window.requestAnimationFrame(() => panel?.removeAttribute?.("data-orbit-snap"));
+        })
+      : 0;
     setOrbitTurn(index < 0 ? 1 : index);
-  }, [isOpen, pathname]);
-  // First open of a session: one springy nudge (never under reduced motion
-  // or in economy, where the dial does not move at all).
-  useEffect(() => {
-    if (!isOpen || typeof document === "undefined") return;
-    const calm =
-      orbitMedia("(prefers-reduced-motion: reduce)") ||
-      document.documentElement.dataset?.worldEffects === "economy";
-    if (calm) return;
-    try {
-      if (window.sessionStorage.getItem(ORBIT_NUDGE_KEY) === "1") return;
-      window.sessionStorage.setItem(ORBIT_NUDGE_KEY, "1");
-    } catch {
-      return;
-    }
-    let back = 0;
-    const out = window.setTimeout(() => {
-      if (orbitPointerRef.current) return;
-      setOrbitTurn((value) => value + ORBIT_NUDGE_TURN);
-      back = window.setTimeout(() => {
-        if (!orbitPointerRef.current) setOrbitTurn((value) => Math.round(value - ORBIT_NUDGE_TURN));
-      }, ORBIT_NUDGE_HOLD_MS);
-    }, ORBIT_NUDGE_AFTER_MS);
     return () => {
-      window.clearTimeout(out);
-      window.clearTimeout(back);
-      setOrbitTurn((value) => Math.round(value));
+      if (raf) window.cancelAnimationFrame(frame);
+      panel?.removeAttribute?.("data-orbit-snap");
     };
-  }, [isOpen]);
+  }, [isOpen, pathname]);
+  // 2026-11-28 (owner): no first-open nudge either; the dial turns only when the reader turns it.
   // Desktop: each row of the region in view hugs the dial's curve. Measured
   // once per region (and on resize), written as one custom property per row;
   // the rows move by `translate` only.
