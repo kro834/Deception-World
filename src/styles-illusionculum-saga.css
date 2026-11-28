@@ -1698,6 +1698,17 @@
   }
 }
 
+/* 2026-11-28: the subchapter titles are nowrap too, and the longest of them
+   (仮面ライダーサーガ・究極形態総合性能比較, 18.9em with its tracking) ran out
+   of the page from 320 to about 490px: at 390 its last two characters sat
+   past the edge, clipped by the page. The size follows the column until it
+   reaches its own 24px, so the title stays one unbroken line. */
+@media (max-width: 1099.98px) {
+  .rxs-page.rxs-page.ics-page .ics-subchapter .ics-heading h2 {
+    font-size: clamp(13px, calc((100vw - 40px) / 19.6), 24px);
+  }
+}
+
 /* ================================================================
    The narrow bar names the chapter in view (Rexonance's bar,
    styles-rexonance-apex.css): from 360 to 1099px the inner grid gives the
@@ -3851,6 +3862,16 @@ html[data-world-effects="economy"] .rxs-page.rxs-page.ics-page .ics-form-panel >
 
 #top.rxs-page.ics-page .ics-spec-part {
   white-space: nowrap;
+}
+
+/* 2026-11-28: 『Paranormal Realizer Ultra』／ is 305px at its 19px size, wider
+   than the 252px inside the card at 320 (ran 19px past the card's border and
+   the screen's edge). Under 400px a part may break at its own spaces; it
+   still never breaks after the ／ or inside a word. */
+@media (max-width: 400px) {
+  #top.rxs-page.ics-page .ics-spec-part {
+    white-space: normal;
+  }
 }
 
 #top.rxs-page.ics-page .ics-spec-sub {
