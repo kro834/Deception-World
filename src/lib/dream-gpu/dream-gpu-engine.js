@@ -1284,6 +1284,7 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
     });
   }
   let bloomDirty = true;
+  let captureFailed = false;
   const capture = () => {
     ensureTexture();
     try {
@@ -1291,8 +1292,14 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
       captured = true;
       bloomDirty = true;
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === "InvalidStateError"))
+      if (error instanceof DOMException && error.name === "InvalidStateError") return;
+      // A browser that rejects the element (the API shape changed once already) would
+      // otherwise throw on every paint: hand the desk back to the plain page once.
+      if (!captureFailed) {
+        captureFailed = true;
         console.warn(error);
+        onFail?.(error);
+      }
     }
   };
   const onPaint = () => capture();
