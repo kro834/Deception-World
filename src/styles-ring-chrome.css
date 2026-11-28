@@ -1827,3 +1827,63 @@ html
     padding-top: 8px;
   }
 }
+
+/* ---- 2026-11-28: the dial on a sideways phone. ----
+   The disc stays at its 62px floor there (the dial is sized from a visible
+   height of 250-300px), so the 12px labels filled it edge to edge:
+   ギャラリー・お知らせ ran into the rim and, with a wider face, wrapped to
+   three lines; クイック検索 ran out of its pill into the focused planet.
+   The words are unchanged. The label size follows the disc, the lines stay
+   whole (nowrap, two at most), and the pill's width is the room between the
+   far planets and the focused one, with its icon and type scaled to it. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .command-atlas-index
+    > #command-atlas-tab-information
+    > span {
+    font-size: clamp(10px, calc(var(--orbit-disc) * 0.17), 12px);
+    letter-spacing: -0.02em;
+    line-height: 1.16;
+    white-space: nowrap;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock {
+    width: min(250px, calc(var(--orbit-r) * 2 - var(--orbit-disc) * 1.22 - 14px));
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > button {
+    gap: 3px;
+    padding-inline: 4px;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > button
+    > span {
+    font-size: clamp(9.5px, calc(var(--orbit-vh) * 0.034), 12px);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > button
+    > svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+}
+
+/* Under 280px of visible height the pill has no room for its icon too. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) and (max-height: 279px) {
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
+    .side-panel-search-dock
+    > button
+    > svg {
+    display: none;
+  }
+}

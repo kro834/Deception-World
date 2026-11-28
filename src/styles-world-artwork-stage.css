@@ -1191,3 +1191,18 @@ html[data-family="world"]
   border-color: transparent;
   background: rgb(var(--ring-key-rgb, 122 232 255) / 12%) !important;
 }
+
+/* 2026-11-28: the pair is a nowrap row whose buttons shrink (min-width 0), so
+   in the narrow copy column of a sideways phone (271px at 667x375) the
+   ENTER THE WORLD label ran 35px out of its pill (76px at 568x320). The
+   buttons keep their own width and the row wraps instead. Last in the file:
+   it must follow the brush-up rules above. */
+@media (max-height: 540px) and (orientation: landscape) {
+  #top.world-artwork-hero .world-stage-actions {
+    flex-wrap: wrap;
+  }
+
+  #top.world-artwork-hero .world-stage-actions :is(.primary-action, .text-action) {
+    flex: none;
+  }
+}
