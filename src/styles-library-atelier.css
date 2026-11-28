@@ -3240,3 +3240,62 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
     text-shadow: none;
   }
 }
+
+/* ==========================================================================
+   Wave-10 Library Atelier Archival Specular Refinement (/library)
+   ========================================================================== */
+
+html[data-family="library"] .world.command-records.library-page.library-atelier :is(
+  .library-index-meter,
+  .library-kind-count,
+  .library-query-summary
+) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  html[data-family="library"] .world.command-records.library-page.library-atelier :is(
+    .library-card,
+    .library-cast-tile,
+    .library-continue
+  ) {
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.26),
+      inset 0 -1px 0 rgba(122, 232, 255, 0.14),
+      0 16px 36px -16px rgba(2, 6, 16, 0.82);
+  }
+
+  html[data-family="library"] .world.command-records.library-page.library-atelier :is(
+    .library-card:hover,
+    .library-cast-tile:hover
+  ) {
+    border-color: rgba(240, 207, 134, 0.56);
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.48),
+      0 20px 42px -14px rgba(2, 6, 16, 0.88),
+      0 0 22px -6px rgba(122, 232, 255, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="library"]:not([data-world-effects="economy"]) .world.command-records.library-page.library-atelier :is(.library-card, .library-cast-tile) {
+    transition:
+      transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms ease,
+      box-shadow 240ms ease;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"]) .world.command-records.library-page.library-atelier :is(.library-card:hover, .library-cast-tile:hover) {
+    transform: translateY(-2px);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"] .world.command-records.library-page.library-atelier :is(.library-card, .library-cast-tile, .library-continue) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

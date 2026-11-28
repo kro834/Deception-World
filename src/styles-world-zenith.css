@@ -1898,3 +1898,182 @@ html[data-family="world"]:root
     }
   }
 }
+
+/* ==========================================================================
+   Wave-10 Zenith Celestial Chronograph Brush-up (/world)
+   Sapphire-Obsidian Specular Glass x Tabular Numerals x <=48px Rim Shadow
+   ========================================================================== */
+
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition :is(
+  #top.world-artwork-hero .world-stage-controls .world-stage-control-cluster,
+  .episode-grid,
+  .episode-pickup-item,
+  .rider-console,
+  .manager-archive-tabs,
+  .world-column-tabs,
+  .wa-quote-band,
+  .wa-quote,
+  .world-exploration-card
+) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition {
+    --w10-obsidian-base: linear-gradient(
+      165deg,
+      rgb(12 20 36 / 0.94) 0%,
+      rgb(7 12 24 / 0.97) 54%,
+      rgb(4 8 17 / 0.99) 100%
+    );
+    --w10-sapphire-caustic: radial-gradient(
+      120% 88% at 18% 0%,
+      rgb(var(--ring-key-rgb) / 0.14) 0%,
+      rgb(var(--ring-gold-rgb) / 0.06) 44%,
+      rgb(4 8 17 / 0) 78%
+    );
+    --w10-specular-key-gold: linear-gradient(
+      90deg,
+      rgb(var(--ring-key-rgb) / 0) 3%,
+      rgb(var(--ring-key-rgb) / 0.92) 26%,
+      rgb(var(--ring-gold-rgb) / 0.96) 52%,
+      rgb(var(--ring-pink-rgb) / 0.58) 78%,
+      rgb(var(--ring-key-rgb) / 0) 97%
+    );
+    --w10-specular-gold-horizon: linear-gradient(
+      90deg,
+      rgb(var(--ring-gold-rgb) / 0) 4%,
+      rgb(var(--ring-gold-rgb) / 0.95) 32%,
+      rgb(var(--ring-key-rgb) / 0.88) 68%,
+      rgb(var(--ring-gold-rgb) / 0) 96%
+    );
+    --w10-rim-rest:
+      inset 0 2px 0 0 rgb(var(--ring-key-rgb) / 0.24),
+      inset 0 -1px 0 0 rgb(var(--ring-gold-rgb) / 0.14),
+      0 16px 38px -14px rgb(2 6 16 / 0.82),
+      0 4px 16px -4px rgb(var(--ring-key-rgb) / 0.14);
+    --w10-rim-elevated:
+      inset 0 2px 0 0 rgb(var(--ring-gold-rgb) / 0.48),
+      inset 0 0 26px -10px rgb(var(--ring-key-rgb) / 0.22),
+      0 22px 46px -12px rgb(2 6 16 / 0.88),
+      0 8px 28px -6px rgb(var(--ring-key-rgb) / 0.28);
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition #top.world-artwork-hero .world-stage-controls .world-stage-control-cluster {
+    border: 1px solid rgb(var(--ring-key-rgb) / 0.32);
+    background-image:
+      var(--w10-specular-key-gold),
+      radial-gradient(95% 130% at 50% 0%, rgb(var(--ring-key-rgb) / 0.18) 0%, rgb(7 13 27 / 0) 72%),
+      var(--w10-obsidian-base);
+    background-size: 84% 2px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 2px 0 0 rgb(var(--ring-key-rgb) / 0.28),
+      inset 0 -1px 0 0 rgb(var(--ring-gold-rgb) / 0.16),
+      0 14px 34px -10px rgb(2 6 16 / 0.82);
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition :is(
+    .episode-pickup-item,
+    .world-exploration-card
+  ) {
+    border: 1px solid rgb(var(--ring-key-rgb) / 0.28);
+    background-color: #060b16;
+    background-image:
+      var(--w10-specular-key-gold),
+      radial-gradient(110% 90% at 88% 100%, rgb(var(--ring-pink-rgb) / 0.08) 0%, rgb(6 11 22 / 0) 64%),
+      var(--w10-sapphire-caustic),
+      var(--w10-obsidian-base);
+    background-size: 94% 2px, 100% 100%, 100% 100%, 100% 100%;
+    background-position: top center, center, center, center;
+    background-repeat: no-repeat;
+    box-shadow: var(--w10-rim-rest);
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition :is(
+    .episode-pickup-item:hover,
+    .episode-pickup-item:focus-within,
+    .world-exploration-card:hover,
+    .world-exploration-card:focus-visible,
+    .world-exploration-card:focus-within
+  ) {
+    border-color: rgb(var(--ring-gold-rgb) / 0.62);
+    background-image:
+      var(--w10-specular-gold-horizon),
+      radial-gradient(115% 95% at 82% 100%, rgb(var(--ring-pink-rgb) / 0.13) 0%, rgb(6 11 22 / 0) 66%),
+      radial-gradient(125% 92% at 16% 0%, rgb(var(--ring-key-rgb) / 0.22) 0%, rgb(var(--ring-gold-rgb) / 0.1) 46%, rgb(4 8 17 / 0) 80%),
+      var(--w10-obsidian-base);
+    background-size: 96% 2px, 100% 100%, 100% 100%, 100% 100%;
+    background-position: top center, center, center, center;
+    background-repeat: no-repeat;
+    box-shadow: var(--w10-rim-elevated);
+  }
+
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition .wa-quote-band {
+    border: 1px solid rgb(var(--ring-gold-rgb) / 0.34);
+    background-image:
+      var(--w10-specular-gold-horizon),
+      radial-gradient(90% 120% at 50% 0%, rgb(var(--ring-gold-rgb) / 0.14) 0%, rgb(var(--ring-key-rgb) / 0.08) 46%, rgb(7 11 22 / 0) 78%),
+      var(--w10-obsidian-base);
+    background-size: 94% 2px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 2px 0 0 rgb(var(--ring-gold-rgb) / 0.36),
+      inset 0 -1px 0 0 rgb(var(--ring-key-rgb) / 0.18),
+      0 18px 42px -14px rgb(2 6 16 / 0.84);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):root body main.site-shell.film-edition.mirage-edition :is(
+    .episode-pickup-item,
+    .world-exploration-card,
+    .wa-quote-band
+  ) {
+    transition:
+      transform var(--ring-dur-spring, 420ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+      box-shadow var(--ring-dur-spring, 420ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+      border-color 200ms ease;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):root body main.site-shell.film-edition.mirage-edition :is(
+    .episode-pickup-item:hover,
+    .world-exploration-card:hover
+  ) {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@media (forced-colors: none) and (prefers-reduced-transparency: reduce),
+       (forced-colors: none) and (prefers-contrast: more) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition :is(
+    #top.world-artwork-hero .world-stage-controls .world-stage-control-cluster,
+    .episode-pickup-item,
+    .wa-quote-band,
+    .world-exploration-card
+  ) {
+    background-color: #050912;
+    background-image: none;
+    border-color: var(--ring-key, #7ae8ff);
+    box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.92);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition :is(
+    #top.world-artwork-hero .world-stage-controls .world-stage-control-cluster,
+    .episode-pickup-item,
+    .wa-quote-band,
+    .world-exploration-card
+  ) {
+    forced-color-adjust: auto;
+    background-color: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border: 1px solid ButtonText;
+    box-shadow: none;
+  }
+}

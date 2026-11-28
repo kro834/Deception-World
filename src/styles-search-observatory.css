@@ -1375,3 +1375,55 @@ html[data-family="library"]
     box-shadow: none !important;
   }
 }
+
+/* ==========================================================================
+   Wave-10 Search Observatory Telemetry & Result Card Polish (/search)
+   ========================================================================== */
+
+html[data-family="library"] .world.command-records.search-page.search-observatory :is(
+  .search-display-summary,
+  .search-result-meta
+) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  html[data-family="library"] .world.command-records.search-page.search-observatory .search-result-card {
+    box-shadow:
+      inset 0 1px 0 rgba(122, 232, 255, 0.22),
+      inset 0 -1px 0 rgba(240, 207, 134, 0.14),
+      0 14px 34px -16px rgba(2, 6, 16, 0.8);
+  }
+
+  html[data-family="library"] .world.command-records.search-page.search-observatory .search-result-card:hover,
+  html[data-family="library"] .world.command-records.search-page.search-observatory .search-result-card:focus-within {
+    border-color: rgba(122, 232, 255, 0.56);
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.44),
+      0 18px 40px -14px rgba(2, 6, 16, 0.88),
+      0 0 22px -6px rgba(122, 232, 255, 0.24);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="library"]:not([data-world-effects="economy"]) .world.command-records.search-page.search-observatory .search-result-card {
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 200ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html[data-family="library"]:not([data-world-effects="economy"]) .world.command-records.search-page.search-observatory .search-result-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"] .world.command-records.search-page.search-observatory .search-result-card {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

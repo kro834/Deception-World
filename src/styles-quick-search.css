@@ -1091,3 +1091,41 @@ dialog.quick-search[data-keyboard-viewport="true"] .quick-search-list {
     background: var(--qs-ink);
   }
 }
+
+/* ==========================================================================
+   Wave-10 Quick Search Command Palette Keycap & Prism Bevel
+   ========================================================================== */
+
+dialog.quick-search :is(.quick-search-count, .quick-search-keys kbd) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  dialog.quick-search .quick-search-panel {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(240, 207, 134, 0.16),
+      0 24px 48px -12px rgba(2, 6, 16, 0.9);
+  }
+
+  dialog.quick-search .quick-search-keys kbd {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 2px 0 rgba(0, 0, 0, 0.55);
+  }
+
+  dialog.quick-search .quick-search-option:focus-visible {
+    outline: 2px solid var(--ring-key, #7ae8ff);
+    outline-offset: -2px;
+  }
+}
+
+@media (forced-colors: active) {
+  dialog.quick-search .quick-search-panel {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border: 2px solid CanvasText;
+    box-shadow: none;
+  }
+}

@@ -1313,3 +1313,99 @@ html[data-family="dream"][data-world-effects="economy"]
     box-shadow: none;
   }
 }
+
+/* ==========================================================================
+   Wave-10 Craft Optics Brush-up: Dream Chapter & Taisho Kinema
+   Kuro-Urushi x Makie Gold Dust x Yoi-Murasaki x Shukou
+   ========================================================================== */
+
+html[data-family="dream"] :is(
+  .dream-chronicle-list,
+  .dream-programme-dossier-chip,
+  .dream-reader-index-number
+) {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (forced-colors: none) {
+  html[data-family="dream"] .dream-chronicle-list {
+    border-color: rgba(220, 179, 96, 0.36);
+    box-shadow:
+      0 16px 36px rgba(6, 4, 10, 0.52),
+      inset 0 1px 0 rgba(247, 230, 183, 0.18);
+  }
+
+  html[data-family="dream"] .dream-programme-dossier-chip {
+    border-color: rgba(220, 179, 96, 0.36);
+    box-shadow:
+      0 6px 18px rgba(7, 4, 12, 0.44),
+      inset 0 1px 0 rgba(247, 230, 183, 0.22),
+      inset 2px 0 0 #c83e2b;
+  }
+
+  html[data-family="dream"] .dream-programme-dossier-chip:hover,
+  html[data-family="dream"] .dream-programme-dossier-chip:focus-visible {
+    border-color: rgba(242, 206, 128, 0.66);
+    box-shadow:
+      0 8px 22px rgba(10, 6, 18, 0.56),
+      0 0 16px rgba(220, 179, 96, 0.2),
+      inset 0 1px 0 rgba(247, 230, 183, 0.38),
+      inset 2px 0 0 #df533d;
+  }
+
+  html[data-family="dream"] .dream-programme-dossier-chip:focus-visible {
+    outline: 2px solid #f7e6b7;
+    outline-offset: 2px;
+  }
+
+  html[data-family="dream"] .dream-glossary {
+    border-color: rgba(220, 179, 96, 0.36);
+    box-shadow:
+      0 18px 38px rgba(5, 3, 9, 0.56),
+      inset 0 1px 0 rgba(247, 230, 183, 0.16);
+  }
+
+  html[data-family="dream"] .dream-reader-index-number {
+    background-image: linear-gradient(
+      168deg,
+      #f7e6b7 0%,
+      #edd082 34%,
+      #9e7329 68%,
+      #f4dfa6 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"]) .dream-programme-dossier-chip {
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-family="dream"] :is(.dream-chronicle-list, .dream-glossary, .dream-programme-dossier-chip) {
+    background-color: #120c1a;
+    background-image: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] :is(.dream-chronicle-list, .dream-glossary, .dream-programme-dossier-chip) {
+    forced-color-adjust: auto;
+    background-color: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border-color: ButtonBorder;
+    box-shadow: none;
+  }
+
+  html[data-family="dream"] .dream-reader-index-number {
+    background-image: none;
+    color: CanvasText;
+  }
+}

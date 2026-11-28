@@ -1171,3 +1171,96 @@ html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page .rxs-fo
     outline-color: Highlight;
   }
 }
+
+/* ==========================================================================
+   Wave-10 Quantum Observatory Instrument — P14 Telemetry & Tri-System Grid
+   ========================================================================== */
+
+.rxs-page.rxs-page.rxs-rexonance-page :is(
+  .rxs-p14-overview,
+  .rxs-p14-overview :is(th, td, dd, dt, data, output, strong, code, span),
+  .rxs-system-grid article,
+  .rxs-bars,
+  .rxs-bars :is(div, span, strong, data, output, dd, dt, td, th, code),
+  .rxs-footer > a
+) {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1, "zero" 1;
+}
+
+@media (forced-colors: none) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview {
+    background-image:
+      linear-gradient(90deg, rgba(232, 244, 255, 0.52) 0%, rgba(96, 165, 250, 0.64) 50%, rgba(245, 208, 118, 0.48) 100%),
+      radial-gradient(125% 88% at 14% 0%, rgba(59, 130, 246, 0.14) 0%, transparent 66%),
+      linear-gradient(168deg, rgba(15, 29, 53, 0.96) 0%, rgba(8, 16, 31, 0.98) 60%, rgba(5, 11, 22, 0.99) 100%);
+    background-size: 96% 2px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgba(242, 248, 255, 0.2),
+      0 20px 44px -18px rgba(2, 7, 18, 0.84);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article {
+    --rxs-sys-crown: linear-gradient(90deg, #f2f8ff 0%, #7dd3fc 56%, #60a5fa 100%);
+    --rxs-sys-aura: rgba(125, 211, 252, 0.16);
+    background-image:
+      var(--rxs-sys-crown),
+      radial-gradient(118% 82% at 15% 0%, var(--rxs-sys-aura) 0%, transparent 68%),
+      linear-gradient(165deg, rgba(16, 31, 56, 0.96) 0%, rgba(9, 18, 35, 0.98) 58%, rgba(6, 12, 24, 0.99) 100%);
+    background-size: 96% 2px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgba(242, 248, 255, 0.2),
+      0 16px 36px -16px rgba(2, 8, 20, 0.82);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:nth-child(2) {
+    --rxs-sys-crown: linear-gradient(90deg, #fef3c7 0%, #f5d076 52%, #60a5fa 100%);
+    --rxs-sys-aura: rgba(245, 208, 118, 0.16);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:nth-child(3) {
+    --rxs-sys-crown: linear-gradient(90deg, #93c5fd 0%, #3b82f6 52%, #f5d076 100%);
+    --rxs-sys-aura: rgba(59, 130, 246, 0.18);
+  }
+
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-footer > a:hover {
+    border-color: rgba(245, 208, 118, 0.72);
+    box-shadow:
+      inset 0 1px 0 rgba(254, 249, 232, 0.36),
+      0 16px 34px -12px rgba(3, 10, 24, 0.88),
+      0 0 22px -6px rgba(96, 165, 250, 0.32);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained]) .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-system-grid article, .rxs-footer > a) {
+    transition:
+      border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained]) .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid article:hover {
+    transform: translateY(-2px);
+  }
+}
+
+html:is([data-world-effects="economy"], [data-rzn-constrained]) .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-p14-overview, .rxs-system-grid article) {
+  background-image: none;
+  box-shadow: none;
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-p14-overview, .rxs-system-grid article, .rxs-footer > a) {
+    forced-color-adjust: auto;
+    background-color: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+}

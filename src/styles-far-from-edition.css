@@ -2328,3 +2328,80 @@ html[data-family="special"]:is([data-world-effects="economy"], [data-rzn-constra
     clip-path: none;
   }
 }
+
+/* ==========================================================================
+   Wave-10 Optical Polish — Far From Saga (Celestial Sapphire x Champagne Gold)
+   ========================================================================== */
+
+@media (forced-colors: none) {
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) .ffs-comparison-card {
+    background-image:
+      linear-gradient(90deg, transparent 2%, rgba(118, 182, 255, 0.88) 28%, rgba(243, 217, 164, 0.94) 54%, rgba(118, 182, 255, 0.84) 78%, transparent 98%),
+      linear-gradient(162deg, rgba(255, 246, 226, 0.1) 0%, rgba(92, 164, 255, 0.08) 38%, rgba(8, 18, 42, 0.24) 100%),
+      radial-gradient(120% 85% at 14% 0%, rgba(96, 168, 255, 0.2) 0%, transparent 64%);
+    background-size: 94% 2px, 100% 100%, 100% 100%;
+    background-position: top center, center, center;
+    background-repeat: no-repeat;
+    border-color: rgba(118, 182, 255, 0.34);
+    box-shadow:
+      0 20px 42px -18px rgba(3, 10, 28, 0.82),
+      0 0 28px -10px rgba(74, 148, 255, 0.24),
+      inset 0 1px 0 rgba(255, 248, 232, 0.44);
+  }
+
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) .ffs-comparison-card:is(:hover, :focus-within) {
+    border-color: rgba(243, 217, 164, 0.58);
+    box-shadow:
+      0 24px 46px -16px rgba(4, 13, 36, 0.88),
+      0 0 34px -8px rgba(243, 217, 164, 0.26),
+      inset 0 1px 0 rgba(255, 251, 240, 0.6);
+  }
+
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) .ffs-finisher {
+    border-color: rgba(243, 217, 164, 0.46);
+    box-shadow:
+      0 24px 46px -16px rgba(2, 8, 24, 0.88),
+      0 0 36px -8px rgba(243, 217, 164, 0.26),
+      inset 0 1px 0 rgba(255, 250, 236, 0.56);
+  }
+
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) .ffs-footer > a:hover {
+    border-color: rgba(248, 228, 182, 0.74);
+    box-shadow:
+      0 18px 40px -12px rgba(4, 14, 38, 0.88),
+      0 0 30px -6px rgba(243, 217, 164, 0.34),
+      inset 0 1px 0 rgba(255, 252, 242, 0.64);
+  }
+
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) :is(
+    .ffs-comparison-card:focus-visible,
+    .ffs-finisher:focus-visible,
+    .ffs-footer > a:focus-visible
+  ) {
+    outline: 2px solid #f5dfa9;
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-rzn-constrained])[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) :is(.ffs-comparison-card, .ffs-finisher, .ffs-footer > a) {
+      transition:
+        border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  }
+
+  html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) :is(.ffs-comparison-card, .ffs-finisher, .ffs-footer > a) {
+    background-image: none;
+    box-shadow: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special]:not(#ff-e) :is(.ffs-comparison-card, .ffs-finisher, .ffs-footer > a) {
+    forced-color-adjust: auto;
+    background-color: Canvas;
+    background-image: none;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

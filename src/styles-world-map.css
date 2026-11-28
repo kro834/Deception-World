@@ -1785,3 +1785,37 @@
     color: #000000;
   }
 }
+
+/* ==========================================================================
+   Wave-10 World Map Astrolabe Console & Detail Plate Polish (/world-map)
+   ========================================================================== */
+
+.wm-page :is(.wm-filter-count, .wm-index-group-head) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  .wm-page :is(.wm-tools, .wm-detail, .wm-index-group) {
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.24),
+      inset 0 -1px 0 rgba(122, 232, 255, 0.16),
+      0 16px 38px -16px rgba(2, 6, 16, 0.84);
+  }
+
+  .wm-page .wm-detail-jump:focus-visible,
+  .wm-page .wm-back:focus-visible,
+  .wm-page .wm-lab-link:focus-visible {
+    outline: 2px solid var(--ring-key, #7ae8ff);
+    outline-offset: 2px;
+  }
+}
+
+@media (forced-colors: active) {
+  .wm-page :is(.wm-tools, .wm-detail, .wm-index-group) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

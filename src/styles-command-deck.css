@@ -759,3 +759,204 @@ body:has(.command-deck) {
     border: 1px solid ButtonText;
   }
 }
+
+/* ==========================================================================
+   Wave-10 Command Deck Brush-Up (Opening & Command Deck `/`)
+   Scene-Adaptive Astrolabe Orbitals x Obsidian Prism Cards x Double Focus Halo
+   ========================================================================== */
+
+.command-deck {
+  --w10-scene-primary: var(--ring-key, #7ae8ff);
+  --w10-scene-primary-rgb: var(--ring-key-rgb, 122 232 255);
+  --w10-scene-secondary: var(--ring-gold, #f0cf86);
+  --w10-scene-secondary-rgb: var(--ring-gold-rgb, 240 207 134);
+  --w10-scene-tertiary-rgb: var(--ring-pink-rgb, 255 95 200);
+  --w10-astrolabe-angle: 16deg;
+  --w10-astrolabe-scale: 1;
+}
+
+.command-deck[data-scene="world"] {
+  --w10-scene-primary: var(--ring-key, #7ae8ff);
+  --w10-scene-primary-rgb: var(--ring-key-rgb, 122 232 255);
+  --w10-scene-secondary: var(--ring-gold, #f0cf86);
+  --w10-scene-secondary-rgb: var(--ring-gold-rgb, 240 207 134);
+  --w10-scene-tertiary-rgb: var(--ring-pink-rgb, 255 95 200);
+  --w10-astrolabe-angle: 16deg;
+  --w10-astrolabe-scale: 1;
+}
+
+.command-deck[data-scene="dream"] {
+  --w10-scene-primary: var(--ring-pink, #ff5fc8);
+  --w10-scene-primary-rgb: var(--ring-pink-rgb, 255 95 200);
+  --w10-scene-secondary: var(--ring-key, #7ae8ff);
+  --w10-scene-secondary-rgb: var(--ring-key-rgb, 122 232 255);
+  --w10-scene-tertiary-rgb: var(--ring-gold-rgb, 240 207 134);
+  --w10-astrolabe-angle: 134deg;
+  --w10-astrolabe-scale: 1.035;
+}
+
+.command-deck[data-scene="final"] {
+  --w10-scene-primary: var(--ring-gold, #f0cf86);
+  --w10-scene-primary-rgb: var(--ring-gold-rgb, 240 207 134);
+  --w10-scene-secondary: var(--ring-pink, #ff5fc8);
+  --w10-scene-secondary-rgb: var(--ring-pink-rgb, 255 95 200);
+  --w10-scene-tertiary-rgb: var(--ring-key-rgb, 122 232 255);
+  --w10-astrolabe-angle: 252deg;
+  --w10-astrolabe-scale: 1.06;
+}
+
+.command-deck-scene-buttons > a,
+.command-deck-destinations a,
+.command-deck-rider-rail a,
+.command-deck-footer a,
+.command-deck .command-deck-enter.command-deck-enter {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.command-deck-scene-buttons > a:focus-visible,
+.command-deck-destinations a:focus-visible,
+.command-deck-rider-rail a:focus-visible,
+.command-deck-footer a:focus-visible,
+.command-deck .command-deck-enter.command-deck-enter:focus-visible {
+  outline: 2px solid var(--w10-scene-primary);
+  outline-offset: 3px;
+}
+
+@media (forced-colors: none) {
+  .command-deck-destinations a {
+    background-image:
+      linear-gradient(
+        90deg,
+        transparent 2%,
+        rgb(var(--ring-key-rgb, 122 232 255) / 0.94) 22%,
+        rgb(var(--ring-gold-rgb, 240 207 134) / 0.98) 50%,
+        rgb(var(--ring-pink-rgb, 255 95 200) / 0.94) 78%,
+        transparent 98%
+      ),
+      radial-gradient(
+        125% 92% at 12% 0%,
+        rgb(var(--w10-scene-primary-rgb) / 0.16) 0%,
+        transparent 58%
+      ),
+      radial-gradient(
+        110% 88% at 94% 100%,
+        rgb(var(--w10-scene-secondary-rgb) / 0.13) 0%,
+        transparent 62%
+      ),
+      linear-gradient(
+        162deg,
+        rgb(20 29 48 / 0.94) 0%,
+        rgb(10 15 28 / 0.96) 48%,
+        rgb(5 8 16 / 0.99) 100%
+      );
+    background-size: 92% 2px, 100% 100%, 100% 100%, 100% 100%;
+    background-position: top center, center, center, center;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.16),
+      inset 1px 0 0 rgb(var(--w10-scene-primary-rgb) / 0.14),
+      inset -1px -1px 0 rgb(var(--w10-scene-secondary-rgb) / 0.12),
+      0 16px 36px -14px rgb(2 5 14 / 0.86);
+  }
+
+  .command-deck-destinations a:hover,
+  .command-deck-destinations a:focus-visible {
+    border-color: rgb(var(--w10-scene-primary-rgb) / 0.72);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 1px 0 0 rgb(var(--w10-scene-primary-rgb) / 0.28),
+      inset -1px -1px 0 rgb(var(--w10-scene-secondary-rgb) / 0.24),
+      0 20px 42px -14px rgb(2 6 18 / 0.92),
+      0 0 24px -4px rgb(var(--w10-scene-primary-rgb) / 0.34);
+  }
+
+  .command-deck-rider-portrait {
+    box-shadow:
+      inset 0 0 0 1.5px rgb(255 255 255 / 0.24),
+      inset 0 0 14px rgb(var(--w10-scene-primary-rgb) / 0.22),
+      0 0 0 1px rgb(var(--w10-scene-primary-rgb) / 0.38),
+      0 10px 24px -10px rgb(0 0 0 / 0.84);
+  }
+
+  .command-deck-rider-rail a:hover .command-deck-rider-portrait,
+  .command-deck-rider-rail a:focus-visible .command-deck-rider-portrait {
+    border-color: rgb(var(--w10-scene-primary-rgb) / 0.92);
+    box-shadow:
+      inset 0 0 0 2px rgb(255 255 255 / 0.38),
+      inset 0 0 18px rgb(var(--w10-scene-primary-rgb) / 0.36),
+      0 0 0 2px rgb(var(--w10-scene-primary-rgb) / 0.68),
+      0 0 24px -2px rgb(var(--w10-scene-primary-rgb) / 0.48),
+      0 14px 28px -10px rgb(0 0 0 / 0.9);
+  }
+
+  .command-deck-scene-buttons > a:focus-visible,
+  .command-deck-destinations a:focus-visible,
+  .command-deck-rider-rail a:focus-visible,
+  .command-deck-footer a:focus-visible,
+  .command-deck .command-deck-enter.command-deck-enter:focus-visible {
+    outline: 2px solid var(--ring-key, #7ae8ff);
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 2px rgb(6 10 18 / 0.96),
+      0 0 0 5px rgb(var(--ring-key-rgb, 122 232 255) / 0.94),
+      0 0 0 8px rgb(var(--ring-gold-rgb, 240 207 134) / 0.56),
+      0 0 24px 2px rgb(var(--w10-scene-primary-rgb) / 0.48);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .command-deck-destinations a {
+    transition:
+      translate var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+      scale var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+      border-color var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1)),
+      box-shadow var(--ring-dur-spring, 380ms) var(--ring-spring, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-destinations a:hover {
+    translate: 0 -4px;
+    scale: 1.012;
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider-rail a {
+    transition:
+      translate var(--ring-dur-bounce, 460ms) var(--ring-spring-bounce, cubic-bezier(0.34, 1.56, 0.64, 1)),
+      scale var(--ring-dur-bounce, 460ms) var(--ring-spring-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
+  }
+
+  html:not([data-world-effects="economy"]) .command-deck-rider-rail a:hover {
+    translate: 0 -5px;
+    scale: 1.055;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .command-deck-destinations a,
+  .command-deck-rider-portrait {
+    background-color: #0a101e;
+    background-image: none;
+    border-color: var(--w10-scene-primary);
+  }
+}
+
+@media (forced-colors: active) {
+  .command-deck-destinations a,
+  .command-deck-rider-portrait {
+    forced-color-adjust: auto;
+    background-color: Canvas;
+    background-image: none;
+    color: LinkText;
+    border: 2px solid LinkText;
+    box-shadow: none;
+  }
+
+  .command-deck-scene-buttons > a:focus-visible,
+  .command-deck-destinations a:focus-visible,
+  .command-deck-rider-rail a:focus-visible,
+  .command-deck-footer a:focus-visible,
+  .command-deck .command-deck-enter.command-deck-enter:focus-visible {
+    outline: 3px double Highlight;
+    outline-offset: 3px;
+    box-shadow: none;
+  }
+}

@@ -859,3 +859,62 @@ html[data-family="gallery"]
     border-color: CanvasText;
   }
 }
+
+/* ==========================================================================
+   Wave-10: Night Museum — Obsidian Matte Framing & Brass Specular Optics
+   Strictly preserves html[data-family="gallery"] gold primary (#f0cf86)
+   ========================================================================== */
+
+html[data-family="gallery"] .gallery-page :is(.gallery-work-number, .gallery-favorite-toggle, .gallery-enter) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  html[data-family="gallery"] .gallery-page .gallery-work-frame {
+    border-color: rgba(240, 207, 134, 0.24);
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.38),
+      inset 0 0 0 1px rgba(240, 207, 134, 0.12),
+      0 18px 40px -16px rgba(0, 0, 0, 0.84);
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-work-frame:is(:hover, :focus-within) {
+    border-color: rgba(240, 207, 134, 0.5);
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.62),
+      inset 0 0 0 1px rgba(240, 207, 134, 0.24),
+      0 22px 44px -14px rgba(0, 0, 0, 0.9),
+      0 0 24px rgba(240, 207, 134, 0.16);
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-work-number {
+    color: #f0cf86;
+    border-color: rgba(240, 207, 134, 0.34);
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.36),
+      0 6px 16px -6px rgba(0, 0, 0, 0.78);
+  }
+
+  html[data-family="gallery"] .gallery-page :is(.gallery-favorite-toggle, .gallery-enter):focus-visible {
+    outline: 2px solid var(--ring-gold, #f0cf86);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="gallery"] .gallery-page :is(.gallery-work-frame, .gallery-favorite-toggle, .gallery-enter) {
+    transition:
+      border-color 240ms ease,
+      box-shadow 240ms ease;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="gallery"] .gallery-page :is(.gallery-work-frame, .gallery-viewer) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

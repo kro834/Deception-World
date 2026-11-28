@@ -1936,3 +1936,47 @@ html[data-family="utility"] body .transformation-lab :is(.lab-title p, .tl-part-
   line-break: strict;
   text-wrap: pretty;
 }
+
+/* ==========================================================================
+   Wave-10 Transformation Lab Optical Caliper & Part Record Polish
+   Strictly isolated from .rzn-canvas / .lab-engine stage layers
+   ========================================================================== */
+
+.transformation-lab :is(.lab-stage-status, .tl-part-record, .lab-zoom) {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (forced-colors: none) {
+  .transformation-lab :is(.lab-selectors, .lab-controls, .tl-part-record) {
+    box-shadow:
+      inset 0 1px 0 rgba(242, 248, 255, 0.2),
+      inset 0 -1px 0 rgba(240, 207, 134, 0.14),
+      0 16px 36px -16px rgba(2, 6, 16, 0.84);
+  }
+
+  .transformation-lab .tl-part-record:hover {
+    border-color: rgba(122, 232, 255, 0.52);
+    box-shadow:
+      inset 0 1px 0 rgba(240, 207, 134, 0.4),
+      0 18px 40px -14px rgba(2, 6, 16, 0.88),
+      0 0 22px -6px rgba(122, 232, 255, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .transformation-lab .tl-part-record {
+    transition:
+      border-color 200ms ease,
+      box-shadow 220ms ease;
+  }
+}
+
+@media (forced-colors: active) {
+  .transformation-lab :is(.lab-selectors, .lab-controls, .tl-part-record) {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}
