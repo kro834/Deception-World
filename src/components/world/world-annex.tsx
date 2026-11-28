@@ -150,7 +150,7 @@ const EPISODE_ART: Record<string, { src: string; width: number; height: number; 
   "02": { src: "/episode-02-legends.jpeg", width: 1448, height: 1086, pos: "50% 50%" },
   "03": { src: "/episode-03-deception-world.jpeg", width: 1086, height: 1448, pos: "50% 18%" },
   "04": { src: "/episode-04-kill.jpeg", width: 1122, height: 1402, pos: "50% 16%" },
-  "05": { src: "/episode-05-arrival-error.svg", width: 800, height: 800, pos: "50% 50%" },
+  "05": { src: "/episode-05-arrival.webp", width: 1536, height: 1024, pos: "50% 4%" },
 };
 
 /* The six 六詠 card thumbnails, at the cards' own sizes (cache hits). */

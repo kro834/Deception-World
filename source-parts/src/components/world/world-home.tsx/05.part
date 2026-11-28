@@ -1,3 +1,6 @@
+                aria-atomic="true"
+                aria-busy={shuffling || posterResetting}
+              >
                 {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
               </output>
               {posterFailure !== null && (
@@ -521,4 +524,3 @@
               <div className="world-column-heading-stack">
                 {COLUMNS.map((item, index) => (
                   <h3
-                    key={item.no}

@@ -206,7 +206,8 @@ test("the rider art is the standard Rexonance artwork through the shared helpers
     home.indexOf("const EPISODES"),
     home.indexOf("];", home.indexOf("const EPISODES")),
   );
-  assert.doesNotMatch(episodes, /EP6|REXONANCE/i, "EP6 is not added to the episode archive");
+  // 2026-11-28: the owner supplied EP6's thumbnail and title (REXONANCE), so the archive now lists it.
+  assert.match(episodes, /no: "06",\s*title: "REXONANCE"/, "EP6 REXONANCE is in the episode archive");
 });
 
 test("the shader runs at high precision where available and avoids undefined smoothstep", async () => {

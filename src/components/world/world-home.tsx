@@ -589,9 +589,16 @@ const EPISODES: EpisodeRecord[] = [
   {
     no: "05",
     title: "来訪",
-    src: "/episode-05-arrival-error.svg",
+    src: "/episode-05-arrival.webp",
+    pos: "50% 0%",
+    alt: "雪の森に立つ赤い棘の怪物を描いたEP5のサムネイル",
+  },
+  {
+    no: "06",
+    title: "REXONANCE",
+    src: "/episode-06-rexonance.webp",
     pos: "50% 50%",
-    alt: "EP5 来訪：サムネイルのERROR表示",
+    alt: "レクソナンスと赤い棘の怪物が向かい合うEP6のサムネイル",
   },
 ];
 

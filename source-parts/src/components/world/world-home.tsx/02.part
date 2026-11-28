@@ -1,4 +1,3 @@
-        alt: "仮面ライダーレディック",
         width: 750,
         height: 1400,
         to: "/riders/leddic",
@@ -65,9 +64,16 @@
   {
     no: "05",
     title: "来訪",
-    src: "/episode-05-arrival-error.svg",
+    src: "/episode-05-arrival.webp",
+    pos: "50% 0%",
+    alt: "雪の森に立つ赤い棘の怪物を描いたEP5のサムネイル",
+  },
+  {
+    no: "06",
+    title: "REXONANCE",
+    src: "/episode-06-rexonance.webp",
     pos: "50% 50%",
-    alt: "EP5 来訪：サムネイルのERROR表示",
+    alt: "レクソナンスと赤い棘の怪物が向かい合うEP6のサムネイル",
   },
 ];
 
@@ -518,8 +524,3 @@ export function WorldHome() {
   const episodeGridRef = useRef<HTMLDivElement>(null);
   const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
   const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const episodePickupOpenedByKeyboard = useRef(false);
-  const episodePointerFocusTimer = useRef<number | null>(null);
-  const episodeScrollTimer = useRef<number | null>(null);
-  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
-  const pickupBtnRef = useRef<HTMLButtonElement>(null);

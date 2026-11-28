@@ -89,7 +89,14 @@ export const EPISODE_THUMBNAILS: Record<string, ImageSet> = {
     "/episode-05-farce-delivery.webp",
     1200,
   ),
-  "/episode-06-deus.webp": episode("/episode-06-deus.webp", "/episode-06-deus.webp", 1448),
+  // 2026-11-28: the owner's EP5 and EP6 thumbnails (EP6 is REXONANCE); the
+  // unused EP6 DEUS file takes no slot here any more.
+  "/episode-05-arrival.webp": episode("/episode-05-arrival.webp", "/episode-05-arrival.webp", 1536),
+  "/episode-06-rexonance.webp": episode(
+    "/episode-06-rexonance.webp",
+    "/episode-06-rexonance.webp",
+    1672,
+  ),
 };
 
 // Card slots: phones calc(100vw - 84px) by 169-181 px; 561-700 px about

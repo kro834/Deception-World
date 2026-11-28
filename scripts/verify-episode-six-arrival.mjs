@@ -22,18 +22,18 @@ try {
     await page.waitForFunction(() => document.querySelectorAll(".episode-card")[4]?.classList.contains("is-active"));
     assert.equal(await card.locator("h4").innerText(), "来訪");
     const image = card.locator(".episode-thumbnail img");
-    assert.equal(await image.getAttribute("src"), "/episode-05-arrival-error.svg");
+    // 2026-11-28: owner supplied EP5's thumbnail (replaces the ERROR placeholder).
+    assert.equal(await image.getAttribute("src"), "/episode-05-arrival.webp");
     await image.evaluate(async image => { await image.decode(); });
-    // A viewBox-only SVG has browser-defined intrinsic pixels; decoding and the selected source are the contract.
     const decoded = await image.evaluate(image => ({ width: image.naturalWidth, height: image.naturalHeight, source: image.currentSrc }));
-    assert.ok(decoded.width > 0 && decoded.height > 0 && decoded.source.endsWith("episode-05-arrival-error.svg"), JSON.stringify(decoded));
+    assert.ok(decoded.width > 0 && decoded.height > 0 && /episode-05-arrival(-\d+)?\.webp$/.test(decoded.source), JSON.stringify(decoded));
     assert.equal(await select.getAttribute("aria-pressed"), "true");
-    assert.equal(await page.locator(".episode-card").count(), 5);
+    assert.equal(await page.locator(".episode-card").count(), 6);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     assert.deepEqual(errors, []);
     await mkdir("output/playwright", { recursive: true });
     await card.screenshot({ path: `output/playwright/ep5-arrival-${width}.png` });
-    console.log(`PASS EP5 来訪 / ERROR ${width}px: title, loaded thumbnail, selection, overflow, errors`);
+    console.log(`PASS EP5 来訪 / owner thumbnail ${width}px: title, loaded thumbnail, selection, overflow, errors`);
     await page.close();
   }
 } finally {

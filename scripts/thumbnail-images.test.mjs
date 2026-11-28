@@ -66,8 +66,10 @@ test("episode and manager cards and the Zeus button use the right-sized sets", (
     "/episode-02-legends.jpeg",
     "/episode-03-deception-world.jpeg",
     "/episode-04-kill.jpeg",
+    // 2026-11-28: owner supplied EP5's and EP6's (REXONANCE) thumbnails.
+    "/episode-05-arrival.webp",
     "/episode-05-farce.jpeg",
-    "/episode-06-deus.webp",
+    "/episode-06-rexonance.webp",
   ]);
   const episode = episodeThumbnail("/episode-01-hide-and-seek.jpeg");
   assert.equal(
