@@ -24,6 +24,7 @@
 // write before the next group's read forced a whole-page style pass, about
 // 2.5 s of /world's first seconds on a throttled phone-class CPU).
 
+// 2026-11-28: removed selectors whose markup is gone
 /** Option groups whose selection becomes a sliding glass pill. */
 export const GLASS_SEGMENTS = [
   ".rzn-movie-speeds",
@@ -41,10 +42,8 @@ export const GLASS_SEGMENTS = [
   ".dream-programme-spotlight-modes",
   ".library-scope-row",
   ".library-filter-row",
-  ".search-categories",
   ".wm-filters",
   ".lab-zoom",
-  ".lab-beats",
   ".lab-mobile-switch",
   ".wa-directory-controls",
 ] as const;

@@ -99,6 +99,7 @@ function readTuckShift(button: HTMLElement) {
 const EDGE_SNAP_PX = 48;
 const EDGE_SNAP_FLICK_PX = 76;
 const EDGE_FLICK_PX_PER_MS = 0.22;
+// 2026-11-28: removed selectors whose markup is gone
 const ZEUS_AVOID_SELECTOR = [
   ".ios-slide-open",
   ".episode-pickup-plus",
@@ -178,7 +179,6 @@ const ZEUS_AVOID_SELECTOR = [
   // rx10 STAGE: the library's rider files and card bookmarks, the record
   // index's field, and the /download and 404 cards' ways back, which the
   // button covered on phones.
-  ".library-cast-tile",
   // 2026-11-23 ring redesign: the rider files, kinds, search categories,
   // tour courses, lab stages and dogs became ring nodes the button must not
   // settle on either.
@@ -280,6 +280,7 @@ const ZEUS_AVOID_TEXT_SELECTOR = [
    counter, and the suit-up's call chips and HUD (parts, readout, nanite
    count). Page words only: the archive bridge mirrors the list above, and
    its frame never shows these. */
+// 2026-11-28: removed selectors whose markup is gone
 const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // 2026-10-23: the 六詠 dossiers' fact values (RIDER, AUTHORITY…) on phones.
   ".manager-facts dd",
@@ -289,9 +290,7 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".rxs-comparison-key",
   ".rxs-comparison-note",
   ".rxs-headline-metrics :is(small, p)",
-  ".rxl-stage-slate",
   ".rxs-section-heading > p",
-  ".rxe-chapter-map-heading small",
   ".rzn-call .rzn-chip",
   ".rzn-parts .rzn-part",
   ".rzn-readout",
@@ -305,12 +304,9 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // The P14 overview's kicker and the suit-up's live status line.
   ".rxs-p14-copy > small",
   ".rxs-assembly-status",
-  ".rxe-form-status-heading",
   ".rzn-form-code",
-  // 2026-10-23: the World annex's section counts (「15 TERMS」, 「17 LINES」)
-  // and the Extreme form panel's ability chips (DARK MATTER CHARGING), which
-  // the button settled on mid-scroll at 390.
-  ".wa-count",
+  // 2026-10-23: the Extreme form panel's ability chips (DARK MATTER CHARGING),
+  // which the button settled on mid-scroll at 390.
   ".rxs-stage-panel ul > li",
   // Extreme's architecture cards' codes (the same chip words, iPad portrait).
   ".rxs-system-grid article > header > small",
@@ -327,8 +323,6 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // 2026-11-28: each result section's count pill (「46」 at the head's right
   // end). It is a b under the display floor, so the button rested on it at 402.
   ".search-group-head :is(span, b)",
-  ".library-stats dd",
-  ".library-stats dt",
   ".mus-hero-ultra",
   ".mus-calls li",
   ".mus-overview-copy",
