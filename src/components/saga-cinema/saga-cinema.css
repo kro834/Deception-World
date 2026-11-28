@@ -1775,3 +1775,5 @@ html[data-rzn-constrained] .saga-cinema.saga-cinema [data-reveal] {
     filter: none;
   }
 }
+/* 2026-11-28: at 320px the footer row (ディセプションへ戻る / SHARE / TOP) is wider than the screen, so its last link and arrow ran past the edge. It wraps instead. */
+@media (max-width:400px){.saga-cinema.saga-cinema .footer-actions{flex-wrap:wrap;row-gap:0}}

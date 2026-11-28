@@ -54,19 +54,11 @@ const DEBUG = debugArg ? debugArg.slice("--debug=".length) : null;
 const W = FAR_FROM_CUTOUT.width;
 const H = FAR_FROM_CUTOUT.height;
 const N = W * H;
-const MID = W; // mirror axis x' = MID - x (the figure stands centred on 512)
-const mirror = (points) => points.map(([x, y]) => [MID - x, y]);
 const circle = (cx, cy, r, n = 28) =>
   Array.from({ length: n }, (_, i) => {
     const a = (i / n) * Math.PI * 2;
     return [Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r)];
   });
-const rect = (x0, y0, x1, y1) => [
-  [x0, y0],
-  [x1, y0],
-  [x1, y1],
-  [x0, y1],
-];
 const ALL = null;
 
 // --- Meta Unitas' geometry (cutout px) ---------------------------------------
@@ -153,7 +145,6 @@ const ORNAMENT_GROUPS = new Set(["tail", "ribbon", "bits"]);
 // flag the build reads those PNG masks, so it stays reproducible without
 // SAM; with no masks it cuts by the polygons. The driver keeps its traced
 // outline (BELT_OUTLINE): SAM only partitions the rest.
-const SAM_VERSION = "20261023";
 const SAM_DIR = join(DESIGN, "sam-masks/middle");
 // SAM's masks, when they are there (--polygons cuts by the polygons instead).
 const samManifest =

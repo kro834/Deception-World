@@ -12,6 +12,7 @@ import { dossierImage } from "@/lib/dossier-images";
 import { DisplayName } from "@/components/name-text";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { FORM_RECORD_IMAGES } from "@/lib/record-form-images";
+import { readLocalHistoryReturn, rememberLocalHistoryReturn } from "@/lib/local-history-return";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { prefetchFarFromEntryWhenIdle } from "@/lib/far-from-entry-gate";
@@ -380,7 +381,11 @@ export function FinalStage() {
   const [stage, setStage] = useState<FfsStageKey>("middle");
   const [royalOpen, setRoyalOpen] = useState(false);
   const [form, setForm] = useState<RrFormKey>("royal");
-  const [castIndex, setCastIndex] = useState(0);
+  const [returningCastIndex] = useState(() => {
+    const id = readLocalHistoryReturn()?.value;
+    return CAST.findIndex((person) => person.id === id && person.to);
+  });
+  const [castIndex, setCastIndex] = useState(Math.max(0, returningCastIndex));
   // The cast ring's turn, in eighths, by the short way round: stepping from
   // the eighth person to the first turns one place on, not seven back.
   const [castTurn, setCastTurn] = useState({ index: 0, turn: 0 });
@@ -406,6 +411,24 @@ export function FinalStage() {
   const activeStage = FAR_FROM_SAGA.stages[stage];
   const activeForm = REALM_ROYAL.forms[form];
   const activeVisual = REALM_ROYAL.visuals[RR_FORM_ORDER.indexOf(form)];
+
+  useLayoutEffect(() => {
+    if (returningCastIndex < 0) return;
+    // The router restores the scroll position after the page mounts. On a
+    // repeated Back it can belong to a later stop, below the dossier link.
+    const frame = requestAnimationFrame(() => {
+      const page = pageRef.current;
+      const link = page?.querySelector<HTMLAnchorElement>("#fst-cast-panel .fst-cast-copy > a");
+      if (!link) return;
+      const rect = link.getBoundingClientRect();
+      const headerBottom = page?.querySelector(".rxs-local-nav")?.getBoundingClientRect().bottom ?? 0;
+      if (rect.top < headerBottom || rect.bottom > window.innerHeight) {
+        link.scrollIntoView({ block: "center", behavior: "instant" });
+      }
+      link.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [returningCastIndex]);
 
   useLayoutEffect(() => {
     // The native dialog makes the underlying navigation inert. Keep its last
@@ -807,6 +830,7 @@ export function FinalStage() {
                 <GuardedLink
                   to={activeCast.to}
                   assets={activeCast.assets ?? []}
+                  beforeNavigate={() => rememberLocalHistoryReturn({ value: activeCast.id })}
                   aria-label={`${activeCast.name}の人物資料を開く`}
                 >
                   <span>人物資料</span>

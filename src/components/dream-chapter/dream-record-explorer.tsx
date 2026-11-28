@@ -400,10 +400,21 @@ export function DreamRecordExplorer() {
                   data-saved={savedIds.has(record.no) ? "true" : undefined}
                 >
                   <p className="dream-record-meta">
-                    <span>CASE {record.case}</span>
+                    <span>
+                      CASE {record.case}{" "}
+                      {DREAM_CASES.find((episode) => episode.no === record.case)?.title}
+                    </span>
                     <span>{highlighted(record.place)}</span>
                   </p>
-                  <h4>{highlighted(record.title.text)}</h4>
+                  <h4>
+                    <a
+                      className="dream-record-title-link"
+                      href={`#dream-chronicle-event-${record.no}`}
+                    >
+                      <span>{String(record.no).padStart(2, "0")}</span>
+                      <span>{highlighted(record.title.text)}</span>
+                    </a>
+                  </h4>
                   <button
                     ref={(element) => {
                       if (element) saveButtons.current.set(record.no, element);

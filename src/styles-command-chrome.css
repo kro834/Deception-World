@@ -45,7 +45,7 @@ html[data-family] {
     border-bottom-color: rgb(var(--sh-l1-rgb) / 58%);
     background-color: #040a14;
     background-image:
-      linear-gradient(90deg, var(--sh-l1) 0 3px, transparent 3px),
+      linear-gradient(transparent, transparent) /* the left-edge seam, retired 2026-11-26 */,
       linear-gradient(
         90deg,
         var(--sh-l1) 0%,

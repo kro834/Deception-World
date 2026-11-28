@@ -9,19 +9,27 @@ const home = readFileSync(
   "utf8",
 );
 const source = home.slice(
-  home.indexOf("  const shufflePoster = () => {"),
+  home.indexOf("  const requestPoster = async"),
   home.indexOf("  const goEpisode ="),
 );
-const cancel = home.match(/const cancelPosterShuffle = useCallback\([\s\S]*?\n {2}}, \[\]\);/)[0];
-const compiled = ts.transpileModule(`${cancel}\n${source}\nglobalThis.shuffle = shufflePoster;`, {
-  compilerOptions: { target: ts.ScriptTarget.ES2022 },
-}).outputText;
+const cancel = home.slice(
+  home.indexOf("  const cancelPosterShuffle ="),
+  home.indexOf("  useEffect(() => mountFilmMotion"),
+);
+const compiled = ts.transpileModule(
+  `${cancel}\n${source}\nglobalThis.shuffle = shufflePoster; globalThis.reset = requestPoster;`,
+  {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  },
+).outputText;
 
-function harness({ reducedMotion = true } = {}) {
+function harness({ reducedMotion = true, random = 0, deferPresentation = false } = {}) {
   const timers = [];
   const images = [];
   const posters = [];
+  const presentations = [];
   const busy = [];
+  const failures = [];
   const shuffleActive = { current: false };
   const shuffleRunId = { current: 0 };
   const context = {
@@ -30,6 +38,8 @@ function harness({ reducedMotion = true } = {}) {
     useCallback: (callback) => callback,
     motionReduced: reducedMotion,
     poster: 0,
+    posterFailure: null,
+    posterRestoring: { current: false },
     prevPoster: null,
     POSTERS: [{ src: "first" }, { src: "second" }, { src: "third" }],
     shuffleActive,
@@ -37,8 +47,19 @@ function harness({ reducedMotion = true } = {}) {
     shuffleTimers: { current: [] },
     setShuffling: (value) => busy.push(value),
     setLocked: () => {},
-    goPoster: (value) => posters.push(value),
-    loadPoster: (index, priority) => {
+    setPosterResetting: () => {},
+    cancelPosterFrame: () => {},
+    setPosterFailure: (value) => failures.push(value),
+    goPoster: async (value, { canShow } = {}) => {
+      const ready = deferPresentation
+        ? await new Promise((resolve) => presentations.push(resolve))
+        : true;
+      if (!ready || canShow?.() === false) return false;
+      if (value !== context.poster) posters.push(value);
+      context.poster = value;
+      return true;
+    },
+    loadPoster: (index, priority = "high") => {
       const image = { index, priority, load: () => {} };
       images.push(image);
       return new Promise((resolve) => {
@@ -46,14 +67,16 @@ function harness({ reducedMotion = true } = {}) {
         image.timeout = () => resolve(false);
       });
     },
+    document: { hidden: false, querySelector: () => null },
+    posterShuffleButton: { current: null },
     window: {
-      crypto: { getRandomValues: (values) => values.fill(0) },
+      crypto: { getRandomValues: (values) => values.fill(random) },
       clearTimeout: () => {},
       setTimeout: (callback) => timers.push(callback),
     },
   };
   runInNewContext(compiled, context);
-  return { ...context, timers, images, posters, busy };
+  return { ...context, timers, images, posters, presentations, busy, failures };
 }
 
 const settle = () => new Promise((resolve) => setImmediate(resolve));
@@ -70,7 +93,26 @@ test("reduced-motion shuffle stays busy during decode and completes without prev
   assert.deepEqual(state.busy, [true, false]);
   assert.equal(state.shuffleActive.current, false);
   assert.equal(state.posters.length, 1);
-  assert.equal(state.timers.length, 0, "the shared loader owns the deadline; there are no preview steps");
+  assert.equal(
+    state.timers.length,
+    0,
+    "the shared loader owns the deadline; there are no preview steps",
+  );
+});
+
+test("the spinner waits for the actual frame even after detached preload succeeds", async () => {
+  const state = harness({ deferPresentation: true });
+  state.shuffle();
+  state.images[0].resolve();
+  await settle();
+  assert.equal(state.presentations.length, 1);
+  assert.deepEqual(state.busy, [true]);
+  assert.deepEqual(state.posters, []);
+
+  state.presentations[0](true);
+  await settle();
+  assert.deepEqual(state.posters, [state.images[0].index]);
+  assert.deepEqual(state.busy, [true, false]);
 });
 
 test("a timed-out reduced-motion shuffle clears busy state and cannot replace the poster later", async () => {
@@ -81,6 +123,7 @@ test("a timed-out reduced-motion shuffle clears busy state and cannot replace th
   assert.deepEqual(state.busy, [true, false]);
   assert.equal(state.shuffleActive.current, false);
   assert.deepEqual(state.posters, []);
+  assert.equal(state.failures.at(-1), state.images[0].index, "failure keeps the retry destination");
   state.images[0].resolve();
   await settle();
   assert.deepEqual(state.posters, []);
@@ -100,25 +143,32 @@ test("cancelled reduced-motion decode cannot overwrite a newer interaction", asy
 });
 
 test("normal-motion previews skip undecoded posters and use them after decode", async () => {
-  const state = harness({ reducedMotion: false });
+  const state = harness({ reducedMotion: false, random: 1 });
   state.shuffle();
 
-  assert.equal(state.images.length, 3, "the final poster preload is reused when it is also a preview");
-  state.timers[0]();
+  assert.equal(state.images.length, 2, "only the final and one next poster are requested");
+  state.timers[1]();
   await settle();
   assert.deepEqual(state.posters, [], "an undecoded preview must not replace the current poster");
 
-  state.images[0].load();
-  await settle();
-  state.timers[0]();
-  await settle();
-  assert.deepEqual(state.posters, [], "loaded pixels are still skipped while decode remains pending");
-
-  state.images.forEach((image) => image.resolve());
+  state.images[1].load();
   await settle();
   state.timers[1]();
   await settle();
-  assert.equal(state.posters.length, 1, "a decoded preview can be shown on a later beat");
+  assert.deepEqual(state.posters, [], "loaded pixels are skipped while decode remains pending");
+
+  state.images[1].resolve();
+  await settle();
+  state.timers[3]();
+  await settle();
+  assert.deepEqual(state.posters, [1], "a decoded preview can be shown on a later beat");
+});
+
+test("shuffle reuses the final preload if the next preview has the same source", () => {
+  const state = harness({ reducedMotion: false });
+  state.shuffle();
+  assert.equal(state.images.length, 1);
+  assert.equal(state.images[0].priority, "high");
 });
 
 test("late normal-motion preview decode from a cancelled shuffle cannot affect its successor", async () => {
@@ -131,9 +181,13 @@ test("late normal-motion preview decode from a cancelled shuffle cannot affect i
 
   cancelledImages.forEach((image) => image.resolve());
   await settle();
-  state.timers[0]();
+  state.timers[1]();
   await settle();
-  assert.deepEqual(state.posters, [], "a stale timer/decode must not replace the successor shuffle's poster");
+  assert.deepEqual(
+    state.posters,
+    [],
+    "a stale timer/decode must not replace the successor shuffle's poster",
+  );
 });
 
 test("a cancelled final settle cannot clear the busy state of a newer shuffle", async () => {
@@ -152,10 +206,22 @@ test("a cancelled final settle cannot clear the busy state of a newer shuffle", 
 });
 
 test("reset and lock are available to cancel image work while shuffle is busy", () => {
-  const reset = home.slice(home.indexOf('className="poster-reset'), home.indexOf('className={\n                  locked'));
-  assert.match(reset, /disabled=\{poster === 0 && !shuffling\}/);
-  assert.match(reset, /cancelPosterShuffle\(\);\s*goPoster\(0\)/);
-  const lock = home.slice(home.indexOf('"poster-lock ios26-glass is-locked"'), home.indexOf('<output'));
+  // Reset stays keyboard reachable, including while cancelling a shuffle.
+  const reset = home.slice(
+    home.indexOf('className="poster-reset'),
+    home.indexOf("（RESET）") + 340,
+  );
+  assert.match(reset, /aria-disabled=\{poster === 0 && !shuffling && !posterResetting\}/);
+  assert.match(
+    reset,
+    /if \(poster !== 0 \|\| shuffling \|\| posterResetting\) void requestPoster\(0\)/,
+  );
+  assert.match(source, /const requestPoster = async[\s\S]*?cancelPosterShuffle\(\);/);
+  assert.match(source, /const requestPoster = async[\s\S]*?await goPoster\(next/);
+  const lock = home.slice(
+    home.indexOf('"poster-lock ios26-glass is-locked"'),
+    home.indexOf("<output"),
+  );
   assert.doesNotMatch(lock, /disabled=\{shuffling\}/);
   assert.match(lock, /cancelPosterShuffle\(\);\s*setLocked/);
 });

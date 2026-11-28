@@ -15,7 +15,7 @@ import {
 test("episode navigation uses the recorded numbers, titles and existing anchors", () => {
   assert.deepEqual(
     WORLD_EPISODE_INDEX,
-    WORLD_EPISODE_NOTES.map(({ no, title }) => ({ no, title, href: `#wa-episode-${no}` })),
+    WORLD_EPISODE_NOTES.map(({ no, title, titleLang }) => ({ no, title, titleLang, href: `#wa-episode-${no}` })),
   );
   assert.equal(new Set(WORLD_EPISODE_INDEX.map(({ href }) => href)).size, WORLD_EPISODE_INDEX.length);
 });
@@ -27,7 +27,7 @@ test("every related record resolves to an existing archive target and its unchan
     ...WORLD_GLOSSARY.map(({ term }) => [`#wa-term-${term}`, term]),
   ]);
   const episodeNumbers = new Set(WORLD_EPISODE_NOTES.map(({ no }) => no));
-  assert.deepEqual(WORLD_RECORD_CONTEXTS.map(({ no }) => no), ["01", "02", "03", "04"]);
+  assert.deepEqual(WORLD_RECORD_CONTEXTS.map(({ no }) => no), ["01", "02", "03", "04", "05"]);
   for (const context of WORLD_RECORD_CONTEXTS) {
     assert.ok(episodeNumbers.has(context.no), context.no);
     const hrefs = [];

@@ -5,6 +5,28 @@ import assert from "node:assert/strict";
 
 const base = process.env.BASE_URL || "http://127.0.0.1:8808";
 const dir = process.env.OUT_DIR || "/tmp/compact-menu-motion";
+
+async function placeCompactLauncher(page) {
+  await page.waitForFunction(
+    () => {
+      // Initial scroll restoration can win over a scripted setup jump.
+      // The recorded flight below still uses a single scroll in each direction.
+      if (scrollY < 150) {
+        scrollTo({ top: 850, behavior: "instant" });
+        return false;
+      }
+      const { dataset } = document.documentElement;
+      return (
+        (dataset.ipadMenuScrolled === "true" || dataset.phoneLandscapeHidden === "true") &&
+        !dataset.ipadMenuMotion &&
+        !dataset.phoneLandscapeMotion
+      );
+    },
+    null,
+    { timeout: 20000 },
+  );
+}
+
 await mkdir(dir, { recursive: true });
 const results = [];
 for (const [name, engine] of [
@@ -16,10 +38,12 @@ for (const [name, engine] of [
     ...(name === "chrome" ? { channel: "chrome" } : {}),
   });
   try {
-    for (const [device, width, height] of [
-      ["ipad", 834, 1194],
-      ["phone", 844, 390],
+    for (const [device, orientation, width, height] of [
+      ["ipad", "portrait", 834, 1194],
+      ["ipad", "landscape", 1194, 834],
+      ["phone", "landscape", 844, 390],
     ]) {
+      const label = `${name} ${device} ${orientation}`;
       const context = await browser.newContext({
         viewport: { width, height },
         hasTouch: true,
@@ -35,7 +59,10 @@ for (const [name, engine] of [
             return (
               !!document.querySelector('button[aria-label*="メニューを開く"]') &&
               (root.dataset.ipadMenu === "compact" || root.dataset.phoneLandscapeMenu === "true") &&
+              (parseFloat(root.style.getPropertyValue("--ipad-header-exit-distance")) > 0 ||
+                parseFloat(root.style.getPropertyValue("--phone-landscape-chrome-height")) > 0) &&
               !root.hasAttribute("data-loading") &&
+              !root.hasAttribute("data-route-scroll-settling") &&
               getComputedStyle(document.body).position !== "fixed"
             );
           },
@@ -44,72 +71,93 @@ for (const [name, engine] of [
         );
         await page.evaluate(() => {
           document.documentElement.style.scrollBehavior = "auto";
-          scrollTo({ top: 200, behavior: "instant" });
         });
-        await page.waitForFunction(
-          () => {
-            if (scrollY >= 150) return true;
-            scrollTo({ top: 200, behavior: "instant" });
-            return false;
-          },
-          null,
-          { timeout: 20000 },
+        await placeCompactLauncher(page);
+        const trigger = page.locator('button[aria-label*="メニューを開く"]').first();
+        const settled = await trigger.boundingBox();
+        assert.ok(settled.width >= 60 && settled.height >= 60, `${label}: hit target too small`);
+        assert.ok(
+          settled.x >= 0 &&
+            settled.y >= 0 &&
+            settled.x + settled.width <= width &&
+            settled.y + settled.height <= height,
+          `${label}: compact launcher is outside the viewport`,
+        );
+        assert.ok(
+          await trigger.evaluate((button) => {
+            const { x, y, width, height } = button.getBoundingClientRect();
+            return button.contains(document.elementFromPoint(x + width / 2, y + height / 2));
+          }),
+          `${label}: compact launcher does not receive hits`,
         );
         await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
-        await page.waitForFunction(() => scrollY === 0);
-        await page.waitForTimeout(1000);
-        const before = await page
-          .locator('button[aria-label*="メニューを開く"]')
-          .first()
-          .boundingBox();
-        await page.evaluate(() => {
-          document.documentElement.style.scrollBehavior = "auto";
-          window.__compactFrames = [];
-          const start = performance.now();
-          function sample() {
-            const root = document.documentElement;
-            const shell = document.querySelector(
-              'button[aria-label*="メニューを開く"] .side-panel-trigger-convergence',
-            );
-            window.__compactFrames.push({
-              time: performance.now() - start,
-              motion: root.dataset.ipadMenuMotion || root.dataset.phoneLandscapeMotion,
-              rect: shell?.getBoundingClientRect().toJSON(),
-            });
-            if (performance.now() - start < 1800) requestAnimationFrame(sample);
-          }
-          requestAnimationFrame(sample);
-          scrollTo({ top: 850, behavior: "instant" });
-          setTimeout(() => scrollTo({ top: 0, behavior: "instant" }), 250);
+        await page.waitForFunction(() => {
+          const { dataset } = document.documentElement;
+          return (
+            scrollY === 0 &&
+            dataset.ipadMenuScrolled !== "true" &&
+            dataset.phoneLandscapeHidden !== "true" &&
+            !dataset.ipadMenuMotion &&
+            !dataset.phoneLandscapeMotion
+          );
         });
-        await page.waitForTimeout(1900);
-        const frames = await page.evaluate(() => window.__compactFrames);
-        const flying = frames.filter((f) => f.motion);
-        assert.ok(flying.length, `${name} ${device}: no flight observed`);
+        const before = await trigger.boundingBox();
+        const frames = await page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              const root = document.documentElement;
+              const samples = [];
+              let originY;
+              let reversing = false;
+              let expanded = false;
+              const start = performance.now();
+              function sample(now) {
+                const shell = document.querySelector(
+                  'button[aria-label*="メニューを開く"] .side-panel-trigger-convergence',
+                );
+                const motion = root.dataset.ipadMenuMotion || root.dataset.phoneLandscapeMotion;
+                const rect = shell?.getBoundingClientRect().toJSON();
+                samples.push({ time: now - start, scrollY, motion, rect });
+                // Reverse an observed, still-moving flight. A timer started by
+                // scrollTo can turn around before a busy browser paints a frame.
+                if (motion === "converge" && rect) {
+                  originY ??= rect.y;
+                  if (!reversing && Math.abs(rect.y - originY) > 8) {
+                    reversing = true;
+                    scrollTo({ top: 0, behavior: "instant" });
+                  }
+                }
+                if (motion === "expand") expanded = true;
+                if ((expanded && !motion && scrollY === 0) || now - start >= 4000) resolve(samples);
+                else requestAnimationFrame(sample);
+              }
+              requestAnimationFrame(sample);
+              scrollTo({ top: 850, behavior: "instant" });
+            }),
+        );
+        await writeFile(
+          `${dir}/${name}-${device}-${orientation}-flight.json`,
+          JSON.stringify({ before, frames }, null, 2),
+        );
+        const launch = frames.find((frame) => frame.motion === "converge" && frame.rect);
+        assert.ok(launch, `${label}: no outward flight observed`);
         assert.ok(
-          Math.abs(flying[0].rect.y - before.y) < 2,
-          `${name} ${device}: flight origin differs from button`,
+          Math.abs(launch.rect.x - before.x) < 2 && Math.abs(launch.rect.y - before.y) < 2,
+          `${label}: flight origin differs from button`,
         );
         assert.ok(
-          flying.some((f) => f.motion === "expand"),
-          `${name} ${device}: reversal not observed`,
+          frames.some((frame) => frame.motion === "expand"),
+          `${label}: reversal not observed`,
         );
-        const after = await page
-          .locator('button[aria-label*="メニューを開く"]')
-          .first()
-          .boundingBox();
-        assert.ok(Math.abs(after.y - before.y) < 2, `${name} ${device}: did not return`);
-        await page.evaluate(() => scrollTo({ top: 850, behavior: "instant" }));
-        await page.waitForTimeout(1100);
-        const settled = await page
-          .locator('button[aria-label*="メニューを開く"]')
-          .first()
-          .boundingBox();
+        const lastFrame = frames.at(-1);
+        assert.ok(lastFrame.scrollY === 0 && !lastFrame.motion, `${label}: return did not settle`);
+        const after = await trigger.boundingBox();
         assert.ok(
-          settled.width >= 60 && settled.height >= 60,
-          `${name} ${device}: hit target too small`,
+          Math.abs(after.x - before.x) < 2 && Math.abs(after.y - before.y) < 2,
+          `${label}: did not return`,
         );
         if (device === "phone") {
+          await placeCompactLauncher(page);
           await page.setViewportSize({ width: height, height: width });
           await page.waitForFunction(
             () => !document.documentElement.hasAttribute("data-phone-landscape-menu"),
@@ -124,7 +172,7 @@ for (const [name, engine] of [
             `${name}: portrait cleanup`,
           );
         }
-        results.push({ name, device, before, after, settled, frames });
+        results.push({ name, device, orientation, before, after, settled, frames });
       } finally {
         await context.close();
       }
@@ -142,6 +190,17 @@ for (const [name, engine] of [
         if (mode === "forced") await page.emulateMedia({ forcedColors: "active" });
         if (mode === "reduced") await page.emulateMedia({ reducedMotion: "reduce" });
         await page.goto(`${base}/dream-chapter`, { waitUntil: "domcontentloaded" });
+        await page.waitForFunction(() => {
+          const root = document.documentElement;
+          return (
+            root.dataset.phoneLandscapeMenu === "true" &&
+            !root.hasAttribute("data-loading") &&
+            !root.hasAttribute("data-route-scroll-settling") &&
+            document.body.style.position !== "fixed" &&
+            document.querySelector("[data-phone-landscape-nav]")
+          );
+        });
+        // The Dream header can still remeasure as its entry assets settle.
         await page.waitForTimeout(3000);
         if (mode === "economy")
           await page.evaluate(() =>

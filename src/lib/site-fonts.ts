@@ -10,6 +10,10 @@ export const SITE_CORE_FONTS_URL =
 export const SITE_DISPLAY_FONTS_URL =
   "https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&display=swap";
 
+// Shippori Mincho carries the Taisho letterpress voice of the film site.
+export const DREAM_FONTS_URL =
+  "https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;800&family=Shippori+Mincho:wght@400;500;700&display=swap";
+
 export function siteFontLinks(opening: boolean) {
   return [SITE_CORE_FONTS_URL, ...(opening ? [] : [SITE_DISPLAY_FONTS_URL])].map((href) => ({
     rel: "stylesheet" as const,

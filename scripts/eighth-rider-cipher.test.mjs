@@ -100,6 +100,6 @@ test("Cipher dossier navigation mounts the enhanced false-trace cut-in", () => {
   // Saga now takes the covered route path; keep ordinary navigation excluded from covers.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await preloadRouteWithDeadline\(\s*\(\) =>\s*navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\),\s*requestSignal,\s*\{ proceedOnError: false \},\s*\);[\s\S]*?return;/,
   );
 });

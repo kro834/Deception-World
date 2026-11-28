@@ -442,7 +442,7 @@ test("the entry plays in the route transition screen as Rexonance's does: prepar
   assert.match(gate, /callOnly:\s*Boolean\(rexonanceCall\) \|\| Boolean\(farFromCall\)/);
   assert.match(
     branch,
-    /if \(farFromCall && tier === "full"\) setSignal\("running"\);\s*await nextFrame\(\);\s*await nextFrame\(\);\s*if \(!isCurrent\(\)\) return;/,
+    /if \(farFromCall && tier === "full"\) setSignal\("running"\);\s*await settleUnderCover\(requestSignal\);\s*if \(!isCurrent\(\)\) return;/,
   );
   assert.match(
     branch,

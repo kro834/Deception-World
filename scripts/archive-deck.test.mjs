@@ -17,7 +17,7 @@ test("both archives link the deck sheet last, after the armour layer", () => {
       const armour = source.indexOf("/archive-armour.css?v=");
       const sheet = source.indexOf("/archive-deck.css?v=20261010-deck");
       assert.ok(armour > 0 && sheet > armour, archive);
-      assert.ok(source.indexOf("/archive-elevation.css?v=20261006-elev4") < armour, archive);
+      assert.ok(source.indexOf("/archive-elevation.css?v=20261126-nav") < armour, archive);
     }
   }
 });

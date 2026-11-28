@@ -863,7 +863,7 @@ main.exhibition-room-curated {
 
   .exhibition-room-curated .exhibition-room-view .exhibition-studio-stage,
   .exhibition-room-curated .exhibition-room-source {
-    height: clamp(260px, 46svh, 430px);
+    height: clamp(280px, 52svh, 480px);
   }
 
   .exhibition-room-work-heading {

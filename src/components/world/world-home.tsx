@@ -12,7 +12,7 @@ import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { captureRiderReturn, readRiderReturn, restoreRiderControl } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import { RevealText } from "./reveal-text";
@@ -25,6 +25,7 @@ import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex-sections";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";
+import { useWorldPosterFrames } from "./use-world-poster-frames";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
@@ -946,7 +947,7 @@ const WorldSectionNav = memo(function WorldSectionNav() {
   }, []);
 
   return (
-    <nav ref={navRef} aria-label="メインメニュー">
+    <nav ref={navRef} className="world-section-nav" aria-label="世界の章">
       <a
         href="#story"
         aria-label="STORY：ストーリーへ移動"
@@ -993,10 +994,22 @@ export function WorldHome() {
   const openingBackdropRef = useRef<HTMLDivElement>(null);
   const openingFocusRef = useRef<HTMLHeadingElement>(null);
   const [initialRiderTab, setInitialRiderTab] = useState(0);
-  const [poster, setPoster] = useState(0);
-  const [prevPoster, setPrevPoster] = useState<number | null>(null);
+  const {
+    frames: posterFrames,
+    show: goPoster,
+    cancel: cancelPosterFrame,
+    load: decodePosterFrame,
+    settle: settlePosterFrame,
+  } = useWorldPosterFrames();
+  const poster = posterFrames.current.index;
+  const prevPoster = posterFrames.previous?.index ?? null;
+  const [posterFailure, setPosterFailure] = useState<number | null>(null);
+  const posterRestoring = useRef(false);
+  const [posterResetting, setPosterResetting] = useState(false);
+  const posterShuffleButton = useRef<HTMLButtonElement>(null);
   const [locked, setLocked] = useState(false);
   const [posterControlsFocused, setPosterControlsFocused] = useState(false);
+  const posterControlsFocusedRef = useRef(false);
   const [shuffling, setShuffling] = useState(false);
   const [ambientPaused, setAmbientPaused] = useState(
     () => typeof document !== "undefined" && (document.hidden || openingHandoffHolds()),
@@ -1048,23 +1061,23 @@ export function WorldHome() {
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
-  const loadPoster = useCallback(
-    (index: number, priority: "high" | "low" = "high") => {
-      posterLoader.current ??= createReadyPosterLoader((image, source) =>
-        preparePosterImage(image, source),
-      );
-      return posterLoader.current.load(POSTERS[index].src, priority);
-    },
-    [],
-  );
+  const loadPoster = useCallback((index: number, priority: "high" | "low" = "high") => {
+    posterLoader.current ??= createReadyPosterLoader((image, source) =>
+      preparePosterImage(image, source),
+    );
+    return posterLoader.current.load(POSTERS[index].src, priority);
+  }, []);
 
   const cancelPosterShuffle = useCallback(() => {
     shuffleRunId.current += 1;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
+    posterRestoring.current = false;
+    cancelPosterFrame();
     setShuffling(false);
-  }, []);
+    setPosterResetting(false);
+  }, [cancelPosterFrame]);
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
   useMirageBoot(shellRef);
@@ -1081,13 +1094,43 @@ export function WorldHome() {
   );
 
   useLayoutEffect(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    if (returnIndex < 0) return;
-    riderTabRef.current = returnIndex;
-    setInitialRiderTab(returnIndex);
-    setRiderTab(returnIndex);
-  }, []);
+    let stopAlign: (() => void) | undefined;
+    const restore = () => {
+      const ticket = readRiderReturn();
+      if (!ticket) return;
+      const returnIndex = RIDERS.findIndex((rider) => rider.id === ticket.id);
+      if (returnIndex < 0) return;
+      riderTabRef.current = returnIndex;
+      setInitialRiderTab(returnIndex);
+      setRiderTab(returnIndex);
+      if (ticket.poster != null && POSTERS[ticket.poster]) {
+        const storedPoster = ticket.poster;
+        cancelPosterShuffle();
+        const runId = shuffleRunId.current;
+        posterRestoring.current = true;
+        void goPoster(storedPoster).then((ready) => {
+          if (shuffleRunId.current !== runId) return;
+          posterRestoring.current = false;
+          setPosterFailure(ready ? null : storedPoster);
+        });
+      }
+      if (ticket.locked != null) setLocked(ticket.locked);
+      const control = shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+      if (control) {
+        stopAlign?.();
+        stopAlign = restoreRiderControl(ticket, control);
+      }
+    };
+    restore();
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restore();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      stopAlign?.();
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [cancelPosterShuffle, goPoster, locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-other") return;
@@ -1200,10 +1243,6 @@ export function WorldHome() {
     return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
-  useEffect(() => {
-    clearRiderReturn();
-  }, []);
-
   const selectRider = useCallback((next: number) => {
     const current = riderTabRef.current;
     if (current === next) return;
@@ -1281,33 +1320,53 @@ export function WorldHome() {
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    if (posterControlsFocused) return;
+    if (posterControlsFocused || posterResetting || posterFailure !== null) return;
     if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+
     let cancelled = false;
     let decoding = false;
     const nextIndex = (poster + 1) % POSTERS.length;
-    const t = window.setInterval(async () => {
-      if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
+    const canAdvance = () =>
+      !cancelled &&
+      !shuffleActive.current &&
+      !posterRestoring.current &&
+      !posterControlsFocusedRef.current &&
+      !document.hidden &&
+      heroInViewRef.current &&
+      !document.querySelector("dialog[open]");
+
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    const shouldPrefetch =
+      !connection?.saveData && !["slow-2g", "2g"].includes(connection?.effectiveType ?? "");
+    let warm: Promise<boolean> | undefined;
+    const preload = shouldPrefetch
+      ? window.setTimeout(() => {
+          if (canAdvance()) warm = loadPoster(nextIndex, "low").catch(() => false);
+        }, 2400)
+      : undefined;
+
+    const timer = window.setInterval(async () => {
+      if (decoding || !heroInViewRef.current || !canAdvance()) return;
       decoding = true;
       try {
-        const ready = await loadPoster(nextIndex, "low");
-        if (cancelled || !ready || document.querySelector("dialog[open]")) return;
-        if (!heroInViewRef.current) return;
-        startTransition(() => {
-          setPrevPoster(poster);
-          setPoster(nextIndex);
-        });
+        const ready = warm ? await warm : true;
+        warm = undefined;
+        if (ready && canAdvance()) await goPoster(nextIndex, { canShow: canAdvance });
       } catch {
-        // Preserve the current art when the next image cannot be delivered.
+        // An automatic advance may fail. Keep the current poster for the next beat.
       } finally {
         decoding = false;
       }
     }, 5200);
     return () => {
       cancelled = true;
-      window.clearInterval(t);
+      window.clearInterval(timer);
+      window.clearTimeout(preload);
     };
   }, [
+    goPoster,
     loadPoster,
     ambientPaused,
     heroVisible,
@@ -1319,37 +1378,8 @@ export function WorldHome() {
     episodePickup,
     shuffling,
     posterControlsFocused,
-  ]);
-
-  useEffect(() => {
-    if (ambientPaused || motionReduced || !heroVisible) return;
-    if (posterControlsFocused) return;
-    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
-    const connection = (
-      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-    ).connection;
-    if (
-      connection?.saveData ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g"
-    )
-      return;
-    const timer = window.setTimeout(() => {
-      void loadPoster((poster + 1) % POSTERS.length, "low");
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [
-    loadPoster,
-    ambientPaused,
-    heroVisible,
-    motionReduced,
-    poster,
-    locked,
-    sideMenuOpen,
-    pickupOpen,
-    episodePickup,
-    shuffling,
-    posterControlsFocused,
+    posterResetting,
+    posterFailure,
   ]);
 
   useEffect(() => {
@@ -1388,22 +1418,21 @@ export function WorldHome() {
   }, [ambientPaused]);
 
   useEffect(() => {
+    if (motionReduced && shuffleActive.current) cancelPosterShuffle();
+  }, [cancelPosterShuffle, motionReduced]);
+
+  useEffect(() => {
     const paused =
-      ambientPaused ||
-      motionReduced ||
-      !heroVisible ||
-      sideMenuOpen ||
-      pickupOpen ||
-      episodePickup !== null;
-    if (paused && shuffleActive.current) cancelPosterShuffle();
+      ambientPaused || !heroVisible || sideMenuOpen || pickupOpen || episodePickup !== null;
+    if (paused && (shuffleActive.current || posterResetting)) cancelPosterShuffle();
   }, [
     cancelPosterShuffle,
     ambientPaused,
-    motionReduced,
     heroVisible,
     sideMenuOpen,
     pickupOpen,
     episodePickup,
+    posterResetting,
   ]);
 
   useEffect(() => {
@@ -1577,23 +1606,43 @@ export function WorldHome() {
       cancelPickupGlass.current?.();
     };
   }, []);
+  // The first print (INITIAL_FRAMES: poster 0) is in the server HTML. If it
+  // fails before hydration, React attaches onError too late to hear it and
+  // the stage keeps a broken image instead of offering 再試行; read the
+  // element once instead (a fast cache or network error on Safari settles
+  // before hydration).
+  useEffect(() => {
+    const image = shellRef.current?.querySelector<HTMLImageElement>(
+      '#poster-stage .world-stage-image[data-layer="current"]',
+    );
+    if (image?.complete && image.naturalWidth === 0 && image.currentSrc) setPosterFailure(0);
+  }, []);
   const current = POSTERS[poster];
-  const previous = prevPoster != null ? POSTERS[prevPoster] : null;
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
   const selectedEpisodePickup = episodePickup == null ? null : EPISODES[episodePickup];
 
-  const goPoster = (next: number | ((p: number) => number)) => {
-    setPoster((p) => {
-      const n = typeof next === "function" ? next(p) : next;
-      const wrapped = ((n % POSTERS.length) + POSTERS.length) % POSTERS.length;
-      if (wrapped !== p) setPrevPoster(p);
-      return wrapped;
-    });
+  const requestPoster = async (next: number, retry = false) => {
+    cancelPosterShuffle();
+    const runId = shuffleRunId.current;
+    const retryControl = retry ? document.activeElement : null;
+    if (!retry) setPosterFailure(null);
+    setPosterResetting(true);
+    const ready = await goPoster(next, { retry: retry && next === poster });
+    if (shuffleRunId.current !== runId) return;
+    if (ready && retryControl && retryControl === document.activeElement) {
+      posterShuffleButton.current?.focus({ preventScroll: true });
+    }
+    setPosterResetting(false);
+    setPosterFailure(ready ? null : next);
   };
 
   const shufflePoster = () => {
     if (ambientPaused || shuffleActive.current) return;
+    posterRestoring.current = false;
+    cancelPosterFrame();
+    setPosterFailure(null);
+    setPosterResetting(false);
     shuffleActive.current = true;
     setShuffling(true);
     setLocked(true);
@@ -1621,58 +1670,47 @@ export function WorldHome() {
       ];
     }
     const finalPoster = posterSequence.pop() ?? (poster + 1) % POSTERS.length;
-    const previewPool = [
-      poster,
-      prevPoster ?? poster,
-      (poster + 1) % POSTERS.length,
-      (poster + 2) % POSTERS.length,
-    ].filter((value, index, values) => values.indexOf(value) === index);
-    for (let index = previewPool.length - 1; index > 0; index -= 1) {
-      const swapIndex = randomBelow(index + 1);
-      [previewPool[index], previewPool[swapIndex]] = [previewPool[swapIndex], previewPool[index]];
-    }
-    const previewPosters = Array.from(
-      { length: 9 },
-      (_, index) => previewPool[index % previewPool.length],
-    );
+    const candidateIsCurrent = () =>
+      shuffleActive.current &&
+      shuffleRunId.current === runId &&
+      heroInViewRef.current &&
+      !document.hidden &&
+      !document.querySelector("dialog[open]");
+    const selectFinal = async (ready: boolean) => {
+      if (!shuffleActive.current || shuffleRunId.current !== runId) return false;
+      if (!candidateIsCurrent()) {
+        cancelPosterShuffle();
+        return false;
+      }
+      if (!ready) cancelPosterFrame();
+      const shown = ready && (await goPoster(finalPoster, { canShow: candidateIsCurrent }));
+      if (shuffleRunId.current !== runId) return false;
+      if (!shown && candidateIsCurrent()) setPosterFailure(finalPoster);
+      return true;
+    };
     const finalReady = loadPoster(finalPoster);
     if (motionReduced) {
-      void finalReady.then((ready) => {
-        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        if (!heroInViewRef.current) {
-          cancelPosterShuffle();
-          return;
-        }
-        if (ready) goPoster(finalPoster);
+      void finalReady.then(async (ready) => {
+        if (!(await selectFinal(ready))) return;
         shuffleActive.current = false;
         setShuffling(false);
       });
       return;
     }
 
-    const previewReady = new Set<number>();
-    previewPool.forEach((index) => {
-      const decoded = index === finalPoster ? finalReady : loadPoster(index, "low");
-      void decoded.then((ready) => {
-        if (ready && shuffleRunId.current === runId) previewReady.add(index);
-      });
+    const nextIndex = (poster + 1) % POSTERS.length;
+    const previewPool = [...new Set([poster, prevPoster ?? poster, nextIndex])];
+    const previewReady = new Set([poster, prevPoster ?? poster]);
+    const previewLoad = nextIndex === finalPoster ? finalReady : loadPoster(nextIndex, "low");
+    void previewLoad.then((ready) => {
+      if (ready && candidateIsCurrent()) previewReady.add(nextIndex);
     });
 
     [0, 75, 155, 240, 335, 440, 560, 695, 850, 1025].forEach((delay, index, steps) => {
       const timer = window.setTimeout(async () => {
         const isFinalStep = index === steps.length - 1;
-        const previewPoster = previewPosters[index % previewPosters.length];
-        const ready = isFinalStep ? await finalReady : previewReady.has(previewPoster);
-        if (!shuffleActive.current || shuffleRunId.current !== runId) return;
-        if (!heroInViewRef.current) {
-          cancelPosterShuffle();
-          return;
-        }
-        const next = isFinalStep ? finalPoster : previewPoster;
-        if (ready) {
-          goPoster(next);
-        }
         if (isFinalStep) {
+          if (!(await selectFinal(await finalReady))) return;
           const settleTimer = window.setTimeout(() => {
             if (!shuffleActive.current || shuffleRunId.current !== runId) return;
             setShuffling(false);
@@ -1680,6 +1718,9 @@ export function WorldHome() {
             shuffleTimers.current = [];
           }, 300);
           shuffleTimers.current.push(settleTimer);
+        } else if (candidateIsCurrent()) {
+          const preview = previewPool[index % previewPool.length];
+          if (previewReady.has(preview)) void goPoster(preview, { canShow: candidateIsCurrent });
         }
       }, delay);
       shuffleTimers.current.push(timer);
@@ -1884,56 +1925,62 @@ export function WorldHome() {
           economy={motionReduced}
           media={
             <div
-              className={shuffling ? "world-poster-media is-shuffling" : "world-poster-media"}
+              className="world-poster-media"
               id="poster-stage"
-              aria-busy={shuffling}
+              tabIndex={-1}
+              aria-busy={shuffling || posterResetting}
             >
-              <div className="world-stage-media">
-                {previous ? (
-                  <img
-                    className="world-stage-image world-stage-image-previous"
-                    key={`poster-prev-${prevPoster}`}
-                    src={previous.src}
-                    width={previous.width}
-                    height={previous.height}
-                    {...posterImage(previous.src)}
-                    alt=""
-                    style={{
-                      objectPosition: "50% 50%",
-                      objectFit: "contain",
-                    }}
-                    onAnimationEnd={() => startTransition(() => setPrevPoster(null))}
-                  />
-                ) : null}
-                <img
-                  className={
-                    current.fit === "contain"
-                      ? "world-stage-image world-stage-image-current is-contain"
-                      : "world-stage-image world-stage-image-current"
-                  }
-                  key={`poster-${poster}`}
-                  src={current.src}
-                  width={current.width}
-                  height={current.height}
-                  {...posterImage(current.src)}
-                  alt={current.alt}
-                  style={{
-                    objectPosition: "50% 50%",
-                    objectFit: "contain",
-                  }}
-                  fetchPriority="high"
-                  decoding="async"
-                />
+              <div className="world-stage-media" data-transitioning={prevPoster !== null}>
+                {[posterFrames.previous, posterFrames.current, posterFrames.pending].map(
+                  (frame) => {
+                    if (!frame) return null;
+                    const art = POSTERS[frame.index];
+                    const staged = frame === posterFrames.pending;
+                    const active = frame === posterFrames.current;
+                    const layer = staged ? "pending" : active ? "current" : "previous";
+                    return (
+                      <img
+                        className={`world-stage-image world-stage-image-${layer}`}
+                        data-layer={layer}
+                        key={frame.key}
+                        src={art.src}
+                        width={art.width}
+                        height={art.height}
+                        {...posterImage(art.src)}
+                        alt={active ? art.alt : ""}
+                        fetchPriority={
+                          frame.key === 0 || (staged && (shuffling || posterResetting))
+                            ? "high"
+                            : "low"
+                        }
+                        decoding="async"
+                        onLoad={
+                          staged
+                            ? (event) => void decodePosterFrame(frame, event.currentTarget)
+                            : undefined
+                        }
+                        onError={() => {
+                          if (staged) settlePosterFrame(frame, false);
+                          else if (active) setPosterFailure(frame.index);
+                        }}
+                      />
+                    );
+                  },
+                )}
               </div>
             </div>
           }
           controls={
             <div
               className="world-stage-controls"
-              onFocusCapture={() => setPosterControlsFocused(true)}
+              onFocusCapture={() => {
+                posterControlsFocusedRef.current = true;
+                setPosterControlsFocused(true);
+              }}
               onBlurCapture={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget))
-                  setPosterControlsFocused(false);
+                if (event.currentTarget.contains(event.relatedTarget)) return;
+                posterControlsFocusedRef.current = false;
+                setPosterControlsFocused(false);
               }}
             >
               <div
@@ -1942,6 +1989,7 @@ export function WorldHome() {
                 aria-label="キービジュアル操作"
               >
                 <button
+                  ref={posterShuffleButton}
                   type="button"
                   className="poster-shuffle ios26-glass"
                   data-liquid-pointer="true"
@@ -1954,17 +2002,19 @@ export function WorldHome() {
                   <span aria-hidden="true">
                     <UiVectorIcon kind="shuffle" size={18} />
                   </span>
-                  <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={shuffling || undefined}>SHUFFLE POSTER</span>
+                    <span data-inactive={!shuffling || undefined}>SHUFFLING...</span>
+                  </b>
                 </button>
                 <button
                   type="button"
                   className="poster-reset ios26-glass"
                   data-liquid-pointer="true"
-                  disabled={poster === 0 && !shuffling}
+                  aria-disabled={poster === 0 && !shuffling && !posterResetting}
                   aria-label="先頭のポスターへ戻る（RESET）"
                   onClick={() => {
-                    cancelPosterShuffle();
-                    goPoster(0);
+                    if (poster !== 0 || shuffling || posterResetting) void requestPoster(0);
                   }}
                 >
                   <LiquidPointerGlow />
@@ -2034,17 +2084,34 @@ export function WorldHome() {
                       </svg>
                     )}
                   </span>
-                  <b>{locked ? "固定中" : "自動切替"}</b>
+                  <b className="world-stage-state-label" aria-hidden="true">
+                    <span data-inactive={locked || undefined}>自動切替</span>
+                    <span data-inactive={!locked || undefined}>固定中</span>
+                  </b>
                 </button>
               </div>
               <output
                 aria-label="表示中のポスター"
                 aria-live={locked || posterControlsFocused ? "polite" : "off"}
                 aria-atomic="true"
-                aria-busy={shuffling}
+                aria-busy={shuffling || posterResetting}
               >
                 {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
               </output>
+              {posterFailure !== null && (
+                <div className="world-poster-recovery">
+                  <span role="status">画像を読み込めませんでした。</span>
+                  <button
+                    type="button"
+                    aria-disabled={posterResetting}
+                    onClick={() => {
+                      if (!posterResetting) void requestPoster(posterFailure, true);
+                    }}
+                  >
+                    {posterResetting ? "読み込み中" : "再試行"}
+                  </button>
+                </div>
+              )}
             </div>
           }
         >
@@ -2105,11 +2172,6 @@ export function WorldHome() {
         </a>
       </section>
 
-      <MirageTicker variant="open" records={EPISODES.length} />
-
-      <WorldContents />
-      <WorldExploration />
-
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
@@ -2143,6 +2205,12 @@ export function WorldHome() {
               </RevealText>
             </p>
           </div>
+        </div>
+
+        <div className="world-story-navigation">
+          <MirageTicker variant="open" records={EPISODES.length} />
+          <WorldContents />
+          <WorldExploration />
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
@@ -2672,6 +2740,19 @@ export function WorldHome() {
                 label="個別資料"
                 opensDialog={false}
                 onOpen={(source) => {
+                  const control =
+                    shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+                  const viewport = window.visualViewport;
+                  captureRiderReturn({
+                    id: rider.id,
+                    poster,
+                    locked,
+                    keyboard: source === "keyboard",
+                    viewportFraction: control
+                      ? (control.getBoundingClientRect().top - (viewport?.offsetTop ?? 0)) /
+                        Math.max(1, viewport?.height ?? window.innerHeight)
+                      : undefined,
+                  });
                   void go({
                     to: `/riders/${rider.id}`,
                     assets: RIDER_NAV.find((n) => n.id === rider.id)?.assets ?? [rider.img],

@@ -4,6 +4,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { episodeThumbnail, managerThumbnail, portraitThumbnail } from "@/lib/thumbnail-images";
 import { DisplayName } from "@/components/name-text";
 import { CAST_ROSTER_SEARCH } from "@/lib/dossier-origin";
+import { mountChapterHistoryReturn } from "@/lib/local-history-return";
 import { NameText, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { QuoteTranscript } from "./quote-transcript";
@@ -20,6 +21,7 @@ import {
   WORLD_GLOSSARY,
   WORLD_LOCATIONS,
   WORLD_QUOTES,
+  worldEpisodeEventId,
   type WorldAnnexLine,
   type WorldCastEntry,
 } from "./world-annex-data";
@@ -148,6 +150,7 @@ const EPISODE_ART: Record<string, { src: string; width: number; height: number; 
   "02": { src: "/episode-02-legends.jpeg", width: 1448, height: 1086, pos: "50% 50%" },
   "03": { src: "/episode-03-deception-world.jpeg", width: 1086, height: 1448, pos: "50% 18%" },
   "04": { src: "/episode-04-kill.jpeg", width: 1122, height: 1402, pos: "50% 16%" },
+  "05": { src: "/episode-05-arrival-error.svg", width: 800, height: 800, pos: "50% 50%" },
 };
 
 /* The six 六詠 card thumbnails, at the cards' own sizes (cache hits). */
@@ -639,11 +642,20 @@ function QuoteRail({ children }: { children: ReactNode }) {
 
 /** 06 ARCHIVE LOG: episode synopses and source dialogue, then the glossary. */
 export function EpisodeNotes() {
+  const notesRef = useRef<HTMLDivElement>(null);
+  useEffect(function restoreEpisodeIndexOnHistory() {
+    return mountChapterHistoryReturn(
+      notesRef.current?.querySelector(".wr-record-index") ?? null,
+      null,
+    );
+  }, []);
   return (
-    <div className="wa-inner">
+    <div className="wa-inner" ref={notesRef}>
       <ChapterOpener no="06" />
       <AnnexHeading id="episode-notes-title" no="06.1" title="エピソードの記録" />
-      <p className="wa-prose">EP.01〜04の展開を含みます。</p>
+      <p className="wa-prose">
+        {`EP.${WORLD_EPISODE_NOTES[0].no}〜${WORLD_EPISODE_NOTES.at(-1)?.no}の展開を含みます。`}
+      </p>
       <WorldEpisodeIndex />
       <ol className="wa-episodes">
         {WORLD_EPISODE_NOTES.map((episode) => {
@@ -653,6 +665,7 @@ export function EpisodeNotes() {
               key={episode.no}
               id={`wa-episode-${episode.no}`}
               className={`wa-plate wa-episode is-ep-${episode.no}`}
+              tabIndex={-1}
             >
               {art ? (
                 <span
@@ -675,7 +688,7 @@ export function EpisodeNotes() {
                 <span>
                   EPISODE <b>{episode.no}</b>
                 </span>
-                <strong lang="en">{episode.title}</strong>
+                <strong lang={episode.titleLang}>{episode.title}</strong>
                 <small>
                   <i lang="en" className="visually-hidden">
                     STAGE
@@ -688,8 +701,13 @@ export function EpisodeNotes() {
                       display: contents (the plate's own stack). */}
               <div className="wa-episode-body">
                 <div className="wa-episode-synopsis">
-                  {episode.synopsis.map((paragraph) => (
-                    <p key={paragraph} className="wa-prose">
+                  {episode.synopsis.map((paragraph, index) => (
+                    <p
+                      key={paragraph}
+                      id={worldEpisodeEventId(episode.no, index)}
+                      className="wa-prose"
+                      tabIndex={-1}
+                    >
                       {paragraph}
                     </p>
                   ))}

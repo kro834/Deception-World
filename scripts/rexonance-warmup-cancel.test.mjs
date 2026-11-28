@@ -603,7 +603,7 @@ test("rx17: LoadGate owns warmup pause before every go and releases on settle, h
   assert.ok(pauseAt < go.indexOf("router.preloadRoute"));
   assert.ok(pauseAt < go.indexOf('warmRexonanceSuit("high")'));
   assert.match(gate, /pauseRexonanceSuitWarmup\(preserveIntent\)/);
-  assert.match(go, /finally\s*\{\s*releaseSuitWarmup\(\);\s*\}\s*\},/);
+  assert.match(go, /finally\s*\{\s*if \(pendingIntent\.current\?\.request === request\) pendingIntent\.current = null;\s*request\.abort\(\);\s*releaseSuitWarmup\(\);\s*\}\s*\},/);
   assert.match(
     gate,
     /if \(released\) return;\s*released = true;\s*releases\.delete\(release\);\s*resume\(\);/,

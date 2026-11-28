@@ -90,8 +90,12 @@ test("SPECIAL and STORIES keep their own rows until three STORIES tiles are wide
   );
 });
 
-test("file tiles: names whole, numbers under them in narrow tiles, a real scrim", () => {
-  assert.equal(chrome.match(/<span>\{file\.name\}<\/span>/g)?.length, 2);
+test("file tiles preserve names with explicit word breaks, metadata, and a real scrim", () => {
+  assert.equal(
+    chrome.match(/<span>\s*<DisplayName value=\{file\.name\} \/>\s*<\/span>/g)?.length,
+    2,
+  );
+  assert.match(chrome, /<DisplayName value="ダンテ／ヴァルグ" \/>/);
   assert.match(shell, /container: dw-file-tile \/ inline-size;/);
   assert.match(shell, /@container dw-file-tile \(max-width: 139px\) \{[\s\S]*?flex-basis: 100%;/);
   assert.match(

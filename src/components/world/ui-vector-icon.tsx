@@ -5,7 +5,8 @@ type UiVectorIconKind =
   | "close"
   | "plus"
   | "reset"
-  | "shuffle";
+  | "shuffle"
+  | "zoom";
 
 type UiVectorIconProps = {
   className?: string;
@@ -21,6 +22,7 @@ const PATHS: Record<UiVectorIconKind, string> = {
   plus: "M12 5.5v13M5.5 12h13",
   reset: "M5 6v12m14-6H6m6-6-6 6 6 6",
   shuffle: "M18.5 8A7 7 0 1 0 19 15.5M18.5 8V4.5M18.5 8H15",
+  zoom: "M10.5 4.5a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm4.3 10.3L19.5 19.5M10.5 8v5M8 10.5h5",
 };
 
 export function UiVectorIcon({ className = "", kind, size = 18 }: UiVectorIconProps) {

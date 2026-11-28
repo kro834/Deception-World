@@ -5,7 +5,7 @@ const base = process.env.BASE_URL || "http://127.0.0.1:8082";
 const iframeMode = process.env.IFRAME === "true";
 const browser = await chromium.launch({ channel: "chrome" });
 try {
-  for (const width of [390, 1280]) {
+  for (const width of [320, 390, 1280]) {
     for (const archive of ["saga", "realm"]) {
       const page = await browser.newPage({
         viewport: { width, height: 844 },
@@ -28,6 +28,29 @@ try {
         await page.goto(`${base}/${archive}-form-archive-embedded.html`);
       }
       const compare = archiveDocument.locator('[id$="saga-form-compare-ios"]').last();
+      if (width === 320) {
+        const nav = archiveDocument.locator(".archive-nav:visible").last();
+        const linksFit = await nav.evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          const links = [...element.querySelectorAll("a")].filter((link) =>
+            link.getClientRects().length > 0,
+          );
+          return (
+            links.length === 4 &&
+            getComputedStyle(element).maskImage === "none" &&
+            links.every((link) => {
+              const box = link.getBoundingClientRect();
+              return box.left >= bounds.left && box.right <= bounds.right && box.height >= 44;
+            })
+          );
+        });
+        assert.ok(linksFit, `${archive} ${width}px: all section links are visible without panning`);
+        await nav.getByRole("link", { name: "2形態比較", exact: true }).press("Enter");
+        await archiveDocument.waitForFunction(
+          (id) => decodeURIComponent(location.hash) === `#${id}`,
+          await compare.getAttribute("id"),
+        );
+      }
       const selects = compare.locator(".compare-native-select");
       const ranges = compare.locator(".compare-range");
       const values = await selects
@@ -91,6 +114,21 @@ try {
       await selects.nth(0).selectOption(last);
       await selects.nth(1).selectOption(first);
       await assertPair(last, first);
+      const specRows = compare.locator(".compare-diff-row");
+      await specRows.first().waitFor({ state: "attached" });
+      const specAlignment = await specRows.first().evaluate((row) => {
+        const [a, b] = [...row.querySelectorAll(".compare-diff-side-cell")].map((cell) =>
+          cell.getBoundingClientRect(),
+        );
+        const delta = row.querySelector(".compare-diff-delta").getBoundingClientRect();
+        return a.right < b.left && Math.abs(a.width - b.width) <= 1 && delta.top >= a.bottom;
+      });
+      assert.ok(specAlignment, `${archive} ${width}px: A/B share a row with the delta below`);
+      const names = await selects.evaluateAll((nodes) =>
+        nodes.map((select) => select.selectedOptions[0].textContent.trim()),
+      );
+      const headers = await compare.locator("[data-compare-form]").allTextContents();
+      assert.deepEqual(headers, [`A・${names[0]}`, `B・${names[1]}`]);
       await compare.locator('[id$="saga-compare-swap-button"]').click();
       await assertPair(first, last);
       await ranges.nth(0).focus();

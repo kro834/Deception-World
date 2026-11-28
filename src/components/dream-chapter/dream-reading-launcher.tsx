@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import type { DreamReadingRoom } from "./dream-reading-room";
-import type { DreamPersonTarget } from "./dream-reading-room";
+import type { DreamPersonTarget, DreamRoomPosition } from "./dream-reading-room";
 import { prepareReadingStyle } from "./dream-reading-style";
 
 /** The room and its styles are fetched only after explicit entry. */
@@ -15,6 +15,7 @@ export function DreamReadingLauncher() {
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
+  const roomPosition = useRef<DreamRoomPosition | null>(null);
   const generation = useRef(0);
   const pending = useRef(false);
   useEffect(() => {
@@ -89,8 +90,12 @@ export function DreamReadingLauncher() {
         ? createPortal(
             <Room
               trigger={trigger.current}
-              onClose={() => setOpen(false)}
+              onClose={(position) => {
+                if (position) roomPosition.current = position;
+                setOpen(false);
+              }}
               personTarget={personTarget}
+              resume={roomPosition.current}
             />,
             document.body,
           )

@@ -76,6 +76,7 @@ import { watchPresses } from "@/lib/press-feedback.js";
 import { watchDynamicGui } from "@/lib/dynamic-gui.js";
 import { watchFxMotion } from "@/lib/fx-motion.js";
 import { watchRingMotion } from "@/lib/ring-motion.js";
+import { watchPhraseFit } from "@/lib/phrase-fit.js";
 import { startPerfHud } from "@/lib/perf-hud-gate.js";
 import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
@@ -97,6 +98,7 @@ import siteDisplayFontsCss from "../styles-site-display-fonts.css?url";
 import siteMetricFacesCss from "../styles-site-metric-faces.css?url";
 import fontSubsetsCoreCss from "../styles-font-subsets-core.css?url";
 import fontSubsetsDisplayCss from "../styles-font-subsets-display.css?url";
+import fontSubsetsDreamCss from "../styles-font-subsets-dream.css?url";
 import controlOpticsCss from "../styles-control-optics.css?url";
 import openingInterfaceCss from "../styles-opening-interface.css?url";
 import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
@@ -118,12 +120,18 @@ import fxMotionCss from "../styles-fx-motion.css?url";
 import futureSpectrumCss from "../styles-future-spectrum.css?url";
 import ringCss from "../styles-ring.css?url";
 import ringChromeCss from "../styles-ring-chrome.css?url";
+import chromeUnifyCss from "../styles-chrome-unify.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
-import { siteFontLinks, SITE_CORE_FONTS_URL, SITE_DISPLAY_FONTS_URL } from "@/lib/site-fonts";
+import {
+  DREAM_FONTS_URL,
+  siteFontLinks,
+  SITE_CORE_FONTS_URL,
+  SITE_DISPLAY_FONTS_URL,
+} from "@/lib/site-fonts";
 const CIEL_BUTTON_SIZES = "(max-width: 560px) 48px, 80px";
 const CIEL_BUTTON_SRCSET =
   "/ciel-button-20261018-144.webp 144w, /ciel-button-20261018-216.webp 216w, /ciel-button-20261018-360.webp 360w";
@@ -170,6 +178,13 @@ function FxMotion() {
    (src/lib/ring-motion.js, src/styles-ring.css). */
 function RingMotion() {
   useEffect(() => watchRingMotion(), []);
+  return null;
+}
+
+/* dw-u[data-dw-fit]: a protected phrase unit wider than its own box may wrap
+   (src/lib/phrase-fit.js, src/styles-name-words.css). */
+function PhraseFit() {
+  useEffect(() => watchPhraseFit(), []);
   return null;
 }
 
@@ -402,7 +417,12 @@ export const Route = createRootRoute({
       // excluded, so the title does not load it).
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
-        : [{ rel: "stylesheet", href: futureSpectrumCss }]),
+        : [
+            { rel: "stylesheet", href: futureSpectrumCss },
+            // 2026-11-26: one header grammar over every page's bar (the DW
+            // ring mark, one trigger, one height), after the spectrum's paint.
+            { rel: "stylesheet", href: chromeUnifyCss },
+          ]),
       // Owner (2026-10-30, 10-31): the optional liquid glass (buttons, then
       // the sliders, tabs, rails, switches and selects, then the surfaces and
       // chrome) belongs here, after the spectrum and before the faces. Every
@@ -486,6 +506,14 @@ function RootDocument() {
     <html lang="ja" data-viewport-chrome={chrome} data-family={family} suppressHydrationWarning>
       <head>
         <HeadContent />
+        {pathname === "/dream-chapter" && (
+          <>
+            {/* Ordinary links keep a failed supplemental font out of the router's
+                managed stylesheet promises. The local subsets have priority. */}
+            <link rel="stylesheet" href={DREAM_FONTS_URL} />
+            <link rel="stylesheet" href={fontSubsetsDreamCss} />
+          </>
+        )}
       </head>
       <body className="antialiased">
         <SkipLink />
@@ -505,6 +533,7 @@ function RootDocument() {
               <DynamicGui />
               <FxMotion />
               <RingMotion />
+              <PhraseFit />
               <PerfHudGate />
               <QuickSearchHost />
               <GalleryStickerWarmup />

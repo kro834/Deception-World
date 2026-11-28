@@ -55,9 +55,33 @@ const CHAPTERS: readonly Chapter[] = [
     title: "戦いの記録を辿る。",
     image: "/episode-01-hide-and-seek-delivery-600.webp",
   },
-  { href: "#cast-roster", no: "04", phase: "annex", title: "人物一覧" },
-  { href: "#world-brief", no: "05", phase: "annex", title: "世界と組織" },
-  { href: "#episode-notes", no: "06", phase: "annex", title: "エピソードの記録" },
+  /* 04-06 (owner, 2026-11-26): a numeral alone on a dark lens read as a
+     picture that failed to load, so each takes a picture from its own
+     chapter, as 01-03 do: 04 a face from the roster (紅城真守, close enough
+     to read in a 62px lens), 05 the world brief's own stage still (EP02;
+     its EP01 and EP03 stills are 03 and 01 here), 06 a record's key art
+     (EP04, on no other lens). */
+  {
+    href: "#cast-roster",
+    no: "04",
+    phase: "annex",
+    title: "人物一覧",
+    image: "/civilian-argenome-delivery-360.webp",
+  },
+  {
+    href: "#world-brief",
+    no: "05",
+    phase: "annex",
+    title: "世界と組織",
+    image: "/episode-02-legends-delivery-600.webp",
+  },
+  {
+    href: "#episode-notes",
+    no: "06",
+    phase: "annex",
+    title: "エピソードの記録",
+    image: "/episode-04-kill-delivery-600.webp",
+  },
 ];
 
 /** After the opening ticker: the chapter map. */
@@ -69,7 +93,7 @@ export const WorldContents = memo(function WorldContents() {
           the heading; ring-enter lets the ring turn into place when seen. */}
       <ol className="ws-map ring-enter">
         {CHAPTERS.map(({ href, no, phase, title, image }) => (
-          <li key={href} data-phase={phase}>
+          <li key={href} data-phase={phase} data-art={image ? "" : undefined}>
             <a href={href}>
               {image && <img src={image} alt="" loading="lazy" decoding="async" />}
               <span className="ws-map-label">

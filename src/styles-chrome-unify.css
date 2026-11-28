@@ -1,0 +1,326 @@
+/* ================================================================
+   One header grammar (2026-11-26 brush-up, package G).
+   Owner: every page shares one header layout and one menu button; the
+   gallery family keeps only its gold colour scheme.
+
+   Linked from src/routes/__root.tsx after the future spectrum (every route
+   but the title, whose dashboard header lives in styles-command-deck.css).
+   It overrides the bars from outside, the same pattern as
+   styles-chrome-elevation.css; page sheets do not restyle their headers.
+
+   THE GRAMMAR
+     height       --dw-header-h (64px; 76px from 720px). Sub-tabs keep their
+                  own row under it (Extreme, Final Stage, Dream). The bars
+                  already measure this; Dream's Taisho bar keeps its 58px.
+     left         the DW ring mark, --dw-header-mark across (44px; 48px from
+                  720px), its glyph fitted inside the ring (Michroma, about
+                  0.6 of the diameter wide), then the page name.
+     right        at most the page's context pill and the dots trigger. The
+                  trigger is the same four-cell glyph on every family.
+     edge         no lit seam on the left edge (the 3px bar is gone from the
+                  shared bar paint in styles-stage-shell.css,
+                  styles-command-chrome.css and styles-future-spectrum.css).
+
+   Paint and box only: no animation, no blur, no backdrop-filter. Forced
+   colours keep the system paint (the ring is a border there).
+   ================================================================ */
+
+/* ---------- 1. The DW ring mark: one size, the glyph inside its ring ---------- */
+
+/* World and the character files: the sigil is an element with its own
+   prism ring (styles-ring-chrome.css); only its size and glyph change. */
+html[data-family]
+  body
+  :is(
+    main.site-shell.film-edition > header.topbar,
+    .manager-page > header.manager-topbar
+  )
+  .brand
+  > .brand-sigil.brand-sigil.brand-sigil {
+  flex: 0 0 auto;
+  width: var(--dw-header-mark);
+  height: var(--dw-header-mark);
+  min-width: var(--dw-header-mark);
+  box-sizing: border-box;
+}
+
+html[data-family]
+  body
+  :is(
+    main.site-shell.film-edition > header.topbar,
+    .manager-page > header.manager-topbar
+  )
+  .brand
+  > .brand-sigil.brand-sigil.brand-sigil
+  i {
+  font-family: var(--dw-font-hud);
+  font-size: calc(var(--dw-header-mark) * 0.22);
+  font-style: normal;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-indent: 0.02em;
+}
+
+html[data-family]
+  body
+  :is(
+    main.site-shell.film-edition > header.topbar,
+    .manager-page > header.manager-topbar
+  )
+  > .brand.brand {
+  min-height: var(--dw-header-mark);
+}
+
+/* The library and the search: the mark is the link's ::before plate,
+   now the same ring. */
+html[data-family]
+  body
+  :is(
+    .library-page > header.library-topbar > a:first-child,
+    .search-page > header.search-topbar > a.search-brand
+  )::before {
+  width: var(--dw-header-mark);
+  height: var(--dw-header-mark);
+  border: 1.5px solid transparent;
+  border-radius: 50%;
+  background:
+    var(--ring-graphite) padding-box,
+    var(--ring-metal-edge) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 6px 16px -10px #000;
+  clip-path: none;
+  color: var(--dw-ice);
+  font-family: var(--dw-font-hud);
+  font-size: calc(var(--dw-header-mark) * 0.22);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* The six special sites: the ring is ::before, the glyph ::after. Both
+   take the mark's diameter and the name moves out by the same amount, so
+   DW sits inside its ring instead of overflowing it. */
+html[data-family="special"] body .rxs-page.rxs-page > header.rxs-local-nav .rxs-brand.rxs-brand {
+  padding-left: calc(var(--dw-header-mark) + 12px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page
+  > header.rxs-local-nav
+  .rxs-brand.rxs-brand::before {
+  width: var(--dw-header-mark);
+  height: var(--dw-header-mark);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page
+  > header.rxs-local-nav
+  .rxs-brand.rxs-brand::after {
+  width: var(--dw-header-mark);
+  font-family: var(--dw-font-hud);
+  font-size: calc(var(--dw-header-mark) * 0.22);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-align: center;
+  text-indent: 0.02em;
+}
+
+/* Saga Cinema keeps its S, on the same ring. */
+html[data-family="special"] body .saga-cinema.saga-cinema .site-header .brand-mark.brand-mark {
+  width: var(--dw-header-mark);
+  height: var(--dw-header-mark);
+  flex: 0 0 auto;
+  border-radius: 50%;
+  clip-path: none;
+  font-size: calc(var(--dw-header-mark) * 0.4);
+  line-height: 1;
+}
+
+/* The gallery, the tours, the lab and the world map had no mark: the
+   home link gains the same ring (aria-hidden content, the link's name is
+   unchanged). The gallery family's ring is gold. */
+html[data-family]
+  body
+  :is(
+    .gallery-page > header.gallery-topbar > a.gallery-brand,
+    .transformation-lab .lab-topbar > a:first-child,
+    .wm-page header.wm-header > a.wm-back
+  ) {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--dw-header-mark);
+}
+
+html[data-family]
+  body
+  :is(
+    .gallery-page > header.gallery-topbar > a.gallery-brand,
+    .transformation-lab .lab-topbar > a:first-child,
+    .wm-page header.wm-header > a.wm-back
+  )::before {
+  content: "DW";
+  content: "DW" / "";
+  display: grid;
+  flex: 0 0 auto;
+  width: var(--dw-header-mark);
+  height: var(--dw-header-mark);
+  place-items: center;
+  box-sizing: border-box;
+  border: 1.5px solid transparent;
+  border-radius: 50%;
+  background:
+    var(--ring-graphite) padding-box,
+    var(--ring-metal-edge) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 6px 16px -10px #000;
+  color: var(--dw-ice);
+  font-family: var(--dw-font-hud);
+  font-size: calc(var(--dw-header-mark) * 0.22);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-indent: 0.02em;
+  text-transform: none;
+}
+
+html[data-family="gallery"] body .gallery-page > header.gallery-topbar > a.gallery-brand::before {
+  background:
+    linear-gradient(150deg, #2a2418, #15120c 54%, #0b0a08) padding-box,
+    conic-gradient(from 215deg, #6b5630, #d9b977 16%, #fae6b6 22%, #8a6c3a 38%, #4b3c22 52%, #d9b977 70%, #fae6b6 74%, #6b5630) border-box;
+  color: var(--dw-gold);
+}
+
+/* The gallery brand: the two lines stack beside the ring. */
+html[data-family="gallery"] body .gallery-page > header.gallery-topbar > a.gallery-brand {
+  display: inline-grid;
+  grid-template-columns: var(--dw-header-mark) auto;
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: 12px;
+  row-gap: 2px;
+}
+
+html[data-family="gallery"] body .gallery-page > header.gallery-topbar > a.gallery-brand::before {
+  grid-row: 1 / 3;
+  grid-column: 1;
+}
+
+html[data-family="gallery"] body .gallery-page > header.gallery-topbar > a.gallery-brand > * {
+  grid-column: 2;
+}
+
+/* The lab and the map: their home pills become the brand (the ring, then
+   the name), without the pill's frame. */
+html[data-family]
+  body
+  :is(.transformation-lab .lab-topbar > a:first-child, .wm-page header.wm-header > a.wm-back) {
+  padding: 0;
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+}
+
+/* ---------- 2. One trigger: the dots on every family ---------- */
+/* The gallery family drew three bars; it now draws the same four cells
+   (three dots and the gold fourth, styles-ring-chrome.css). */
+@media (forced-colors: none) {
+  html[data-family="gallery"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger
+    > .side-panel-trigger-glyph.side-panel-trigger-glyph {
+    display: grid;
+    width: auto;
+    height: auto;
+    grid-template-columns: repeat(2, 7px);
+    grid-template-rows: repeat(2, 7px);
+    gap: 4px;
+    place-content: center;
+    justify-items: stretch;
+  }
+
+  html[data-family="gallery"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger
+    > .side-panel-trigger-glyph.side-panel-trigger-glyph
+    > i {
+    position: static;
+    width: 7px;
+    height: 7px;
+    margin: 0;
+    border-radius: 1px;
+    background: currentColor;
+    box-shadow: none;
+    transform: none;
+    translate: none;
+    rotate: none;
+  }
+
+  html[data-family="gallery"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger
+    > .side-panel-trigger-glyph.side-panel-trigger-glyph::after {
+    content: "";
+    position: static;
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+    border: 1.5px solid currentColor;
+    border-radius: 1px;
+    background: none;
+    transform: none;
+  }
+
+  /* Without the glass the cells are dots and the fourth is gold, as on every
+     other family (styles-ring-chrome.css); with it they are the glass
+     launcher's squares, the fourth open. */
+  html[data-family="gallery"]:not([data-button-style="liquid"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger.side-panel-trigger
+    > .side-panel-trigger-glyph.side-panel-trigger-glyph
+    > i {
+    border-radius: 50%;
+  }
+
+  html[data-family="gallery"]:not([data-button-style="liquid"]):not([data-ipad-menu-scrolled="true"]):not(
+      [data-ipad-menu-motion]
+    )
+    body
+    .side-panel-trigger.side-panel-trigger
+    > .side-panel-trigger-glyph.side-panel-trigger-glyph::after {
+    border: 0;
+    border-radius: 50%;
+    background: var(--ring-gold);
+  }
+
+  html[data-family="gallery"]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger
+    > .side-panel-trigger-glyph.side-panel-trigger-glyph::before {
+    content: none;
+  }
+}
+
+/* ---------- 3. One context pill ---------- */
+/* The bar's context links (back to the list, the gallery's refresh and
+   works, the tours' way back, the map's lab, Saga Cinema's way home) take
+   the compact button height and the pill; each keeps its own paint. */
+html[data-family]
+  body
+  :is(
+    .manager-page > header.manager-topbar .detail-topbar-actions > a.manager-back,
+    .gallery-page > header.gallery-topbar .gallery-topbar-actions > :is(a, button),
+    .wm-page header.wm-header .wm-header-actions > a,
+    .saga-cinema .site-header > a.world-return-link
+  ) {
+  box-sizing: border-box;
+  min-height: var(--dw-btn-h);
+  height: var(--dw-btn-h);
+  border-radius: var(--dw-r-pill);
+}

@@ -82,11 +82,16 @@ test("the title starts the opening handoff synchronously before any route work",
 });
 
 test("the title recovers cancellation, BFCache, and background video state", () => {
+  const enterWorld = sliceBetween(title, "const enterWorld =", "useEffect(() => {", "enterWorld");
+  const restore = sliceBetween(title, "const restoreTitleAfterEntry =", "const enterWorld =", "restore");
   assert.match(
-    title,
-    /await go\([\s\S]*?window\.location\.pathname === "\/"[\s\S]*?setPhase\("complete"\)/,
-    "a non-throwing covered-navigation cancellation must restore the opening controls",
+    enterWorld,
+    /await go\([\s\S]*?restoreTitleAfterEntry\(\);\s*\} catch \{\s*restoreTitleAfterEntry\(\)/,
+    "covered navigation must restore the opening controls on cancellation or rejection",
   );
+  assert.match(restore, /!mountedRef\.current \|\| phaseRef\.current !== "diving"/);
+  assert.match(restore, /window\.location\.pathname !== "\/"\) \{\s*return;/);
+  assert.match(restore, /phaseRef\.current = "complete";\s*setPhase\("complete"\)/);
   assert.match(title, /window\.addEventListener\("pageshow", handlePageShow\)/);
   assert.match(title, /window\.removeEventListener\("pageshow", handlePageShow\)/);
   assert.match(title, /document\.addEventListener\("visibilitychange", handleVisibilityChange\)/);
@@ -129,8 +134,8 @@ test("covered navigation waits for destination readiness and is cancellation-saf
   );
   assert.match(
     coveredBranch,
-    /Promise\.resolve\(\)\s*\.then\(\(\)\s*=>\s*router\.preloadRoute/,
-    "a synchronous route-preload throw must be converted into a guarded rejection",
+    /preloadRouteWithDeadline\(\s*\(\)\s*=>\s*router\.preloadRoute\([^\n]+\),\s*requestSignal/,
+    "route preloading must use the bounded, abortable helper",
   );
   assert.match(
     coveredBranch,
@@ -139,11 +144,11 @@ test("covered navigation waits for destination readiness and is cancellation-saf
   );
   assert.match(
     coveredBranch,
-    /const navigateOpeningDestination = \(\) => navigate\(\{ to, hash, search: navigationSearch \}\)/,
+    /const navigateOpeningDestination = \(\) =>\s*navigateUnderCover\(\s*router,\s*\(\) => navigate\(\{ to, hash, search: navigationSearch \}\),\s*to,\s*requestSignal/,
   );
-  const coverWait = coveredBranch.indexOf("Promise.all([routeWarmup, assetWarmup])");
+  const coverWait = coveredBranch.indexOf("const ready = await routeWarmup");
   const navigateIndex = coveredBranch.lastIndexOf("await navigateOpeningDestination()");
-  assert.ok(coverWait !== -1 && coverWait < navigateIndex, "covered navigation must commit /world after warming");
+  assert.ok(coverWait !== -1 && coverWait < navigateIndex, "covered navigation must check route readiness before committing /world");
   const afterNavigate = coveredBranch.slice(navigateIndex);
   const readyWaitIndex = afterNavigate.search(/const destination = await Promise\.race/);
   assert.notEqual(

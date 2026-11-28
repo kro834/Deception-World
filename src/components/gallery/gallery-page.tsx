@@ -18,6 +18,7 @@ import { gallerySelectFocus } from "./gallery-select-focus";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
+import { UiVectorIcon } from "@/components/world/ui-vector-icon";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
 import { GALLERY_ARTWORKS, GALLERY_CATEGORIES, GALLERY_DEFAULT_ARTWORK } from "./gallery-data";
@@ -63,11 +64,14 @@ import {
 import {
   galleryAdjacentId,
   galleryLayoutTop,
+  galleryReturnFocusTarget,
   galleryRevealDelta,
+  galleryViewerOpenerSelector,
   galleryViewerSequence,
   readGalleryViewerRecord,
   settleGalleryViewerReturn,
   type GalleryViewerMode,
+  type GalleryViewerOpener,
 } from "./gallery-viewer-state";
 import { GALLERY_TITLES_KEY, readGalleryTitles, type GalleryTitles } from "./gallery-titles";
 import { galleryStageSizes, rememberGalleryNativeLoad } from "./gallery-image-delivery";
@@ -80,6 +84,9 @@ function revealGalleryControl(control: HTMLElement | null) {
   const top = galleryRevealDelta(control.getBoundingClientRect(), header.getBoundingClientRect());
   if (top) header.scrollBy({ top, behavior: "instant" });
 }
+
+// A visited entry with no temporary selection must still restore the saved artwork.
+const visitedGalleryEntries = new Set<string>();
 
 export function GalleryPage() {
   useWorldMode();
@@ -160,6 +167,7 @@ export function GalleryPage() {
   const featureFeedbackRef = useRef<HTMLParagraphElement>(null);
   const saveFeatureRef = useRef<HTMLButtonElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
+  const openerRecordRef = useRef<GalleryViewerOpener | null>(null);
   const restoreFocusRef = useRef(false);
   const viewerWorksRef = useRef<GalleryCollectionArtwork[]>([]);
   const viewerModeRef = useRef<GalleryViewerMode>("normal");
@@ -438,7 +446,7 @@ export function GalleryPage() {
     return () => observer.disconnect();
   }, [works]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const dialog = dialogRef.current;
     if (!viewerOpen || !dialog) return;
     // Capture before native modal focus can scroll Safari's page.
@@ -505,6 +513,7 @@ export function GalleryPage() {
           ids: viewerWorksRef.current.map((work) => work.id),
           position: readingAt,
           mode: viewerModeRef.current,
+          opener: openerRecordRef.current ?? undefined,
         },
       });
       viewerEntryRef.current = true;
@@ -515,6 +524,7 @@ export function GalleryPage() {
       const ownEntry = viewerEntryRef.current;
       viewerEntryRef.current = false;
       const opener = openerRef.current;
+      const openerKind = openerRecordRef.current?.kind;
       const restoreFocus = restoreFocusRef.current;
       const originalTop = openerTopRef.current;
       restoreFocusRef.current = false;
@@ -536,8 +546,7 @@ export function GalleryPage() {
             behavior: "instant",
           });
         if (restoreFocus) {
-          const returnTarget =
-            opener?.isConnected && !opener.matches(":disabled") ? opener : favoritesFilter;
+          const returnTarget = galleryReturnFocusTarget(opener, openerKind, favoritesFilter);
           returnTarget?.focus({ preventScroll: true });
         } else if (document.activeElement === opener) {
           opener?.blur();
@@ -615,9 +624,12 @@ export function GalleryPage() {
   ]);
 
   useEffect(() => {
-    const restore = () => {
-      if (preparingLinkRef.current || arriving) return;
+    let previous = router.history.location;
+    const restore = (replacing = false) => {
+      const from = previous;
       const here = router.history.location;
+      previous = here;
+      if (preparingLinkRef.current || arriving) return;
       const plan = planGalleryArtworkEntry({
         href: here.href,
         viewerState: (here.state as { galleryViewer?: unknown }).galleryViewer,
@@ -626,21 +638,41 @@ export function GalleryPage() {
         communityFailed: Boolean(communityLoadError),
       });
       if (plan.kind === "none") {
+        if (here.pathname === "/gallery") {
+          const entry = String(here.state.__TSR_key ?? "gallery");
+          if (entry !== stageEntry.current) {
+            if (
+              from !== here &&
+              from.pathname === "/gallery" &&
+              readGalleryArtworkLink(from.href).kind === "none" &&
+              !visitedGalleryEntries.has(entry) &&
+              (replacing || from.hash !== here.hash)
+            )
+              rememberGalleryStagePreview(entry, readGalleryStagePreview(stageEntry.current));
+            stageEntry.current = entry;
+            setPreviewId(readGalleryStagePreview(entry));
+          }
+          visitedGalleryEntries.add(entry);
+        }
         // Back closes the viewer; its cleanup still needs the opener's focus policy.
+        viewerEntryRef.current = false;
         setSelectedId(null);
         return;
       }
+      // Back can have queued a close without committing it. Forward must
+      // supersede that state update even when the very same dialog is still open.
+      const keepOpen = (id: string) => {
+        if (!dialogRef.current?.open || viewerIdRef.current !== id) return false;
+        viewerEntryRef.current = true;
+        setSelectedId(id);
+        return true;
+      };
       if (plan.kind === "waiting") {
         const activeRecord = readGalleryViewerRecord(
           (here.state as { galleryViewer?: unknown }).galleryViewer,
         );
         // A background refresh must leave an already open finite session intact.
-        if (
-          viewerActiveRef.current &&
-          activeRecord?.mode === "shuffle" &&
-          viewerIdRef.current === activeRecord.id
-        )
-          return;
+        if (activeRecord?.mode === "shuffle" && keepOpen(activeRecord.id)) return;
         setLinkNotice(plan.failed ? "error" : "waiting");
         return;
       }
@@ -660,7 +692,7 @@ export function GalleryPage() {
       const { record } = plan;
       // A restored community artwork may arrive after hydration. Retrying must
       // not reset an already open viewer or its in-progress title editor.
-      if (viewerActiveRef.current && viewerIdRef.current === record.id) return;
+      if (plan.cleanHref === null && keepOpen(record.id)) return;
       restoreFocusRef.current = false;
       const sequence = record.ids
         .map((id) => allArtworksRef.current.find((work) => work.id === id))
@@ -680,14 +712,12 @@ export function GalleryPage() {
         }
       }
       readingAtRef.current = record.position;
+      // The viewed artwork can change without changing the place we opened it from.
       openerRef.current =
-        plan.cleanHref !== null
-          ? null
-          : document.querySelector<HTMLElement>(
-              record.mode === "shuffle"
-                ? ".gallery-shuffle-start"
-                : `[data-gallery-artwork="${CSS.escape(record.id)}"] .gallery-work-open`,
-            );
+        plan.cleanHref === null
+          ? document.querySelector<HTMLElement>(galleryViewerOpenerSelector(record))
+          : null;
+      openerRecordRef.current = record.opener ?? null;
       window.scrollTo({ ...record.position, behavior: "instant" });
       openerTopRef.current = openerRef.current ? galleryLayoutTop(openerRef.current) : null;
       viewerWorksRef.current = sequence;
@@ -703,7 +733,7 @@ export function GalleryPage() {
       setSelectedId(record.id);
     };
     restore();
-    return router.history.subscribe(restore);
+    return router.history.subscribe(({ action }) => restore(action.type === "REPLACE"));
   }, [router, communityLoaded, communityLoadError, arriving]);
 
   useEffect(
@@ -738,6 +768,12 @@ export function GalleryPage() {
     setLinkNotice(null);
     readingAtRef.current = { top: window.scrollY, left: window.scrollX };
     openerRef.current = opener;
+    openerRecordRef.current =
+      mode === "shuffle"
+        ? { kind: "shuffle" }
+        : opener.matches(".gallery-feature-open")
+          ? { kind: "feature" }
+          : { kind: "grid", artworkId: work.id };
     openerTopRef.current = galleryLayoutTop(opener);
     restoreFocusRef.current = keyboard;
     viewerWorksRef.current = sequence;
@@ -1433,8 +1469,10 @@ export function GalleryPage() {
                       decoding="async"
                     />
                   </span>
-                  <span className="gallery-work-hint">
-                    拡大して鑑賞 <span aria-hidden="true">↗</span>
+                  <span className="gallery-work-hint" aria-hidden="true">
+                    {/* Owner (2026-11-26): a magnifier replaces the visible 拡大して鑑賞;
+                        the link's accessible name still ends with 拡大して鑑賞. */}
+                    <UiVectorIcon kind="zoom" size={18} />
                   </span>
                 </a>
                 <figcaption>
@@ -1626,9 +1664,11 @@ export function GalleryPage() {
         data-gallery-background={display.preferences.background}
         ref={dialogRef}
         tabIndex={-1}
-        aria-labelledby="gallery-viewer-title"
+        aria-labelledby={selected ? "gallery-viewer-title" : undefined}
         onClose={(event) => {
-          if (!event.currentTarget.open) setSelectedId(null);
+          // A close event can arrive after Forward has requested a fresh modal.
+          if (!event.currentTarget.open && viewerActiveRef.current && !finishReturnRef.current)
+            setSelectedId(null);
         }}
         onCancel={(event) => {
           event.preventDefault();

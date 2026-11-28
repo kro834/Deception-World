@@ -843,6 +843,27 @@ dialog.quick-search :is(button, a):focus-visible {
   }
 }
 
+dialog.quick-search[data-keyboard-viewport="true"] {
+  --qs-top: max(8px, env(safe-area-inset-top, 0px));
+  --qs-keyboard-space: max(0px, calc(var(--qs-visible-height) - var(--qs-top) - 8px));
+  margin-top: calc(var(--qs-visible-top) + var(--qs-top));
+  max-height: var(--qs-keyboard-space);
+}
+dialog.quick-search[data-keyboard-viewport="true"] .quick-search-panel {
+  max-height: var(--qs-keyboard-space);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+dialog.quick-search[data-keyboard-viewport="true"] .quick-search-head {
+  padding-block: 6px 0;
+}
+dialog.quick-search[data-keyboard-viewport="true"] .quick-search-field {
+  margin-block: 6px;
+}
+dialog.quick-search[data-keyboard-viewport="true"] .quick-search-list {
+  min-height: 56px;
+}
+
 /* Motion lives strictly inside reduced-motion gates outside economy mode. */
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   html:not([data-world-effects="economy"]) dialog.quick-search.dg-dialog {

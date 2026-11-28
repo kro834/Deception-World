@@ -243,7 +243,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
    2. Decoration that only decorates: the marquee bands, the hero HUD
       layer, the HUD jargon after the chapter kickers
    ================================================================ */
-html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .mr-ticker {
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .mr-ticker,
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition
+  .world-story-navigation > .mr-ticker {
   display: none;
 }
 

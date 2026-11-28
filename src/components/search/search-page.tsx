@@ -195,10 +195,20 @@ export function SearchPage({
   }, [activeOption]);
 
   const setQuery = (value: string, focus = true) => {
+    window.clearTimeout(queryTimerRef.current);
+    queryTimerRef.current = undefined;
     setDraft(value);
     writtenRef.current = value;
     onQueryChange(value);
-    if (focus) inputRef.current?.focus({ preventScroll: true });
+    if (focus && inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+      inputRef.current.scrollIntoView({ block: "nearest", behavior: "instant" });
+    }
+  };
+
+  const focusResults = () => {
+    resultsRef.current?.focus({ preventScroll: true });
+    resultsRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
   };
 
   const open = (result: SearchResult, fromKeyboard: boolean) => {
@@ -304,8 +314,7 @@ export function SearchPage({
                 if (composing || performance.now() - compositionEndedRef.current < 50) return;
                 if (draft.trim()) rememberSearch(draft);
                 flushQuery();
-                resultsRef.current?.focus({ preventScroll: true });
-                resultsRef.current?.scrollIntoView({ block: "start" });
+                focusResults();
               }}
             >
               <label htmlFor="record-query">どの記録を探しますか？</label>
@@ -477,6 +486,14 @@ export function SearchPage({
             <p role="status" aria-live="polite" aria-atomic="true">
               <strong>{total}</strong> 件{trimmed && <span>「{trimmed}」</span>}
             </p>
+            <GuardedLink
+              className="search-map-link"
+              to="/world-map"
+              search={{ q: trimmed, view: "list" }}
+              assets={[]}
+            >
+              関係図で探す <span aria-hidden="true">↗</span>
+            </GuardedLink>
           </div>
           {visibleCount < total ? (
             <p className="search-display-summary">
@@ -595,7 +612,10 @@ export function SearchPage({
               suggestions={suggestions}
               onSuggest={setQuery}
               onCategory={onCategoryChange}
-              onClearCategory={() => onCategoryChange("all")}
+              onClearCategory={() => {
+                onCategoryChange("all");
+                focusResults();
+              }}
               onClearQuery={() => setQuery("")}
             />
           ) : null}

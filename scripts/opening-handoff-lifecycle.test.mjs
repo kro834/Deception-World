@@ -308,3 +308,43 @@ test("viewport changes still update a settled covering root and cleanup cancels 
   for (const type of ["resize", "scroll"]) assert.equal(ui.window.visualViewport.listenerCount(type), 0);
   assert.equal(ui.document.listenerCount("visibilitychange"), 0);
 });
+
+test("orientation change before the dive is ready covers with the world still", async () => {
+  const ui = runtime();
+  const snapshot = covering();
+  ui.render(snapshot);
+  ui.window.dispatchEvent(new Event("orientationchange"));
+  assertStaticLanding(ui);
+  assert.deepEqual(ui.covered, [1]);
+  await flush();
+  assert.equal(ui.runs.length, 0, "a late import cannot replay the dive");
+  ui.render({ ...snapshot, phase: "arriving" });
+  assertStaticLanding(ui);
+  assert.equal(ui.root.animations.at(-1).keyframes.map(({ opacity }) => opacity).join(","), "1,0");
+  ui.unmount();
+});
+
+test("a dive that never reports landing uses a static cover when its deadline expires", async () => {
+  const ui = runtime();
+  ui.render(covering());
+  await flush();
+  assert.equal(ui.runs.length, 1);
+  assert.equal(ui.timers.size, 1);
+  const [watchdog] = ui.timers.values();
+  watchdog();
+  assertStaticLanding(ui);
+  assert.deepEqual(ui.covered, [1]);
+  ui.runs[0].land();
+  assert.deepEqual(ui.covered, [1], "a late landing cannot request navigation twice");
+  ui.unmount();
+});
+
+test("a handoff opened in a background tab has a cover ready before navigation", () => {
+  const ui = runtime();
+  ui.document.hidden = true;
+  ui.render(covering());
+  assertStaticLanding(ui);
+  assert.deepEqual(ui.covered, [1]);
+  assert.equal(ui.timers.size, 0);
+  ui.unmount();
+});

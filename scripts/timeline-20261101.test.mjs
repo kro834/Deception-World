@@ -45,7 +45,7 @@ test("CASE 5 preserves the November 1 hostage crisis and the subsequent encounte
   assert.match(synopsis, /ムツキに迎えられる/);
   assert.match(synopsis, /死怒.*生命力/);
   assert.doesNotMatch(synopsis, /紫は藍のもと|息を引き取った|紫の瞼を閉じ|全員が帰還|ムツキを倒/);
-  assert.match(DREAM_CASES[5].paragraphs.at(-1), /ゲイザーゼロを倒した.*怪作を捜し、本部の最奥へ向かう。$/);
+  assert.match(DREAM_CASES[5].paragraphs[28], /ゲイザーゼロを倒した.*怪作を捜し、本部の最奥へ向かう。$/);
 });
 
 test(

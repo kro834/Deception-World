@@ -166,14 +166,15 @@ test("native viewer owns and releases the shared viewport lock and dismisses on 
   assert.match(component, /const release = acquireViewportScrollLock\(\{ freezeBody: true \}\)/);
   assert.match(component, /if \(dialog\.open\) dialog\.close\(\)/);
   assert.match(component, /release\(\)/);
-  assert.match(component, /router.history.subscribe\(restore\)/);
+  assert.match(component, /router\.history\.subscribe\(\(\{ action \}\) => restore\(action\.type === "REPLACE"\)\)/);
   assert.match(component, /plan.kind === "none"[\s\S]*?setSelectedId\(null\)/);
 });
 
 test("viewer exposes dialog names, keyboard dismissal, live position, and image recovery", () => {
   assert.match(component, /aria-haspopup="dialog"/);
   assert.match(component, /aria-controls="gallery-viewer"/);
-  assert.match(component, /aria-labelledby="gallery-viewer-title"/);
+  // 2026-11-28: the dialog names itself only while a work is selected (its title h2 renders only then); a dangling reference when closed was removed.
+  assert.match(component, /aria-labelledby=\{selected \? "gallery-viewer-title" : undefined\}/);
   assert.match(component, /onCancel=\{/);
   assert.match(component, /aria-live="polite"/);
   assert.match(viewerImage, /onError=\{\(\) => setFullStatus\("error"\)\}/);

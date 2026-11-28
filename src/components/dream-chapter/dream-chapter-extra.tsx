@@ -224,7 +224,14 @@ function openArchiveFold(id: string, event: MouseEvent<HTMLAnchorElement>) {
 
 const relationPeople = [...new Set(DREAM_RELATIONS.flatMap((tie) => [tie.a, tie.b]))];
 
+const chronicleCases = DREAM_CASES.map((episode) => ({
+  episode,
+  events: DREAM_CHRONICLE.filter((event) => event.case === episode.no),
+}));
+
 export function DreamChronicle({ id }: { id: "chronicle" }) {
+  const latest = DREAM_CHRONICLE.at(-1);
+  const latestCase = DREAM_CASES.find((episode) => episode.no === latest?.case);
   return (
     <section
       id={id}
@@ -232,10 +239,38 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
       aria-labelledby="chronicle-title"
     >
       <CornerHeading id={id} />
+      <nav className="dream-chronicle-entry" aria-labelledby="chronicle-title">
+        {latest && latestCase ? (
+          <a className="dream-chronicle-latest" href={`#dream-chronicle-event-${latest.no}`}>
+            <span className="dream-chronicle-number">{latest.no}</span>
+            <span>
+              <small>
+                CASE {latest.case} {latestCase.title}
+              </small>
+              <strong>{latest.title.text}</strong>
+            </span>
+            <span className="dream-chronicle-action">
+              出来事を読む <i aria-hidden="true">→</i>
+            </span>
+          </a>
+        ) : null}
+        <ol className="dream-chronicle-directory">
+          {chronicleCases.map(({ episode }) => (
+            <li key={episode.no}>
+              <a href={`#dream-chronicle-case-${episode.no}`}>
+                <small>CASE {episode.no}</small>
+                <span>{episode.title}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <a className="dream-chronicle-search-link" href="#dream-record-explorer">
+          記録を探す
+        </a>
+      </nav>
       <DreamRecordExplorer />
       <ol className="dream-chronicle-cases" data-dream-reveal>
-        {DREAM_CASES.map((episode, index) => {
-          const events = DREAM_CHRONICLE.filter((event) => event.case === episode.no);
+        {chronicleCases.map(({ episode, events }, index) => {
           return (
             <li key={episode.no}>
               <details
@@ -252,15 +287,22 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
                       id={`dream-chronicle-event-${event.no}`}
                       className="dream-chronicle-item"
                       tabIndex={-1}
+                      aria-label={`CASE ${episode.no} ${episode.title} · ${event.no} ${event.title.text}`}
                     >
                       <span className="dream-archive-seal" aria-hidden="true">
                         {toKanjiNumber(event.no)}
                       </span>
+                      <h3>{event.title.text}</h3>
                       <p className="dream-chronicle-meta">
+                        <a
+                          className="dream-chronicle-case-link"
+                          href={`#dream-chronicle-case-${episode.no}`}
+                        >
+                          CASE {episode.no} {episode.title}
+                        </a>
                         <span className="dream-chronicle-place">{event.place}</span>
                         <span className="dream-chronicle-cast">{event.cast.join("・")}</span>
                       </p>
-                      <h3>{event.title.text}</h3>
                       <div className="dream-chronicle-body">
                         <ArchivePassage passage={event} />
                       </div>

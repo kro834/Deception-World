@@ -1,5 +1,5 @@
 import { LAB_PART_LABELS, labPartRecord } from "@/lib/transformation-lab-details";
-import type { LabRider, LabZoom } from "@/lib/transformation-lab-state.js";
+import { LAB_NAMES, type LabRider, type LabZoom } from "@/lib/transformation-lab-state.js";
 
 function TargetReticle({ zoom }: { zoom: LabZoom }) {
   const common = {
@@ -63,14 +63,14 @@ export function LabPartRecord({ rider, zoom }: { rider: LabRider; zoom: LabZoom 
   return (
     <section
       className="tl-part-record"
-      aria-label={`${LAB_PART_LABELS[zoom]}の関連記録`}
+      aria-label={`${LAB_NAMES[rider]}・${LAB_PART_LABELS[zoom]}の関連記録`}
       data-part={zoom}
       data-rider={rider}
     >
       <div className="tl-part-record-heading">
         <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
           <TargetReticle zoom={zoom} />
-          <span>{LAB_PART_LABELS[zoom]} / 関連記録</span>
+          <span>{LAB_NAMES[rider]} / {LAB_PART_LABELS[zoom]}の関連記録</span>
         </span>
         <a href={record.href}>設定資料へ ↗</a>
       </div>

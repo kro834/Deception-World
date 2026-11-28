@@ -99,6 +99,7 @@ function readTuckShift(button: HTMLElement) {
 const EDGE_SNAP_PX = 48;
 const EDGE_SNAP_FLICK_PX = 76;
 const EDGE_FLICK_PX_PER_MS = 0.22;
+// 2026-11-28: removed selectors whose markup is gone
 const ZEUS_AVOID_SELECTOR = [
   ".ios-slide-open",
   ".episode-pickup-plus",
@@ -149,12 +150,16 @@ const ZEUS_AVOID_SELECTOR = [
   ".wa-quote-controls",
   '.rider-tabs [role="tab"]',
   '.rxs-stage-tabs [role="tab"]',
+  '.fst-cast-tabs [role="tab"]',
+  ".exs-chapter-index > a",
   ".dream-poster-thumbnails button",
   ".dream-poster-controls button",
+  ".dream-chapter-stage-chapters button",
   // 2026-10-31 QA: /gallery's preview filmstrip and its トップに飾る plate.
   // On phones the button rested on the strip's last thumbnail (005).
   ".gallery-stage-candidates > button",
   ".gallery-stage-controls > button",
+  ".gallery-feature-save",
   // Same QA: /saga-cinema's chapter reel (the button sat on 終末 on an iPad
   // Pro) and its 自動切替 switch (iPad mini).
   ".chapter-reel > button",
@@ -174,17 +179,20 @@ const ZEUS_AVOID_SELECTOR = [
   // rx10 STAGE: the library's rider files and card bookmarks, the record
   // index's field, and the /download and 404 cards' ways back, which the
   // button covered on phones.
-  ".library-cast-tile",
   // 2026-11-23 ring redesign: the rider files, kinds, search categories,
   // tour courses, lab stages and dogs became ring nodes the button must not
   // settle on either.
   ".ring-cast-node",
   ".ring-kind",
+  // 2026-11-26 (owner's iPhone): /world's 目次 lenses; at rest MOVE sat on
+  // 03 at 375px, over the chapter's picture.
+  ".ws-map > li > a",
   ".search-ring button",
   ".gallery-tour-ring-node",
   ".lab-ring button",
   ".library-card-actions button",
   ".search-input-row",
+  ".dream-record-search-field",
   ".export-page :is(.export-page-alt, .export-page-back)",
   ".app-not-found > a",
   // rx10 review: the ZIP plate, which the button settled on at 390x844 once
@@ -206,6 +214,8 @@ const ZEUS_AVOID_SELECTOR = [
   ".wm-detail",
   ".exhibition-shelf-work",
   ".search-results-heading p",
+  ".search-map-link",
+  ".library-jump-links > a",
   ".rxs-assembly-controls a",
   ".gallery-work-open",
   ".gallery-feature-open",
@@ -219,9 +229,12 @@ const ZEUS_AVOID_SELECTOR = [
   ".mus-table-wrap",
   ".lab-transport button",
   ".lab-seek",
+  ".fst-page .rxs-local-nav nav a",
   ".wm-index-heading a",
   ".wm-detail :is(a, button)",
   ".wm-view-controls button",
+  ".wm-display-mode > button",
+  ".wm-detail-jump",
   ".wm-node",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
@@ -267,6 +280,7 @@ const ZEUS_AVOID_TEXT_SELECTOR = [
    counter, and the suit-up's call chips and HUD (parts, readout, nanite
    count). Page words only: the archive bridge mirrors the list above, and
    its frame never shows these. */
+// 2026-11-28: removed selectors whose markup is gone
 const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // 2026-10-23: the 六詠 dossiers' fact values (RIDER, AUTHORITY…) on phones.
   ".manager-facts dd",
@@ -276,9 +290,7 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".rxs-comparison-key",
   ".rxs-comparison-note",
   ".rxs-headline-metrics :is(small, p)",
-  ".rxl-stage-slate",
   ".rxs-section-heading > p",
-  ".rxe-chapter-map-heading small",
   ".rzn-call .rzn-chip",
   ".rzn-parts .rzn-part",
   ".rzn-readout",
@@ -292,12 +304,9 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // The P14 overview's kicker and the suit-up's live status line.
   ".rxs-p14-copy > small",
   ".rxs-assembly-status",
-  ".rxe-form-status-heading",
   ".rzn-form-code",
-  // 2026-10-23: the World annex's section counts (「15 TERMS」, 「17 LINES」)
-  // and the Extreme form panel's ability chips (DARK MATTER CHARGING), which
-  // the button settled on mid-scroll at 390.
-  ".wa-count",
+  // 2026-10-23: the Extreme form panel's ability chips (DARK MATTER CHARGING),
+  // which the button settled on mid-scroll at 390.
   ".rxs-stage-panel ul > li",
   // Extreme's architecture cards' codes (the same chip words, iPad portrait).
   ".rxs-system-grid article > header > small",
@@ -311,8 +320,9 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".ics-evaluation p",
   // 2026-11-16 polish: search intro, library stats, MUS saga hero, FFS copy
   ".search-intro p",
-  ".library-stats dd",
-  ".library-stats dt",
+  // 2026-11-28: each result section's count pill (「46」 at the head's right
+  // end). It is a b under the display floor, so the button rested on it at 402.
+  ".search-group-head :is(span, b)",
   ".mus-hero-ultra",
   ".mus-calls li",
   ".mus-overview-copy",
@@ -339,6 +349,13 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // left: counted as words, not as whole boxes, so a spot beside a label
   // stays open (as whole boxes the 111 rows left none and hid the button).
   ".wm-index-grid > button",
+  // 2026-11-28: the map's node labels. A node's own box is its glyph (about
+  // 30x19px); its label is an SVG text beside it that the box does not
+  // include in WebKit, so the button could rest on the words.
+  ".wm-node text",
+  // The map's colour key (人物 / 組織 / 形態 …), which the button rested on
+  // at the foot of the map on a sideways phone.
+  ".wm-legend > span",
 ].join(",");
 /* Where no spot is clear of words on a saga page (the .rxs-page family: Rexonance,
    Extreme, Illusionculum, Meta Unitas, Far From), the Form Archive or the world map
@@ -596,6 +613,74 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
     }
   }
   return glyphs;
+}
+
+/* Owner (2026-11-26): while the button rests over body text (a paragraph, a
+   list, a quote) it dims, so the words under it stay legible. Read once per
+   placement from a few hit tests inside the button's resting box: the
+   elements under those points (the button and its dialog's own chrome
+   excluded) whose glyphs meet the box. Placement and paint only: where the
+   button goes is unchanged. */
+const ZEUS_PROSE_SELECTOR =
+  ".dw-prose, [data-prose], p, li, dd, blockquote, figcaption";
+
+function readOverProse(button: HTMLElement, box: ZeusRect): boolean {
+  if (typeof document.elementsFromPoint !== "function") return false;
+  const width = box.right - box.left;
+  const height = box.bottom - box.top;
+  if (width <= 0 || height <= 0) return false;
+  const cx = box.left + width / 2;
+  const cy = box.top + height / 2;
+  const points: Array<[number, number]> = [
+    [cx, cy],
+    [cx - width * 0.3, cy],
+    [cx + width * 0.3, cy],
+    [cx, cy - height * 0.3],
+    [cx, cy + height * 0.3],
+  ];
+  const seen = new Set<Element>();
+  const range = document.createRange();
+  for (const [x, y] of points) {
+    if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
+    for (const element of document.elementsFromPoint(x, y)) {
+      if (element === button || button.contains(element)) continue;
+      const prose = element.closest(ZEUS_PROSE_SELECTOR);
+      if (!prose || seen.has(prose)) continue;
+      seen.add(prose);
+      if (prose.closest("header, nav, button, a[href], [role='tab']")) continue;
+      if (!drawn(prose)) continue;
+      const walker = document.createTreeWalker(prose, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.nodeValue?.trim()) continue;
+        range.selectNodeContents(node);
+        for (const rect of Array.from(range.getClientRects())) {
+          if (rect.width > 0 && rect.height > 0 && meetsAny(rect, [box])) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/* The iPad's compact launcher, while it floats (styles-viewport-chrome.css):
+   its drawn box, or null. The button stacks over it with this gap. */
+const ZEUS_STACK_GAP = 12;
+function readCompactLauncher(): ZeusRect | null {
+  const root = document.documentElement;
+  if (
+    typeof root?.getAttribute !== "function" ||
+    root.getAttribute("data-ipad-menu") !== "compact" ||
+    root.getAttribute("data-ipad-menu-scrolled") !== "true"
+  )
+    return null;
+  for (const trigger of document.querySelectorAll<HTMLElement>(".side-panel-trigger")) {
+    if (!drawn(trigger)) continue;
+    if (window.getComputedStyle(trigger).position !== "fixed") continue;
+    const box = trigger.getBoundingClientRect();
+    if (box.width < 1 || box.height < 1) continue;
+    return { left: box.left, right: box.right, top: box.top, bottom: box.bottom };
+  }
+  return null;
 }
 
 /* A fixed or sticky bar across the top of the screen (a header, a chapter
@@ -1336,6 +1421,31 @@ function ZeusButton({
         // (index 8); the far side's own steps keep their order after it.
         candidates.splice(4, 0, ...candidates.splice(8, 1));
       }
+      // Owner (2026-11-26): on an iPad, when the compact launcher (the menu
+      // opener that leaves the bar) floats in the corner, a button that would
+      // sit on it or beside it stacks in one column with it instead: centred
+      // over the launcher, 12px above it. Taken only when the spot it was
+      // headed for is near the launcher; a spot clear of it is kept.
+      const launcher = readCompactLauncher();
+      if (launcher) {
+        const reach = rect.height;
+        const near =
+          preferred.x + rect.width / 2 > launcher.left - reach &&
+          preferred.x - rect.width / 2 < launcher.right + reach &&
+          preferred.y + rect.height / 2 > launcher.top - reach &&
+          preferred.y - rect.height / 2 < launcher.bottom + reach;
+        if (near) {
+          candidates.splice(
+            1,
+            0,
+            clampZeusCenter(
+              (launcher.left + launcher.right) / 2,
+              launcher.top - ZEUS_STACK_GAP - rect.height / 2,
+              bounds,
+            ),
+          );
+        }
+      }
       // Inside a dialog only its own controls count, as with its words: the
       // page behind it is covered and cannot be pressed.
       const controlRoot: ParentNode = button.closest("dialog") ?? document;
@@ -1614,6 +1724,18 @@ function ZeusButton({
           x: (actual.x - viewport.offsetLeft) / viewport.width,
           y: (actual.y - viewport.offsetTop) / viewport.height,
         };
+        // Dim over body text (owner, 2026-11-26), from the spot it rests on.
+        const overProse = readOverProse(button, {
+          left: actual.x - size.width / 2,
+          right: actual.x + size.width / 2,
+          top: actual.y - size.height / 2,
+          bottom: actual.y + size.height / 2,
+        });
+        if (overProse) {
+          if (button.dataset.overText !== "true") button.dataset.overText = "true";
+        } else if (button.dataset.overText) {
+          delete button.dataset.overText;
+        }
         return actual;
       };
       const travel = Math.hypot(

@@ -517,7 +517,10 @@ function installRecorder({ saveData, traceEnabled, menuClaimProbe }) {
       if (suit && callRecord.nanites.at(-1)?.value !== suit.dataset.nanites) {
         callRecord.nanites.push({ value: suit.dataset.nanites, ...state });
         if (suit.dataset.nanites === "canvas")
-          callRecord.canvases = [...suit.querySelectorAll("canvas")].map((canvas) => ({
+          // 2026-11-28: .rx-suit now also holds the surge layers, the henshin canvas and the WebGL
+          // skin (sized a moment after the engine starts: 0x0 at this instant, measured), so the
+          // nanite engine's own canvases are the ones inside .rx-suit-nanites.
+          callRecord.canvases = [...suit.querySelectorAll(".rx-suit-nanites canvas")].map((canvas) => ({
             width: canvas.width,
             height: canvas.height,
           }));

@@ -591,18 +591,10 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-seek {
   position: relative;
   padding-bottom: 4px;
-  background-image:
-    linear-gradient(
-      90deg,
-      transparent 4%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 52%) 26%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 72%) 50%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 52%) 74%,
-      transparent 96%
-    );
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 100% 1px;
+  --mc-played: calc(var(--rzn-movie-p, 0) * 1%);
+  --mc-progress-track: linear-gradient(90deg,
+    var(--mc-accent, #79e8ff), var(--mc-lit, #f2d896) var(--mc-played),
+    rgb(var(--mc-accent-rgb, 121 232 255) / 26%) var(--mc-played));
 }
 
 html[data-family="special"]
@@ -611,6 +603,7 @@ html[data-family="special"]
   .rzn-movie
   .rzn-movie-seek
   > input::-webkit-slider-runnable-track {
+  background: var(--mc-progress-track);
   opacity: 0.96;
 }
 
@@ -620,6 +613,7 @@ html[data-family="special"]
   .rzn-movie
   .rzn-movie-seek
   > input::-moz-range-track {
+  background: var(--mc-progress-track);
   opacity: 0.96;
 }
 
@@ -917,18 +911,18 @@ html[data-family="special"]
 
 /* Keep Japanese action labels whole and give each speed its own touch target. */
 @media (max-width: 479.98px) and (orientation: portrait) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-row {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site] .rzn-movie-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-row > button,
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-speeds > button {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site] .rzn-movie-row > button,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site] .rzn-movie-speeds > button {
     min-height: 44px;
     white-space: nowrap;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-speeds {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site] .rzn-movie-speeds {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -936,7 +930,7 @@ html[data-family="special"]
     margin: 0;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-seek > input {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site] .rzn-movie-seek > input {
     height: 44px;
   }
 }

@@ -56,6 +56,7 @@ export default function QuickSearchDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState("");
   const [active, setActive] = useState(-1);
   const [composing, setComposing] = useState(false);
@@ -82,6 +83,47 @@ export default function QuickSearchDialog({
     } else if (!open && dialog.open) dialog.close();
     // The seed is read once, as the overlay opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const viewport = window.visualViewport;
+    if (!open || !dialog || !viewport) return;
+    let frame = 0;
+    const reset = () => {
+      dialog.style.removeProperty("--qs-visible-height");
+      dialog.style.removeProperty("--qs-visible-top");
+      delete dialog.dataset.keyboardViewport;
+    };
+    const measure = () => {
+      frame = 0;
+      // Safari can leave dvh unchanged when the software keyboard opens.
+      // Pinch zoom keeps its native pan and zoom behavior.
+      if (Math.abs(viewport.scale - 1) > 0.01 || window.innerHeight - viewport.height < 88) {
+        reset();
+        return;
+      }
+      dialog.style.setProperty("--qs-visible-height", `${Math.floor(viewport.height)}px`);
+      dialog.style.setProperty(
+        "--qs-visible-top",
+        `${Math.max(0, Math.round(viewport.offsetTop))}px`,
+      );
+      dialog.dataset.keyboardViewport = "true";
+    };
+    const queue = () => {
+      if (!frame) frame = window.requestAnimationFrame(measure);
+    };
+    measure();
+    viewport.addEventListener("resize", queue);
+    viewport.addEventListener("scroll", queue);
+    window.addEventListener("resize", queue);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      viewport.removeEventListener("resize", queue);
+      viewport.removeEventListener("scroll", queue);
+      window.removeEventListener("resize", queue);
+      reset();
+    };
   }, [open]);
 
   const results = useMemo(
@@ -141,8 +183,14 @@ export default function QuickSearchDialog({
   const visibleCount = options.filter((option) => option.kind === "result").length;
   const activeOption = active >= 0 ? options[active] : undefined;
   useEffect(() => {
-    if (activeOption)
-      document.getElementById(activeOption.id)?.scrollIntoView({ block: "nearest" });
+    const list = listRef.current;
+    const row = activeOption && list?.ownerDocument.getElementById(activeOption.id);
+    if (!list || !row) return;
+    const bounds = list.getBoundingClientRect();
+    const { top, bottom } = row.getBoundingClientRect();
+    if (top < bounds.top) list.scrollTop += top - bounds.top;
+    else if (bottom > bounds.bottom)
+      list.scrollTop += Math.min(top - bounds.top, bottom - bounds.bottom);
   }, [activeOption]);
 
   const closeThen = (action: () => void) => {
@@ -296,6 +344,7 @@ export default function QuickSearchDialog({
         </div>
         <div
           id="quick-search-list"
+          ref={listRef}
           role="listbox"
           aria-label={trimmed ? `「${trimmed}」の検索結果` : "最近の検索とページ"}
           className="quick-search-list"

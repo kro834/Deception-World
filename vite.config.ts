@@ -4,6 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
+import { fileURLToPath } from "node:url";
 import { FINAL_STAGE_NATIVE_WIDTHS } from "./src/lib/rexonance-images.ts";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
@@ -22,6 +23,35 @@ const legacyImageRedirects = Object.fromEntries(
     ["/rider-cipher-thumbnail.jpeg", "/rider-cipher-thumbnail-20260825.jpeg"],
   ].map(([from, to]) => [from, { redirect: { to, status: 308 } }]),
 );
+
+/**
+ * Protected phrase units (2026-11-26, owner 「途中改行を根こそぎ直して」): the
+ * site's own JSX gets React's runtime through src/lib/phrase-jsx-runtime.js,
+ * which keeps proper nouns, terms, bracketed titles and number tokens on one
+ * line with a nowrap <dw-u> (src/lib/phrase-children.js). Server and client
+ * builds both resolve it, so hydration matches. Dependencies and the phrase
+ * modules themselves import React's runtime directly.
+ */
+function phraseJsxRuntime(): Plugin {
+  const local = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+  const runtime: Record<string, string> = {
+    "react/jsx-runtime": local("./src/lib/phrase-jsx-runtime.js"),
+    "react/jsx-dev-runtime": local("./src/lib/phrase-jsx-dev-runtime.js"),
+  };
+  const src = local("./src/");
+  const phraseModules = local("./src/lib/phrase-");
+  return {
+    name: "deception-world:phrase-jsx-runtime",
+    enforce: "pre",
+    resolveId(id, importer) {
+      const target = runtime[id];
+      if (!target || !importer) return null;
+      const from = importer.replace(/^\0/, "").split("?")[0];
+      if (!from.startsWith(src) || from.startsWith(phraseModules)) return null;
+      return target;
+    },
+  };
+}
 
 /**
  * Finish PGLite bootstrap during dev-server setup (before traffic). Vite awaits
@@ -156,6 +186,7 @@ export default defineConfig(({ command }) => ({
   // glass; owner 2026-11-06 for the whole site).
   css: { postcss: { plugins: [glassSelectorBuckets()] } },
   plugins: [
+    phraseJsxRuntime(),
     pgliteBootstrapPlugin(),
     // Before tanstackStart so /auth/popup never falls through to the SPA.
     authPopupPlugin(),

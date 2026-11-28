@@ -1420,3 +1420,164 @@ html[data-world-effects="economy"] .dream-page.dream-page .dream-archive-fold > 
     border-color: CanvasText;
   }
 }
+
+/* The opening spread gives the last scene and the six existing case folds their own links. */
+.dream-page.dream-page #chronicle .dream-chronicle-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 20px;
+  max-width: 1000px;
+  margin: 0 auto clamp(24px, 4vw, 48px);
+}
+
+.dream-page.dream-page .dream-chronicle-entry a,
+.dream-page.dream-page .dream-chronicle-case-link {
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 12px);
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 44px;
+  color: var(--ts-kin-light);
+  overflow-wrap: anywhere;
+}
+
+.dream-page.dream-page .dream-chronicle-latest {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px clamp(12px, 3vw, 30px);
+  padding: clamp(14px, 3vw, 28px);
+  border-block: 3px double var(--ts-kin);
+  border-inline-start: 4px solid #ba665b;
+  background: linear-gradient(105deg, #39212c, #1b1524 75%);
+  text-decoration: none;
+}
+
+.dream-page.dream-page .dream-chronicle-number {
+  font: 600 clamp(32px, 6vw, 60px)/1 var(--ts-display);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.dream-page.dream-page .dream-chronicle-entry small {
+  display: block;
+  font: 600 12px/1.5 var(--ts-text);
+}
+
+.dream-page.dream-page .dream-chronicle-latest strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff4df;
+  font: 800 clamp(19px, 3vw, 28px)/1.45 var(--ts-display);
+}
+
+.dream-page.dream-page .dream-chronicle-action,
+.dream-page.dream-page .dream-chronicle-search-link,
+.dream-page.dream-page .dream-chronicle-case-link {
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+
+.dream-page.dream-page .dream-chronicle-action i {
+  font-style: normal;
+}
+
+.dream-page.dream-page .dream-chronicle-directory {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dream-page.dream-page .dream-chronicle-directory a {
+  display: grid;
+  align-content: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--ts-kin);
+  background: var(--ts-velvet);
+  font: 700 16px/1.5 var(--ts-display);
+  text-decoration: none;
+}
+
+.dream-page.dream-page :is(.dream-chronicle-search-link, .dream-chronicle-case-link) {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dream-page.dream-page .dream-chronicle-search-link {
+  padding-inline: 12px;
+}
+
+.dream-page.dream-page .dream-chronicle-entry a:focus-visible,
+.dream-page.dream-page .dream-chronicle-case-link:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .dream-page.dream-page #chronicle .dream-chronicle-entry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .dream-page.dream-page .dream-chronicle-directory {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dream-page.dream-page .dream-chronicle-search-link {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 520px) {
+  .dream-page.dream-page #chronicle .dream-chronicle-list {
+    padding-inline: 12px;
+  }
+
+  .dream-page.dream-page #chronicle .dream-chronicle-list::before {
+    left: 0;
+  }
+
+  .dream-page.dream-page #chronicle .dream-chronicle-item {
+    padding-inline: 0;
+  }
+
+  .dream-page.dream-page #chronicle .dream-chronicle-item h3 {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline-start: 48px;
+    margin-bottom: 0;
+  }
+
+  .dream-page.dream-page #chronicle .dream-chronicle-body p {
+    font-size: 16px;
+    line-height: 1.9;
+  }
+}
+
+@media (max-width: 440px) {
+  .dream-page.dream-page .dream-chronicle-latest {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .dream-page.dream-page .dream-chronicle-action {
+    grid-column: 2;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 480px) and (min-width: 560px) {
+  .dream-page.dream-page .dream-chronicle-directory {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (forced-colors: active) {
+  .dream-page.dream-page .dream-chronicle-entry a,
+  .dream-page.dream-page .dream-chronicle-case-link {
+    color: LinkText;
+    border-color: LinkText;
+  }
+}

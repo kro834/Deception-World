@@ -1082,3 +1082,24 @@
     box-shadow: none;
   }
 }
+
+.dream-page #dream-record-explorer .dream-record-card a {
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 12px);
+}
+
+.dream-page #dream-record-explorer .dream-record-title-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+  min-width: 0;
+  min-height: 44px;
+  color: inherit;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.dream-page #dream-record-explorer .dream-record-title-link > span:first-child {
+  font: 600 14px/1.6 var(--ts-latin);
+  font-variant-numeric: tabular-nums;
+}

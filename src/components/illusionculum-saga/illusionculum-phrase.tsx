@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { withWordBreaks } from "@/lib/name-breaks";
+import { HEADING_CAP, PROSE_CAP, splitPhraseUnits } from "@/lib/phrase-units.js";
 
 /* ILLUSIONCULUM SAGA — where the owner's headings may break (2026-10-23,
    owner: 「改行も改善して」). The words stay character for character; this
@@ -10,6 +11,20 @@ import { withWordBreaks } from "@/lib/name-breaks";
    the line still wraps by overflow-wrap). */
 const SEAM = "​";
 
+/** The opening bracket and what it holds on to: the first character, or the
+ * whole first name or term when one starts there (phrase-units.js), so the
+ * bracket's no-break run never cuts 『オーバークリスタルコア』 after 『オ. */
+function withOpening(part: string, cap: number): ReactNode {
+  const units = splitPhraseUnits(part.slice(1), cap);
+  const head = units && !units[0] ? part[0] + units[1] : part.slice(0, 2);
+  return (
+    <>
+      <span className="ics-nb">{head}</span>
+      {part.slice(head.length)}
+    </>
+  );
+}
+
 export function phrase(text: string): ReactNode {
   const seamed = withWordBreaks(text).replace(/(の)(?=[^\s、。」』）]{2,})/gu, `$1${SEAM}`);
   const parts = seamed.split(SEAM).filter(Boolean);
@@ -18,14 +33,7 @@ export function phrase(text: string): ReactNode {
     <Fragment key={index}>
       {index > 0 ? <wbr /> : null}
       {/* An opening bracket stays with what follows it (WebKit broke after 『). */}
-      {/^[『「（《【]./u.test(part) ? (
-        <>
-          <span className="ics-nb">{part.slice(0, 2)}</span>
-          {part.slice(2)}
-        </>
-      ) : (
-        part
-      )}
+      {/^[『「（《【]./u.test(part) ? withOpening(part, HEADING_CAP) : part}
     </Fragment>
   ));
 }
@@ -44,14 +52,7 @@ export function prose(text: string): ReactNode {
     <Fragment key={index}>
       {index > 0 ? <wbr /> : null}
       {/* An opening bracket stays with what follows it (WebKit broke after 『). */}
-      {/^[『「（《【]./u.test(part) ? (
-        <>
-          <span className="ics-nb">{part.slice(0, 2)}</span>
-          {part.slice(2)}
-        </>
-      ) : (
-        part
-      )}
+      {/^[『「（《【]./u.test(part) ? withOpening(part, PROSE_CAP) : part}
     </Fragment>
   ));
 }

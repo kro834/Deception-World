@@ -1,4 +1,5 @@
-import { Children, cloneElement, memo, type CSSProperties, type ReactNode } from "react";
+import { Children, Fragment, cloneElement, memo, type CSSProperties, type ReactNode } from "react";
+import { HEADING_CAP, PROSE_CAP, splitPhraseUnits } from "@/lib/phrase-units.js";
 import { BLANK, revealLabel, splittable } from "./reveal-label";
 
 /* Scroll-lit type for /world (styles-world-reveal.css).
@@ -50,6 +51,18 @@ function count(node: ReactNode): number {
   return total;
 }
 
+/** A name or term keeps its letters on one line (src/lib/phrase-units.js):
+    its letter spans go in one <dw-u>, the rest stay as they are. */
+function holdUnits(text: string, letters: ReactNode[], cap: number): ReactNode {
+  const parts = splitPhraseUnits(text, cap);
+  if (!parts) return letters;
+  let offset = 0;
+  return parts.map((part, at) => {
+    const run = letters.slice(offset, (offset += Array.from(part).length));
+    return at % 2 ? <dw-u key={`u${at}`}>{run}</dw-u> : <Fragment key={`t${at}`}>{run}</Fragment>;
+  });
+}
+
 export const RevealText = memo(function RevealText({
   children,
   copy = false,
@@ -62,7 +75,7 @@ export const RevealText = memo(function RevealText({
   const split = (node: ReactNode): ReactNode =>
     Children.map(node, (child) => {
       if (typeof child === "string" || typeof child === "number") {
-        return Array.from(String(child), (part, key) =>
+        const letters = Array.from(String(child), (part, key) =>
           BLANK.test(part) ? (
             part
           ) : (
@@ -80,6 +93,8 @@ export const RevealText = memo(function RevealText({
             </span>
           ),
         );
+        // Copy has the prose measure; a heading holds about 8em.
+        return holdUnits(String(child), letters, copy ? PROSE_CAP : HEADING_CAP);
       }
       if (splittable(child)) return cloneElement(child, undefined, split(child.props.children));
       return child;

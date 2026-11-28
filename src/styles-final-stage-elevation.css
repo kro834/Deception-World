@@ -565,12 +565,16 @@ html[data-mode="world"] .fst-page .fst-pickup-plus .ios-slide-open-label small {
   color: var(--fst-text-2);
 }
 
-/* Tighter rhythm: less ink between the sections, and a nav jump lands the
-   kicker a step under the bar (html keeps a 96px scroll padding). */
+/* The page measures its own two-row bar. Apply that offset at the
+   fragment targets, including direct visits with a hash. */
+html[data-mode="world"][data-family="special"]:has(.fst-page) {
+  scroll-padding-top: 0;
+}
+
 .fst-page .rxs-section {
-  padding-top: clamp(80px, 8vw, 112px);
-  padding-bottom: clamp(80px, 8vw, 112px);
-  scroll-margin-top: calc(-1 * clamp(40px, 6vw, 80px));
+  --fst-section-padding: clamp(80px, 8vw, 112px);
+  padding-block: var(--fst-section-padding);
+  scroll-margin-top: calc(var(--rxs-local-nav-reserve) + 20px - var(--fst-section-padding));
 }
 
 /* ================================================================
@@ -1517,8 +1521,7 @@ html[data-mode="world"] .fst-page .fst-pickup-dialog .form-pickup-close:focus-vi
   }
 
   .fst-page .rxs-section {
-    padding-top: clamp(64px, 14vw, 88px);
-    padding-bottom: clamp(64px, 14vw, 88px);
+    --fst-section-padding: clamp(64px, 14vw, 88px);
   }
 
   .fst-page .rxs-section-heading {

@@ -36,8 +36,8 @@
 .dream-page .dream-chapter-stage-scene {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  grid-template-areas: "theatre copy" "controls copy";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  grid-template-areas: "theatre copy" "controls controls";
   align-items: center;
   overflow: hidden;
   min-height: 410px;
@@ -160,7 +160,12 @@
   inset: 55% 14% 4%;
   background:
     radial-gradient(ellipse 84% 72% at 50% 96%, rgb(246 206 132 / 26%), transparent 72%),
-    linear-gradient(180deg, rgb(232 196 126 / 26%) 0%, transparent 18%, rgb(232 196 126 / 14%) 100%),
+    linear-gradient(
+      180deg,
+      rgb(232 196 126 / 26%) 0%,
+      transparent 18%,
+      rgb(232 196 126 / 14%) 100%
+    ),
     linear-gradient(90deg, transparent 48%, rgb(248 228 182 / 56%) 50%, transparent 52%);
   transform: translateZ(-118px) rotateX(42deg);
   transform-origin: center bottom;
@@ -222,14 +227,29 @@
 .dream-page .dream-chapter-stage-controls {
   grid-area: controls;
   min-width: 0;
-  align-self: start;
+  align-self: stretch;
+  padding: clamp(12px, 2vw, 24px);
+  border-top: 1px solid rgb(232 196 126 / 34%);
+  background: linear-gradient(180deg, #2c1d2e, #170e1b);
 }
 
 .dream-page .dream-chapter-stage-sheet {
   grid-area: copy;
   position: relative;
   min-width: 0;
-  padding: 40px clamp(24px, 4vw, 52px) 40px 12px;
+  display: grid;
+  align-content: center;
+  align-self: stretch;
+  margin: clamp(12px, 2vw, 24px);
+  padding: clamp(28px, 4.2vw, 64px);
+  border: 1px solid #cba975;
+  background:
+    linear-gradient(90deg, rgb(104 56 39 / 14%), transparent 12%),
+    radial-gradient(ellipse at 85% 15%, #fbf4e6, transparent 75%), #eee0cb;
+  box-shadow:
+    inset 0 0 0 5px #eee0cb,
+    inset 0 0 0 6px #bc9c71,
+    0 14px 28px rgb(0 0 0 / 40%);
 }
 
 .dream-page .dream-chapter-stage-copy {
@@ -242,7 +262,7 @@
   align-items: center;
   gap: 14px;
   margin: 0 0 18px;
-  color: var(--stage-gold-hi);
+  color: #674125;
   font:
     600 13px/1.5 "Cinzel",
     Georgia,
@@ -260,25 +280,22 @@
 
 .dream-page .dream-chapter-stage-copy h3 {
   margin: 0;
-  color: #fff8ea;
+  color: #332238;
   font-family: "Shippori Mincho B1", "Yu Mincho", "Hiragino Mincho ProN", serif;
   font-size: clamp(36px, 4.4vw, 64px);
   font-weight: 600;
   line-height: 1.4;
   letter-spacing: 0.1em;
-  text-shadow:
-    0 0 24px rgb(248 202 118 / 26%),
-    0 2px 14px rgb(0 0 0 / 76%);
+  text-shadow: none;
   overflow-wrap: anywhere;
 }
 
 .dream-page .dream-chapter-stage-lead {
   margin: 20px 0 26px;
   max-width: 26em;
-  min-height: 3.8em;
   font-size: 16px;
   line-height: 1.9;
-  color: #f4e6d2;
+  color: #493747;
 }
 
 .dream-page .dream-chapter-stage-enter {
@@ -313,8 +330,7 @@
 .dream-page .dream-chapter-stage-chapters {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  padding: 0 20px;
-  gap: 6px;
+  gap: clamp(6px, 1.25vw, 16px);
 }
 
 .dream-page .dream-chapter-stage-chapters button {
@@ -324,11 +340,10 @@
   align-items: center;
   gap: 7px;
   min-width: 0;
-  min-height: 86px;
+  min-height: 76px;
   padding: 13px 4px 12px;
   border: 1px solid rgb(218 182 116 / 48%);
-  border-top: 0;
-  border-radius: 0 0 2px 2px;
+  border-radius: 3px;
   color: #f2e4ca;
   background:
     linear-gradient(#f0d292 0 0) 100% 100% / 10px 1.5px no-repeat,
@@ -370,7 +385,7 @@
   grid-template-columns: 48px minmax(0, 1fr) 48px;
   align-items: center;
   gap: 18px;
-  padding: 16px 24px;
+  padding: 12px 0 0;
 }
 
 .dream-page .dream-chapter-stage-console button {
@@ -569,7 +584,7 @@
   .dream-page .dream-chapter-stage-chapters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 5px;
-    padding: 0 14px;
+    padding: 0;
   }
 
   .dream-page .dream-chapter-stage-chapters button {
@@ -590,13 +605,17 @@
 
   .dream-page .dream-chapter-stage-console {
     grid-template-columns: 44px minmax(0, 1fr) 44px;
-    padding: 8px 14px;
+    padding: 8px 0 0;
     gap: 10px;
   }
 
   .dream-page .dream-chapter-stage-console button {
     width: 44px;
   }
+}
+
+.dream-page .dream-chapter-stage-sheet a:focus-visible {
+  outline-color: #613252;
 }
 
 @media (forced-colors: active) {
@@ -621,6 +640,17 @@
 
   .dream-page .dream-chapter-stage-sheet {
     padding: 24px;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
+  .dream-page .dream-chapter-stage-sheet :is(h3, p) {
+    color: CanvasText;
+  }
+
+  .dream-page .dream-chapter-stage-sheet a:focus-visible {
+    outline-color: Highlight;
   }
 
   .dream-page .dream-chapter-stage-chapters button[aria-pressed="true"] {

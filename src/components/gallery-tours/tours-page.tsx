@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { GalleryTourEntrance } from "./tour-entrance";
@@ -12,6 +12,9 @@ import {
   TOUR_PROGRESS_KEY,
   type TourProgress,
 } from "./tour-progress";
+
+// A tour can appear several times in history, with a different departure each time.
+const nextTourDepartures = new Map<string, string>();
 
 function TourShareLink({ tourId, workId }: { tourId: string; workId: string }) {
   const [message, setMessage] = useState("");
@@ -92,13 +95,17 @@ export function GalleryToursPage({
   onExit: () => void;
 }) {
   useWorldMode();
+  const { history } = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [progress, setProgress] = useState<TourProgress>({});
   const [storageMessage, setStorageMessage] = useState("");
   const mainRef = useRef<HTMLElement>(null);
   const focusAfterNavigation = useRef(false);
   const returnTourIdRef = useRef<string | null>(null);
+  const nextTourButton = useRef<HTMLButtonElement>(null);
+  const nextTourReturn = useRef<{ key: string; tourId: string | null; cancelled: boolean } | null>(null);
   const tour = getGalleryTour(tourId);
+  const previousTourId = useRef(tour?.id);
   const nextTour = tour
     ? GALLERY_TOURS[(GALLERY_TOURS.indexOf(tour) + 1) % GALLERY_TOURS.length]
     : undefined;
@@ -113,6 +120,62 @@ export function GalleryToursPage({
     },
     [tour, onSelect],
   );
+
+  useEffect(() => {
+    let previous = history.location;
+    const unsubscribe = history.subscribe(({ location, action }) => {
+      const from = previous;
+      previous = location;
+      const key = location.state.__TSR_key;
+      const backward = action.type === "BACK" || (action.type === "GO" && action.index === -1);
+      const destination = key && nextTourDepartures.get(key);
+      nextTourReturn.current =
+        backward &&
+        key &&
+        destination &&
+        from.pathname === "/gallery-tours" &&
+        location.pathname === "/gallery-tours" &&
+        new URLSearchParams(from.search).get("tour") === destination
+          ? { key, tourId: new URLSearchParams(location.search).get("tour"), cancelled: document.hidden }
+          : null;
+      if (nextTourReturn.current) focusAfterNavigation.current = false;
+    });
+    const cancel = () => {
+      if (nextTourReturn.current) nextTourReturn.current.cancelled = true;
+    };
+    const listeners = new AbortController();
+    for (const type of ["keydown", "pointerdown", "wheel", "focusin", "blur"])
+      window.addEventListener(type, cancel, {
+        capture: type !== "blur",
+        passive: true,
+        signal: listeners.signal,
+      });
+    document.addEventListener("visibilitychange", cancel, { signal: listeners.signal });
+    return () => {
+      nextTourReturn.current = null;
+      unsubscribe();
+      listeners.abort();
+    };
+  }, [history]);
+
+  const focusNextTourOnReturn = useCallback(() => {
+    const request = nextTourReturn.current;
+    const button = nextTourButton.current;
+    if (!request || request.cancelled || request.tourId !== tourId || !button || menuOpen) return;
+    window.requestAnimationFrame(() => {
+      if (
+        nextTourReturn.current !== request ||
+        request.cancelled ||
+        history.location.state.__TSR_key !== request.key ||
+        !button.isConnected ||
+        document.hidden
+      )
+        return;
+      request.cancelled = true;
+      button.focus({ preventScroll: true });
+      button.scrollIntoView({ block: "nearest", behavior: "instant" });
+    });
+  }, [history, menuOpen, tourId]);
 
   useEffect(() => {
     const read = () => {
@@ -143,9 +206,16 @@ export function GalleryToursPage({
   }, []);
 
   useEffect(() => {
-    if (!focusAfterNavigation.current) return;
+    const previousId = previousTourId.current;
+    previousTourId.current = tour?.id;
+    const explicitNavigation = focusAfterNavigation.current;
+    if (nextTourReturn.current) {
+      focusNextTourOnReturn();
+      return;
+    }
+    if (!explicitNavigation && previousId === tour?.id) return;
     focusAfterNavigation.current = false;
-    const returnId = returnTourIdRef.current;
+    const returnId = returnTourIdRef.current ?? previousId;
     returnTourIdRef.current = null;
     if (!tour && returnId) {
       // Restore the course after the router has applied its navigation scroll reset.
@@ -158,8 +228,38 @@ export function GalleryToursPage({
       });
       return () => window.cancelAnimationFrame(frame);
     }
-    mainRef.current?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
-  }, [tour]);
+    const main = mainRef.current;
+    if (explicitNavigation) {
+      main?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
+      return;
+    }
+
+    // Browser history restores the scroll position independently of the tour.
+    // Focus an element the reader can already see at that position.
+    const frame = window.requestAnimationFrame(() => {
+      if (!main || nextTourReturn.current) return;
+      const bar = main.previousElementSibling;
+      const viewportTop = Math.max(0, bar?.getBoundingClientRect().bottom ?? 0);
+      const targets = main.querySelectorAll<HTMLElement>(
+        "h1, #gallery-tour-stage, #gallery-tour-reading h2, .gallery-tour-theatre button:not(:disabled, [tabindex=\"-1\"], [aria-disabled=\"true\"])",
+      );
+      for (const target of targets) {
+        const bounds = target.getBoundingClientRect();
+        const top = Math.max(bounds.top, viewportTop);
+        const bottom = Math.min(bounds.bottom, window.innerHeight);
+        if (bounds.height === 0 || bottom - top < Math.min(24, bounds.height)) continue;
+        // A thumbnail may also be clipped by the horizontal filmstrip.
+        const visiblePoint = document.elementFromPoint(
+          bounds.left + bounds.width / 2,
+          (top + bottom) / 2,
+        );
+        if (!target.contains(visiblePoint)) continue;
+        target.focus({ preventScroll: true });
+        break;
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [tour, focusNextTourOnReturn]);
 
   const remember = useCallback(
     (id: string) => {
@@ -169,6 +269,8 @@ export function GalleryToursPage({
         activePositionRef.current.workId !== id
       )
         return;
+      // The last stop's button mounts only after its artwork is ready.
+      focusNextTourOnReturn();
       try {
         setProgress(saveTourProgress(window.localStorage, tourId, id));
         setStorageMessage("");
@@ -178,7 +280,7 @@ export function GalleryToursPage({
         );
       }
     },
-    [tourId],
+    [tourId, focusNextTourOnReturn],
   );
 
   function resetTour(id: string) {
@@ -219,8 +321,11 @@ export function GalleryToursPage({
                 onExit();
               }}
               nextTour={nextTour}
+              nextTourButtonRef={nextTourButton}
               onNextTour={() => {
                 if (!nextTour) return;
+                const key = history.location.state.__TSR_key;
+                if (key) nextTourDepartures.set(key, nextTour.id);
                 focusAfterNavigation.current = true;
                 onSelect(nextTour.id, nextTour.stops[0].artworkId, false);
               }}

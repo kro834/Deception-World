@@ -25,7 +25,7 @@ try {
     const punch = page.locator("#performance .exi-stage > article:first-child");
     await punch.evaluate((el) =>
       window.scrollTo({
-        top: scrollY + el.getBoundingClientRect().top - innerHeight + 120,
+        top: scrollY + el.getBoundingClientRect().top - innerHeight + 80,
         behavior: "instant",
       }),
     );
@@ -43,9 +43,23 @@ try {
         behavior: "instant",
       }),
     );
-    const p14Visibility = await page
-      .locator(".rxs-p14-overview dl > div:nth-child(3)")
-      .evaluate((row) =>
+    const p14Section = page.locator("#p14");
+    await page.waitForFunction(
+      () =>
+        document.querySelector('#p14[data-exi-hit="true"]') &&
+        document.querySelector('#p14 > .rxs-section-heading[data-exi-hit="true"]'),
+      null,
+      { timeout: 1500 },
+    );
+    const roundAnimation = await p14Section.evaluate((section) => [
+      getComputedStyle(section, "::after").animationName,
+      ...[...section.querySelectorAll(".rxs-section-heading .exo-line")].map(
+        (line) => getComputedStyle(line).animationName,
+      ),
+    ]);
+    assert.deepEqual(roundAnimation, ["exi-blade", "exi-smash-l", "exi-smash-r"]);
+    const p14Visibility = await page.locator(".rxs-p14-overview dl > div:nth-child(3)").evaluate(
+      (row) =>
         new Promise((resolve) => {
           const value = row.querySelector("dd");
           const start = performance.now();
@@ -59,16 +73,33 @@ try {
           };
           sample();
         }),
-      );
+    );
     assert.ok(
       p14Visibility.rowOpacity > 0.99,
-      `P14 TUNING parent fades out: ${p14Visibility.rowOpacity} at ${width}px`,
+      `P14 TYPE parent fades out: ${p14Visibility.rowOpacity} at ${width}px`,
     );
     assert.ok(
       p14Visibility.valueOpacity > 0.99,
       `P14 result disappears: ${p14Visibility.valueOpacity} at ${width}px`,
     );
-    if (auditOut) await page.screenshot({ path: `${auditOut}/${width}-tuning.png` });
+    const typeReadout = await page
+      .locator(".rxs-p14-overview dl > div:last-child")
+      .evaluate((row) => {
+        const label = row.querySelector("dt").getBoundingClientRect();
+        const value = row.querySelector("dd").getBoundingClientRect();
+        return {
+          valueClearsLabel: value.left > label.right,
+          bothOnSameRow: value.top < label.bottom,
+        };
+      });
+    assert.ok(
+      typeReadout.valueClearsLabel && typeReadout.bothOnSameRow,
+      `${width}px TYPE leaves an empty row`,
+    );
+    if (auditOut) {
+      await page.locator(".rxs-p14-overview dl > div:last-child").scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${auditOut}/${width}-type.png` });
+    }
 
     await page.locator("#stages").evaluate((el) => el.scrollIntoView({ behavior: "instant" }));
     await page.waitForTimeout(800);
@@ -162,6 +193,8 @@ try {
         p14MinimumRowOpacity: p14Visibility.rowOpacity,
         labels: "pass",
         heading: "pass",
+        roundAnimation,
+        typeReadout,
       }),
     );
     await page.close();

@@ -1188,12 +1188,13 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page = the dossier page; html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) = the same, with the orbit present. */
 
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page {
-  --d1-r: min(128px, 50vw - 52px);
-  --d1-node: 64px;
+  --d1-r: min(158px, 50vw - 46px);
+  --d1-ry: calc(var(--d1-r) + 16px);
+  --d1-node: 60px;
   --d1-focus: 90deg;
-  --d1-fig-w: calc(var(--d1-r) * 0.98);
-  --d1-fig-h: calc(var(--d1-r) * 1.44);
-  --d1-stage-h: calc(var(--d1-r) * 2 + var(--d1-node) + 36px);
+  --d1-fig-w: calc(var(--d1-r) * 1.24);
+  --d1-fig-h: calc(var(--d1-r) * 1.6);
+  --d1-stage-h: calc(var(--d1-ry) * 2 + var(--d1-node) + 28px);
   --d1-top: var(--sd-head, 68px);
 }
 
@@ -1226,7 +1227,18 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   display: none;
 }
 
-/* The figure: the art in a jewel-bezel showcase inside a volumetric spotlight stage. */
+/* This source belongs to the form records and stays beside their selector. */
+html[data-family="dossier"] main.manager-page .dossier-form-archive {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px var(--sd-pad) 12px;
+}
+
+html[data-family="dossier"] main.manager-page .dossier-form-archive .dossier-read-link {
+  margin: 0;
+}
+
+/* The figure: the art in a card at the orbit's centre. */
 html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.manager-page:has(> .dossier-orbit)
@@ -1404,8 +1416,8 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   top: 50%;
   left: 50%;
   width: calc(var(--d1-r) * 2);
-  height: calc(var(--d1-r) * 2);
-  border: 0;
+  height: calc(var(--d1-ry) * 2);
+  border: 1.5px solid color-mix(in srgb, var(--ring-key) 64%, rgb(255 255 255 / 44%));
   border-radius: 50%;
   background: none;
   box-shadow: 0 0 36px -6px color-mix(in srgb, var(--ring-key) 24%, transparent);
@@ -1533,8 +1545,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   font: inherit;
   cursor: pointer;
   pointer-events: auto;
-  /* Out along its spoke, then upright again whatever the orbit's angle. */
-  transform: rotate(var(--d1-a)) translateX(var(--d1-r)) rotate(calc(var(--d1-a) * -1))
+  /* The vertical axis leaves the portrait room to breathe on compact screens. */
+  transform: translate(
+      calc(cos(var(--d1-a)) * var(--d1-r)),
+      calc(sin(var(--d1-a)) * var(--d1-ry))
+    )
     scale(var(--d1-s));
 }
 
@@ -1686,6 +1701,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
     html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page {
       --d1-r: min(290px, 33vh, var(--sd-stage-w) / 2 - 62px);
+      --d1-ry: var(--d1-r);
+      --d1-fig-w: calc(var(--d1-r) * 1.24);
+      --d1-fig-h: calc(var(--d1-r) * 1.48);
       --d1-node: clamp(72px, 9.6vh, 92px);
       --d1-focus: 0deg;
       --d1-stage-h: var(--sd-stage-h);
@@ -2150,39 +2168,104 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   }
 }
 
+/* Keep the active part and the portrait prominent. Ciel has a separate finish. */
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body main.manager-page:not(.ciel-dossier-page) {
+    --file-metal: linear-gradient(125deg, #53595e, #e5e1d7 19%, #60666a 34%, #394147 75%, var(--ring-key));
+
+    & .dossier-orbit-track {
+      border: 1px solid color-mix(in srgb, var(--ring-key) 30%, #41474d);
+      box-shadow: none;
+    }
+
+    & .dossier-orbit-track::before,
+    & .dossier-orbit-track::after {
+      content: none;
+    }
+
+    & .dossier-orbit-ring > button {
+      background: linear-gradient(155deg, #282d32, #181d21 64%) padding-box, var(--file-metal) border-box;
+      box-shadow: 0 6px 12px -8px #000;
+    }
+
+    & .dossier-orbit-ring > button[aria-selected="true"] {
+      color: #101518;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--ring-key) 44%, white), #ccd2d4) padding-box,
+        var(--file-metal) border-box;
+      box-shadow: 0 0 0 2px var(--ring-key);
+    }
+
+    & .dossier-orbit-ring > button[aria-selected="true"] > span {
+      text-shadow: none;
+    }
+
+    & #dossier-profile .manager-portrait-frame {
+      box-shadow: 0 0 0 1px #777e83, 0 12px 24px -18px #020304;
+    }
+
+    & .manager-pagination .dossier-roster > li:not(.is-void) > :is(a, span)::before {
+      background: var(--file-metal);
+    }
+
+    & .dossier-reader-links > a[aria-current] {
+      box-shadow: inset 0 -2px 0 var(--ring-key);
+    }
+  }
+}
+
+/* ---------- Brush-up (2026-11-26): spec labels, reading tabs, numeral ----------
+   The Michroma spec labels (NAME / AGE …) read at the 12px label size in a
+   pale tint of the file's accent, so they stay legible on the dark plate. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:not(.is-sovereign)
+  .manager-facts
+  dt {
+  color: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--sd-accent, #7ae8ff) 30%, #eef5fd) 76%,
+    transparent
+  );
+  font-size: var(--dw-fs-label, 12px);
+  letter-spacing: 0.12em;
+}
+
+/* The four reading tabs: 44px targets, and the current one carries a fill. */
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-reader-links
+  > a {
+  min-height: 44px;
+}
+
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:not(.is-sovereign)
+  .dossier-reader-links
+  > a[aria-current] {
+  color: #ffffff;
+  background-color: color-mix(in srgb, var(--sd-accent, #7ae8ff) 26%, rgb(9 20 34 / 92%));
+}
+
+/* The numeral's ring clears the top bar on the split stage. */
+@media (min-width: 1100px) {
+  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.manager-page
+    .dossier-file-numeral {
+    margin-top: 52px;
+  }
+}
+
 @media (forced-colors: active) {
   html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
     body
     main.manager-page
-    :is(
-      #dossier-profile .manager-portrait-column,
-      .manager-pagination,
-      .manager-pagination .dossier-roster
-    ) {
-    background: none;
-    box-shadow: none;
-  }
-
-  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
-    body
-    main.manager-page
-    :is(
-      .dossier-orbit-stage::before,
-      .dossier-orbit-track,
-      .dossier-orbit-track::before,
-      .dossier-orbit-track::after,
-      .manager-pagination .dossier-roster::before,
-      .manager-pagination .dossier-roster::after
-    ) {
-    display: none;
-  }
-
-  html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
-    body
-    main.manager-page
-    :is(#dossier-profile .manager-portrait-frame, .dossier-index-arrow) {
-    border: 1px solid CanvasText;
-    background: Canvas;
-    box-shadow: none;
+    .dossier-reader-links
+    > a[aria-current] {
+    background-color: Highlight;
+    color: HighlightText;
   }
 }

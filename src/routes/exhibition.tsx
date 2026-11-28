@@ -1,6 +1,7 @@
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
+import { ExhibitionBar } from "@/components/exhibition/exhibition-bar";
 import { ExhibitionStudio } from "@/components/exhibition/exhibition-studio";
 import { ExhibitionArtworkBrowser } from "@/components/exhibition/exhibition-artwork-browser";
 import { useExhibitionArtworkReady } from "@/lib/use-exhibition-artwork-ready";
@@ -9,6 +10,7 @@ import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import studioCssUrl from "@/styles-exhibition-studio.css?url";
 import roomCssUrl from "@/styles-exhibition-room.css?url";
 import ringGalleryCssUrl from "@/styles-ring-gallery.css?url";
+import barCssUrl from "@/styles-exhibition-bar.css?url";
 
 export const Route = createFileRoute("/exhibition")({
   validateSearch: normalizeExhibitionSearch,
@@ -23,6 +25,8 @@ export const Route = createFileRoute("/exhibition")({
         { rel: "stylesheet", href: roomCssUrl },
         // The ring system on this page (2026-11-23), after every older skin.
         { rel: "stylesheet", href: ringGalleryCssUrl },
+        // The unified header's box and gold paint (2026-11-26), after the ring sheet.
+        { rel: "stylesheet", href: barCssUrl },
       ],
     }),
 });
@@ -30,6 +34,7 @@ export const Route = createFileRoute("/exhibition")({
 function ExhibitionRoom() {
   const { work } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const shelfReturnRef = useRef<{ button: HTMLButtonElement; top: number } | null>(null);
   const ready = useExhibitionArtworkReady();
   const index = Math.max(
     0,
@@ -41,111 +46,142 @@ function ExhibitionRoom() {
     void navigate({ search: { work: id }, replace: true, resetScroll: false });
 
   return (
-    <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
-      <header className="exhibition-room-heading dg-reveal">
-        <i className="exhibition-ring-halo ring-halo ring-bounce" aria-hidden="true" />
-        <div className="exhibition-room-heading-copy">
-          <h1>原画のある、展示室。</h1>
-          <p className="exhibition-room-lead">光と素材に囲まれて、一枚と向き合う。</p>
-        </div>
-        <div className="exhibition-room-entrances">
-          <Link className="dg-control" to="/gallery">
-            ギャラリーに戻る ↗
-          </Link>
-          <Link className="dg-control" to="/gallery-tours">
-            展示を巡る ↗
-          </Link>
-        </div>
-      </header>
-      <section
-        className="exhibition-room-current"
-        id="exhibition-current-work"
-        tabIndex={-1}
-        aria-labelledby="exhibition-current-title"
-      >
-        <div className="exhibition-room-view" aria-label={`${number}の立体展示`}>
-          <ExhibitionStudio
-            immersive
-            initialView="room"
-            showEnlargeHint={false}
-            artworkUrl={artwork.full}
-            artworkWidth={artwork.width}
-            artworkHeight={artwork.height}
-            artworkReady={ready}
-          >
-            <img
-              className="exhibition-room-source"
-              src={artwork.full}
-              width={artwork.width}
-              height={artwork.height}
-              alt={artwork.alt}
-              decoding="async"
-            />
-          </ExhibitionStudio>
-        </div>
-        <div className="exhibition-room-work-heading">
-          <div className="exhibition-room-work-title" aria-live="polite" aria-atomic="true">
-            {/* Ring system (2026-11-23): the number's ring is lit by its place
-                among the works. */}
-            <p
-              className="exhibition-room-work-number exhibition-ring-number"
-              style={
-                {
-                  "--ring-p": ((index + 1) / GALLERY_ARTWORKS.length).toFixed(4),
-                } as CSSProperties
-              }
+    <div className="gallery-page exhibition-page">
+      <ExhibitionBar />
+      <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
+        <header className="exhibition-room-heading dg-reveal">
+          <i className="exhibition-ring-halo ring-halo ring-bounce" aria-hidden="true" />
+          <div className="exhibition-room-heading-copy">
+            <h1>原画のある、展示室。</h1>
+            <p className="exhibition-room-lead">光と素材に囲まれて、一枚と向き合う。</p>
+          </div>
+          <div className="exhibition-room-entrances">
+            <Link className="dg-control" to="/gallery">
+              ギャラリーに戻る ↗
+            </Link>
+            <Link className="dg-control" to="/gallery-tours">
+              展示を巡る ↗
+            </Link>
+          </div>
+        </header>
+        <section
+          className="exhibition-room-current"
+          id="exhibition-current-work"
+          tabIndex={-1}
+          aria-labelledby="exhibition-current-title"
+        >
+          <div className="exhibition-room-view" aria-label={`${number}の立体展示`}>
+            <ExhibitionStudio
+              immersive
+              initialView="room"
+              showEnlargeHint={false}
+              artworkUrl={artwork.full}
+              artworkWidth={artwork.width}
+              artworkHeight={artwork.height}
+              artworkReady={ready}
             >
-              <span>{number}</span> / {GALLERY_ARTWORKS.length}
-            </p>
-            <h2 id="exhibition-current-title">{artwork.title}</h2>
+              <img
+                className="exhibition-room-source"
+                src={artwork.full}
+                width={artwork.width}
+                height={artwork.height}
+                alt={artwork.alt}
+                decoding="async"
+              />
+            </ExhibitionStudio>
           </div>
-          <div className="exhibition-room-caption">
-            <p>{artwork.alt}</p>
-            <a href={artwork.full} target="_blank" rel="noreferrer">
-              原画を別のタブで開く ↗
-            </a>
+          <div className="exhibition-room-work-heading">
+            <div className="exhibition-room-work-title" aria-live="polite" aria-atomic="true">
+              {/* Ring system (2026-11-23): the number's ring is lit by its place
+                among the works. */}
+              <p
+                className="exhibition-room-work-number exhibition-ring-number"
+                style={
+                  {
+                    "--ring-p": ((index + 1) / GALLERY_ARTWORKS.length).toFixed(4),
+                  } as CSSProperties
+                }
+              >
+                <span>{number}</span> / {GALLERY_ARTWORKS.length}
+              </p>
+              <h2 id="exhibition-current-title">{artwork.title}</h2>
+            </div>
+            <div className="exhibition-room-caption">
+              <p>{artwork.alt}</p>
+              <a href={artwork.full} target="_blank" rel="noreferrer">
+                原画を別のタブで開く ↗
+              </a>
+            </div>
+            <div className="exhibition-room-choose">
+              <label>
+                <span>展示する原画</span>
+                <select value={artwork.id} onChange={(event) => select(event.currentTarget.value)}>
+                  {GALLERY_ARTWORKS.map((art, position) => (
+                    <option key={art.id} value={art.id}>
+                      {String(position + 1).padStart(3, "0")} — {art.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <a
+                className="dg-control"
+                href="#exhibition-shelf-heading"
+                onClick={(event) => {
+                  const origin = shelfReturnRef.current;
+                  if (
+                    !origin?.button.isConnected ||
+                    event.metaKey ||
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey
+                  )
+                    return;
+                  event.preventDefault();
+                  origin.button.focus({ preventScroll: true });
+                  // The exhibit can resize above the shelf when a new work comes in.
+                  // Return to the same thumbnail at its previous viewport position.
+                  window.scrollBy({
+                    top: origin.button.getBoundingClientRect().top - origin.top,
+                    behavior: "instant",
+                  });
+                }}
+              >
+                画像から選ぶ ↓
+              </a>
+            </div>
           </div>
-          <div className="exhibition-room-choose">
-            <label>
-              <span>展示する原画</span>
-              <select value={artwork.id} onChange={(event) => select(event.currentTarget.value)}>
-                {GALLERY_ARTWORKS.map((art, position) => (
-                  <option key={art.id} value={art.id}>
-                    {String(position + 1).padStart(3, "0")} — {art.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <a className="dg-control" href="#exhibition-shelf-heading">
-              画像から選ぶ ↓
-            </a>
-          </div>
-        </div>
-        <nav className="exhibition-room-adjacent" aria-label="展示する作品">
-          <button
-            type="button"
-            className="dg-control"
-            disabled={index === 0}
-            onClick={() => select(GALLERY_ARTWORKS[index - 1].id)}
-          >
-            <span>← 前の作品</span>
-            <span>{GALLERY_ARTWORKS[index - 1]?.title ?? "最初の作品です"}</span>
-          </button>
-          <span className="exhibition-room-adjacent-number" aria-hidden="true">
-            {number}
-          </span>
-          <button
-            type="button"
-            className="dg-control"
-            disabled={index === GALLERY_ARTWORKS.length - 1}
-            onClick={() => select(GALLERY_ARTWORKS[index + 1].id)}
-          >
-            <span>次の作品 →</span>
-            <span>{GALLERY_ARTWORKS[index + 1]?.title ?? "最後の作品です"}</span>
-          </button>
-        </nav>
-      </section>
-      <ExhibitionArtworkBrowser currentIndex={index} onSelect={select} />
-    </main>
+          <nav className="exhibition-room-adjacent" aria-label="展示する作品">
+            <button
+              type="button"
+              className="dg-control"
+              disabled={index === 0}
+              onClick={() => select(GALLERY_ARTWORKS[index - 1].id)}
+            >
+              <span>← 前の作品</span>
+              <span>{GALLERY_ARTWORKS[index - 1]?.title ?? "最初の作品です"}</span>
+            </button>
+            <span className="exhibition-room-adjacent-number" aria-hidden="true">
+              {number}
+            </span>
+            <button
+              type="button"
+              className="dg-control"
+              disabled={index === GALLERY_ARTWORKS.length - 1}
+              onClick={() => select(GALLERY_ARTWORKS[index + 1].id)}
+            >
+              <span>次の作品 →</span>
+              <span>{GALLERY_ARTWORKS[index + 1]?.title ?? "最後の作品です"}</span>
+            </button>
+          </nav>
+        </section>
+        <ExhibitionArtworkBrowser
+          currentIndex={index}
+          onSelect={(id, button) => {
+            shelfReturnRef.current = { button, top: button.getBoundingClientRect().top };
+            select(id);
+          }}
+        />
+      </main>
+    </div>
   );
 }

@@ -67,10 +67,15 @@ const PLATES = [
 ].join(", ");
 const HEADING = ".rxs-section-heading";
 
+// Text, or text in the phrase-unit wrappers (<dw-t>, <dw-u>; phrase-children.js),
+// which hold nothing else; letterise sets the call from its textContent.
 const textOnly = (node) =>
   !node.dataset.rxkSplit &&
   !!node.textContent?.trim() &&
-  [...node.childNodes].every((child) => child.nodeType === 3 /* TEXT */);
+  [...node.childNodes].every(
+    (child) =>
+      child.nodeType === 3 /* TEXT */ || child.localName === "dw-t" || child.localName === "dw-u",
+  );
 
 /** Sets a call in boxes that can move: by letter, or (where letters would
  * lose the face's kerning and change the call's measure) by word. A hidden

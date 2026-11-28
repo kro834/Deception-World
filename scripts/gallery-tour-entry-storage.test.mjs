@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
+import { createMemoryHistory } from "@tanstack/history";
 import ts from "typescript";
 import * as data from "../src/components/gallery-tours/tour-data.ts";
 import * as progress from "../src/components/gallery-tours/tour-progress.ts";
@@ -13,14 +14,16 @@ const source = readFileSync(
   "utf8",
 );
 
-function mount() {
+function mount({ history = createMemoryHistory(), stopIndex = 0 } = {}) {
   const effects = [];
   const refs = [];
   const updates = [];
   const listeners = new Map();
+  const frames = [];
   const storage = { getItem: () => null, setItem() {} };
   let blocked = false;
   const window = {
+    requestAnimationFrame: (callback) => frames.push(callback),
     get localStorage() {
       if (blocked) throw new Error("Denied");
       return storage;
@@ -39,6 +42,9 @@ function mount() {
     {
       exports,
       window,
+      document: Object.assign(new EventTarget(), { hidden: false }),
+      AbortController,
+      URLSearchParams,
       require(name) {
         if (name === "react")
           return {
@@ -56,6 +62,7 @@ function mount() {
           };
         if (name === "./tour-data") return data;
         if (name === "./tour-progress") return progress;
+        if (name === "@tanstack/react-router") return { useRouter: () => ({ history }) };
         if (name === "@/components/world/use-world-mode") return { useWorldMode() {} };
         if (name === "react/jsx-runtime") return require(name);
         return new Proxy({}, { get: (_, key) => key });
@@ -65,7 +72,7 @@ function mount() {
   const tour = data.GALLERY_TOURS[0];
   const tree = exports.GalleryToursPage({
     tourId: tour.id,
-    workId: tour.stops[0].artworkId,
+    workId: tour.stops[stopIndex].artworkId,
     onSelect() {},
     onExit() {},
   });
@@ -73,6 +80,8 @@ function mount() {
   assert.ok(effect);
   return {
     effect,
+    effects,
+    frames,
     refs,
     updates,
     storage,
@@ -84,6 +93,37 @@ function mount() {
     },
   };
 }
+
+test("Back waits for the next-tour button and a Tab during loading cancels that return only", () => {
+  const [from, to] = data.GALLERY_TOURS;
+  const last = from.stops.length - 1;
+  const work = from.stops[last].artworkId;
+  const history = createMemoryHistory({ initialEntries: [`/gallery-tours?tour=${from.id}&work=${work}`] });
+  const view = mount({ history, stopIndex: last });
+  const theatre = view.tree.props.children.find((node) => node.type === "main")
+    .props.children.props.children[0];
+  const unsubscribe = view.effects.find((effect) => String(effect).includes("history.subscribe"))();
+  let focused = 0;
+  theatre.props.onNextTour();
+  history.push(`/gallery-tours?tour=${to.id}&work=${to.stops[0].artworkId}`);
+  history.replace(`/gallery-tours?tour=${to.id}&work=${to.stops[1].artworkId}`);
+  history.back();
+  view.listeners.get("keydown")({ key: "Tab" });
+  theatre.props.nextTourButtonRef.current = {
+    isConnected: true,
+    focus: () => focused++,
+    scrollIntoView() {},
+  };
+  theatre.props.onArtworkReady(work);
+  view.frames.splice(0).forEach((frame) => frame());
+  assert.equal(focused, 0);
+  history.forward();
+  history.back();
+  theatre.props.onArtworkReady(work);
+  view.frames.splice(0).forEach((frame) => frame());
+  assert.equal(focused, 1);
+  unsubscribe();
+});
 
 test("storage recovery clears the unavailable message and cleanup removes the listener", () => {
   const view = mount();

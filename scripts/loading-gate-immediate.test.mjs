@@ -33,15 +33,16 @@ test("covered opening navigation is selected before immediate routes while rider
   // Direct-route behavior must continue excluding every route with a deliberate cover.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await preloadRouteWithDeadline\(\s*\(\) =>\s*navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\),\s*requestSignal,\s*\{ proceedOnError: false \},\s*\);[\s\S]*?return;/,
   );
-  const directTail = goBlock.slice(directIndex).search(/\n\s+return;\n\s+\}/);
-  const directEnd = directTail === -1 ? -1 : directIndex + directTail;
-  assert.notEqual(directEnd, -1, "the immediate-route branch must return after navigation");
+  const directEnd = goBlock.indexOf("busy.current = true;", directIndex);
+  assert.notEqual(directEnd, -1, "the covered branches must follow direct navigation");
   const directBranch = goBlock.slice(directIndex, directEnd);
+  assert.match(directBranch, /return;\s*\}\s*$/, "direct routes exit before the cover acquires its lock");
+  assert.match(directBranch, /if \(changesDocument\) \{\s*const prepared = await startDestinationWarmup\(\)/);
   assert.match(
     directBranch,
-    /await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\)/,
+    /await preloadRouteWithDeadline\(\s*\(\) =>\s*navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\),\s*requestSignal,\s*\{ proceedOnError: false \},\s*\)/,
     "same-document section jumps preserve search while new documents clear it",
   );
   assert.match(directBranch, /preloadAssets\(assets, \(\) => undefined\)/);

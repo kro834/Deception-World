@@ -20,6 +20,7 @@ const MAX_LINES = {
   "2026-10-27": 60120,
   "2026-11-01": 60602,
   "2026-11-18": 62210,
+  "2026-11-26": 63274,
 };
 const HUD = /^[A-Z0-9][A-Z0-9 ·\-–—:'.&/]*$/;
 
@@ -73,15 +74,15 @@ test("archive corners keep their ids, 目次 rows and English HUD kickers", () =
   for (const label of Object.values(extra.DREAM_ARCHIVE_LABELS)) assert.match(label, HUD);
 });
 
-test("chronicle: seventy-five events retain case order through the ongoing final battle", () => {
+test("chronicle: eighty-five events retain case order through the ongoing final battle", () => {
   const events = extra.DREAM_CHRONICLE;
   assert.deepEqual(
     events.map(({ no }) => no),
-    Array.from({ length: 75 }, (_, i) => i + 1),
+    Array.from({ length: 85 }, (_, i) => i + 1),
   );
   const cases = owner.DREAM_CASES.map(({ no }) => no);
   const perCase = cases.map((no) => events.filter((event) => event.case === no).length);
-  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 39]);
+  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 49]);
   for (let i = 1; i < events.length; i += 1) {
     assert.ok(cases.indexOf(events[i].case) >= cases.indexOf(events[i - 1].case), `event ${i + 1}`);
   }

@@ -47,6 +47,17 @@ export const cinemaPosterAlt = (index: number) =>
 export const cinemaDownload = (index: number) =>
   `kamen-rider-saga-${SAGA_CINEMA_FILMS[index].slug}.jpg`;
 
+export function cinemaViewHash(view: "film" | "poster", index: number) {
+  return `#${view}-${SAGA_CINEMA_FILMS[index].slug}`;
+}
+
+export function readCinemaViewHash(hash: string) {
+  const match = /^#(film|poster)-([a-z]+)$/.exec(hash);
+  if (!match) return null;
+  const index = SAGA_CINEMA_FILMS.findIndex((film) => film.slug === match[2]);
+  return index < 0 ? null : { view: match[1] as "film" | "poster", index };
+}
+
 export async function loadCinemaPoster(index: number) {
   const image = new Image();
   if (typeof image.decode === "function") {

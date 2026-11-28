@@ -38,14 +38,14 @@ export const MIRAGE_BOOT_GATE_SCRIPT = `(function () {
   }
   try {
     var store = window.sessionStorage;
-    quiet =
-      quiet ||
-      store.getItem("${MIRAGE_BOOT_KEY}") === "1" ||
-      store.getItem("deception-world:rider-return") !== null;
+    quiet = quiet || store.getItem("${MIRAGE_BOOT_KEY}") === "1";
   } catch (error) {
     /* Storage can be blocked; the device rules still apply. */
   }
-  if (quiet || window.location.hash) d.setAttribute("data-mirage-quiet", "");
+  var state = window.history && window.history.state;
+  var entry = state && state.worldRiderReturn;
+  var returning = entry && entry.index === state.__TSR_index && entry.href === window.location.href;
+  if (returning || quiet || window.location.hash) d.setAttribute("data-mirage-quiet", "");
   // The document's own first parse only: the router runs this script again on
   // every client-side arrival at /world, where nothing would release the hold.
   if (window.location.hash && document.readyState === "loading")

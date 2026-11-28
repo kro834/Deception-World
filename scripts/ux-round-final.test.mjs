@@ -15,7 +15,7 @@ const loadGate = read("src/components/load-gate.tsx");
 test("a reader or contents jump in a dossier is aligned again while the page settles", () => {
   assert.match(
     loadGate,
-    /const DOSSIER_SECTION_LINK =\s*\/\^#\(\?:character-section-\[\\w-\]\+\|dossier-profile\|dossier-index\|identity-records\|form-records\|ruler-enigma\|ruler-polaris\)\$\/;/,
+    /const DOSSIER_SECTION_LINK =\s*\/\^#\(\?:character-section-\[\\w-\]\+\|dossier-profile\|dossier-index\|identity-records\|form-records\|form-record-\\d\+\|partner-form-\\d\+\|ruler-enigma\|ruler-polaris\)\$\/;/,
   );
   // The native jump itself runs; the settle starts a frame later, instantly.
   assert.match(
@@ -33,7 +33,7 @@ test("only the latest hash landing keeps aligning", () => {
   );
   assert.match(
     loadGate,
-    /const align = \(\) => \{\s*if \(settle !== routeHashSettle\) userInteracted = true;\s*if \(!userInteracted\) \{/,
+    /const align = \(\) => \{\s*if \(settle !== routeHashSettle \|\| window\.location\.href !== arrivalHref\) userInteracted = true;\s*if \(!userInteracted\) \{/,
   );
 });
 

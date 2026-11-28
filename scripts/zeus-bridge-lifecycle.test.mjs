@@ -5,7 +5,7 @@ import test from "node:test";
 
 const source = readFileSync(new URL("../public/archive-zeus-bridge.js", import.meta.url), "utf8");
 
-function mountBridge() {
+function mountBridge(comparisonControls = {}) {
   let serial = 0,
     layoutReads = 0,
     walks = 0;
@@ -54,7 +54,22 @@ function mountBridge() {
     scrollingElement: { scrollTop: 0, scrollHeight: 2000 },
     querySelectorAll(selector) {
       if (selector.startsWith("h1,")) return [closed, skipped, visible];
-      if (selector.startsWith(".mobile-dock")) return [closed, skipped];
+      if (selector.startsWith(".mobile-dock")) {
+        const controlSelectors = selector.split(",").map((part) => part.trim());
+        const controls = Object.entries(comparisonControls)
+          .filter(([name]) => controlSelectors.includes(name))
+          .map(([, [left, top, right, bottom]]) => ({
+            getBoundingClientRect: () => ({
+              left,
+              top,
+              right,
+              bottom,
+              width: right - left,
+              height: bottom - top,
+            }),
+          }));
+        return [closed, skipped, ...controls];
+      }
       return [];
     },
     createRange: () => ({ selectNodeContents() {}, getClientRects: () => [rect] }),
@@ -112,6 +127,20 @@ test("the bridge requests contentVisibilityAuto before title, text and control g
   assert.ok(
     ui.visibilityChecks.every((options) => options?.contentVisibilityAuto === true),
     "native checkVisibility defaults this option to false",
+  );
+});
+
+test("comparison inputs send their full hit areas to the floating shortcut", () => {
+  const controls = {
+    ".compare-native-select": [204, 128, 374, 172],
+    ".compare-range": [204, 184, 374, 234],
+    ".compare-swap": [18, 66, 372, 110],
+  };
+  const ui = mountBridge(controls);
+  ui.flush();
+  assert.deepEqual(
+    Array.from(ui.reports[0].controls, (bounds) => Array.from(bounds)),
+    Object.values(controls),
   );
 });
 

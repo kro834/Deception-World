@@ -36,6 +36,11 @@ const EPISODE_REFERENCES: Readonly<Record<string, RecordReferences>> = {
     locations: ["悠真の夢", "碧栄"],
     terms: ["ネクストピース"],
   },
+  "05": {
+    brief: [],
+    locations: ["天守閣", "悠真の夢"],
+    terms: ["マキャベルゴアナイトメア"],
+  },
 };
 
 const briefLinks = new Map(
@@ -59,9 +64,10 @@ function resolveLinks(
   });
 }
 
-export const WORLD_EPISODE_INDEX = WORLD_EPISODE_NOTES.map(({ no, title }) => ({
+export const WORLD_EPISODE_INDEX = WORLD_EPISODE_NOTES.map(({ no, title, titleLang }) => ({
   no,
   title,
+  titleLang,
   href: `#wa-episode-${no}`,
 }));
 
@@ -72,7 +78,7 @@ export const WORLD_RECORD_CONTEXTS = WORLD_EPISODE_NOTES.map(({ no }) => {
         { label: "世界と組織", links: resolveLinks(references.brief, briefLinks) },
         { label: "舞台", links: resolveLinks(references.locations, locationLinks) },
         { label: "用語集", links: resolveLinks(references.terms, termLinks) },
-      ]
+      ].filter(({ links }) => links.length > 0)
     : [];
   return { no, groups };
 });

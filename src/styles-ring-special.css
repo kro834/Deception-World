@@ -189,18 +189,12 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   height: var(--rb-size);
   margin: calc(var(--rb-size) / -2) 0 0;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgb(var(--cs-key-rgb) / 0.14) 0%,
-    rgb(var(--cs-secondary-rgb) / 0.06) 44%,
-    transparent 70%
-  );
+  background: none;
   pointer-events: none;
 }
 
-/* The lit arc over its track, and an inner ring in the second light. */
-html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::before,
-html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::after {
+/* The heading carries a single arc in the chapter colour. */
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::before {
   content: "";
   position: absolute;
   border-radius: 50%;
@@ -210,26 +204,9 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
 
 html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::before {
   inset: 0;
-  background: conic-gradient(
-    from 200deg,
-    var(--cs-key) 0turn,
-    #ffffff 0.11turn,
-    var(--cs-secondary) 0.34turn,
-    rgb(var(--cs-secondary-rgb) / 0.36) 0.48turn,
-    rgb(var(--cs-key-rgb) / 0.2) 0.62turn 1turn
-  );
+  background: conic-gradient(from 200deg, var(--cs-key), #dddcd8 0.12turn, #60666a 0.22turn, rgb(var(--cs-key-rgb) / 0.16) 0.42turn);
 }
 
-html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::after {
-  inset: 18%;
-  background: conic-gradient(
-    from 20deg,
-    rgb(var(--cs-secondary-rgb) / 0.84) 0turn,
-    rgb(255 250 242 / 0.56) 0.12turn,
-    rgb(var(--cs-key-rgb) / 0.42) 0.28turn,
-    rgb(var(--cs-secondary-rgb) / 0.14) 0.42turn 1turn
-  );
-}
 
 /* The ring's node: where the lit arc begins. */
 html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring > b {
@@ -242,10 +219,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
   border: 2px solid #fff;
   border-radius: 50%;
   background: var(--cs-key);
-  box-shadow:
-    0 0 0 3px rgb(6 12 20 / 0.82),
-    0 0 14px 2px rgb(var(--cs-key-rgb) / 0.72),
-    0 0 24px 4px rgb(var(--cs-secondary-rgb) / 0.36);
+  box-shadow: 0 0 0 2px #1a1e22;
   /* 200deg on the conic = the lower left of the ring. */
   transform: rotate(110deg) translateX(calc(var(--rb-size) / 2 - 1px));
 }
@@ -280,84 +254,29 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .fst-story-layout
     ) {
     border-color: transparent;
-    border-radius: var(--ring-radius-card);
-    background:
-      var(--cs-face) padding-box,
-      var(--ring-prism) border-box;
-    box-shadow:
-      inset 0 1px 0 rgb(255 250 242 / 0.22),
-      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.34),
-      0 24px 48px -18px rgb(0 0 0 / 0.92),
-      0 0 34px -10px rgb(var(--cs-key-rgb) / 0.34);
+    border-radius: 16px;
+    background: linear-gradient(145deg, #24282d, #15191f 65%) padding-box,
+      linear-gradient(126deg, #42474d 5%, #d8d8d4 19%, #5c6267 33%, #30363c 70%, var(--cs-key)) border-box;
+    box-shadow: 0 14px 28px -22px #000;
   }
 
-  /* Final Stage nocturnal lamplight optical panels: obsidian royal-navy depth,
-     warm dawn gold lamplight, gold-foil top hairline, and cyan/violet prism rim. */
+  /* Final Stage keeps its night-blue panels and a warm metal edge. */
   html[data-family="special"]
     body
     #top.fst-page[data-command-special]:not(#ring-b)
     .fst-story-layout {
-    background:
-      linear-gradient(
-          90deg,
-          transparent 4%,
-          #f5ca79 22%,
-          #fff7e2 48%,
-          #7ae8ff 78%,
-          transparent 96%
-        )
-        0 0 / 100% 2px no-repeat padding-box,
-      radial-gradient(ellipse 58% 46% at 6% 4%, rgb(255 212 146 / 0.28), transparent 68%) padding-box,
-      radial-gradient(ellipse 50% 38% at 96% 8%, rgb(122 232 255 / 0.18), transparent 68%) padding-box,
-      radial-gradient(ellipse 56% 44% at 92% 100%, rgb(164 139 255 / 0.18), transparent 72%) padding-box,
-      linear-gradient(164deg, #101b3b 0%, #080f24 48%, #040713 100%) padding-box,
-      conic-gradient(
-        from var(--ring-from, 210deg),
-        #ffd996 0turn,
-        #fff7e2 0.15turn,
-        #7ae8ff 0.42turn,
-        rgb(164 139 255 / 0.62) 0.68turn,
-        #ffd996 1turn
-      )
-      border-box;
-    box-shadow:
-      inset 0 1px 0 rgb(255 248 226 / 0.36),
-      inset 0 0 0 1px rgb(255 217 150 / 0.24),
-      0 32px 72px -18px rgb(0 0 0 / 0.94),
-      0 0 50px -10px rgb(255 212 146 / 0.3),
-      0 0 64px -16px rgb(122 232 255 / 0.26);
+    background: linear-gradient(152deg, #24283a, #101624 65%) padding-box,
+      linear-gradient(126deg, #716657, #ddc397 18%, #424959 38%, #353c50) border-box;
+    box-shadow: 0 14px 28px -22px #030611;
   }
 
   html[data-family="special"]
     body
     #top.fst-page[data-command-special]:not(#ring-b)
     :is(.fst-cast-console, .fst-pickup-card) {
-    background:
-      linear-gradient(
-          90deg,
-          transparent 4%,
-          rgb(255 217 150 / 0.78) 24%,
-          color-mix(in srgb, var(--fst-accent, #7ae8ff) 80%, #fff6e0) 76%,
-          transparent 96%
-        )
-        0 0 / 100% 1.5px no-repeat padding-box,
-      radial-gradient(ellipse 54% 42% at 8% 0%, rgb(255 212 146 / 0.22), transparent 68%) padding-box,
-      radial-gradient(ellipse 48% 38% at 94% 6%, color-mix(in srgb, var(--fst-accent, #7ae8ff) 24%, transparent), transparent 66%) padding-box,
-      linear-gradient(164deg, #101a38 0%, #080e22 52%, #040713 100%) padding-box,
-      conic-gradient(
-        from var(--ring-from, 210deg),
-        color-mix(in srgb, var(--fst-accent, #7ae8ff) 78%, #ffd9a3) 0turn,
-        #fff7e4 0.16turn,
-        #ffd996 0.44turn,
-        rgb(122 232 255 / 0.52) 0.72turn,
-        color-mix(in srgb, var(--fst-accent, #7ae8ff) 78%, #ffd9a3) 1turn
-      )
-      border-box;
-    box-shadow:
-      inset 0 1px 0 rgb(255 248 226 / 0.32),
-      inset 0 0 0 1px rgb(255 217 150 / 0.22),
-      0 30px 64px -18px rgb(0 0 0 / 0.94),
-      0 0 44px -10px color-mix(in srgb, var(--fst-accent, #7ae8ff) 36%, transparent);
+    background: linear-gradient(152deg, #202636, #101624 65%) padding-box,
+      linear-gradient(126deg, var(--fst-accent, #ffd9a3), #dfd6bf 18%, #474c58 38%, #323948) border-box;
+    box-shadow: 0 14px 28px -22px #030611;
   }
 
   html[data-family="special"]
@@ -375,14 +294,9 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .rxs-headline-metrics > article
     ) {
     border-color: transparent;
-    border-radius: 22px;
-    background:
-      var(--cs-face) padding-box,
-      var(--ring-prism) border-box;
-    box-shadow:
-      inset 0 1px 0 rgb(255 250 242 / 0.2),
-      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.28),
-      0 16px 32px -16px rgb(0 0 0 / 0.92);
+    border-radius: 8px;
+    background: linear-gradient(120deg, #22262b, #171b20) padding-box, linear-gradient(#646970, #34393f) border-box;
+    box-shadow: none;
   }
 
   html[data-family="special"]
@@ -537,7 +451,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .exs-unavailable > li,
       .exo-read
     ) {
-    border-radius: 22px !important;
+    border-radius: 9px !important;
     clip-path: none !important;
   }
 
@@ -614,10 +528,7 @@ html[data-family="special"]
   > b {
   border-radius: 50% !important; /* the editions' square numeral plate */
   clip-path: none !important;
-  box-shadow:
-    inset 0 1px 0 rgb(255 252 246 / 0.34),
-    0 0 0 3px rgb(6 12 20 / 0.8),
-    0 0 18px -4px rgb(var(--cs-key-rgb) / 0.54);
+  box-shadow: inset 0 1px 0 rgb(255 252 246 / 0.38);
 }
 
 html[data-family="special"]
@@ -652,11 +563,7 @@ html[data-family="special"]
     .rxe-chapter-map
     > a:hover
     > b {
-    box-shadow:
-      inset 0 1px 0 rgb(255 254 250 / 0.48),
-      0 0 0 3px rgb(6 12 20 / 0.86),
-      0 0 0 5px rgb(var(--cs-key-rgb) / 0.48),
-      0 0 24px 0 rgb(var(--cs-key-rgb) / 0.72);
+    box-shadow: inset 0 0 0 1px var(--cs-key);
   }
 }
 
@@ -879,154 +786,21 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) {
     linear-gradient(180deg, #111b29, #070c14);
 }
 
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit {
-  --fo-w: clamp(132px, 38vw, 250px);
-  position: relative;
-  display: grid;
-  width: 100%;
-  margin-inline: auto;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit > * {
-  grid-area: 1 / 1;
-}
-
-/* The heading is the ring's centre. */
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .section-heading {
-  z-index: 2;
-  display: block;
-  place-self: center;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  text-align: center;
-  pointer-events: none;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .section-heading h3 {
-  font-size: clamp(22px, 2.6vw, 40px);
-  line-height: 1.5;
-  white-space: nowrap;
-}
-
-/* The ring itself: one stroke through the four films, an inner ring in
-   gold, four ticks between the films. */
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring {
-  position: relative;
-  z-index: 0;
-  display: block;
-  place-self: center;
-  width: min(100%, 560px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 50% 50%,
-      rgba(var(--saga-accent-rgb), 0.22) 0%,
-      rgb(240 211 156 / 0.1) 34%,
-      rgba(122, 232, 255, 0.06) 56%,
-      transparent 74%
-    );
-  box-shadow:
-    0 0 80px -20px rgba(var(--saga-accent-rgb), 0.34),
-    inset 0 0 64px -20px rgb(240 211 156 / 0.18);
-  pointer-events: none;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::before,
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::before {
-  inset: 0;
-  background: var(--ring-prism);
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring::after {
-  inset: 14%;
-  background: conic-gradient(
-    from 45deg,
-    rgba(var(--saga-accent-rgb), 0.68) 0turn,
-    rgb(255 248 232 / 0.78) 0.18turn,
-    rgba(var(--saga-accent-rgb), 0.28) 0.48turn,
-    var(--ring-gold) 0.72turn,
-    rgba(var(--saga-accent-rgb), 0.68) 1turn
-  );
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b {
-  position: absolute;
-  inset: 0;
-  rotate: 0deg;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b:nth-child(2) {
-  rotate: 90deg;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b:nth-child(3) {
-  rotate: 180deg;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b:nth-child(4) {
-  rotate: 270deg;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring > b::before {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: calc(50% - 5.5px);
-  width: 11px;
-  height: 11px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: var(--saga-accent);
-  box-shadow:
-    0 0 0 3px rgb(4 8 14 / 0.86),
-    0 0 14px 2px rgba(var(--saga-accent-rgb), 0.72);
-}
-
-/* Two by two: the four on the ring's diagonals. */
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-grid {
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(2, var(--fo-w));
-  gap: clamp(112px, 26vw, 150px) clamp(16px, 8vw, 120px);
-  justify-content: center;
-  align-content: center;
-}
-
-html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card {
-  margin: 0;
-}
-
 /* Each film is a ring card: the whole poster inside the ring's stroke. */
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster {
   border: 2px solid transparent;
-  border-radius: 18px;
-  background:
-    radial-gradient(120% 70% at 50% 0%, rgb(255 248 238 / 0.16), transparent 60%) padding-box,
-    linear-gradient(168deg, #131b28, #06090e) padding-box,
-    var(--ring-prism) border-box;
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 240 / 0.36),
-    0 26px 56px -16px rgb(0 0 0 / 0.92),
-    0 0 38px -10px rgba(var(--saga-accent-rgb), 0.3);
+  border-radius: 10px;
+  background: linear-gradient(#202328, #131519) padding-box,
+    linear-gradient(125deg, #6c6964, #d7d2c6 18%, #55585c 32%, var(--saga-accent)) border-box;
+  box-shadow: 0 12px 26px -17px #000;
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster img {
-  border-radius: 14px;
+  border-radius: 6px;
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-poster::before {
-  border-radius: 12px;
+  border-radius: 6px;
 }
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-open {
@@ -1047,58 +821,6 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .f
 
 html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-name h4 {
   font-size: clamp(22px, 2.4vw, 32px);
-}
-
-@media (min-width: 1000px) {
-  /* The full orbit: north, east, south, west. */
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit {
-    --fo-w: clamp(200px, 17vw, 244px);
-    --fo-r: clamp(290px, 25vw, 340px);
-    /* A card: its part line, the 853:1280 poster, its name. */
-    --fo-h: calc(var(--fo-w) * 1.5 + 104px);
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring {
-    width: calc(var(--fo-r) * 2);
-    /* The ticks sit between the films. */
-    rotate: 45deg;
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-grid {
-    position: relative;
-    display: block;
-    width: calc(var(--fo-r) * 2 + var(--fo-w));
-    height: calc(var(--fo-r) * 2 + var(--fo-h));
-    margin-inline: auto;
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: var(--fo-w);
-    translate: calc(-50% + var(--fo-x, 0px)) calc(-50% + var(--fo-y, 0px));
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(1) {
-    --fo-y: calc(var(--fo-r) * -1);
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(2) {
-    --fo-x: var(--fo-r);
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(3) {
-    --fo-y: var(--fo-r);
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-card:nth-child(4) {
-    --fo-x: calc(var(--fo-r) * -1);
-  }
-
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .section-heading {
-    max-width: calc(var(--fo-r) * 2 - var(--fo-w) - 40px);
-  }
 }
 
 /* The cinema's controls are cut from circles too. */
@@ -1199,10 +921,7 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .hero-pos
     #films
     .film-card:hover
     .film-poster {
-    box-shadow:
-      inset 0 1px 0 rgb(255 254 248 / 0.48),
-      0 32px 68px -16px rgb(0 0 0 / 0.94),
-      0 0 52px -6px rgba(var(--saga-accent-rgb), 0.54);
+    box-shadow: 0 16px 30px -17px #000;
   }
 
   html[data-family="special"]
@@ -1234,42 +953,6 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) .hero-pos
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* The films pop along the ring as the orbit arrives (the page pins the
-     cards' opacity, so only their scale springs; the grid carries the fade). */
-  html[data-family="special"][data-ring-ready]:not([data-world-effects="economy"])
-    body
-    .saga-cinema.saga-cinema:not(#ring-b)
-    #films
-    .film-grid[data-ring-in]
-    > .film-card {
-    animation: ring-pop-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: calc(120ms + var(--ring-i, 0) * 70ms);
-  }
-
-  html[data-family="special"]:not([data-world-effects="economy"])
-    body
-    .saga-cinema.saga-cinema:not(#ring-b)
-    #films
-    .film-card:nth-child(2) {
-    --ring-i: 1;
-  }
-
-  html[data-family="special"]:not([data-world-effects="economy"])
-    body
-    .saga-cinema.saga-cinema:not(#ring-b)
-    #films
-    .film-card:nth-child(3) {
-    --ring-i: 2;
-  }
-
-  html[data-family="special"]:not([data-world-effects="economy"])
-    body
-    .saga-cinema.saga-cinema:not(#ring-b)
-    #films
-    .film-card:nth-child(4) {
-    --ring-i: 3;
-  }
-
   /* A film answers the hand on the spring. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
@@ -1530,27 +1213,16 @@ html[data-family="special"]
   height: 100%;
   rotate: calc(var(--fst-turn) * 45deg);
   background: #081020;
-  box-shadow:
-    0 0 0 3px rgb(6 11 22 / 0.8),
-    0 8px 18px -6px rgb(0 0 0 / 0.86),
-    0 0 16px -4px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 44%, transparent);
+  box-shadow: 0 6px 12px -8px #01040b;
 }
 
-/* Unselected cast nodes wear a clear luminous rim in their own accent so
-   every portrait stands out crisply against the night sky; the chosen node
-   flares with a multi-layered prism halo. */
+/* A narrow metal edge frames each portrait. The selected face carries its own accent. */
 html[data-family="special"]
   body
   #top.fst-page[data-command-special]:not(#ring-b)
   .fst-cast-node
   > .ring-frame::before {
-  background: conic-gradient(
-    from 210deg,
-    color-mix(in srgb, var(--fst-accent, var(--cs-key)) 72%, #fff4dc) 0turn,
-    rgb(255 248 232 / 0.78) 0.2turn,
-    rgb(122 232 255 / 0.48) 0.55turn,
-    color-mix(in srgb, var(--fst-accent, var(--cs-key)) 56%, transparent) 1turn
-  );
+  background: linear-gradient(130deg, #606673, #cbc6b9 18%, #565a67 38%, var(--fst-accent, var(--cs-key)));
 }
 
 html[data-family="special"]
@@ -1559,12 +1231,7 @@ html[data-family="special"]
   .fst-cast-node.is-on
   > .ring-frame {
   scale: 1.28;
-  box-shadow:
-    0 0 0 4px rgb(6 11 22 / 0.88),
-    0 0 0 6px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 74%, #fff3d6),
-    0 0 26px 2px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 64%, transparent),
-    0 0 44px -2px rgb(255 217 163 / 0.34),
-    0 16px 32px -10px rgb(0 0 0 / 0.92);
+  box-shadow: 0 0 0 2px var(--fst-accent, var(--cs-key)), 0 8px 16px -9px #02040b;
 }
 
 html[data-family="special"]
@@ -1572,14 +1239,7 @@ html[data-family="special"]
   #top.fst-page[data-command-special]:not(#ring-b)
   .fst-cast-node.is-on
   > .ring-frame::before {
-  background: conic-gradient(
-    from 210deg,
-    var(--fst-accent, var(--cs-key)) 0turn,
-    #fff8ec 0.16turn,
-    var(--cs-secondary) 0.42turn,
-    #7ae8ff 0.68turn,
-    var(--fst-accent, var(--cs-key)) 1turn
-  );
+  background: linear-gradient(125deg, var(--fst-accent, var(--cs-key)), #fff2d7 22%, var(--fst-accent, var(--cs-key)) 50%);
 }
 
 @media (hover: hover) and (pointer: fine) and (forced-colors: none) {
@@ -1588,11 +1248,7 @@ html[data-family="special"]
     #top.fst-page[data-command-special]:not(#ring-b)
     .fst-cast-node:not(.is-on):hover
     > .ring-frame {
-    box-shadow:
-      0 0 0 3px rgb(6 11 22 / 0.86),
-      0 0 0 5px color-mix(in srgb, var(--fst-accent, var(--cs-key)) 56%, #fff3d6),
-      0 0 22px 0 color-mix(in srgb, var(--fst-accent, var(--cs-key)) 56%, transparent),
-      0 12px 24px -8px rgb(0 0 0 / 0.9);
+    box-shadow: 0 0 0 1px var(--fst-accent, var(--cs-key));
   }
 }
 
@@ -1684,10 +1340,6 @@ html[data-family="special"]
 }
 
 @media (forced-colors: active) {
-  html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) #films .film-orbit-ring {
-    background: none;
-  }
-
   html[data-family="special"] body #top.fst-page[data-command-special]:not(#ring-b) .fst-cast-orbit {
     background: none;
   }
@@ -1704,4 +1356,145 @@ html[data-family="special"]
     > .ring-frame {
     box-shadow: none;
   }
+}
+
+/* ================================================================
+   Design brush-up, package S (2026-11-26): the special sites' reading
+   surfaces. Loaded last on the six special routes and the cinema, so one
+   block settles prose, dead bands and small-text floors. Copy, art,
+   engines and the stages' geometry are untouched.
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   S1. Long Japanese prose set flush like a printed page.
+   The same technique as .fst-copy and .ffs-report-body: character
+   breaking under strict kinsoku (the <wbr> seams stay as extra
+   opportunities), the last line protected by `pretty`. Phrase-wise
+   breaking (auto-phrase, keep-all) left the right edge ragged by up to
+   a seventh of the line on a phone column.
+   --------------------------------------------------------------- */
+
+html body #top.rxs-page:not(#ring-s)
+  :is(
+    .rxs-processing-comparison > p,
+    p.rxs-comparison-note,
+    p.rxs-p14-method-note,
+    .rxs-p14-copy p,
+    article.rxs-reveal > p,
+    .ffs-copy p,
+    p.ffs-table-note,
+    p.ffs-panel-lede,
+    .ffs-p16-copy p,
+    .ffs-p16-source p,
+    .ffs-p16-lineage p,
+    .ffs-p16-generation-copy p,
+    .ffs-p16-main p,
+    .ffs-p16-note p,
+    .ffs-p16-summary p,
+    .ffs-stage-copy p,
+    p.ffs-note,
+    .ffs-report-chapters p,
+    .ics-more-body p,
+    p.ics-lead-line,
+    p.ics-note,
+    .ics-prose p,
+    .ics-article-copy p,
+    .ics-evaluation p,
+    .ics-form-copy p,
+    .mus-copy p,
+    .mus-more-body p
+  ) {
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------
+   S2. Small-text floors: the comparison and table notes read at 13px.
+   --------------------------------------------------------------- */
+
+html body #top.rxs-page:not(#ring-s) :is(p.rxs-comparison-note, p.ffs-table-note, p.ics-note) {
+  font-size: max(var(--dw-fs-small, 13px), 13px);
+  line-height: 1.85;
+}
+
+/* ---------------------------------------------------------------
+   S3. Illusionculum: the runway's stage keeps its height; the padding
+   around it (a stage-sized pause before and after the 02 変身 chapter)
+   is trimmed to one ring space either side.
+   --------------------------------------------------------------- */
+
+html body #top.rxs-page.ics-page:not(#ring-s) > section#comparison {
+  padding-bottom: var(--ring-space-5, 40px);
+}
+
+html body #top.rxs-page.ics-page:not(#ring-s) > section#suitup {
+  padding-top: var(--ring-space-4, 24px);
+  padding-bottom: var(--ring-space-4, 24px);
+}
+
+html body #top.rxs-page.ics-page:not(#ring-s) > section#forms {
+  padding-top: var(--ring-space-5, 40px);
+}
+
+/* ---------------------------------------------------------------
+   S4. Far From on a tablet: the article plates keep one reading column.
+   Between 701 and 1100px the number, title and body sat in three
+   columns, so the title stood alone in a third of the plate beside a
+   narrow body. The title now runs under its number and the body takes
+   the full plate at a 34-38em measure; generation plates stack likewise.
+   --------------------------------------------------------------- */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  html body #top.ffs-page:not(#ring-s) > :is(#theories, #system, #authority) .ffs-articles > article {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 16px;
+  }
+
+  html body #top.ffs-page:not(#ring-s) > :is(#theories, #system, #authority) .ffs-articles > article > p {
+    grid-column: 1 / -1;
+    max-width: 38em;
+  }
+
+  html body #top.ffs-page:not(#ring-s) > :is(#theories, #system, #authority) .ffs-articles > article > p:first-of-type {
+    grid-row: 2;
+    margin-top: 16px;
+  }
+
+  html body #top.ffs-page:not(#ring-s) #p16 .ffs-p16-generations article {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html body #top.ffs-page:not(#ring-s) #p16 .ffs-p16-generations article > header {
+    margin-bottom: 6px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   S5. Saga cinema: no stage-sized pauses between its chapters.
+   --------------------------------------------------------------- */
+
+html body .saga-cinema.saga-cinema:not(#ring-s) :is(#introduction, #films, #visuals, #information) {
+  padding-block: var(--ring-space-6, 64px);
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  /* The hero was a 1100px stage for a 626px composition. */
+  html body .saga-cinema.saga-cinema:not(#ring-s) #top.hero {
+    min-height: 0;
+    padding-bottom: var(--ring-space-6, 64px);
+  }
+}
+
+html body .saga-cinema.saga-cinema:not(#ring-s) :is(p.hero-description, .visual-copy p) {
+  font-size: max(var(--dw-fs-small, 13px), 14px);
+  line-height: 1.9;
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+html body .saga-cinema.saga-cinema:not(#ring-s) .section-label h2 {
+  font-size: max(var(--dw-fs-small, 13px), 14px);
+  letter-spacing: 0.2em;
 }

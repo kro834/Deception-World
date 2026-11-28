@@ -1529,6 +1529,10 @@ html[data-family="special"]
   dl
   > div:last-child {
   grid-column: 1 / -1;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: clamp(16px, 2.4vw, 32px);
+  padding-block: 12px;
   border-left-color: #fff2cf;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #p14 .rxs-p14-copy dt {
@@ -2756,7 +2760,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     .rxs-page.rxs-page.exs-page
     > :is(#performance, #p14)
     > .rxs-section-heading {
-    grid-template-columns: 76px minmax(0, 1.3fr) minmax(240px, 0.7fr);
+    grid-template-columns: 76px minmax(0, 1.2fr) minmax(260px, 0.8fr);
     grid-template-rows: auto auto;
   }
   html[data-family="special"]

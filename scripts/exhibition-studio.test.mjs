@@ -90,6 +90,9 @@ test("the immersive room only accepts known artwork IDs, never a supplied textur
     "@/styles-command-archive.css?url": "command-archive.css",
     // 2026-11-23 (ring system): the route links its ring sheet last.
     "@/styles-ring-gallery.css?url": "ring-gallery.css",
+    // 2026-11-26 (one header grammar): the unified header and its box sheet.
+    "@/components/exhibition/exhibition-bar": { ExhibitionBar() {} },
+    "@/styles-exhibition-bar.css?url": "exhibition-bar.css",
   });
   assert.equal(Route.validateSearch({ work: "g19" }).work, "g19");
   assert.equal(Route.validateSearch({ work: "g80" }).work, "g80");

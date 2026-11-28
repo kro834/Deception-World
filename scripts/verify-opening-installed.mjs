@@ -33,6 +33,13 @@ for (const engine of engines) {
       });
       try {
         await context.addInitScript((scenario) => {
+          // 2026-11-28 (stale since 2026-10-31, 6934a2e7): the economy tier is the
+          // reader's saved 軽量 choice only, no longer guessed from the user agent.
+          if (scenario === "economy")
+            localStorage.setItem(
+              "deception-world:render-quality:v1",
+              JSON.stringify({ quality: "lightweight", revision: 1 }),
+            );
           Object.defineProperty(navigator, "standalone", { get: () => true });
           const original = window.matchMedia.bind(window);
           window.matchMedia = (query) => {

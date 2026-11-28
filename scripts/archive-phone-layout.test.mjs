@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 /* Phone reading of the form archive (rx6): no dead sheet control in the
-   page flow, table figures beside the sticky names, and the comparison's
-   gaps kept out of the Zeus button's right-hand lane. */
+   page flow, table figures beside the sticky names, and matched A/B figures
+   that stay adjacent even in a narrow frame. */
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const mobile = read("public/archive-mobile-stability.css");
@@ -30,9 +30,9 @@ test("phone tables narrow the sticky name column so figures show beside it", () 
   assert.match(phone, /:is\(th, td\):nth-child\(2\) \{[\s\S]*?word-break: keep-all;/);
 });
 
-test("phone comparison gaps sit beside their label, out of the Zeus lane", () => {
+test("phone comparisons keep A and B adjacent, with the delta underneath in reading order", () => {
   assert.match(
     comparison,
-    /@media \(max-width: 620px\) \{\s*\[id\$="saga-form-compare-ios"\] \.compare-diff-row \{\s*grid-template-columns: auto minmax\(0, 1fr\);\s*\}\s*\[id\$="saga-form-compare-ios"\] \.compare-diff-delta \{\s*justify-self: start;/,
+    /\.compare-diff-row \{\s*display: grid;\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);\s*grid-template-areas:\s*"label label"\s*"a b"\s*"delta delta";/,
   );
 });

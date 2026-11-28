@@ -1,3 +1,4 @@
+import { readRiderReturn, riderNavigationState } from "./world/rider-return-state";
 import {
   createContext,
   useCallback,
@@ -368,7 +369,26 @@ function waitForRexonanceCover(duration: number, still = false) {
 // Two painted frames under the still shutter after the route commits: the
 // commit's long task lands in a held frame, and the portrait is measured on
 // laid-out geometry. Capped, so a slow phone never looks stuck.
-const settleUnderCover = () => Promise.race([nextFrame().then(nextFrame), wait(120)]);
+function settleUnderCover(signal?: AbortSignal, frames = 2) {
+  if (signal?.aborted) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    let frame: number;
+    const finish = () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+      signal?.removeEventListener("abort", finish);
+      resolve();
+    };
+    const paint = () => {
+      frames -= 1;
+      if (frames === 0) finish();
+      else frame = window.requestAnimationFrame(paint);
+    };
+    const timer = window.setTimeout(finish, 120);
+    frame = window.requestAnimationFrame(paint);
+    signal?.addEventListener("abort", finish, { once: true });
+  });
+}
 
 type AppRouter = ReturnType<typeof useRouter>;
 
@@ -378,15 +398,25 @@ type AppRouter = ReturnType<typeof useRouter>;
 // early (the old page is still in the document then, and a keyboard arrival
 // would focus its heading); navigate() settles later still, so it is only
 // the fallback.
-function navigateUnderCover(router: AppRouter, start: () => Promise<void>, to: string) {
+function navigateUnderCover(
+  router: AppRouter,
+  start: () => Promise<void>,
+  to: string,
+  signal: AbortSignal,
+) {
   let stop: () => void = () => undefined;
-  const rendered = new Promise<void>((resolve) => {
-    stop = router.subscribe("onRendered", (event) => {
-      if (event.toLocation.pathname === to) resolve();
-    });
-  });
-  const settled = start().catch(() => undefined);
-  return Promise.race([rendered, settled]).finally(() => stop());
+  return preloadRouteWithDeadline(
+    () => {
+      const rendered = new Promise<void>((resolve) => {
+        stop = router.subscribe("onRendered", (event) => {
+          if (event.toLocation.pathname === to) resolve();
+        });
+      });
+      return Promise.race([rendered, start()]);
+    },
+    signal,
+    { proceedOnError: false },
+  ).finally(() => stop());
 }
 
 // Each element's own animations under a root, pseudo-elements left out.
@@ -410,7 +440,7 @@ function ownAnimations(root: Element | null | undefined): Animation[] {
 // already arriving rather than onto an empty ground. Capped.
 async function entranceLead(cap = 160) {
   const from = performance.now();
-  await nextFrame();
+  await settleUnderCover(undefined, 1);
   const delays = ownAnimations(document.querySelector("main"))
     .filter((animation) => {
       const end = animation.effect?.getComputedTiming().endTime;
@@ -445,7 +475,7 @@ async function revealRan(
 ) {
   let started = 0;
   for (let frame = 0; frame < 8 && !started; frame += 1) {
-    await nextFrame();
+    await settleUnderCover(undefined, 1);
     if (stopped()) return;
     if (document.querySelector(".load-gate.is-revealing")) started = performance.now();
   }
@@ -937,7 +967,7 @@ function dispatchOpeningHandoffState(active: boolean) {
 const DETAIL_ROUTE = /^\/(?:riders|managers|characters)\//;
 // The dossier reader's and contents' in-page links.
 const DOSSIER_SECTION_LINK =
-  /^#(?:character-section-[\w-]+|dossier-profile|dossier-index|identity-records|form-records|ruler-enigma|ruler-polaris)$/;
+  /^#(?:character-section-[\w-]+|dossier-profile|dossier-index|identity-records|form-records|form-record-\d+|partner-form-\d+|ruler-enigma|ruler-polaris)$/;
 const SCROLL_KEYS = new Set([
   "ArrowDown",
   "ArrowLeft",
@@ -971,11 +1001,20 @@ function holdRouteScrollMotion() {
   };
 }
 
+// The dossier button is a more precise landmark than the top of the roster.
+function returningToRiderControl(hash?: string) {
+  return (
+    (hash === "riders" || hash === "riders-return") && readRiderReturn()?.viewportFraction != null
+  );
+}
+
 async function settleRouteHash(hash: string) {
   // TanStack restores the previous document position after the destination
   // route commits, and mobile WebKit can repeat that restoration after layout.
   // Keep aligning briefly, but stop the moment the user starts scrolling.
   const settle = ++routeHashSettle;
+  if (returningToRiderControl(hash)) return;
+  const arrivalHref = window.location.href;
   let userInteracted = false;
   let stopWaiting: () => void = () => undefined;
   const userScrollIntent = new Promise<void>((resolve) => {
@@ -990,7 +1029,7 @@ async function settleRouteHash(hash: string) {
     stopWaiting();
   };
   const align = () => {
-    if (settle !== routeHashSettle) userInteracted = true;
+    if (settle !== routeHashSettle || window.location.href !== arrivalHref) userInteracted = true;
     if (!userInteracted) {
       document.getElementById(hash)?.scrollIntoView({ block: "start", behavior: "auto" });
     }
@@ -1033,6 +1072,7 @@ async function settleRouteHash(hash: string) {
 // the page's heading. Otherwise focus stays with the menu trigger (or falls
 // to <body>) and the next Tab jumps back to the top of the page.
 function focusRouteDestination(hash?: string) {
+  if (returningToRiderControl(hash)) return;
   let target =
     (hash && hash !== "top" ? document.getElementById(hash) : null) ??
     document.querySelector<HTMLElement>("main h1") ??
@@ -1077,7 +1117,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     phase: "covering",
   });
   const busy = useRef(false);
-  const pendingIntent = useRef<string | null>(null);
+  const pendingIntent = useRef<{ href: string; request: AbortController } | null>(null);
   const decoration = useRef<ReturnType<typeof createTransitionDecorationClock> | null>(null);
   const [decorationSkipped, setDecorationSkipped] = useState(false);
   const [destinationPending, setDestinationPending] = useState(false);
@@ -1318,6 +1358,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (
             transitionId.current === token &&
             pathnameRef.current === "/world" &&
+            !window.location.hash &&
+            (document.activeElement === document.body ||
+              document.activeElement === document.documentElement) &&
             focusTarget.isConnected &&
             document.visibilityState === "visible"
           ) {
@@ -1333,7 +1376,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
 
   const beginOpeningHandoff = useCallback(
     (source: OpeningHandoffSource) => {
-      if (busy.current || openingHandoff.current) return false;
+      if (busy.current || openingHandoff.current || pendingIntent.current) return false;
       busy.current = true;
       const token = ++transitionId.current;
       const runtime: OpeningHandoffRuntime = {
@@ -1389,6 +1432,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const pendingScrollReleases = scrollMotionReleases.current;
     const cancelTransition = () => {
+      pendingIntent.current?.request.abort();
+      pendingIntent.current = null;
       decoration.current?.skip();
       decoration.current = null;
       setDecorationSkipped(false);
@@ -1454,6 +1499,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     return () => {
       // A pending preload can settle after disposal (or router replacement).
       // Invalidate it before releasing the cover so it cannot navigate later.
+      pendingIntent.current?.request.abort();
+      pendingIntent.current = null;
       decoration.current?.skip();
       decoration.current = null;
       transitionId.current += 1;
@@ -1527,11 +1574,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       focusDestination,
     }: GoOptions) => {
       const intent = guardedHref(to, hash, search);
-      if (!transitionCovered && busy.current) {
-        if (pendingIntent.current === intent) return;
+      if (pendingIntent.current?.href === intent) return;
+      if (!transitionCovered && (busy.current || pendingIntent.current)) {
         document.dispatchEvent(new Event("deception-world:cancel-route-transition"));
       }
-      if (!transitionCovered) pendingIntent.current = intent;
+      const request = new AbortController();
+      const { signal: requestSignal } = request;
+      pendingIntent.current = { href: intent, request };
+      setDelayedRoute(null);
       const releaseSuitWarmup = holdSuitWarmup(
         to === "/rexonance-saga",
         to === "/illusionculum-saga" &&
@@ -1539,6 +1589,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       );
       try {
         const navigationSearch = search ? () => search : undefined;
+        const reportDelay = () =>
+          setDelayedRoute({
+            href: intent,
+            focus: Boolean(focusDestination || skipFocusRequested.current),
+          });
         if (transitionCovered) {
           const runtime = openingHandoff.current;
           if (!runtime || to !== "/world") return;
@@ -1546,20 +1601,27 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           const isCurrent = () =>
             transitionId.current === requestId && openingHandoff.current?.token === requestId;
 
-          const navigateOpeningDestination = () => navigate({ to, hash, search: navigationSearch });
+          const navigateOpeningDestination = () =>
+            navigateUnderCover(
+              router,
+              () => navigate({ to, hash, search: navigationSearch }),
+              to,
+              requestSignal,
+            );
 
           try {
             // Build both warmups inside the guarded region. Besides turning a
             // synchronous router/preloader failure into a handled rejection,
             // this guarantees the shared handoff is released by `finally`.
-            const routeWarmup = Promise.resolve()
-              .then(() => router.preloadRoute({ to: to as never }))
-              .catch(() => undefined);
-            const assetWarmup = assets.length
-              ? Promise.resolve()
-                  .then(() => preloadAssets(assets, () => undefined))
-                  .catch(() => undefined)
-              : Promise.resolve();
+            const routeWarmup = preloadRouteWithDeadline(
+              () => router.preloadRoute({ to: to as never }),
+              requestSignal,
+            );
+            if (assets.length) {
+              void Promise.resolve()
+                .then(() => preloadAssets(assets, () => undefined))
+                .catch(() => undefined);
+            }
 
             // The opening owns the screen until the shared layer has painted its
             // complete cover: the dive lands on a still of the world (about
@@ -1572,16 +1634,25 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             ]);
             if (!isCurrent()) return;
             if (!hasHandoffLayer) {
-              finishOpeningHandoff(requestId, false);
-              await navigateOpeningDestination();
-              if (transitionId.current === requestId && focusDestination)
-                focusRouteDestination(hash);
+              setOpeningSnapshot(null);
+              setDocumentLoading(false);
+            }
+            const ready = await routeWarmup;
+            if (!isCurrent()) return;
+            if (!ready) {
+              reportDelay();
               return;
             }
-            await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
+            const entered = await navigateOpeningDestination();
             if (!isCurrent()) return;
-            await navigateOpeningDestination();
-            if (!isCurrent()) return;
+            if (!entered) {
+              reportDelay();
+              return;
+            }
+            if (!hasHandoffLayer) {
+              if (focusDestination) focusRouteDestination(hash);
+              return;
+            }
             const destination = await Promise.race([
               runtime.destination.promise,
               wait(2200).then(() => null),
@@ -1599,8 +1670,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             setDocumentLoading(false);
             // The destination must paint twice before FLIP reads its geometry.
             // This prevents zero-sized target rects during iOS viewport changes.
-            await nextFrame();
-            await nextFrame();
+            await settleUnderCover(requestSignal);
             if (!isCurrent()) return;
             await Promise.race([runtime.animation.promise, wait(1800)]);
             if (!isCurrent()) return;
@@ -1610,7 +1680,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (busy.current) return;
-        setDelayedRoute(null);
         const changesDocument = pathname !== to;
         const isGalleryTransition = changesDocument && to === "/gallery";
         const isCinemaTransition = changesDocument && to === "/saga-cinema";
@@ -1651,18 +1720,32 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         setDecorationSkipped(false);
         setDestinationPending(false);
         const isCurrent = () => transitionId.current === requestId;
-        const warmCoveredDestination = async () => {
-          setDestinationPending(true);
-          const ready = await preloadRouteWithDeadline(() =>
-            router.preloadRoute({ to: to as never }),
+        const commitCoveredDestination = async (riderState?: ReturnType<typeof riderNavigationState>) => {
+          const ready = await navigateUnderCover(
+            router,
+            () => navigate({ to, hash, search: navigationSearch, state: riderState }),
+            to,
+            requestSignal,
           );
           if (!isCurrent()) return false;
+          if (!ready) {
+            setDestinationPending(false);
+            reportDelay();
+          }
+          return ready;
+        };
+        let destinationWarmup: Promise<boolean> | undefined;
+        const startDestinationWarmup = () =>
+          (destinationWarmup ??= preloadRouteWithDeadline(
+            () => router.preloadRoute({ to: to as never }),
+            requestSignal,
+          ));
+        const warmCoveredDestination = async () => {
+          setDestinationPending(true);
+          const ready = await startDestinationWarmup();
+          if (!isCurrent()) return false;
           if (!ready) setDestinationPending(false);
-          if (!ready)
-            setDelayedRoute({
-              href: guardedHref(to, hash, search),
-              focus: Boolean(focusDestination || skipFocusRequested.current),
-            });
+          if (!ready) reportDelay();
           return ready;
         };
         if (
@@ -1684,17 +1767,36 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (signalled) {
               window.clearTimeout(signalTimer.current);
               setSignal("running");
-              await nextFrame();
+              await settleUnderCover(requestSignal, 1);
             }
             if (!isCurrent()) return;
+            // navigate() writes history before a lazy route finishes. Keep the
+            // current document and URL together if the requested chunk stalls.
+            if (changesDocument) {
+              const prepared = await startDestinationWarmup();
+              if (!isCurrent()) return;
+              if (!prepared) {
+                reportDelay();
+                return;
+              }
+            }
             // A section jump stays in the current document, including its
             // selected archive. Only a new document starts with fresh search.
-            await navigate({
-              to,
-              hash,
-              search: navigationSearch ?? (changesDocument ? undefined : true),
-            });
+            const ready = await preloadRouteWithDeadline(
+              () =>
+                navigate({
+                  to,
+                  hash,
+                  search: navigationSearch ?? (changesDocument ? undefined : true),
+                }),
+              requestSignal,
+              { proceedOnError: false },
+            );
             if (!isCurrent()) return;
+            if (!ready) {
+              reportDelay();
+              return;
+            }
             setDestinationPending(false);
             skipDestinationReady.current = true;
             if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
@@ -1734,30 +1836,22 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             scene: null,
           });
           try {
-            await nextFrame();
-            await nextFrame();
-            const cinemaArt = isCinemaTransition
-              ? Promise.race([
-                  preloadAssets(assets, () => undefined).catch(() => undefined),
-                  wait(1000),
-                ])
-              : null;
-            if (!isCurrent() || !(await warmCoveredDestination())) return;
-            if (cinemaArt) await cinemaArt;
+            await settleUnderCover(requestSignal);
+            if (!isCurrent()) return;
+            const ready = warmCoveredDestination();
+            if (isCinemaTransition && assets.length && !clock.skipped) {
+              void preloadAssets(assets, () => undefined).catch(() => undefined);
+            }
+            if (!(await ready)) return;
             if (!isCurrent()) return;
             const remaining = timings.cover - (performance.now() - startedAt);
             if (remaining > 0) await clock.delay(remaining);
             if (!isCurrent()) return;
-            await navigateUnderCover(
-              router,
-              () => navigate({ to, hash, search: navigationSearch }),
-              to,
-            );
-            if (!isCurrent()) return;
+            if (!(await commitCoveredDestination()) || !isCurrent()) return;
             setDestinationPending(false);
             skipDestinationReady.current = true;
             if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
-            await settleUnderCover();
+            await settleUnderCover(requestSignal);
             if (!isCurrent()) return;
             setDocumentLoading(false);
             markRouteCover("revealing");
@@ -1816,9 +1910,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             // nanite engine simply because the atlas misses the first 300 ms.
             // No preparation changes the call's clock or can hold go forever.
             if (rexonanceCall && tier === "full") setSignal("running");
-            await nextFrame();
-            await nextFrame();
+            await settleUnderCover(requestSignal);
             if (!isCurrent()) return;
+            // The menu has painted closed. Let the destination load beside suit preparation.
+            void startDestinationWarmup();
             if (rexonanceCall && tier === "full" && rexonanceSuitWarm) {
               const entry = prepareRexonanceEntry({
                 decoded: rexonanceSuitWarm,
@@ -1863,8 +1958,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               rexonanceCoverCancel.current = null;
             if (!isCurrent()) return;
             if (farFromCall && tier === "full") setSignal("running");
-            await nextFrame();
-            await nextFrame();
+            await settleUnderCover(requestSignal);
             if (!isCurrent()) return;
             if (farFromCall && tier === "full" && farFromWarm) {
               const entry = prepareRexonanceEntry({
@@ -2044,8 +2138,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               Boolean(extremePlayback) ||
               (diveVariant === "meta-unitas" && metaUnitasCall)
             ) {
-              await nextFrame();
-              await nextFrame();
+              await settleUnderCover(requestSignal);
               if (!isCurrent()) return;
               // Rexonance's call runs from the first painted frame, not
               // from the click (which may have included a long layout task).
@@ -2150,16 +2243,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               } else await clock.delay(coverTimeLeft);
             }
             if (!isCurrent()) return;
-            await navigateUnderCover(
-              router,
-              () => navigate({ to, hash, search: navigationSearch }),
-              to,
-            );
-            if (!isCurrent()) return;
+            const riderState = riderNavigationState(to, hash, focusDestination);
+            if (!(await commitCoveredDestination(riderState)) || !isCurrent()) return;
             setDestinationPending(false);
             skipDestinationReady.current = true;
             if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
-            await settleUnderCover();
+            await settleUnderCover(requestSignal);
             if (!isCurrent()) return;
             const callOnly = Boolean(rexonanceCall);
             let landed = scene;
@@ -2279,16 +2368,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
             if (coverTimeLeft > 0) await clock.delay(coverTimeLeft);
             if (!isCurrent()) return;
-            await navigateUnderCover(
-              router,
-              () => navigate({ to, hash, search: navigationSearch }),
-              to,
-            );
-            if (!isCurrent()) return;
+            if (!(await commitCoveredDestination()) || !isCurrent()) return;
             setDestinationPending(false);
             skipDestinationReady.current = true;
             if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
-            await settleUnderCover();
+            await settleUnderCover(requestSignal);
             if (!isCurrent()) return;
             const landed = { ...scene, ...landingRects() };
             setDocumentLoading(false);
@@ -2353,12 +2437,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           if (!isCurrent()) return;
           if (progressTimer) window.clearInterval(progressTimer);
           setGate({ active: true, percent: 100, variant: "archive", phase: "covering", scene });
-          await navigate({ to, hash, search: navigationSearch });
-          if (!isCurrent()) return;
+          if (!(await commitCoveredDestination()) || !isCurrent()) return;
           setDestinationPending(false);
           skipDestinationReady.current = true;
           if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
-          await settleUnderCover();
+          await settleUnderCover(requestSignal);
           if (!isCurrent()) return;
           setDocumentLoading(false);
           markRouteCover("revealing");
@@ -2382,6 +2465,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           }
         }
       } finally {
+        if (pendingIntent.current?.request === request) pendingIntent.current = null;
+        request.abort();
         releaseSuitWarmup();
       }
     },
@@ -3435,6 +3520,11 @@ export function AppGuards() {
     // A reloaded document's first route keeps the reader's place: it is not a
     // fresh entry, so it is restored like a history arrival
     // (restoreReloadPosition), not sent to the top.
+    const firstWorldAlreadyRead =
+      previousPathname.current === null &&
+      pathname === "/world" &&
+      !locationHash &&
+      window.scrollY > 0;
     const reloaded = previousPathname.current === null && reloadArrival.current;
     const pathnameChanged = previousPathname.current !== pathname;
     previousPathname.current = pathname;
@@ -3465,14 +3555,16 @@ export function AppGuards() {
       restoringTimer = 0;
       delete root.dataset.routeRestoring;
     };
-    const isDossierSectionHash =
-      /^#?character-section-/.test(locationHash) ||
-      /^#?(?:dossier-profile|dossier-index|identity-records|form-records|ruler-enigma|ruler-polaris)$/.test(
-        locationHash,
-      );
+    const isDossierSectionHash = DOSSIER_SECTION_LINK.test(
+      locationHash.startsWith("#") ? locationHash : `#${locationHash}`,
+    );
     const resetRouteTop =
       (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash && !fromHistory) ||
-      (pathname === "/world" && (!locationHash || locationHash === "top") && !fromHistory);
+      (pathname === "/world" &&
+        (!locationHash || locationHash === "top") &&
+        !fromHistory &&
+        !firstWorldAlreadyRead &&
+        readRiderReturn()?.viewportFraction == null);
     if (!resetRouteTop) {
       if (!historyDossier) return releaseRestoring;
       // A dossier reached by Back/Forward is left like any other: its exit is
@@ -3491,8 +3583,9 @@ export function AppGuards() {
     let userInteracted = false;
     let stopped = false;
 
+    const arrivalHref = window.location.href;
     const resetDetailScroll = () => {
-      if (stopped || userInteracted) return;
+      if (stopped || userInteracted || window.location.href !== arrivalHref) return;
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     };
     const stopResetting = () => {

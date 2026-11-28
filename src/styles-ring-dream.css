@@ -5,8 +5,7 @@
    Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
    アニメーションにして」. The programme keeps its Taisho letterpress (gilt,
    vermilion lacquer, deep violet-ink, kinari washi) and elevates the ring
-   idiom: round windows (円窓) hung on a twin gilt arc with luminous double-ring
-   halos, gilt ring dividers between acts, sculpted pill controls with top
+   idiom: round windows (円窓) hung on a gilt arc, gilt ring dividers between acts, sculpted pill controls with top
    specular highlights, and elastic spring responses for every pointer.
 
    The tokens are gilt and vermilion (styles-ring-chrome.css maps
@@ -137,10 +136,7 @@ html[data-family="dream"]
   border-color: #fff4ce;
   outline: 2px solid #fae09c;
   outline-offset: -2px;
-  box-shadow:
-    0 0 0 2px rgb(var(--ring-pink-rgb) / 0.56),
-    0 0 26px rgb(var(--ring-key-rgb) / 0.62),
-    0 12px 26px rgb(0 0 0 / 0.7);
+  box-shadow: 0 3px 0 #bc9455;
 }
 
 html[data-family="dream"]
@@ -160,6 +156,24 @@ html[data-family="dream"]
   border-radius: 20px;
 }
 
+/* Ink and vermilion entry slips below the key visual. */
+@media (forced-colors: none) and (prefers-contrast: no-preference) {
+  html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) .dream-hero-actions {
+    & a {
+      border-radius: 5px;
+      border-color: #796750;
+      background: #281c2a;
+      box-shadow: inset 0 1px 0 rgb(241 216 167 / 0.22);
+    }
+
+    & a.dream-cinema-primary {
+      border-color: #bf9b69;
+      background: linear-gradient(112deg, #812f36, #521d29);
+      box-shadow: inset 0 1px 0 #dac099;
+    }
+  }
+}
+
 /* A file's own controls: the switcher is a row of pills, the close a
    circle. !important: the Taisho and image-cinema sheets square them from
    selectors that carry the dialog's own ids. Shape + luminous ring polish. */
@@ -167,20 +181,9 @@ html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-switcher :is
 html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-plate-controls :is(a, button) {
   border-radius: var(--ring-radius-pill) !important;
   clip-path: none !important;
-  border: 1px solid rgb(240 206 136 / 0.6);
-  background:
-    linear-gradient(
-        90deg,
-        transparent 14%,
-        rgb(255 248 220 / 68%) 50%,
-        transparent 86%
-      )
-      top / 100% 1px no-repeat,
-    radial-gradient(90% 80% at 50% 0%, rgb(255 244 214 / 18%), transparent 70%),
-    linear-gradient(180deg, #221330 0%, #100818 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 248 220 / 28%),
-    0 8px 20px rgb(0 0 0 / 0.52);
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.52);
+  background: #251a28;
+  box-shadow: inset 0 1px 0 rgb(255 244 212 / 0.18);
 }
 
 html[data-family="dream"]
@@ -188,44 +191,22 @@ html[data-family="dream"]
   .dream-dossier-dialog
   :is(.dream-dossier-switcher, .dream-dossier-plate-controls)
   :is(button[aria-current="true"], button[aria-pressed="true"]) {
-  border-color: #fff4ce;
-  color: #fffaf0;
-  background:
-    linear-gradient(
-        90deg,
-        transparent 12%,
-        rgb(255 250 228 / 90%) 50%,
-        transparent 88%
-      )
-      top / 100% 1.5px no-repeat,
-    radial-gradient(90% 80% at 50% 0%, rgb(255 236 184 / 40%), transparent 70%),
-    linear-gradient(135deg, #a22c33 0%, #6d1924 56%, #3f0e18 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 226 / 52%),
-    0 0 0 1px rgb(var(--ring-key-rgb) / 0.74),
-    0 0 22px rgb(var(--ring-pink-rgb) / 0.42),
-    0 12px 26px rgb(0 0 0 / 0.64);
+  border-color: #fff0c2;
+  color: #fff8ea;
+  background: linear-gradient(108deg, #802c35, #511d2a);
+  box-shadow: inset 0 1px 0 #dfc997;
 }
 
 html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-close {
   border-radius: 50% !important;
   clip-path: none !important;
-  border: 1px solid rgb(246 214 146 / 0.88);
-  background:
-    radial-gradient(84% 84% at 32% 24%, rgb(255 246 216 / 28%), transparent 68%),
-    linear-gradient(155deg, #261434 0%, #0f0716 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 224 / 44%),
-    0 0 0 3px #0c0612,
-    0 0 0 4.5px rgb(var(--ring-pink-rgb) / 0.68),
-    0 0 20px rgb(var(--ring-key-rgb) / 0.24),
-    0 14px 30px rgb(0 0 0 / 0.76);
+  border: 1px solid rgb(var(--ring-key-rgb) / 0.8);
+  background: #35232c;
+  box-shadow: inset 0 1px 0 #d2b781;
 }
 
 /* ---------------------------------------------------------------
-   2. 円窓: the three leads in round windows on one gilt twin arc.
-   The card's frame dissolves; the portrait is the round window ringed
-   in gilt with a vermilion hairline and warm amber halo.
+   2. 円窓: three portraits above ink nameplates, joined by a gilt arc.
    --------------------------------------------------------------- */
 
 html[data-family="dream"]
@@ -288,18 +269,8 @@ html[data-family="dream"]
   margin: 20px auto 32px;
   border-radius: 50%;
   object-fit: cover;
-  /* Imperial Theatre triple-halo round window: obsidian lacquer moat,
-     burnished gold-leaf ring, second lacquer moat, vermilion ring, outer moat,
-     fine ivory-gold halo ring, and warm amber luminescence (no filter on art). */
-  box-shadow:
-    0 0 0 5px #0b0612,
-    0 0 0 8px #f6db96,
-    0 0 0 14px #0e0717,
-    0 0 0 16.5px rgb(var(--ring-pink-rgb) / 0.92),
-    0 0 0 20px #0b0612,
-    0 0 0 21px rgb(255 246 218 / 0.52),
-    0 0 42px rgb(var(--ring-key-rgb) / 0.34),
-    0 30px 56px -10px rgb(0 0 0 / 0.9);
+  /* A fine gilt rim leaves the gap between portrait and name open. */
+  box-shadow: 0 0 0 1px #c8aa72, 0 12px 20px -15px #09060b;
 }
 
 html[data-family="dream"]
@@ -309,23 +280,11 @@ html[data-family="dream"]
   .dream-character-copy {
   box-sizing: border-box;
   align-items: center;
-  border: 1px solid rgb(240 206 136 / 0.56);
-  border-top: 2px solid rgb(252 224 162 / 0.9);
-  border-radius: 22px;
-  background:
-    linear-gradient(
-        90deg,
-        transparent 10%,
-        rgb(255 250 228 / 86%) 50%,
-        transparent 90%
-      )
-      top / 100% 1.5px no-repeat,
-    radial-gradient(88% 60% at 50% 0%, rgb(255 236 184 / 18%), transparent 70%),
-    radial-gradient(66% 52% at 50% 100%, rgb(var(--ring-pink-rgb) / 0.14), transparent 72%),
-    linear-gradient(180deg, #1b0f26 0%, #0d0715 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 226 / 34%),
-    0 22px 46px -10px rgb(0 0 0 / 0.78);
+  border: 0;
+  border-top: 1px solid #c4a46b;
+  border-radius: 0;
+  background: linear-gradient(180deg, #211621, #19111c);
+  box-shadow: none;
   text-align: center;
 }
 
@@ -339,7 +298,7 @@ html[data-family="dream"]
   text-align: center;
 }
 
-/* The celestial gilt twin arc behind the three round windows: text-free ornament. */
+/* The gilt arc behind the three round windows: text-free ornament. */
 html[data-family="dream"]
   body
   main#top.dream-page.dream-image-cinema:not(#ring-b)
@@ -352,29 +311,16 @@ html[data-family="dream"]
   aspect-ratio: 1;
   margin-left: calc(min(1500px, 190%) / -2);
   border-radius: 50%;
-  background: conic-gradient(
-    from -66deg,
-    transparent 0turn,
-    rgb(var(--ring-pink-rgb) / 0.72) 0.048turn,
-    rgb(var(--ring-key-rgb) / 0.96) 0.11turn,
-    rgb(255 250 228 / 1) 0.183turn,
-    rgb(var(--ring-key-rgb) / 0.96) 0.256turn,
-    rgb(var(--ring-pink-rgb) / 0.72) 0.318turn,
-    transparent 0.366turn
-  );
+  background: conic-gradient(from -64deg, transparent, #806541 0.07turn, #e1c992 0.18turn, #806541 0.29turn, transparent 0.356turn);
   -webkit-mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 14px),
-    rgb(0 0 0 / 0.58) calc(100% - 13.2px) calc(100% - 11.4px),
-    transparent calc(100% - 10.6px) calc(100% - 3.6px),
-    #000 calc(100% - 2.6px)
+    transparent calc(100% - 1.5px),
+    #000 calc(100% - 0.75px)
   );
   mask: radial-gradient(
     farthest-side,
-    transparent calc(100% - 14px),
-    rgb(0 0 0 / 0.58) calc(100% - 13.2px) calc(100% - 11.4px),
-    transparent calc(100% - 10.6px) calc(100% - 3.6px),
-    #000 calc(100% - 2.6px)
+    transparent calc(100% - 1.5px),
+    #000 calc(100% - 0.75px)
   );
   pointer-events: none;
 }
@@ -445,16 +391,7 @@ html[data-family="dream"]
     .dream-character-grid
     button.ios26-glass:hover
     > img {
-    box-shadow:
-      0 0 0 5px #0b0612,
-      0 0 0 8.5px #fff6d6,
-      0 0 0 14px #0e0717,
-      0 0 0 17px rgb(var(--ring-pink-rgb) / 1),
-      0 0 0 20px #0b0612,
-      0 0 0 21.5px rgb(255 248 220 / 0.85),
-      0 0 52px rgb(var(--ring-key-rgb) / 0.58),
-      0 0 82px rgb(var(--ring-pink-rgb) / 0.3),
-      0 34px 62px -10px rgb(0 0 0 / 0.94);
+    box-shadow: 0 0 0 2px #f3d99e, 0 12px 20px -15px #09060b;
   }
 
   html[data-family="dream"]
@@ -463,12 +400,9 @@ html[data-family="dream"]
     .dream-character-grid
     button.ios26-glass:hover
     .dream-character-copy {
-    border-color: rgb(255 242 198 / 0.84);
-    border-top-color: #fff6d6;
-    box-shadow:
-      inset 0 1px 0 rgb(255 250 228 / 46%),
-      0 0 32px rgb(var(--ring-key-rgb) / 0.24),
-      0 26px 48px -10px rgb(0 0 0 / 0.86);
+    border-color: rgb(255 236 184 / 0.72);
+    border-top-color: #fff0c2;
+    box-shadow: none;
   }
 
   html[data-family="dream"]
@@ -497,9 +431,7 @@ html[data-family="dream"]
     .dream-poster-thumbnails
     button:hover {
     border-color: #fff0c2;
-    box-shadow:
-      0 0 18px rgb(var(--ring-key-rgb) / 0.42),
-      0 10px 22px rgb(0 0 0 / 0.56);
+    box-shadow: 0 2px 0 #bc9455;
   }
 
   html[data-family="dream"]
@@ -517,12 +449,7 @@ html[data-family="dream"]
 
   html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-close:hover {
     border-color: #fff4ce;
-    box-shadow:
-      inset 0 1px 0 rgb(255 248 228 / 48%),
-      0 0 0 3px #120919,
-      0 0 0 5px rgb(var(--ring-key-rgb) / 0.85),
-      0 0 24px rgb(var(--ring-key-rgb) / 0.42),
-      0 14px 30px rgb(0 0 0 / 0.72);
+    box-shadow: inset 0 1px 0 #f3d99e;
   }
 }
 
@@ -931,4 +858,36 @@ html[data-family="dream"]
     color: CanvasText;
     box-shadow: none;
   }
+}
+
+/* ================================================================
+   Design brush-up, package S (2026-11-26): flush prose on the
+   programme. The records, chronicle, atlas, voices and annex quotes
+   break phrase by phrase (auto-phrase), which left their right edge
+   ragged by 11-15% of the line on a phone. They now break like the
+   story cases already do (character breaking, strict kinsoku, last
+   line protected); short, centred copy keeps its phrases whole.
+   ================================================================ */
+
+html[data-family="dream"] body main.dream-page.dream-page:not(#ring-s)
+  :is(
+    blockquote p,
+    dd p,
+    .dream-chronicle-body p,
+    .dream-atlas-body p,
+    .dream-record-reading-body p,
+    .dream-archive-add p,
+    .dream-agent-copy p,
+    p.dream-record-excerpt,
+    p.dream-karakuri-excerpt,
+    p.dream-agent-note,
+    p.dream-faction-archive-text,
+    p.dream-archive-said,
+    p.dream-story-crossings-lead,
+    p.dream-research-lead,
+    .dream-story-intro p
+  ) {
+  word-break: normal;
+  line-break: strict;
+  text-wrap: pretty;
 }

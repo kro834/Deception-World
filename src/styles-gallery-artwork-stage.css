@@ -638,7 +638,7 @@ html[data-family="gallery"]
     .gallery-page[data-gallery-page][data-gallery-page]
     .gallery-artwork-intro
     .artwork-stage {
-    --stage-art-height: clamp(222px, 64vw, 408px);
+    --stage-art-height: clamp(240px, 76vw, 440px);
     grid-template-columns: minmax(0, 1fr);
   }
 

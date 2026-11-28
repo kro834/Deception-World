@@ -7,6 +7,7 @@ import {
   assemblyComparisonSearch,
   parseLabState,
   labSearch,
+  labBeatAt,
   advanceLab,
   LAB_RIDERS,
   LAB_ZOOMS,
@@ -34,6 +35,8 @@ test("lab URL round trips all riders and zooms with a paused exact comparison be
     for (const zoom of LAB_ZOOMS) {
       const state = {
         rider,
+        side: "b",
+        direction: -1,
         compare: "far-from",
         zoom,
         speed: 0.25,
@@ -54,6 +57,39 @@ test("malformed and stale links safely constrain every transport input", () => {
   assert.equal(parseLabState("?at=-2").progress, 0);
   assert.equal(parseLabState("?at=NaN").progress, 0);
 });
+test("side and direction restore safely for links from every generation", () => {
+  assert.equal(parseLabState("?side=b&zoom=head").side, "a");
+  assert.equal(parseLabState("?compare=far-from&side=b&direction=reverse").direction, -1);
+  assert.equal(parseLabState("?compare=far-from&side=unknown&direction=bad").side, "a");
+  assert.equal(parseLabState("?rider=meta-unitas").direction, 1);
+});
+
+test("a comparison uses one clock and respects Far From's form sequence on either side", () => {
+  for (const direction of [-1, 1]) {
+    const normal = advanceLab(.94, 50, 1, direction);
+    const far = advanceLab(.94, 50, 1, direction, "far-from", "ultra");
+    assert.ok(Math.abs(far - .94) < Math.abs(normal - .94));
+    for (const pair of [
+      ["rexonance", "max", "far-from", "ultra"],
+      ["far-from", "ultra", "rexonance", "max"],
+      ["far-from", "high", "far-from", "ultra"],
+    ]) assert.equal(advanceLab(.94, 50, 1, direction, ...pair), far);
+  }
+});
+
+test("each phase starts on its stated frame, including the completion endpoint", () => {
+  LAB_BEATS.forEach((beat, i) => {
+    assert.equal(labBeatAt(beat.at), beat);
+    if (i) {
+      const before = beat.at - .00001;
+      assert.equal(labBeatAt(before), LAB_BEATS[i - 1]);
+      const restored = parseLabState(labSearch({ ...parseLabState(""), progress: before }));
+      assert.equal(restored.progress, before);
+      assert.equal(labBeatAt(restored.progress), LAB_BEATS[i - 1]);
+    }
+  });
+});
+
 test("transport reverses symmetrically and stops exactly at endpoints", () => {
   for (const speed of [0.25, 0.5, 1, 1.5, 2]) {
     const forward = advanceLab(0.4, 50, speed, 1);

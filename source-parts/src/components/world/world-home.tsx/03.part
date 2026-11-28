@@ -1,17 +1,3 @@
-  // Read by the poster timer at once; the state follows when scrolling settles.
-  const heroInViewRef = useRef(true);
-  const [motionReduced, setMotionReduced] = useState(false);
-  const managerRail = useRef<HTMLDivElement>(null);
-  const columnRail = useRef<HTMLDivElement>(null);
-  const riderRail = useRef<HTMLDivElement>(null);
-  const episodeGridRef = useRef<HTMLDivElement>(null);
-  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
-  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const episodePickupOpenedByKeyboard = useRef(false);
-  const episodePointerFocusTimer = useRef<number | null>(null);
-  const episodeScrollTimer = useRef<number | null>(null);
-  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
-  const pickupBtnRef = useRef<HTMLButtonElement>(null);
   const pickupDialogRef = useRef<HTMLDialogElement>(null);
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
@@ -26,23 +12,23 @@
   const riderTransitionTimer = useRef<number | null>(null);
   const pausedAmbientAnimations = useRef<Animation[]>([]);
 
-  const loadPoster = useCallback(
-    (index: number, priority: "high" | "low" = "high") => {
-      posterLoader.current ??= createReadyPosterLoader((image, source) =>
-        preparePosterImage(image, source),
-      );
-      return posterLoader.current.load(POSTERS[index].src, priority);
-    },
-    [],
-  );
+  const loadPoster = useCallback((index: number, priority: "high" | "low" = "high") => {
+    posterLoader.current ??= createReadyPosterLoader((image, source) =>
+      preparePosterImage(image, source),
+    );
+    return posterLoader.current.load(POSTERS[index].src, priority);
+  }, []);
 
   const cancelPosterShuffle = useCallback(() => {
     shuffleRunId.current += 1;
     shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
     shuffleTimers.current = [];
     shuffleActive.current = false;
+    posterRestoring.current = false;
+    cancelPosterFrame();
     setShuffling(false);
-  }, []);
+    setPosterResetting(false);
+  }, [cancelPosterFrame]);
 
   useEffect(() => mountFilmMotion(shellRef.current), []);
   useMirageBoot(shellRef);
@@ -59,13 +45,43 @@
   );
 
   useLayoutEffect(() => {
-    const returnId = readRiderReturn();
-    const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
-    if (returnIndex < 0) return;
-    riderTabRef.current = returnIndex;
-    setInitialRiderTab(returnIndex);
-    setRiderTab(returnIndex);
-  }, []);
+    let stopAlign: (() => void) | undefined;
+    const restore = () => {
+      const ticket = readRiderReturn();
+      if (!ticket) return;
+      const returnIndex = RIDERS.findIndex((rider) => rider.id === ticket.id);
+      if (returnIndex < 0) return;
+      riderTabRef.current = returnIndex;
+      setInitialRiderTab(returnIndex);
+      setRiderTab(returnIndex);
+      if (ticket.poster != null && POSTERS[ticket.poster]) {
+        const storedPoster = ticket.poster;
+        cancelPosterShuffle();
+        const runId = shuffleRunId.current;
+        posterRestoring.current = true;
+        void goPoster(storedPoster).then((ready) => {
+          if (shuffleRunId.current !== runId) return;
+          posterRestoring.current = false;
+          setPosterFailure(ready ? null : storedPoster);
+        });
+      }
+      if (ticket.locked != null) setLocked(ticket.locked);
+      const control = shellRef.current?.querySelector<HTMLButtonElement>(".rider-dossier-open");
+      if (control) {
+        stopAlign?.();
+        stopAlign = restoreRiderControl(ticket, control);
+      }
+    };
+    restore();
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restore();
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      stopAlign?.();
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [cancelPosterShuffle, goPoster, locationHash]);
 
   useLayoutEffect(() => {
     if (locationHash !== "manager-archive-other") return;
@@ -178,10 +194,6 @@
     return () => media.removeEventListener?.("change", syncMotionPreference);
   }, []);
 
-  useEffect(() => {
-    clearRiderReturn();
-  }, []);
-
   const selectRider = useCallback((next: number) => {
     const current = riderTabRef.current;
     if (current === next) return;
@@ -259,33 +271,53 @@
 
   useEffect(() => {
     if (locked || ambientPaused || motionReduced || !heroVisible) return;
-    if (posterControlsFocused) return;
+    if (posterControlsFocused || posterResetting || posterFailure !== null) return;
     if (sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
+
     let cancelled = false;
     let decoding = false;
     const nextIndex = (poster + 1) % POSTERS.length;
-    const t = window.setInterval(async () => {
-      if (decoding || !heroInViewRef.current || document.querySelector("dialog[open]")) return;
+    const canAdvance = () =>
+      !cancelled &&
+      !shuffleActive.current &&
+      !posterRestoring.current &&
+      !posterControlsFocusedRef.current &&
+      !document.hidden &&
+      heroInViewRef.current &&
+      !document.querySelector("dialog[open]");
+
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    const shouldPrefetch =
+      !connection?.saveData && !["slow-2g", "2g"].includes(connection?.effectiveType ?? "");
+    let warm: Promise<boolean> | undefined;
+    const preload = shouldPrefetch
+      ? window.setTimeout(() => {
+          if (canAdvance()) warm = loadPoster(nextIndex, "low").catch(() => false);
+        }, 2400)
+      : undefined;
+
+    const timer = window.setInterval(async () => {
+      if (decoding || !heroInViewRef.current || !canAdvance()) return;
       decoding = true;
       try {
-        const ready = await loadPoster(nextIndex, "low");
-        if (cancelled || !ready || document.querySelector("dialog[open]")) return;
-        if (!heroInViewRef.current) return;
-        startTransition(() => {
-          setPrevPoster(poster);
-          setPoster(nextIndex);
-        });
+        const ready = warm ? await warm : true;
+        warm = undefined;
+        if (ready && canAdvance()) await goPoster(nextIndex, { canShow: canAdvance });
       } catch {
-        // Preserve the current art when the next image cannot be delivered.
+        // An automatic advance may fail. Keep the current poster for the next beat.
       } finally {
         decoding = false;
       }
     }, 5200);
     return () => {
       cancelled = true;
-      window.clearInterval(t);
+      window.clearInterval(timer);
+      window.clearTimeout(preload);
     };
   }, [
+    goPoster,
     loadPoster,
     ambientPaused,
     heroVisible,
@@ -297,37 +329,8 @@
     episodePickup,
     shuffling,
     posterControlsFocused,
-  ]);
-
-  useEffect(() => {
-    if (ambientPaused || motionReduced || !heroVisible) return;
-    if (posterControlsFocused) return;
-    if (locked || sideMenuOpen || pickupOpen || episodePickup !== null || shuffling) return;
-    const connection = (
-      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-    ).connection;
-    if (
-      connection?.saveData ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g"
-    )
-      return;
-    const timer = window.setTimeout(() => {
-      void loadPoster((poster + 1) % POSTERS.length, "low");
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [
-    loadPoster,
-    ambientPaused,
-    heroVisible,
-    motionReduced,
-    poster,
-    locked,
-    sideMenuOpen,
-    pickupOpen,
-    episodePickup,
-    shuffling,
-    posterControlsFocused,
+    posterResetting,
+    posterFailure,
   ]);
 
   useEffect(() => {
@@ -366,22 +369,21 @@
   }, [ambientPaused]);
 
   useEffect(() => {
+    if (motionReduced && shuffleActive.current) cancelPosterShuffle();
+  }, [cancelPosterShuffle, motionReduced]);
+
+  useEffect(() => {
     const paused =
-      ambientPaused ||
-      motionReduced ||
-      !heroVisible ||
-      sideMenuOpen ||
-      pickupOpen ||
-      episodePickup !== null;
-    if (paused && shuffleActive.current) cancelPosterShuffle();
+      ambientPaused || !heroVisible || sideMenuOpen || pickupOpen || episodePickup !== null;
+    if (paused && (shuffleActive.current || posterResetting)) cancelPosterShuffle();
   }, [
     cancelPosterShuffle,
     ambientPaused,
-    motionReduced,
     heroVisible,
     sideMenuOpen,
     pickupOpen,
     episodePickup,
+    posterResetting,
   ]);
 
   useEffect(() => {
@@ -509,3 +511,14 @@
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
+      grid.removeEventListener("touchstart", startTouch);
+      grid.removeEventListener("touchend", endTouch);
+      grid.removeEventListener("touchcancel", endTouch);
+      grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
+      grid.removeEventListener("wheel", releaseProgrammaticScroll);
+      grid.removeEventListener("scroll", onScroll);
+      grid.removeEventListener("scrollend", settleScroll);
+    };
+  }, []);
+
+  useEffect(() => {

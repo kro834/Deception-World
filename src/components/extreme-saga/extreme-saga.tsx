@@ -9,6 +9,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { mountExtremeMotion, mountExtremeNavReserve } from "@/lib/extreme-motion.js";
 import { mountExtremeImpact } from "@/lib/extreme-impact.js";
 import { mountExtremeFightCard } from "@/lib/extreme-fightcard.js";
+import { mountChapterHistoryReturn } from "@/lib/local-history-return";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { createExtremeStageSelection } from "@/lib/extreme-stage-selection.js";
 import { ExtremeImpactDefs } from "./extreme-impact-art";
@@ -255,7 +256,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
   const [baseline, setBaseline] = useState<ExtremeBaseline>("diluculum");
   const activeComparison = COMPARISONS[baseline];
   return (
-    <section id="performance" className="rxs-performance rxs-section">
+    <section id="performance" className="rxs-performance rxs-section" tabIndex={-1}>
       {/* Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The head is
           the bout plate (ROUND and its number) and the catchphrase; the
           English kicker went. The introduction is the owner's copy. */}
@@ -282,7 +283,7 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           which stays in the text. */}
       <div className="rxs-headline-metrics">
         <div className="exi-stage">
-          <article className="rxs-reveal" data-exi-hit="" data-exi-line="mid">
+          <article className="rxs-reveal" data-exi-hit="" data-exi-line="punch">
             <strong>
               <b className="exi-figure">
                 <b className="exi-real">205.6</b>
@@ -483,6 +484,7 @@ export function ExtremeSaga() {
   const [stageError, setStageError] = useState("");
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
+  const chapterIndexRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const stageSelectionRef = useRef<ReturnType<typeof createExtremeStageSelection> | null>(null);
   const displayedStageRef = useRef<ExtremeStage>("middle");
@@ -492,6 +494,13 @@ export function ExtremeSaga() {
 
   useEffect(() => mountExtremeNavReserve(pageRef.current), []);
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
+  useEffect(
+    () => mountChapterHistoryReturn(
+      chapterIndexRef.current,
+      pageRef.current?.querySelector(".rxs-local-nav nav") ?? null,
+    ),
+    [],
+  );
   useEffect(() => mountExtremeMotion(pageRef.current, setMotionReady), []);
   useEffect(() => mountExtremeImpact(pageRef.current), []);
   useEffect(() => mountExtremeFightCard(pageRef.current), []);
@@ -690,7 +699,10 @@ export function ExtremeSaga() {
       {/* The fight card after the hero: each bout's number plate (the bar's
           number), its name and the way in (owner, 2026-10-23: no English
           codes or descriptions on the card). */}
-      <nav className="rxs-chapter-index exs-chapter-index" aria-label="エクスプリームの見どころ">
+      <nav className="rxs-chapter-index exs-chapter-index"
+        ref={chapterIndexRef}
+        aria-label="エクスプリームの見どころ"
+      >
         <a href="#performance" className="dg-control dg-control-sweep">
           <small className="dg-numeral" aria-hidden="true">01</small>
           <span>性能を比べる</span>
@@ -715,7 +727,7 @@ export function ExtremeSaga() {
 
       <ExtremePerformance />
 
-      <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">
+      <section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title" tabIndex={-1}>
         <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
           <h2 id="exs-p14-title">
             <span className="exo-line">可能性は増やす。</span>
@@ -819,7 +831,7 @@ export function ExtremeSaga() {
         </p>
       </section>
 
-      <section id="stages" className="rxs-stages rxs-section">
+      <section id="stages" className="rxs-stages rxs-section" tabIndex={-1}>
         <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
           <h2>
             <span className="exo-line">ミドルで育てて、</span>
@@ -945,7 +957,7 @@ export function ExtremeSaga() {
         </div>
       </section>
 
-      <section id="system" className="rxs-system rxs-section exs-system">
+      <section id="system" className="rxs-system rxs-section exs-system" tabIndex={-1}>
         <header className="rxs-section-heading rxs-reveal" data-exi-hit="">
           <h2>
             <span className="exo-line">学習、充填、</span>

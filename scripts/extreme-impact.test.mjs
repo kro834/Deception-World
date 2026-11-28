@@ -423,7 +423,7 @@ test("every tally is a silent copy of the owner's figure, which stays in the tex
   // The pinned markup the earlier pins read is untouched.
   assert.match(
     component,
-    /<section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title">/,
+    /<section id="p14" className="rxs-p14 rxs-section exs-p14" aria-labelledby="exs-p14-title" tabIndex=\{-1\}>/,
   );
   assert.match(component, /<div className="rxs-specs rxs-reveal">/);
 });
@@ -608,7 +608,7 @@ function setup({ reduced = false, fine = true, loading = false, saveData = false
   const heading = h("header", { class: "rxs-section-heading", "data-exi-hit": "" });
   const punch = h(
     "article",
-    { "data-exi-hit": "", "data-exi-line": "mid" },
+    { "data-exi-hit": "", "data-exi-line": "punch" },
     h("strong", {}, tally("205.6")),
   );
   // rx15 pass 2: the time follows the punch as a combination.
@@ -774,12 +774,14 @@ test("the engine arms the page, keys scenes it owns and lands a hit once, as a o
   assert.equal(t.page.getAttribute("data-exi-arrival"), "true");
   t.tick(BEATS.arrival);
   assert.equal(t.page.getAttribute("data-exi-arrival"), "done");
-  // Two trigger lines (beside the art warm-up's wide margin).
+  // Three trigger lines, plus the separate heading dwell and artwork warm-up.
   const lines = t
-    .live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? ""))
+    .live((o) => /-20%|-72px|-96px/.test(o.options?.rootMargin ?? ""))
     .map((o) => o.options.rootMargin)
     .sort();
-  assert.deepEqual(lines, ["0px 0px -20% 0px", "0px 0px -96px 0px"]);
+  assert.deepEqual(lines, ["0px 0px -20% 0px", "0px 0px -72px 0px", "0px 0px -96px 0px"]);
+  const punchLine = t.live((o) => o.targets.has(t.punch));
+  assert.deepEqual(punchLine.map((o) => o.options.rootMargin), ["0px 0px -72px 0px"]);
   t.reach(t.heading);
   assert.equal(t.heading.getAttribute("data-exi-hit"), "true");
   t.tick(BEATS.hit);
@@ -859,7 +861,7 @@ test("a hit at rest short of its line lands after the dwell, once; leaving first
   const cleanup = t.mount();
   const dwell = t.live((o) => o.options?.rootMargin === "0px 0px -64px 0px")[0];
   assert.ok(dwell?.targets.has(t.heading));
-  assert.equal(dwell.targets.has(t.punch), false, "the mid line's hits keep to their line");
+  assert.equal(dwell.targets.has(t.punch), false, "the opening punch keeps to its line");
   const rest = (visible) => dwell.callback([{ target: t.heading, isIntersecting: visible }], dwell);
   rest(true);
   rest(true);
@@ -1190,7 +1192,7 @@ test("nothing is keyed behind the load gate's cover, and the arrival waits for t
   const cleanup = t.mount();
   assert.equal(t.page.getAttribute("data-exi-armed"), "true");
   assert.equal(t.page.hasAttribute("data-exi-arrival"), false);
-  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
+  assert.equal(t.live((o) => /-20%|-72px|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
   t.htmlElement.removeAttribute("data-loading");
   t.watchers.filter((w) => w.target === t.htmlElement).forEach((w) => w.callback([]));
   assert.equal(t.page.getAttribute("data-exi-arrival"), "true");
@@ -1206,18 +1208,18 @@ test("a hidden tab and the bfcache suspend every beat; showing again resumes wit
   t.document.emit("visibilitychange");
   assert.equal(t.frames.size, 0);
   assert.equal(t.timers.size, 0);
-  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
+  assert.equal(t.live((o) => /-20%|-72px|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
   t.document.hidden = false;
   t.document.emit("visibilitychange");
-  const lines = t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length;
+  const lines = t.live((o) => /-20%|-72px|-96px/.test(o.options?.rootMargin ?? "")).length;
   assert.ok(lines >= 1);
   // The landed punch is not watched again.
   assert.equal(t.live((o) => o.targets.has(t.punch)).length, 0);
   t.environment.emit("pagehide");
-  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
+  assert.equal(t.live((o) => /-20%|-72px|-96px/.test(o.options?.rootMargin ?? "")).length, 0);
   t.environment.emit("pageshow");
   t.environment.emit("pageshow");
-  assert.equal(t.live((o) => /-20%|-96px/.test(o.options?.rootMargin ?? "")).length, lines);
+  assert.equal(t.live((o) => /-20%|-72px|-96px/.test(o.options?.rootMargin ?? "")).length, lines);
   cleanup();
 });
 

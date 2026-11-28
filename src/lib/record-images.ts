@@ -122,17 +122,30 @@ export const INDEX_ART_IMAGES: Record<string, IndexArt> = {
     source: "/gallery/g01-1024.webp",
     variants: steps("/gallery/g01", [480, 900, 1024]),
   },
+  // These three are Final Stage files encoded at their native 1086px width
+  // (FINAL_STAGE_NATIVE_WIDTHS): the native file is the 1086w step. Their old
+  // `-delivery-1086` names do not ship and only answered through a legacy
+  // 308 (vite.config.ts), an extra round trip a 3x phone paid per card.
   "/rider-far-from-saga-max-delivery-640.webp": {
     source: "/rider-far-from-saga-max.webp",
-    variants: steps("/rider-far-from-saga-max-delivery", [640, 960, 1086]),
+    variants: [
+      ...steps("/rider-far-from-saga-max-delivery", [640, 960]),
+      { path: "/rider-far-from-saga-max.webp", width: 1086 },
+    ],
   },
   "/character-nagi-20260922-delivery-640.webp": {
     source: "/character-nagi-20260922.webp",
-    variants: steps("/character-nagi-20260922-delivery", [640, 960, 1086]),
+    variants: [
+      ...steps("/character-nagi-20260922-delivery", [640, 960]),
+      { path: "/character-nagi-20260922.webp", width: 1086 },
+    ],
   },
   "/character-archive-delivery-640.webp": {
     source: "/character-archive.webp",
-    variants: steps("/character-archive-delivery", [640, 960, 1086]),
+    variants: [
+      ...steps("/character-archive-delivery", [640, 960]),
+      { path: "/character-archive.webp", width: 1086 },
+    ],
   },
 };
 

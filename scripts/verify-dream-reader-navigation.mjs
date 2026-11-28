@@ -41,6 +41,40 @@ async function current(page, no) {
   assert.equal(await selected.getAttribute("href"), `#dream-case-${no}`);
 }
 
+async function checkCaseFiveNoteReturn(page) {
+  const note = "#dream-case-note-5";
+  const chronicle = "#dream-chronicle-case-5";
+  const opener = `${note} a[href="${chronicle}"]`;
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("about:blank");
+  await page.goto(`${base}/dream-chapter${note}`, { waitUntil: "domcontentloaded" });
+  await page
+    .locator('.dream-reader-index a[href="#dream-case-5"][aria-current]')
+    .waitFor({ state: "attached" });
+  await page.evaluate(() => document.fonts.ready);
+  const link = page.locator(opener);
+  const departureTop = await link.evaluate((element) => {
+    element.scrollIntoView({ block: "center", behavior: "instant" });
+    element.focus({ preventScroll: true });
+    return element.getBoundingClientRect().top;
+  });
+  await page.keyboard.press("Enter");
+  const summary = `${chronicle} > summary`;
+  await page.waitForFunction((selector) => document.activeElement?.matches(selector), summary);
+  await page.locator(`${chronicle} .dream-chronicle-item:last-child h3`).scrollIntoViewIfNeeded();
+  await page.goBack();
+  await page.waitForURL(`**${note}`);
+  await page.waitForFunction((selector) => document.activeElement?.matches(selector), opener);
+  const restoredTop = await link.evaluate((element) => element.getBoundingClientRect().top);
+  assert.ok(Math.abs(restoredTop - departureTop) < 44, "Back preserves the note link's position");
+  await page.keyboard.press(linkTab);
+  assert.equal(await page.locator(".dream-chronicle-latest:focus").count(), 1);
+  await page.goForward();
+  await page.waitForURL(`**${chronicle}`);
+  await page.waitForFunction((selector) => document.activeElement?.matches(selector), summary);
+  await landed(page, chronicle.slice(1));
+}
+
 try {
   for (const viewport of [
     { width: 320, height: 640 },
@@ -135,9 +169,15 @@ try {
     await current(page, "3");
     await page.goBack();
     await page.waitForURL("**#dream-case-note-3");
+    await page.waitForFunction(() =>
+      document.activeElement?.matches('#dream-case-note-3 a[href="#dream-chronicle-case-3"]'),
+    );
     await current(page, "3");
     await page.goForward();
     await page.waitForURL("**#dream-chronicle-case-3");
+    await page.waitForFunction(() =>
+      document.activeElement?.matches("#dream-chronicle-case-3 > summary"),
+    );
     await current(page, "3");
 
     await page.locator('#dream-chronicle-case-3 a[href="#dream-case-3"]').press("Enter");
@@ -178,8 +218,69 @@ try {
       await page.evaluate(() => document.activeElement?.getAttribute("href")),
       "#dream-case-0",
     );
-    assert.deepEqual(errors, []);
     await page.screenshot({ path: `${output}/${viewport.width}x${viewport.height}-reader.png` });
+    const latest = page.locator(".dream-chronicle-latest");
+    const eventHash = await latest.getAttribute("href");
+    assert.match(eventHash, /^#dream-chronicle-event-\d+$/);
+    const eventItem = page.locator(eventHash);
+    const caseHash = await eventItem.locator(".dream-chronicle-case-link").getAttribute("href");
+    const closed = page.locator(caseHash);
+    assert.equal(await closed.getAttribute("open"), null);
+    await latest.press("Enter");
+    const checkEvent = async () => {
+      await page.waitForFunction(
+        (hash) =>
+          location.hash === hash &&
+          document.activeElement?.id === hash.slice(1) &&
+          document.activeElement.closest("details")?.open,
+        eventHash,
+      );
+      await landed(page, eventHash.slice(1));
+    };
+    await checkEvent();
+    await eventItem.locator(".dream-chronicle-case-link").press("Enter");
+    await landed(page, caseHash.slice(1));
+    const summary = closed.locator(":scope > summary");
+    await page.waitForFunction(
+      (hash) => document.activeElement === document.querySelector(hash + " > summary"),
+      caseHash,
+    );
+    await summary.press("Space");
+    assert.equal(await closed.getAttribute("open"), null);
+    await page.goBack();
+    await checkEvent();
+    await page.goForward();
+    await landed(page, caseHash.slice(1));
+    await page.waitForFunction(
+      (hash) => document.activeElement === document.querySelector(hash + " > summary"),
+      caseHash,
+    );
+    // A fresh document starts with the last case closed before resolving this fragment.
+    await page.goto("about:blank");
+    await page.goto(`${base}/dream-chapter${eventHash}`, { waitUntil: "domcontentloaded" });
+    await checkEvent();
+    await page.screenshot({ path: `${output}/${viewport.width}x${viewport.height}-chronicle.png` });
+    await page.locator(".dream-chronicle-search-link").press("Enter");
+    await page.waitForURL("**#dream-record-explorer");
+    const query = await eventItem.locator("h3").innerText();
+    const search = page.locator("#dream-record-query");
+    await search.fill(query);
+    const caseFilter = page.locator(".dream-record-filters select").first();
+    const caseNo = caseHash.split("-").at(-1);
+    await caseFilter.selectOption(caseNo);
+    const result = page.locator(`.dream-record-title-link[href="${eventHash}"]`);
+    await result.press("Enter");
+    await checkEvent();
+    await page.goBack();
+    await page.waitForURL("**#dream-record-explorer");
+    await page.waitForFunction(
+      (hash) => document.activeElement?.matches(`.dream-record-title-link[href="${hash}"]`),
+      eventHash,
+    );
+    assert.equal(await search.inputValue(), query);
+    assert.equal(await caseFilter.inputValue(), caseNo);
+    if (viewport.width === 320) await checkCaseFiveNoteReturn(page);
+    assert.deepEqual(errors, []);
     console.log(
       `${viewport.width}×${viewport.height}: chapter links, keyboard, related records and history passed`,
     );

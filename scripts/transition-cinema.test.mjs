@@ -160,7 +160,7 @@ test("the rider numeral reads at 64px or more and every label keeps its 12px flo
 test("the hand-over: rendered under the still cover, two frames, then data-loading goes", () => {
   assert.match(
     gate,
-    /const settleUnderCover = \(\) => Promise\.race\(\[nextFrame\(\)\.then\(nextFrame\), wait\(120\)\]\);/,
+    /function settleUnderCover\(signal\?: AbortSignal, frames = 2\)[\s\S]*?const timer = window\.setTimeout\(finish, 120\);/,
   );
   // The router's location store changes when the load starts; onRendered
   // fires once the destination is in the document (review 2026-09-29).
@@ -168,7 +168,7 @@ test("the hand-over: rendered under the still cover, two frames, then data-loadi
   assert.doesNotMatch(gate, /announceRouteCommit/);
   // The wrapper must release the global lock and local marker at the same reveal boundary.
   const branches = gate.match(
-    /await navigateUnderCover\(\s*router,\s*\(\) => navigate\(\{ to, hash, search: navigationSearch \}\),\s*to,?\s*\);\s*if \(!isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?setDocumentLoading\(false\);[\s\S]*?phase: "revealing",[\s\S]*?await clock\.wait\(\s*revealRan\(\s*timings\.reveal/g,
+    /if \(!\(await commitCoveredDestination\((?:riderState)?\)\) \|\| !isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*await settleUnderCover\(requestSignal\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?setDocumentLoading\(false\);[\s\S]*?phase: "revealing",[\s\S]*?await clock\.wait\(\s*revealRan\(\s*timings\.reveal/g,
   );
   assert.equal(branches?.length, 2, "rider dives/cut-ins and the sovereign gate");
   // Only a prepared Rexonance renderer has no portrait to dock. A failed
@@ -226,7 +226,7 @@ test("routes without a cover answer with the prism signal, never a scroll lock",
     ),
     gate.indexOf("busy.current = true;", gate.indexOf("const go = useCallback")),
   );
-  assert.match(direct, /setSignal\("running"\);\s*await nextFrame\(\);/);
+  assert.match(direct, /setSignal\("running"\);\s*await settleUnderCover\(requestSignal, 1\);/);
   assert.doesNotMatch(direct, /dataset\.loading|data-route-cover/);
   assert.match(gate, /<span className=\{`route-signal is-\$\{state\}`\} aria-hidden="true" \/>/);
   assert.match(css, /\.route-signal \{[^}]*height: 2px;[^}]*pointer-events: none;/);

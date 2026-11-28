@@ -14,12 +14,12 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
+import { rememberDossierArchiveReturn } from "@/lib/dossier-origin";
 import { CharacterChapterTools } from "./character-reading-tools";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { rememberRiderReturn } from "./rider-return-state";
 import { DossierTopbar } from "./world-chrome";
 import type { FormTheme } from "./form-signature-state";
 
@@ -1491,9 +1491,6 @@ export function RiderPage({ id }: { id: string }) {
   const rider = RIDER_DOSSIERS.find((r) => r.id === id) ?? RIDER_DOSSIERS[0];
   const nightmareRef = useRef<HTMLDialogElement>(null);
   const cancelNightmareScrollReset = useRef<(() => void) | null>(null);
-  useEffect(() => {
-    rememberRiderReturn(rider.id);
-  }, [rider.id]);
   useEffect(
     () => () => {
       cancelNightmareScrollReset.current?.();
@@ -1771,6 +1768,20 @@ export function RiderPage({ id }: { id: string }) {
       </section>
       {pickupForms.length ? (
         <div className="rider-form-pickup-stack" id="form-records">
+          {rider.id === "saga" || rider.id === "realm" ? (
+            <div className="dossier-form-archive">
+              <GuardedLink
+                to="/form-archive"
+                search={rider.id === "realm" ? { archive: "realm" } : {}}
+                assets={[]}
+                className="dossier-read-link"
+                beforeNavigate={rememberDossierArchiveReturn}
+              >
+                フォームアーカイブ
+                <span aria-hidden="true">↗</span>
+              </GuardedLink>
+            </div>
+          ) : null}
           {pickupForms.length > 1 ? (
             <nav className="dossier-form-pills" aria-label="フォーム切替">
               {pickupForms.map((form, index) => (

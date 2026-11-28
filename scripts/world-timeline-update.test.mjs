@@ -23,7 +23,7 @@ const sourceEvidence = [
 test("episode 03 advances within its recorded chapter and keeps discoveries unresolved", () => {
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ no, title }) => `${no} ${title}`),
-    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD", "04 癒えぬ傷を負った者共"],
+    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD", "04 癒えぬ傷を負った者共", "05 来訪"],
   );
   const episode = WORLD_EPISODE_NOTES[2];
   assert.equal(episode.synopsis.length, 9);

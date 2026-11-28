@@ -2,6 +2,7 @@ import {
   WORLD_BRIEF,
   WORLD_CAST_ROSTER,
   WORLD_EPISODE_NOTES,
+  worldEpisodeEventId,
 } from "../components/world/world-annex-data.ts";
 import { FORM_ARCHIVE_FORMS } from "../components/search/form-archive-index.ts";
 
@@ -47,11 +48,17 @@ export const MAP_KINDS = {
   chapter: "章",
 } as const;
 export type MapKind = keyof typeof MAP_KINDS;
-export type MapNode = { id: string; title: string; kind: MapKind; href: string; subtitle: string };
+export type MapNode = {
+  id: string;
+  title: string;
+  kind: MapKind;
+  href: string;
+  subtitle: string;
+  excerpt?: string;
+};
 export type MapEdge = { from: string; to: string; label: string; evidence: string };
 const publicName = (name: string) => !/[?？]{2}|未公開|非公開/.test(name);
-// Identity and captions come from public navigation/content tables. Paragraphs stay in
-// their source pages; the graph stores only references and verifiable edge predicates.
+// Identity, captions and event excerpts come from public navigation/content tables.
 export const WORLD_MAP_NODES: readonly MapNode[] = [
   ...extraDossiers
     .filter((p) => publicName(p.title))
@@ -114,12 +121,13 @@ export const WORLD_MAP_NODES: readonly MapNode[] = [
       subtitle: `EPISODE ${c.no} / ${c.stage}`,
       href: `/world#wa-episode-${c.no}`,
     },
-    ...c.synopsis.map((_, i) => ({
+    ...c.synopsis.map((excerpt, i) => ({
       id: `event:${c.no}:${i}`,
       title: `${c.title} · ${String(i + 1).padStart(2, "0")}`,
       kind: "event" as const,
       subtitle: `${c.stage} / 記録 ${i + 1}`,
-      href: `/world#wa-episode-${c.no}`,
+      excerpt,
+      href: `/world#${worldEpisodeEventId(c.no, i)}`,
     })),
   ]),
 ];
@@ -164,26 +172,30 @@ export const WORLD_MAP_EDGES: readonly MapEdge[] = [
     evidence: `/form-archive?archive=${f.archive}&form=${encodeURIComponent(f.id)}`,
   })),
   ...WORLD_EPISODE_NOTES.flatMap((c) =>
-    c.synopsis.flatMap((text, i) => [
-      {
-        from: `chapter:${c.no}`,
-        to: `event:${c.no}:${i}`,
-        label: "記録に収録",
-        evidence: `/world#wa-episode-${c.no}`,
-      },
-      ...WORLD_CAST_ROSTER.filter((p) => publicName(p.name) && text.includes(p.name)).map((p) => ({
-        from: `person:${p.id}`,
-        to: `event:${c.no}:${i}`,
-        label: "記録に登場",
-        evidence: `/world#wa-episode-${c.no}`,
-      })),
-      ...WORLD_BRIEF.filter((p) => text.includes(p.name)).map((p) => ({
-        from: `organization:${p.id}`,
-        to: `event:${c.no}:${i}`,
-        label: "記録に登場",
-        evidence: `/world#wa-episode-${c.no}`,
-      })),
-    ]),
+    c.synopsis.flatMap((text, i) => {
+      const to = `event:${c.no}:${i}`;
+      const evidence = `/world#${worldEpisodeEventId(c.no, i)}`;
+      return [
+        {
+          from: `chapter:${c.no}`,
+          to,
+          label: "記録に収録",
+          evidence,
+        },
+        ...WORLD_CAST_ROSTER.filter((p) => publicName(p.name) && text.includes(p.name)).map((p) => ({
+          from: `person:${p.id}`,
+          to,
+          label: "記録に登場",
+          evidence,
+        })),
+        ...WORLD_BRIEF.filter((p) => text.includes(p.name)).map((p) => ({
+          from: `organization:${p.id}`,
+          to,
+          label: "記録に登場",
+          evidence,
+        })),
+      ];
+    }),
   ),
 ];
 export function mapNeighbors(id: string) {
@@ -193,13 +205,14 @@ export function mapNeighbors(id: string) {
 }
 export function filterMapNodes(query: string, kind: string) {
   const terms = query.normalize("NFKC").toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
-  return WORLD_MAP_NODES.filter(
-    (n) =>
-      (kind === "all" || n.kind === kind) &&
-      terms.every((t) =>
-        `${n.title} ${n.subtitle}`.normalize("NFKC").toLocaleLowerCase().includes(t),
-      ),
-  );
+  return WORLD_MAP_NODES.filter((node) => {
+    if (kind !== "all" && node.kind !== kind) return false;
+    if (terms.length === 0) return true;
+    const record = `${node.title} ${node.subtitle} ${node.excerpt ?? ""}`
+      .normalize("NFKC")
+      .toLocaleLowerCase();
+    return terms.every((term) => record.includes(term));
+  });
 }
 export function validateMapSearch(search: Record<string, unknown>) {
   // Resolve a dossier at this route boundary, so shared navigation never imports

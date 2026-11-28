@@ -9,7 +9,7 @@ type PrepareFlow = NonNullable<NaniteSkinInput["prepareFlow"]>;
 type Field = Parameters<PrepareFlow>[0];
 
 const EDGE_STRIDE = 10;
-const WIRE_STRIDE = 9;
+const WIRE_STRIDE = 12;
 const CHIP_STRIDE = 3;
 const ICE = "#9ceeff";
 const GOLD = "#ffdb8d";
@@ -71,8 +71,12 @@ function* buildRoute(
     const { xs, ys, loopStart, loopCount } = mesh;
     const triangles = yield* triangulateWireMeshSteps(mesh);
     const times = new Float32Array(xs.length);
-    for (let i = 0; i < xs.length; i += 1)
+    for (let i = 0; i < xs.length; i += 1) {
       times[i] = fieldTime(field, time, xs[i] / WIRE_UNIT, ys[i] / WIRE_UNIT);
+      // A form has up to 1,712 vertices; give the idle scheduler a chance
+      // to return to a wheel/touch event while searching adjacent cells.
+      if ((i + 1) % 256 === 0) yield;
+    }
 
     const seen = new Set<number>();
     const socket = new Uint8Array(xs.length);
@@ -202,6 +206,7 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
         const head = clamp((age + lead) / lead);
         const tipX = sx + (ex - sx) * head;
         const tipY = sy + (ey - sy) * head;
+        if (wireCount >= wireLimit) break;
         const at = wireCount++ * WIRE_STRIDE;
         wires[at] = sx;
         wires[at + 1] = sy;
@@ -211,7 +216,12 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
         wires[at + 5] = by;
         wires[at + 6] = ex;
         wires[at + 7] = ey;
-        wires[at + 8] = outline || (length > 10 && seed < 0.32) ? 1 : 0;
+        wires[at + 8] = outline ? 2 : length > 10 && seed < 0.32 ? 1 : 0;
+        // The foot of the advancing edge lies on the original mesh. The
+        // side between the two is visible until the scaffold folds flat.
+        wires[at + 9] = ax + (bx - ax) * head;
+        wires[at + 10] = ay + (by - ay) * head;
+        wires[at + 11] = near;
 
         // Several short, parallel streams feed the same contact. Smaller
         // chips follow behind the leading white chip and weld into the vertex.
@@ -248,6 +258,23 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
       if (!wireCount) return 0;
 
       context.save();
+      // Translucent sidewalls give the projected perimeter a measurable
+      // height above its socket without filling the interior diagonals.
+      context.globalCompositeOperation = "source-over";
+      context.fillStyle = "#17445f";
+      context.globalAlpha = 0.49;
+      context.beginPath();
+      for (let i = 0; i < wireCount * WIRE_STRIDE; i += WIRE_STRIDE) {
+        if (wires[i + 8] !== 2) continue;
+        const heel = wires[i + 11];
+        if (heel < 1 && wires[i + 10] - wires[i + 3] < 1) continue;
+        context.moveTo(wires[i], wires[i + 1]);
+        context.lineTo(wires[i + 2], wires[i + 3]);
+        context.lineTo(wires[i + 9], wires[i + 10]);
+        context.lineTo(wires[i] - heel * 0.44, wires[i + 1] + heel);
+        context.closePath();
+      }
+      context.fill();
       context.globalCompositeOperation = "lighter";
       // (Thinner wires since the nanosuit pass, 2026-11-20.)
       context.lineWidth = px * 0.4;

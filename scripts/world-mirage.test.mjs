@@ -333,7 +333,7 @@ test("accessibility modes are restated", async () => {
   );
 });
 
-const runGate = (device, { storage = {}, hash = "" } = {}) => {
+const runGate = (device, { storage = {}, hash = "", state = null } = {}) => {
   const attributes = new Map();
   const documentStub = {
     documentElement: { setAttribute: (key, value) => attributes.set(key, value) },
@@ -341,7 +341,8 @@ const runGate = (device, { storage = {}, hash = "" } = {}) => {
   const windowStub = {
     localStorage: { getItem: (key) => storage[key] ?? null },
     sessionStorage: { getItem: (key) => storage[key] ?? null },
-    location: { hash },
+    location: { hash, href: "https://world.example/world" + hash },
+    history: { state },
   };
   new Function("document", "navigator", "window", MIRAGE_BOOT_GATE_SCRIPT)(
     documentStub,
@@ -427,7 +428,10 @@ test("the pre-paint boot gate follows the saved quality choice and session state
     true,
   );
   assert.equal(runGate(desktop, { storage: { [MIRAGE_BOOT_KEY]: "1" } }), true);
-  assert.equal(runGate(desktop, { storage: { "deception-world:rider-return": "saga" } }), true);
+  const entry = { index: 4, href: "https://world.example/world", value: { id: "saga" } };
+  assert.equal(runGate(desktop, { state: { __TSR_index: 4, worldRiderReturn: entry } }), true);
+  assert.equal(runGate(desktop, { state: { __TSR_index: 5, worldRiderReturn: entry } }), false);
+  assert.equal(runGate(desktop, { storage: { "deception-world:rider-return": "saga" } }), false);
   assert.equal(runGate(desktop, { hash: "#riders" }), true);
 
   const route = await read("src/routes/world.tsx");

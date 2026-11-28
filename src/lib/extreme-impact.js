@@ -7,8 +7,8 @@
    a dialog or a loading cover never replays when the page comes back.
 
    - Hits: an element carrying data-exi-hit="" is keyed the first time it
-     crosses the trigger line (the default inset, or 96px above the bottom
-     for data-exi-line="mid"). IntersectionObservers only, no scroll listener.
+     crosses its trigger line (the default inset, 96px for "mid", and
+     72px for the opening punch). IntersectionObservers only.
      A default-line hit that comes to rest on screen short of its line (on a
      tall screen the bottom fifth is a full ROUND head) lands once it has
      stood there for DWELL_MS: the reader who stops sees the head, not its
@@ -47,7 +47,11 @@
 // Percent root margins are measured against width, not height: the former
 // -45% held the punch hundreds of pixels on portrait tablets. A bounded
 // inset makes the first hit arrive as its panel enters on every aspect ratio.
-const LINES = { base: "0px 0px -20% 0px", mid: "0px 0px -96px 0px" };
+const LINES = {
+  base: "0px 0px -20% 0px",
+  mid: "0px 0px -96px 0px",
+  punch: "0px 0px -72px 0px",
+};
 // Round 2 (2026-10-22): the dwell. A default-line hit at least this far onto
 // the screen (a ROUND head's kicker row and the top of its title, which
 // stands beside the plate) that stays short of the line for DWELL_MS lands
@@ -409,9 +413,11 @@ export function mountExtremeImpact(page, environment = window) {
   };
   const observe = () => {
     if (observers.length || !environment.IntersectionObserver) return;
-    const byLine = { base: [], mid: [] };
-    for (const element of page.querySelectorAll('[data-exi-hit=""]'))
-      byLine[element.getAttribute("data-exi-line") === "mid" ? "mid" : "base"].push(element);
+    const byLine = { base: [], mid: [], punch: [] };
+    for (const element of page.querySelectorAll('[data-exi-hit=""]')) {
+      const line = element.getAttribute("data-exi-line");
+      (Object.hasOwn(byLine, line) ? byLine[line] : byLine.base).push(element);
+    }
     for (const [line, elements] of Object.entries(byLine)) {
       if (!elements.length) continue;
       const observer = new environment.IntersectionObserver(onIntersect, {

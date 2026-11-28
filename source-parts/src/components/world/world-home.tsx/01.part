@@ -12,7 +12,7 @@ import { RELATED_NAV, RIDER_NAV, NameText } from "./dossier-nav";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
-import { clearRiderReturn, readRiderReturn } from "./rider-return-state";
+import { captureRiderReturn, readRiderReturn, restoreRiderControl } from "./rider-return-state";
 import { mountFilmMotion } from "@/lib/film-motion";
 import { FilmTextScan } from "@/components/cinematic/film-text-scan";
 import { RevealText } from "./reveal-text";
@@ -25,6 +25,7 @@ import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex-sections";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";
+import { useWorldPosterFrames } from "./use-world-poster-frames";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
@@ -509,3 +510,15 @@ const EPISODES: EpisodeRecord[] = [
       },
       {
         label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーサイファー",
+        width: 1024,
+        height: 1280,
+        to: "/riders/cipher",
+        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
+      },
+      {
+        label: "仮面ライダーレディック",
+        src: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 12%",

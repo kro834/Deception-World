@@ -46,7 +46,7 @@ test("every appearance relationship is backed by an exact mention in its cited e
     const episode = sources.WORLD_EPISODE_NOTES.find((c) => c.no === no);
     const subject = graph.WORLD_MAP_NODES.find((n) => n.id === e.from);
     assert.ok(episode.synopsis[Number(index)].includes(subject.title));
-    assert.equal(e.evidence, `/world#wa-episode-${no}`);
+    assert.equal(e.evidence, `/world#${sources.worldEpisodeEventId(no, Number(index))}`);
   }
 });
 test("archive form ownership is retained without equating forms with people", () => {
@@ -134,6 +134,7 @@ test("every graph and evidence link targets a public canonical route and an actu
     "wa-person-${entry.id}",
     "wa-brief-${entry.id}",
     "wa-episode-${episode.no}",
+    "worldEpisodeEventId(episode.no, index)",
   ])
     assert.ok(worldSource.includes(template));
   for (const template of [
@@ -147,6 +148,9 @@ test("every graph and evidence link targets a public canonical route and an actu
     ...sources.WORLD_CAST_ROSTER.map((p) => `wa-person-${p.id}`),
     ...sources.WORLD_BRIEF.map((p) => `wa-brief-${p.id}`),
     ...sources.WORLD_EPISODE_NOTES.map((c) => `wa-episode-${c.no}`),
+    ...sources.WORLD_EPISODE_NOTES.flatMap((c) =>
+      c.synopsis.map((_, i) => sources.worldEpisodeEventId(c.no, i)),
+    ),
   ]);
   const dreamAnchors = new Set([
     ...dream.DREAM_CHARACTERS.map((p) => `dream-character-${p.id}`),
@@ -171,6 +175,15 @@ test("every graph and evidence link targets a public canonical route and an actu
         href,
       );
   }
+});
+
+test("World's latest event opens its own paragraph and uses that paragraph as evidence", () => {
+  const event = graph.WORLD_MAP_NODES.find((node) => node.id === "event:05:3");
+  assert.equal(event.href, "/world#wa-event-05-04");
+  assert.equal(graph.WORLD_MAP_EDGES.find((edge) => edge.to === event.id).evidence, event.href);
+  assert.equal(event.excerpt, sources.WORLD_EPISODE_NOTES.at(-1).synopsis.at(-1));
+  assert.ok(graph.filterMapNodes("古いソファー シエル", "event").includes(event));
+  assert.equal(graph.filterMapNodes("古いソファー シエル", "person").length, 0);
 });
 
 test("explicit graph selection wins over the original dossier source on subsequent navigation", () => {

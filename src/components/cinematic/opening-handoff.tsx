@@ -335,6 +335,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     };
 
     if (snapshot.phase === "covering") {
+      root.style.removeProperty("opacity");
       const landing = landingRef.current;
       if (landing && landing.token !== token) {
         landingRef.current = null;
@@ -462,7 +463,23 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       landingRef.current = { token, endsAt: performance.now() + delay + settleMs, motion };
     }
 
-    function settleHandoff() {
+    function showStaticLanding() {
+      const world = worldRef.current;
+      if (!world) return;
+      stableRoot.dataset.openingHandoffTier = "css";
+      stableRoot.dataset.openingHandoffLanding = "static";
+      stableRoot.style.background = "#04080f";
+      // Keep an in-progress arrival fade. Replace only the picture it owns.
+      for (const layer of stableRoot.querySelectorAll<HTMLElement>(":scope > *")) {
+        if (layer !== world) layer.style.visibility = "hidden";
+      }
+      for (const animation of world.getAnimations()) animation.cancel();
+      world.style.opacity = "1";
+      world.style.transform = "none";
+      world.style.visibility = "visible";
+    }
+
+    function settleHandoff(staticCover = false) {
       if (settled || !alive || activeTokenRef.current !== token) return;
       settled = true;
       if (stableSnapshot.phase === "covering") {
@@ -473,7 +490,11 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         timers.clear();
         for (const animation of running) animation.finish();
         stableVideo.pause();
-        if (!document.hidden) startLanding();
+        if (staticCover || stableRoot.dataset.openingHandoffTier === "pending") {
+          showStaticLanding();
+        } else if (!document.hidden) {
+          startLanding();
+        }
         onCoveredRef.current(token);
         return;
       }
@@ -496,6 +517,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     }
 
     function handlePageHide() {
+      diveRef.current?.run.land();
       settleHandoff();
     }
 
@@ -534,7 +556,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
     let diveHook: OpeningDiveTestHook | null = null;
 
     if (document.hidden) {
-      settleHandoff();
+      settleHandoff(true);
       return cleanupEffect;
     }
 
@@ -754,6 +776,10 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
           { transform: `translate3d(0, ${top ? "-104%" : "104%"}, 0)` },
         ]);
       }
+      if (!cssAnimations.length) {
+        settleHandoff(true);
+        return;
+      }
       if (!audit) {
         // The landing is scheduled on the compositor now, so a busy main
         // thread (the route mounting) cannot hold it at its first frame.
@@ -854,19 +880,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
                 )
                   return;
                 tierLabel = "css";
-                stableRoot.dataset.openingHandoffTier = "css";
-                stableRoot.dataset.openingHandoffLanding = "static";
-                stableRoot.style.background = "#04080f";
-                // Do not touch root opacity: its arrival fade may already be
-                // running. A static world replaces the canvas without another
-                // tunnel, title reveal, or covered notification.
-                for (const layer of stableRoot.querySelectorAll<HTMLElement>(":scope > *")) {
-                  if (layer !== world) layer.style.visibility = "hidden";
-                }
-                for (const animation of world.getAnimations()) animation.cancel();
-                world.style.opacity = "1";
-                world.style.transform = "none";
-                world.style.visibility = "visible";
+                showStaticLanding();
                 return;
               }
               tierLabel = "css";
@@ -904,7 +918,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
         safetyTimer = window.setTimeout(
           () => {
             timers.delete(safetyTimer);
-            settleHandoff();
+            settleHandoff(true);
           },
           OPENING_DIVE.glEnd * 1000 + 950,
         );

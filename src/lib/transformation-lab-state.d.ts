@@ -7,6 +7,8 @@ export interface LabState {
   compareForm: string;
   loop: boolean;
   compare: LabRider | "";
+  side: "a" | "b";
+  direction: 1 | -1;
   progress: number;
   zoom: LabZoom;
   speed: number;
@@ -14,6 +16,7 @@ export interface LabState {
 export const LAB_RIDERS: LabRider[];
 export const LAB_ZOOMS: LabZoom[];
 export const LAB_BEATS: { label: string; at: number }[];
+export function labBeatAt(progress: number): (typeof LAB_BEATS)[number];
 export function clampProgress(value: unknown): number;
 export function assemblyComparisonSearch(
   rider: AssemblyRider,
@@ -28,6 +31,8 @@ export function advanceLab(
   direction: number,
   rider?: LabRider,
   form?: string,
+  compare?: LabRider | "",
+  compareForm?: string,
 ): number;
 
 export const LAB_NAMES: Record<LabRider, string>;

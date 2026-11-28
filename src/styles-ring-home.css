@@ -2,13 +2,8 @@
    The ring system on the home dashboard (2026-11-22).
    Linked by src/routes/index.tsx after styles-command-deck.css, on the
    dashboard branch only (the title never loads it).
-   The dashboard is recomposed around circles:
-     - the eight riders stand on one orbit, the section heading at its centre,
-       inside the pre-rendered glass rings (2026-11-23), each rider in a
-       glass frame
-     - round controls (a ring sigil, pill switches, ring buttons)
-     - the key visual sits in a halo of three rings
-     - sections are parted by ring dividers and arrive on springs
+   The poster sits in a single pool of reflected light. The rider directory
+   keeps its glass orbit behind eight portraits with fine metal rims.
    Copy, links, order and the WebGL engine are unchanged. Motion gates as
    in styles-ring.css (reduced motion and economy get the resting layout).
    ================================================================ */
@@ -16,20 +11,21 @@
 .command-deck {
   --ring-key: var(--deck-accent, #74d9ec);
   --ring-gold: var(--deck-gold, #ebcd97);
+  --ring-prism: var(--ring-metal-edge);
 }
 
 .command-deck-main {
-  gap: clamp(22px, 3.6vw, 52px);
+  gap: clamp(22px, 4.5vw, 64px);
 }
 
 .command-deck .command-deck-divider {
   margin: 0;
 }
 
-/* ---- Header: a ring sigil and pill links ------------------------------ */
+/* ---- Header: a ring sigil and quiet navigation ------------------------------ */
 
 .command-deck-header {
-  border-bottom: 0;
+  border-bottom: 1px solid rgb(198 204 205 / 0.18);
   background: none;
 }
 
@@ -41,11 +37,12 @@
   height: 44px;
   place-items: center;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 26%, rgb(var(--ring-key-rgb) / 0.26), transparent 62%), #07101c;
+  background: var(--ring-graphite);
   font-size: 17px;
   letter-spacing: -0.08em;
   text-indent: -0.08em;
   white-space: nowrap;
+  text-shadow: none;
 }
 
 /* The mark is one word: D and W side by side inside the ring. */
@@ -58,7 +55,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  padding: 2px;
+  padding: 1px;
   border-radius: 50%;
   background: var(--ring-prism);
   -webkit-mask:
@@ -76,71 +73,41 @@
 }
 
 .command-deck-header-nav a {
-  padding-inline: 15px;
-  border-radius: var(--ring-radius-pill);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 56%),
-    radial-gradient(80% 100% at 50% 0%, rgb(var(--ring-key-rgb) / 0.16), transparent 72%),
-    rgb(7 15 28 / 0.88);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.24),
-    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.34),
-    0 8px 20px -10px rgb(0 0 0 / 0.78);
+  padding-inline: 14px;
+  border-radius: 8px;
+  box-shadow: none;
+  background: transparent;
 }
 
-/* ---- The work switch: one pill track, the current work a lit pill ----- */
+/* ---- The work switch: one track with a metal edge on the current work ----- */
 
 .command-deck-scene-buttons {
   gap: 4px;
   padding: 5px;
   border: 0;
-  border-radius: 36px;
-  background:
-    radial-gradient(85% 130% at 50% 0%, rgb(var(--ring-key-rgb) / 0.2), transparent 74%),
-    linear-gradient(180deg, rgb(14 26 44 / 0.92), rgb(6 12 22 / 0.94));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.38),
-    0 18px 40px -14px rgb(0 0 0 / 0.88),
-    0 0 28px -12px color-mix(in srgb, var(--deck-accent) 42%, transparent);
+  border-radius: 18px;
+  background: linear-gradient(120deg, #1d2226, #121619);
+  box-shadow: inset 0 0 0 1px rgb(202 210 213 / 0.19);
 }
 
 .command-deck-scene-buttons > a {
   position: relative;
   border: 0;
-  border-radius: 30px;
-  color: #d6e4f0;
-}
-
-.command-deck-scene-buttons > a:not(.is-selected) {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.04), transparent 64%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  border-radius: 14px;
 }
 
 .command-deck-scene-buttons > a.is-selected {
   border: 0;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.28), transparent 54%),
-    radial-gradient(
-      95% 110% at 50% 0%,
-      color-mix(in srgb, var(--deck-accent) 48%, transparent),
-      transparent 74%
-    ),
-    color-mix(in srgb, var(--deck-accent) 32%, #081526);
-  box-shadow:
-    inset 0 1.5px 0 rgb(255 255 255 / 0.56),
-    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 84%, #fff),
-    0 0 28px -4px color-mix(in srgb, var(--deck-accent) 72%, transparent),
-    0 12px 28px -10px var(--deck-accent);
-  color: #ffffff;
-  text-shadow: 0 0 16px color-mix(in srgb, var(--deck-accent) 56%, transparent);
+  background: linear-gradient(118deg, color-mix(in srgb, var(--deck-accent) 15%, #373b3f), #262b30 78%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 6px 16px -10px #000;
+  color: #fcfaf3;
 }
 
 .command-deck-scene-buttons > a.is-selected::after {
   content: "";
   position: absolute;
   inset: 0;
-  padding: 1.75px;
+  padding: 1px;
   border-radius: inherit;
   background: var(--ring-prism);
   -webkit-mask:
@@ -150,7 +117,7 @@
   mask:
     linear-gradient(#000 0 0) content-box exclude,
     linear-gradient(#000 0 0);
-  opacity: 0.88;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -159,21 +126,8 @@
 .command-deck .command-deck-enter {
   padding: 6px 6px 6px clamp(20px, 2.5vw, 30px);
   border-radius: var(--ring-radius-pill);
-  background:
-    linear-gradient(125deg, transparent 10%, rgb(255 255 255 / 0.72) 45%, transparent 74%),
-    linear-gradient(
-      180deg,
-      #ffffff 0%,
-      var(--deck-accent-ink, #c8faff) 44%,
-      color-mix(in srgb, var(--deck-accent) 74%, #ffffff) 100%
-    );
-  box-shadow:
-    inset 0 1.5px 0 #ffffff,
-    inset 0 -1.5px 0 color-mix(in srgb, var(--deck-accent) 64%, #06121c),
-    0 0 0 1.5px color-mix(in srgb, var(--deck-accent) 86%, #ffffff),
-    0 0 34px -4px color-mix(in srgb, var(--deck-accent) 82%, transparent),
-    0 18px 42px -8px color-mix(in srgb, var(--deck-accent) 74%, transparent),
-    0 10px 24px -8px rgb(0 0 0 / 0.88);
+  background: linear-gradient(112deg, #e8e5dc, color-mix(in srgb, var(--deck-accent) 24%, #d8dad5));
+  box-shadow: inset 0 1px 0 #fbf9f2, 0 7px 18px -12px #000;
 }
 
 .command-deck .command-deck-enter > svg {
@@ -181,39 +135,23 @@
   flex: none;
   padding: 10px;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 26%, color-mix(in srgb, var(--deck-accent) 38%, transparent), transparent 64%),
-    #050e19;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.42),
-    inset 0 0 0 1.5px color-mix(in srgb, var(--deck-accent) 76%, #ffffff),
-    0 0 14px -2px color-mix(in srgb, var(--deck-accent) 56%, transparent),
-    0 5px 14px rgb(0 0 0 / 0.65);
-  color: #ffffff;
+  background: #20272a;
+  box-shadow: none;
+  color: #f3f0e8;
 }
 
 .command-deck-chapter-links a {
-  padding-inline: 16px;
-  border-radius: var(--ring-radius-pill);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 56%),
-    radial-gradient(85% 100% at 50% 0%, color-mix(in srgb, var(--deck-accent) 22%, transparent), transparent 72%),
-    rgb(8 17 30 / 0.88);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.26),
-    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 42%, rgb(var(--ring-gold-rgb) / 0.24)),
-    0 10px 22px -10px rgb(0 0 0 / 0.82);
-}
-
-.command-deck-chapter-links a svg {
-  color: var(--deck-gold);
+  padding-inline: 14px;
+  border-radius: 4px;
+  box-shadow: inset 0 -1px 0 rgb(206 210 209 / 0.24);
+  background: none;
 }
 
 .command-deck-chapter-links {
-  gap: 10px;
+  gap: 6px 14px;
 }
 
-/* ---- The key visual: three rings behind the poster --------------------- */
+/* ---- The key visual: one pool of light behind the poster --------------------- */
 
 .command-deck .artwork-stage.command-deck-artwork-stage {
   border-bottom: 0;
@@ -221,93 +159,36 @@
 
 .command-deck .command-deck-artwork-stage .artwork-stage__halo {
   background:
-    radial-gradient(
-      circle at 50% 2%,
-      #ffffff 0 2px,
-      color-mix(in srgb, var(--deck-accent) 72%, transparent) 4px,
-      transparent 8px
-    ),
-    radial-gradient(
-      circle at 50% 94%,
-      var(--deck-gold) 0 2px,
-      color-mix(in srgb, var(--deck-gold) 65%, transparent) 4px,
-      transparent 8px
-    ),
-    radial-gradient(
-      circle closest-side at 50% 48%,
-      transparent calc(100% - 2.5px),
-      color-mix(in srgb, var(--deck-accent) 74%, #ffffff) calc(100% - 2.5px) calc(100% - 0.8px),
-      transparent 100%
-    ),
-    radial-gradient(
-      circle closest-side at 50% 48%,
-      transparent calc(84% - 2px),
-      color-mix(in srgb, var(--deck-gold) 64%, #ffffff) calc(84% - 2px) calc(84% - 0.5px),
-      transparent 84%
-    ),
-    radial-gradient(
-      circle closest-side at 50% 48%,
-      transparent calc(79% - 1px),
-      color-mix(in srgb, var(--deck-accent) 34%, transparent) calc(79% - 1px) 79%,
-      transparent calc(79% + 1px)
-    ),
-    radial-gradient(
-      circle closest-side at 50% 48%,
-      transparent calc(66% - 1.8px),
-      rgb(var(--ring-pink-rgb) / 0.52) calc(66% - 1.8px) calc(66% - 0.3px),
-      transparent 66%
-    ),
-    radial-gradient(
-      ellipse 78% 72% at 50% 48%,
-      color-mix(in srgb, var(--deck-accent) 56%, transparent) 0%,
-      var(--deck-nebula-2, rgb(255 82 198 / 0.24)) 38%,
-      color-mix(in srgb, var(--deck-gold) 26%, transparent) 56%,
-      transparent 78%
-    );
+    radial-gradient(ellipse 70% 58% at 52% 52%, color-mix(in srgb, var(--deck-accent) 17%, transparent), transparent 78%);
 }
 
 .command-deck .command-deck-artwork-stage .artwork-stage__image img {
-  padding: 5px;
-  border-radius: 20px;
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--deck-accent) 68%, #ffffff) 0%,
-      #050c16 34%,
-      #050c16 66%,
-      color-mix(in srgb, var(--deck-gold) 72%, #ffffff) 100%
-    );
-  outline: 1px solid color-mix(in srgb, var(--deck-accent) 78%, #f4fbff);
-  outline-offset: -1px;
-  box-shadow:
-    0 28px 72px rgb(1 4 10 / 0.94),
-    0 0 56px -10px color-mix(in srgb, var(--deck-accent) 68%, transparent),
-    0 14px 42px -14px color-mix(in srgb, var(--deck-gold) 44%, transparent);
+  border-radius: 6px;
+  outline: 1px solid rgb(215 218 216 / 0.32);
+  box-shadow: 0 24px 44px -18px rgb(0 0 0 / 0.78);
 }
 
 /* The picture switch: ring buttons. */
 .command-deck-art-controls button {
   border-radius: 50%;
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 58%),
-    rgb(7 15 28 / 0.88);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.26),
-    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.44),
-    0 8px 18px -8px rgb(0 0 0 / 0.8);
+  box-shadow: none;
 }
 
 /* ---- Exhibitions: cards in the ring's material ------------------------- */
 
 .command-deck-destinations a {
-  border-radius: var(--ring-radius-card);
+  border-radius: 12px;
+  border-color: rgb(212 215 211 / 0.19);
+  background: #181b1d;
+  box-shadow: 0 8px 24px -18px #000;
 }
 
 .command-deck-destinations a > span > svg {
   box-sizing: content-box;
   padding: 7px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgb(var(--ring-gold-rgb) / 0.5);
+  box-shadow: none;
+  color: #ddd6c1;
 }
 
 /* ---- The rider orbit ---------------------------------------------------- */
@@ -343,7 +224,7 @@
 /* On the section too, so the centre can size itself from the same ring. */
 .command-deck-riders,
 .command-deck-riders .command-deck-rider-orbit {
-  /* The item box is the glass frame; the portrait fills its inner 73 %. */
+  /* The outer box reserves space between portraits on the orbit. */
   --ring-item: clamp(112px, 11.4vw, 164px);
   --ring-r: clamp(206px, 22vw, 300px);
   --ring-track: color-mix(in srgb, var(--deck-accent, #74d9ec) 44%, transparent);
@@ -398,6 +279,10 @@
 
 .command-deck-riders .command-deck-rider-core > a {
   pointer-events: auto;
+  background: none;
+  text-decoration: underline;
+  text-decoration-color: #818781;
+  text-underline-offset: 0.35em;
 }
 
 .command-deck-riders .command-deck-rider-core h2 {
@@ -409,15 +294,7 @@
   position: relative;
   padding-inline: 16px;
   border-radius: var(--ring-radius-pill);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.16), transparent 58%),
-    radial-gradient(85% 100% at 50% 0%, color-mix(in srgb, var(--deck-accent) 26%, transparent), transparent 72%),
-    rgb(7 16 28 / 0.9);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.34),
-    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 56%, rgb(var(--ring-gold-rgb) / 0.38)),
-    0 10px 24px -8px rgb(0 0 0 / 0.84),
-    0 0 20px -6px color-mix(in srgb, var(--deck-accent) 44%, transparent);
+  box-shadow: none;
 }
 
 .command-deck-rider {
@@ -452,15 +329,10 @@
   position: absolute;
   top: calc(100% + 3px);
   /* The name may sit over a glass ring: a small ink plate keeps it legible. */
-  padding: 2px 11px;
-  border-radius: var(--ring-radius-pill);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 62%),
-    rgb(6 13 24 / 0.92);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.28),
-    inset 0 0 0 1px color-mix(in srgb, var(--deck-accent, #74d9ec) 48%, rgb(var(--ring-gold-rgb) / 0.28)),
-    0 8px 20px -6px rgb(0 0 0 / 0.85);
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #171b1e;
+  box-shadow: none;
   left: 50%;
   display: block;
   width: max-content;
@@ -479,33 +351,21 @@
 
 @media (hover: hover) and (pointer: fine) {
   .command-deck-scene-buttons > a:not(.is-selected):hover {
-    background:
-      radial-gradient(85% 100% at 50% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 72%),
-      rgb(255 255 255 / 0.04);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.24),
-      inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.42),
-      0 8px 20px -10px rgb(var(--ring-key-rgb) / 0.42);
+    background: #282d30;
+    box-shadow: none;
   }
 
   .command-deck .command-deck-enter:hover > svg {
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.48),
-      inset 0 0 0 1px var(--deck-accent),
-      0 0 16px -2px var(--deck-accent);
+    box-shadow: inset 0 0 0 1px #a6abad;
   }
 
   .command-deck-rider:hover strong {
     color: #fff;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.42),
-      inset 0 0 0 1px color-mix(in srgb, var(--deck-accent) 82%, #fff),
-      0 0 18px -3px color-mix(in srgb, var(--deck-accent) 68%, transparent),
-      0 10px 22px -8px rgb(0 0 0 / 0.88);
+    box-shadow: inset 0 -1px 0 var(--deck-accent);
   }
 }
 
-/* ---- Footer: pill links -------------------------------------------------- */
+/* ---- Footer: text links -------------------------------------------------- */
 
 .command-deck-footer {
   gap: 8px;
@@ -515,16 +375,41 @@
 }
 
 .command-deck-footer a {
-  padding-inline: 18px;
-  border-radius: var(--ring-radius-pill);
-  background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 56%),
-    radial-gradient(85% 100% at 50% 0%, rgb(var(--ring-key-rgb) / 0.18), transparent 72%),
-    rgb(7 15 28 / 0.88);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.26),
-    inset 0 0 0 1px rgb(var(--ring-key-rgb) / 0.36),
-    0 10px 22px -10px rgb(0 0 0 / 0.82);
+  padding-inline: 16px;
+  border-radius: 4px;
+  box-shadow: none;
+  background: none;
+}
+
+/* The poster and the riders each have one stage. Keep the ticked orbit clear
+   but let its inner glass recede behind the eight portraits. */
+.command-deck-rider-orbit > .ring-glass {
+  opacity: 0.46;
+}
+
+.command-deck-rider-orbit > .ring-glass > i:nth-child(n + 2) {
+  opacity: 0.32;
+}
+
+.command-deck-rider .command-deck-rider-portrait.ring-frame-glass {
+  padding: 8%;
+}
+
+.command-deck-rider .command-deck-rider-portrait.ring-frame-glass::before {
+  inset: 7%;
+  border: 1px solid rgb(216 218 211 / 0.55);
+  background: none;
+}
+
+.command-deck .command-deck-divider::after {
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  opacity: 0.58;
+}
+
+.command-deck .command-deck-divider::before {
+  background: linear-gradient(90deg, transparent, #585c5b 28%, #85857d 50%, #585c5b 72%, transparent);
 }
 
 /* ---- Motion --------------------------------------------------------------- */
@@ -857,8 +742,128 @@
   }
 }
 
+@media (prefers-contrast: more), (forced-colors: active) {
+  html[data-button-style="liquid"] .command-deck-scene-buttons > a.is-selected::after {
+    inset: auto 24% 4px;
+    padding: 0;
+    border-bottom: 2px solid currentColor;
+    border-radius: 0;
+    background: none;
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+
 @media (forced-colors: active) {
+  .command-deck-scene-buttons > a.is-selected {
+    outline: 2px solid Highlight;
+    outline-offset: -4px;
+  }
+
+  .command-deck-scene-buttons > a:focus-visible {
+    outline-offset: 2px;
+  }
+
   .command-deck-rider .command-deck-rider-portrait {
     border: 1px solid ButtonText;
+  }
+}
+
+/* ================================================================
+   2026-11-26 brush-up (package G): the dashboard speaks the site's
+   grammar. The sigil is the shared DW ring mark (Michroma, fitted inside
+   its ring), the work's title takes the World wordmark's prism (the other
+   works, their own light over the ink), and the door is the shared prism
+   primary at the hero height (52px, the 14px Japanese label). The selected
+   work in the switch carries a rule in its own light. Paint and box only:
+   copy, links, order, the engine and the hand-off are unchanged.
+   ================================================================ */
+.command-deck-brand-mark.command-deck-brand-mark {
+  width: var(--dw-header-mark, 44px);
+  height: var(--dw-header-mark, 44px);
+  color: var(--dw-ice, #7ae8ff);
+  font-family: var(--dw-font-hud, "Michroma", "Oxanium", sans-serif);
+  font-size: calc(var(--dw-header-mark, 44px) * 0.22);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-indent: 0.02em;
+  line-height: 1;
+  text-shadow: none;
+}
+
+/* D and W read as one glyph pair, as on every bar. */
+.command-deck-brand-mark.command-deck-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.command-deck-brand-mark.command-deck-brand-mark > span {
+  margin: 0;
+  color: inherit;
+}
+
+@media (forced-colors: none) {
+  .command-deck-title h1 > span {
+    background: linear-gradient(
+      100deg,
+      #fcfaf3 0%,
+      color-mix(in srgb, var(--deck-accent, #7ae8ff) 62%, #fcfaf3) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: none;
+  }
+
+  .command-deck[data-scene="world"] .command-deck-title h1 > span {
+    background-image: linear-gradient(
+      100deg,
+      #eefaff 0%,
+      var(--dw-ice, #7ae8ff) 34%,
+      #ff9bdc 70%,
+      var(--dw-gold, #f0cf86) 100%
+    );
+  }
+
+  .command-deck-title h1 {
+    filter: drop-shadow(0 2px 12px rgb(0 0 0 / 0.45));
+  }
+
+  .command-deck .command-deck-enter.command-deck-enter {
+    background: var(
+      --dw-btn-primary-fill,
+      linear-gradient(112deg, #c9f4ff 0%, #7ae8ff 30%, #f4b8e4 68%, #f0cf86 100%)
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.55),
+      var(--dw-btn-primary-glow, 0 10px 28px -14px rgb(122 232 255 / 0.7));
+    color: var(--dw-btn-primary-ink, #061423);
+  }
+
+  .command-deck-scene-buttons > a.is-selected {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      inset 0 -2px 0 color-mix(in srgb, var(--deck-accent, #7ae8ff) 78%, transparent),
+      0 6px 16px -10px #000;
+  }
+}
+
+.command-deck .command-deck-enter.command-deck-enter {
+  min-height: var(--dw-btn-h-hero, 52px);
+  padding-left: var(--dw-btn-pad-x, 20px);
+}
+
+.command-deck .command-deck-enter.command-deck-enter > strong {
+  font: var(--dw-btn-font-jp, 700 14px/1 "Zen Kaku Gothic New", sans-serif);
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 520px) {
+  .command-deck-brand-mark.command-deck-brand-mark {
+    width: 40px;
+    height: 40px;
+    font-size: 9px;
   }
 }

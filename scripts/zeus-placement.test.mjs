@@ -186,6 +186,10 @@ test("the audit's controls are stepped off as whole boxes", () => {
     '".lab-seek"',
     '".wm-detail :is(a, button)"',
     '".wm-view-controls button"',
+    '".wm-display-mode > button"',
+    '".wm-detail-jump"',
+    '".fst-page .rxs-local-nav nav a"',
+    '".search-map-link"',
     '".wm-node"',
   ]) {
     assert.ok(avoid.includes(selector), selector);

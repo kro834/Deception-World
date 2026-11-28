@@ -4,7 +4,7 @@ import { validateMapSearch } from "@/lib/world-map-data";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import css from "@/styles-world-map.css?url";
 import ringArchiveCss from "@/styles-ring-archive.css?url";
-type MapRequest = { q?: string; kind?: string; node?: string; source?: string };
+type MapRequest = { q?: string; kind?: string; node?: string; source?: string; view?: "list" };
 
 export const Route = createFileRoute("/world-map")({
   // Only the map view needs the graph to resolve aliases and decide which node exists.
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/world-map")({
     kind: typeof input.kind === "string" ? input.kind : undefined,
     node: typeof input.node === "string" ? input.node : undefined,
     source: typeof input.source === "string" ? input.source : undefined,
+    view: input.view === "list" ? "list" : undefined,
   }),
   component: WorldMapRoute,
   head: () =>
@@ -28,14 +29,20 @@ export const Route = createFileRoute("/world-map")({
     }),
 });
 function WorldMapRoute() {
-  const search = validateMapSearch(Route.useSearch());
+  const request = Route.useSearch();
+  const search = validateMapSearch(request);
   const navigate = Route.useNavigate();
   return (
     <WorldMap
       {...search}
+      listView={request.view === "list"}
       onChange={(patch) =>
         void navigate({
-          search: (previous) => ({ ...validateMapSearch(previous), ...patch }),
+          search: (previous) => ({
+            ...validateMapSearch(previous),
+            view: previous.view,
+            ...patch,
+          }),
           replace: Boolean(patch.q !== undefined),
           resetScroll: false,
         })

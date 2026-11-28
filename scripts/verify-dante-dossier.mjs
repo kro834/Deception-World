@@ -20,21 +20,24 @@ try {
     { width: 1280, height: 960 },
   ]) {
     const page = await browser.newPage({ viewport, hasTouch: true });
+    page.setDefaultTimeout(15000);
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${base}/characters/dante`);
     await ready(page);
     assert.match(await page.title(), /ダンテ/);
     assert.equal(await page.locator("h1 .manager-display-name").textContent(), "ダンテ／ヴァルグ");
+    await page.getByRole("tab", { name: "人物資料", exact: true }).click();
     assert.equal(await page.locator('[aria-label="ヴァルグの人物録"] > div').count(), 10);
+    const contents = page.getByRole("navigation", { name: "人物資料の章" });
     for (const name of ["原圧", "界外実体", "重勢", "不退", "深紅冠", "重相復元", "存在捕食", "認知追跡"]) {
-      // Offscreen chapters use content-visibility. Read each as the visitor reaches it.
-      await show(page.locator(".manager-copy-heading h2").filter({ hasText: new RegExp(`^${name}$`) }));
+      await contents.getByRole("link", { name: new RegExp(name) }).click();
       const heading = page.getByRole("heading", { name, exact: true });
       await heading.waitFor({ state: "visible" });
       assert.equal(await heading.count(), 1);
     }
     assert.equal(await page.locator(".manager-copy-section").count(), 17);
+    await contents.getByRole("link", { name: /第二の犬・ヴァルグ/ }).click();
     const varg = page.locator(".varg-portrait img");
     await show(varg);
     await varg.evaluate((img) => img.decode());
@@ -60,6 +63,9 @@ try {
     });
     const portrait = page.locator(".manager-portrait-frame img");
     assert.ok(await portrait.evaluate((image) => image.complete && image.naturalWidth > 0));
+    const forms = page.locator('#character-section-17 a[href="#form-records"]');
+    await show(forms);
+    await forms.click();
     for (const [index, name] of ["ポラリス", "エニグマ"].entries()) {
       const open = page.getByRole("button", {
         name: new RegExp(`仮面ライダールーラー・${name}モードをピックアップ`),

@@ -100,13 +100,27 @@ test("the driver, the reactor and the helmet are never held", () => {
   assert.ok(ENTRY_SEAT_GATE > 1.7 && ENTRY_SEAT_GATE < 2.4);
 });
 
-test("the shader's SEAT block is the entry's alone and leaves the scroll's program as it was", () => {
+test("the entry keeps its seat clock and lighting while the scroll uses playhead reflections", () => {
   const skin = read("src/lib/rexonance-suit-skin.ts");
-  // Every seat line sits inside an #ifdef SEAT … #endif.
   const fragment = skin.slice(skin.indexOf("const FRAGMENT = `"), skin.indexOf("export type SkinSources"));
-  const outside = fragment.replace(/#ifdef SEAT[\s\S]*?#endif/g, "");
-  assert.doesNotMatch(outside, /uSeat|seatAt|gated|seated/);
-  assert.equal(fragment.match(/#ifdef SEAT/g).length, 3);
+  // Select both sides of the SEAT condition, retaining the common GLSL.
+  const variant = (seat) => fragment.replace(
+    /^#(ifdef|ifndef) SEAT\n([\s\S]*?)^#endif/gm,
+    (_, condition, block) => {
+      const [enabled, disabled = ""] = block.split(/^#else$/m);
+      return (condition === "ifdef") === seat ? enabled : disabled;
+    },
+  );
+  const entry = variant(true), scroll = variant(false);
+  assert.match(entry, /float seatAt = texture2D\(uSeatMap, vUv\)\.r/);
+  assert.match(entry, /float seated = \(uSeat\.x - seatAt\) \/ uSeat\.z/);
+  assert.match(entry, /float seatLit = \(uSeat\.y - seatAt\) \/ uSeat\.z/);
+  assert.doesNotMatch(scroll, /uSeat|seatAt|gated|seated/);
+  assert.match(entry, /float room = .*uTime \* 2\.6/);
+  assert.match(entry, /outc \+= mix\(ICE, vec3\(1\.0\), 0\.35\) \* line \* glow \* 0\.75/);
+  assert.doesNotMatch(entry, /reflectionTint|float bevel/);
+  assert.match(scroll, /float reflection = [^;]*- front \* 15\.0;/);
+  assert.match(scroll, /float seating = glow \* \(1\.0 - disc\) \* \(1\.0 - eyes\) \* \(1\.0 - glowing\)/);
   // Compiled only when a seat map is passed; the scroll's mount passes none.
   // (2026-11-20, nanosuit pass: the program may also define DERIV, for the
   // derivatives extension; SEAT is still defined only with a seat map.)

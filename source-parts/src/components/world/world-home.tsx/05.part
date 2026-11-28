@@ -1,6 +1,19 @@
-              >
                 {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
               </output>
+              {posterFailure !== null && (
+                <div className="world-poster-recovery">
+                  <span role="status">画像を読み込めませんでした。</span>
+                  <button
+                    type="button"
+                    aria-disabled={posterResetting}
+                    onClick={() => {
+                      if (!posterResetting) void requestPoster(posterFailure, true);
+                    }}
+                  >
+                    {posterResetting ? "読み込み中" : "再試行"}
+                  </button>
+                </div>
+              )}
             </div>
           }
         >
@@ -61,11 +74,6 @@
         </a>
       </section>
 
-      <MirageTicker variant="open" records={EPISODES.length} />
-
-      <WorldContents />
-      <WorldExploration />
-
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
@@ -99,6 +107,12 @@
               </RevealText>
             </p>
           </div>
+        </div>
+
+        <div className="world-story-navigation">
+          <MirageTicker variant="open" records={EPISODES.length} />
+          <WorldContents />
+          <WorldExploration />
         </div>
 
         <div className="threat-panel" id="manager-archive" data-performance-region>
@@ -508,4 +522,3 @@
                 {COLUMNS.map((item, index) => (
                   <h3
                     key={item.no}
-                    id={`world-column-${item.no}`}

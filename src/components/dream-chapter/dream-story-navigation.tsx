@@ -239,7 +239,7 @@ export function DreamStoryIndex() {
   return (
     <>
       <DreamReaderSupport onChange={setReader} />
-      <DreamChapterStage />
+      <DreamChapterStage chapter={location.current ?? reader.bookmark?.caseNo ?? null} />
       <nav
         ref={navRef}
         id="dream-chapter-index"

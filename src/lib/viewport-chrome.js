@@ -6,10 +6,13 @@ export const VIEWPORT_CHROME_COLORS = {
   dream: "#130c17",
 };
 
+// 2026-11-26: /exhibition has the gallery's bar, so it takes the gallery's edge
+// colour and iPad launcher too.
 export function getViewportChrome(pathname) {
   switch (pathname.replace(/\/$/, "")) {
     case "/gallery":
     case "/gallery-tours":
+    case "/exhibition":
       return "gallery";
     case "/world":
       return "world";

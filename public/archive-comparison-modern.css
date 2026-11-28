@@ -716,13 +716,13 @@
 
 [id$="saga-form-compare-ios"] .compare-diff-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-areas:
-    "label delta"
-    "a a"
-    "b b";
+    "label label"
+    "a b"
+    "delta delta";
   align-content: start;
-  gap: 0.34rem 0.6rem;
+  gap: 0.44rem 0.85rem;
   min-width: 0;
   padding: 0.62rem 0.72rem;
   border: 1px solid var(--compare-rule, rgb(145 187 214 / 22%));
@@ -751,26 +751,17 @@
 
 [id$="saga-form-compare-ios"] .compare-diff-delta {
   grid-area: delta;
-  align-self: center;
-  padding: 0;
+  justify-self: start;
   color: var(--compare-muted, #9ca8bb);
-  font: 850 max(12px, 0.76rem)/1.2 ui-monospace, "SFMono-Regular", "SF Mono", Menlo, monospace;
+  font: 850 max(12px, 0.76rem)/1.3 ui-monospace, "SFMono-Regular", "SF Mono", Menlo, monospace;
   font-variant-numeric: tabular-nums lining-nums;
-  text-align: end;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
-/* Phones: the gap reads beside its label, out of the right-hand lane the
-   floating Zeus button rests in. */
-@media (max-width: 620px) {
-  [id$="saga-form-compare-ios"] .compare-diff-row {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  [id$="saga-form-compare-ios"] .compare-diff-delta {
-    justify-self: start;
-    text-align: start;
-  }
+[id$="saga-form-compare-ios"] .compare-diff-delta:has(> span:first-child:not(:empty)) {
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.35rem;
+  background: rgb(155 190 220 / 11%);
 }
 
 [id$="saga-form-compare-ios"] .compare-diff-row[data-lead="a"] .compare-diff-delta {
@@ -783,9 +774,10 @@
 
 [id$="saga-form-compare-ios"] .compare-diff-side-cell {
   display: grid;
-  grid-template-columns: 1rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.2rem 0.5rem;
+  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  align-items: baseline;
+  gap: 0.35rem 0.42rem;
   min-width: 0;
   padding: 0;
 }
@@ -796,10 +788,6 @@
 
 [id$="saga-form-compare-ios"] .compare-diff-side-cell.is-b {
   grid-area: b;
-}
-
-[id$="saga-form-compare-ios"] .compare-diff-row[data-measured="true"] .compare-diff-side-cell {
-  grid-template-columns: 1rem minmax(0, 9.5rem) minmax(3rem, 1fr);
 }
 
 [id$="saga-form-compare-ios"] .compare-diff-value {
@@ -820,6 +808,7 @@
 }
 
 [id$="saga-form-compare-ios"] .compare-diff-bar {
+  grid-column: 1 / -1;
   display: block;
   position: relative;
   height: 8px;

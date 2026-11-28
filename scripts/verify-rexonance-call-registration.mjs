@@ -130,7 +130,10 @@ async function enter() {
     });
   return page.evaluate(() => {
     const box = document.querySelector(".rx-suit-nanites");
-    const canvases = box ? [...box.querySelectorAll("canvas")] : [];
+    // 2026-11-28: the resonance field (2026-10-21, fba01849) puts its own two WebGL
+    // canvases (.rx-suit-field) in the box before the engine's settled and flight canvases
+    // (`canvas:last-child` stays the flight one). They are not the 2D pair this check is about.
+    const canvases = box ? [...box.querySelectorAll("canvas:not(.rx-suit-field)")] : [];
     const rect = (element) => {
       const r = element.getBoundingClientRect();
       return { x: r.left, y: r.top, w: r.width, h: r.height };
@@ -188,11 +191,13 @@ console.log("boxes", JSON.stringify({ box: info.box, canvases: info.canvases }))
       `the flight canvas's ${side} edge is ${inset} CSS px from the figure's, not whole`,
     );
   check(insets.left >= 1 && insets.top >= 1, "the flight canvas does not bleed left and up");
-  // Never past the stylesheet's bleed (−4 % / −2 % / 114 % × 102 %) nor below.
-  check(insets.left <= box.w * 0.04 + 1 / 64, `the flight canvas bleeds ${insets.left} px left`);
-  check(insets.top <= box.h * 0.02 + 1 / 64, `the flight canvas bleeds ${insets.top} px up`);
-  check(insets.right <= box.w * 0.1 + 1 / 64, `the flight canvas bleeds ${insets.right} px right`);
-  check(near(insets.bottom, 0), `the flight canvas bleeds ${insets.bottom} px below the figure`);
+  // Never past the stylesheet's bleed, nor below. 2026-11-28: that bleed is the firestorm's room
+  // (e4273509 / 104e2bd5, 2026-10-19): top -18 % / left -25 % / 150 % x 134 % of the figure, i.e.
+  // 25 % left and right, 18 % up and 16 % below (the old -4 % / -2 % / 114 % x 102 % predates it).
+  check(insets.left <= box.w * 0.25 + 1 / 64, `the flight canvas bleeds ${insets.left} px left`);
+  check(insets.top <= box.h * 0.18 + 1 / 64, `the flight canvas bleeds ${insets.top} px up`);
+  check(insets.right <= box.w * 0.25 + 1 / 64, `the flight canvas bleeds ${insets.right} px right`);
+  check(insets.bottom <= box.h * 0.16 + 1 / 64, `the flight canvas bleeds ${insets.bottom} px below the figure`);
   const expected = [
     figure[0] + Math.round((insets.left + insets.right) * DPR),
     figure[1] + Math.round((insets.top + insets.bottom) * DPR),
@@ -281,7 +286,7 @@ if (ids.length) at = await enter();
 const STEP = 40;
 const placed = await page.evaluate((step) => {
   const box = document.querySelector(".rx-suit-nanites");
-  const canvases = [...box.querySelectorAll("canvas")];
+  const canvases = [...box.querySelectorAll("canvas:not(.rx-suit-field)")]; // 2026-11-28: the WebGL field canvases have no 2D context
   const P = CanvasRenderingContext2D.prototype;
   // The figure's origin on each canvas, in its backing pixels.
   const r = (element) => element.getBoundingClientRect();
@@ -380,7 +385,8 @@ for (const [x, y, dx, dy] of maps[0]) {
 console.log(
   `screen: ${pairs} dots on both canvases, worst gap ${worstX.toFixed(3)} device px across, ${worstY.toFixed(3)} down`,
 );
-check(pairs > 500, `only ${pairs} dots found on both canvases`);
+// 2026-11-28: with the larger bleed part of the box lies off the 1440x900 viewport, so fewer grid dots are on screen (278).
+check(pairs > 200, `only ${pairs} dots found on both canvases`);
 check(
   worstY < 0.05,
   `the canvases put the same figure pixel ${worstY.toFixed(3)} device px apart down`,

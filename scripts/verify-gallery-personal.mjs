@@ -35,7 +35,9 @@ async function pressed(page, id, expected) {
 
 const card = (page, id) => page.locator(`[data-gallery-artwork="${id}"]`);
 const favorite = (page, id) => card(page, id).locator(".gallery-favorite-toggle");
-const hero = (page) => page.locator(".gallery-feature a[aria-haspopup=dialog]");
+// 2026-11-28: the top artwork's link is the stage's own a.gallery-feature-open (gallery
+// redesign 2026-11-18, cbc1877d); it no longer sits inside figure.gallery-feature.
+const hero = (page) => page.locator("a.gallery-feature-open[aria-haspopup=dialog]");
 
 async function open(page, id) {
   await card(page, id).locator(".gallery-work-open").focus();
@@ -58,7 +60,12 @@ async function close(page) {
 
 async function feature(page) {
   await expandTools(page);
-  const button = page.getByRole("button", { name: /^トップに(?:飾る|設定済み)$/ });
+  // 2026-11-28: the page's own 「トップに飾る」 plate (gallery-feature-save,
+  // gallery redesign 2026-11-18) stays in the tree behind the modal, so the
+  // viewer's button is looked up inside the open dialog.
+  const button = page
+    .locator("dialog[open]")
+    .getByRole("button", { name: /^トップに(?:飾る|設定済み)$/ });
   await button.focus();
   await button.press("Enter");
   return button;
@@ -324,7 +331,7 @@ for (const [engine, type] of [
             await pressed(page, "g10", true);
             await page.waitForFunction(() =>
               document
-                .querySelector(".gallery-feature a[aria-haspopup=dialog]")
+                .querySelector("a.gallery-feature-open[aria-haspopup=dialog]")
                 ?.getAttribute("href")
                 ?.includes("g10-"),
             );
@@ -334,7 +341,7 @@ for (const [engine, type] of [
             await pressed(page, "g10", false);
             await page.waitForFunction(() =>
               document
-                .querySelector(".gallery-feature a[aria-haspopup=dialog]")
+                .querySelector("a.gallery-feature-open[aria-haspopup=dialog]")
                 ?.getAttribute("href")
                 ?.includes("g03-"),
             );

@@ -66,7 +66,7 @@ export function ExhibitionArtworkBrowser({
   onSelect,
 }: {
   currentIndex: number;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, button: HTMLButtonElement) => void;
 }) {
   const [query, setQuery] = useState("");
   const [format, setFormat] = useState<ExhibitionFormat>("all");
@@ -179,7 +179,7 @@ export function ExhibitionArtworkBrowser({
                 className="exhibition-shelf-work dg-control"
                 aria-pressed={index === currentIndex}
                 aria-label={`${String(index + 1).padStart(3, "0")} ${artwork.title}を展示${index === currentIndex ? "（展示中）" : ""}`}
-                onClick={() => onSelect(artwork.id)}
+                onClick={(event) => onSelect(artwork.id, event.currentTarget)}
               >
                 <span className="exhibition-shelf-image">
                   <img

@@ -58,7 +58,7 @@ test("the call yields before mount; decoded plan preparation is bounded and canc
   const branch = source.slice(source.indexOf("rexonanceCall = await preparation.promise;"));
   assert.match(
     branch,
-    /await nextFrame\(\);\s*await nextFrame\(\);\s*if \(!isCurrent\(\)\) return;/,
+    /await settleUnderCover\(requestSignal\);\s*if \(!isCurrent\(\)\) return;/,
   );
   assert.match(branch, /rexonanceCall && tier === "full" && rexonanceSuitWarm/);
   assert.match(
@@ -69,7 +69,7 @@ test("the call yields before mount; decoded plan preparation is bounded and canc
     branch,
     /rexonanceCoverCancel\.current = entry\.cancel;\s*await entry\.promise;[\s\S]*?if \(!isCurrent\(\)\) return;/,
   );
-  assert.ok(branch.indexOf('setSignal("running")') < branch.indexOf("await nextFrame()"));
+  assert.ok(branch.indexOf('setSignal("running")') < branch.indexOf("await settleUnderCover(requestSignal)"));
   assert.ok(
     branch.indexOf("await entry.promise;") < branch.indexOf("startedAt = performance.now();"),
   );

@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent,
@@ -23,13 +24,15 @@ import {
   cinemaDownload,
   cinemaNumber,
   cinemaPosterAlt,
+  cinemaViewHash,
   cinemaWrap,
   loadCinemaPoster,
+  readCinemaViewHash,
 } from "./saga-cinema-data";
 import { useCinemaMotion, useCinemaPreferences } from "./use-cinema-motion";
 
 function useNativeDialog(ref: RefObject<HTMLDialogElement | null>, open: boolean) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
@@ -88,6 +91,7 @@ export function SagaCinema() {
   const requestedHeroRef = useRef(3);
   const committedHeroRef = useRef(3);
   const galleryFromDetailRef = useRef(false);
+  const viewOriginRef = useRef({ hash: "", fromLink: false });
   const releaseScrollLockRef = useRef<(() => void) | null>(null);
   const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -109,6 +113,15 @@ export function SagaCinema() {
   const detail = SAGA_CINEMA_FILMS[detailIndex];
   const gallery = SAGA_CINEMA_FILMS[galleryIndex];
 
+  useLayoutEffect(() => {
+    if (!modalOpen) return;
+    const release = acquireViewportScrollLock({ freezeBody: true });
+    releaseScrollLockRef.current = release;
+    return () => {
+      release();
+      if (releaseScrollLockRef.current === release) releaseScrollLockRef.current = null;
+    };
+  }, [modalOpen]);
   useNativeDialog(detailRef, detailOpen);
   useNativeDialog(galleryRef, galleryOpen);
   useCinemaMotion(
@@ -129,10 +142,23 @@ export function SagaCinema() {
     }, 3500);
   }, []);
 
+  const setCinemaFragment = (hash: string, landAtSection = false) => {
+    if (window.location.hash === hash) return;
+    void router.navigate({
+      to: "/saga-cinema",
+      search: true,
+      hash: hash.slice(1),
+      replace: true,
+      resetScroll: false,
+      hashScrollIntoView: landAtSection,
+    });
+  };
+
   const closeAll = useCallback(() => {
     selectionRef.current += 1;
     requestedHeroRef.current = committedHeroRef.current;
     setHeroChanging(false);
+    galleryFromDetailRef.current = false;
     [galleryRef, detailRef].forEach((ref) => {
       if (ref.current?.open) ref.current.close();
     });
@@ -143,13 +169,39 @@ export function SagaCinema() {
     setMenuOpen(false);
   }, []);
 
-  useEffect(
-    () =>
-      router.history.subscribe(({ action }) => {
-        if (action.type === "BACK" || action.type === "FORWARD" || action.type === "GO") closeAll();
-      }),
-    [router, closeAll],
-  );
+  useEffect(() => {
+    const applyFragment = () => {
+      const target =
+        window.location.pathname === "/saga-cinema"
+          ? readCinemaViewHash(window.location.hash)
+          : null;
+      if (!target) {
+        closeAll();
+        return;
+      }
+      galleryFromDetailRef.current = false;
+      setMenuOpen(false);
+      viewOriginRef.current = {
+        hash: target.view === "film" ? "#films" : "#visuals",
+        fromLink: true,
+      };
+      if (target.view === "film") {
+        setGalleryOpen(false);
+        setDetailIndex(target.index);
+        setDetailOpen(true);
+      } else {
+        setDetailOpen(false);
+        setGalleryIndex(target.index);
+        setGalleryOpen(true);
+      }
+    };
+    const stopHistory = router.history.subscribe(({ action }) => {
+      if (!["BACK", "FORWARD", "GO"].includes(action.type)) return;
+      applyFragment();
+    });
+    applyFragment();
+    return stopHistory;
+  }, [router, closeAll]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -164,16 +216,6 @@ export function SagaCinema() {
       });
     };
   }, []);
-
-  useEffect(() => {
-    if (!modalOpen) return;
-    const release = acquireViewportScrollLock({ freezeBody: true });
-    releaseScrollLockRef.current = release;
-    return () => {
-      release();
-      if (releaseScrollLockRef.current === release) releaseScrollLockRef.current = null;
-    };
-  }, [modalOpen]);
 
   useEffect(() => {
     if (!heroRef.current || !("IntersectionObserver" in window)) return;
@@ -244,20 +286,40 @@ export function SagaCinema() {
   };
 
   const openDetail = (index: number) => {
-    setDetailIndex(cinemaWrap(index));
+    viewOriginRef.current = { hash: window.location.hash, fromLink: false };
+    const next = cinemaWrap(index);
+    setDetailIndex(next);
     setDetailOpen(true);
+    setCinemaFragment(cinemaViewHash("film", next));
   };
   const changeDetail = (index: number) => {
-    setDetailIndex(cinemaWrap(index));
+    const next = cinemaWrap(index);
+    setDetailIndex(next);
+    setCinemaFragment(cinemaViewHash("film", next));
     if (detailRef.current) detailRef.current.scrollTop = 0;
   };
+  const dismissDetail = () => {
+    setDetailOpen(false);
+    setCinemaFragment(viewOriginRef.current.hash, viewOriginRef.current.fromLink);
+  };
+  const selectGallery = (index: number) => {
+    const next = cinemaWrap(index);
+    setGalleryIndex(next);
+    setCinemaFragment(cinemaViewHash("poster", next));
+  };
   const openGallery = (index: number, fromDetail = false) => {
+    if (!fromDetail) viewOriginRef.current = { hash: window.location.hash, fromLink: false };
     galleryFromDetailRef.current = fromDetail;
-    setGalleryIndex(cinemaWrap(index));
+    selectGallery(index);
     setGalleryOpen(true);
   };
-  const galleryClosed = () => {
+  const dismissGallery = () => {
     setGalleryOpen(false);
+    if (galleryFromDetailRef.current) setCinemaFragment(cinemaViewHash("film", detailIndex));
+    else setCinemaFragment(viewOriginRef.current.hash, viewOriginRef.current.fromLink);
+  };
+  const galleryClosed = () => {
+    if (galleryRef.current?.open) return;
     if (galleryFromDetailRef.current && detailRef.current?.open)
       detailPosterRef.current?.focus({ preventScroll: true });
     galleryFromDetailRef.current = false;
@@ -269,7 +331,7 @@ export function SagaCinema() {
     const dx = event.changedTouches[0].clientX - start.x;
     const dy = event.changedTouches[0].clientY - start.y;
     if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5)
-      setGalleryIndex((index) => cinemaWrap(index + (dx < 0 ? 1 : -1)));
+      selectGallery(galleryIndex + (dx < 0 ? 1 : -1));
   };
   const shareSite = async () => {
     const data = {
@@ -380,20 +442,6 @@ export function SagaCinema() {
                       ポスターを見る <span>＋</span>
                     </button>
                   </div>
-                  <div className="project-data">
-                    <div>
-                      <span>FORMAT</span>
-                      <p>全4部作</p>
-                    </div>
-                    <div>
-                      <span>PROJECT</span>
-                      <p>本編リメイク</p>
-                    </div>
-                    <div>
-                      <span>RELEASE</span>
-                      <p>公開日未発表</p>
-                    </div>
-                  </div>
                 </div>
                 <div className="hero-poster-area">
                   <button
@@ -481,6 +529,8 @@ export function SagaCinema() {
                       void selectHero(index, true);
                     }}
                   >
+                    <img src={film.image} width="853" height="1280" alt="" loading="lazy" />
+                    <span>{film.part}</span>
                     <strong>{film.title}</strong>
                   </button>
                 ))}
@@ -558,20 +608,11 @@ export function SagaCinema() {
             </section>
             <section className="films section" id="films">
               <SectionLabel number="02">映画4部作</SectionLabel>
-              {/* The ring update (2026-11-23): the four films are an orbit
-                  around their heading (styles-ring-special.css). The ring is
-                  a text-free ornament; the cards stay the buttons they were. */}
-              <div className="film-orbit">
-                <i className="film-orbit-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
-                  <b />
-                  <b />
-                  <b />
-                  <b />
-                </i>
+              <div className="film-programme">
                 <div className="section-heading" data-reveal>
                   <h3>邂逅から、終末へ。</h3>
                 </div>
-                <div className="film-grid ring-enter">
+                <div className="film-grid">
                   {SAGA_CINEMA_FILMS.map((film, index) => (
                     <button
                       key={film.slug}
@@ -581,9 +622,6 @@ export function SagaCinema() {
                       aria-haspopup="dialog"
                       onClick={() => openDetail(index)}
                     >
-                      <div className="film-card-top">
-                        <span>{film.part}</span>
-                      </div>
                       <div className="film-poster">
                         <img
                           src={film.image}
@@ -596,9 +634,11 @@ export function SagaCinema() {
                           ↗
                         </span>
                       </div>
+                      <div className="film-card-top">
+                        <span>{film.part}</span>
+                      </div>
                       <div className="film-name">
                         <h4>{film.title}</h4>
-                        <span aria-hidden="true">＋</span>
                       </div>
                     </button>
                   ))}
@@ -698,7 +738,10 @@ export function SagaCinema() {
           id="film-dialog"
           className="film-dialog dg-dialog"
           aria-labelledby="dialog-title"
-          onClose={() => setDetailOpen(false)}
+          onCancel={(event) => {
+            event.preventDefault();
+            dismissDetail();
+          }}
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
               event.preventDefault();
@@ -714,14 +757,14 @@ export function SagaCinema() {
               event.clientY < bounds.top ||
               event.clientY > bounds.bottom
             )
-              setDetailOpen(false);
+              dismissDetail();
           }}
         >
           <button
             className="close-button"
             data-close
             aria-label="作品情報を閉じる"
-            onClick={() => setDetailOpen(false)}
+            onClick={dismissDetail}
           >
             ×
           </button>
@@ -804,20 +847,27 @@ export function SagaCinema() {
           className="gallery-dialog"
           aria-label="メインビジュアル ギャラリー"
           onClose={galleryClosed}
+          onCancel={(event) => {
+            event.preventDefault();
+            dismissGallery();
+          }}
           onKeyDown={(event) => {
             if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
               event.preventDefault();
               event.stopPropagation();
-              setGalleryIndex((index) => cinemaWrap(index + (event.key === "ArrowRight" ? 1 : -1)));
+              selectGallery(galleryIndex + (event.key === "ArrowRight" ? 1 : -1));
             }
           }}
         >
           <div className="gallery-top">
+            <p id="gallery-caption" aria-live="polite" aria-atomic="true">
+              {gallery.part}『{gallery.title}』
+            </p>
             <button
               className="close-button"
               data-close
               aria-label="ギャラリーを閉じる"
-              onClick={() => setGalleryOpen(false)}
+              onClick={dismissGallery}
             >
               ×
             </button>
@@ -840,7 +890,7 @@ export function SagaCinema() {
               id="gallery-prev"
               className="gallery-arrow previous"
               aria-label="前のビジュアル"
-              onClick={() => setGalleryIndex((index) => cinemaWrap(index - 1))}
+              onClick={() => selectGallery(galleryIndex - 1)}
             >
               ←
             </button>
@@ -856,25 +906,23 @@ export function SagaCinema() {
               id="gallery-next"
               className="gallery-arrow next"
               aria-label="次のビジュアル"
-              onClick={() => setGalleryIndex((index) => cinemaWrap(index + 1))}
+              onClick={() => selectGallery(galleryIndex + 1)}
             >
               →
             </button>
           </div>
           <div className="gallery-bottom">
-            <p id="gallery-caption" aria-live="polite" aria-atomic="true">
-              {gallery.part}『{gallery.title}』
-            </p>
-            <div className="gallery-dots" aria-label="ビジュアルを選ぶ">
+            <div className="gallery-dots" role="group" aria-label="ビジュアルを選ぶ">
               {SAGA_CINEMA_FILMS.map((film, index) => (
                 <button
                   key={film.slug}
                   data-gallery={index}
                   aria-label={film.title}
                   aria-pressed={galleryIndex === index}
-                  onClick={() => setGalleryIndex(index)}
+                  onClick={() => selectGallery(index)}
                 >
-                  {cinemaNumber(index)}
+                  <img src={film.image} width="853" height="1280" alt="" loading="lazy" />
+                  <span>{film.title}</span>
                 </button>
               ))}
             </div>

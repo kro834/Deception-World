@@ -321,7 +321,7 @@ test("both archives link the profile sheet last and its script after the analyze
       const deck = html.indexOf("/archive-deck.css?v=20261010-deck");
       const sheetAt = html.indexOf('<link rel="stylesheet" href="/archive-profile.css?v=20261010-rx9">');
       assert.ok(deck > 0 && sheetAt > deck, archive);
-      const modern = html.indexOf("/archive-comparison-modern.js?v=20261009-diff");
+      const modern = html.indexOf("/archive-comparison-modern.js?v=20261125-spec");
       const script = html.indexOf('<script src="/archive-profile.js?v=20261010-rx9" defer></script>');
       assert.ok(modern > 0 && script > modern, archive);
     }

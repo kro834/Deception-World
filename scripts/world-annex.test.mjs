@@ -56,7 +56,35 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   const dialBlock = homeView.match(ringDial)[0];
   assert.match(dialBlock, /className="rider-ring-dial" aria-hidden="true"/);
   assert.doesNotMatch(dialBlock.replace(/\{\/\*[\s\S]*?\*\/\}/, ""), />[^<>{}\s][^<>{}]*</, "the ring carries no text");
+  const storyNavigation =
+    / {8}<div className="world-story-navigation">\n([\s\S]*?)\n {8}<\/div>\n\n/;
+  const navigation = homeView.match(storyNavigation);
+  assert.ok(navigation, "the navigation block follows the narrative opening");
+  assert.match(homeView, /<\/section>\s*<section className="story-section" id="story">/);
+  assert.match(
+    navigation[1],
+    /<MirageTicker variant="open" records=\{EPISODES.length\} \/>\s*<WorldContents \/>\s*<WorldExploration \/>/,
+  );
+  assert.ok(homeView.indexOf('className="story-copy"') < navigation.index);
+  assert.ok(navigation.index < homeView.indexOf('id="manager-archive"'));
+  // Restore the approved changes before applying the historical markup pins.
   const preservedHomeView = homeView
+    .replace(storyNavigation, "")
+    .replace(
+      '      <section className="story-section" id="story">',
+      '      <MirageTicker variant="open" records={EPISODES.length} />\n\n' +
+        '      <WorldContents />\n      <WorldExploration />\n\n' +
+        '      <section className="story-section" id="story">',
+    )
+    .replace('className="world-section-nav" aria-label="世界の章"', 'aria-label="メインメニュー"')
+    .replace(
+      /<b className="world-stage-state-label" aria-hidden="true">\s*<span data-inactive=\{shuffling \|\| undefined\}>SHUFFLE POSTER<\/span>\s*<span data-inactive=\{!shuffling \|\| undefined\}>SHUFFLING\.\.\.<\/span>\s*<\/b>/,
+      '<b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>',
+    )
+    .replace(
+      /<b className="world-stage-state-label" aria-hidden="true">\s*<span data-inactive=\{locked \|\| undefined\}>自動切替<\/span>\s*<span data-inactive=\{!locked \|\| undefined\}>固定中<\/span>\s*<\/b>/,
+      '<b>{locked ? "固定中" : "自動切替"}</b>',
+    )
     .replace(ringDial, "")
     .replace("      <WorldExploration />\n", "")
     .replace(
@@ -88,11 +116,15 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner (2026-10-23, ruling): the cards' RELATED / 01·02·05 and SECOND DOG / 02 codes and the archive slots' numbers stay (they pair with the artwork cards' RELATED / 03·04); the column pickup shows its own kicker (data) without the ARCHIVE prefix.
     // Owner (2026-10-30): film composition removes two decorative HUD layers; original copy and records stay.
     // Owner 2026-10-31: original artwork stage replaces the hero composition only.
-    markup: "e22bac1597fc906e9f31c0042f55ca3515ca12397cdd0854d3b2a785100b4524",
+    // 2026-11-25: focus and retry are scoped to the decoded poster layers.
+    markup: "259986b760c635f1f820e6c8daaa8733fef03c2ae87922d8c873a040856b31e2",
   });
   // Both values are independently pinned from pre-stage HEAD 95eb55fe.
-  // Hero wording and every JSX node outside it remain unchanged.
-  assert.deepEqual(worldArtworkBoundaryContract(preservedHomeView), {
+  // The new error status is functional copy. All previously visible hero words
+  // and every JSX node outside the hero keep their independent pins.
+  const posterError = '<span role="status">画像を読み込めませんでした。</span>';
+  assert.equal(preservedHomeView.split(posterError).length, 2);
+  assert.deepEqual(worldArtworkBoundaryContract(preservedHomeView.replace(posterError, "")), {
     outsideHero: "0846d3f5626222597db807efc886d312cb22802c671d5524ddae2c0cb65a35a2",
     heroWords: "2f6895ba018c5cf288f07508185eb1498d475b231a0930f85540b12d7f4d2825",
   });
@@ -124,15 +156,15 @@ test("the annex data is complete", () => {
   }
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ no, title }) => `${no} ${title}`),
-    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD", "04 癒えぬ傷を負った者共"],
+    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD", "04 癒えぬ傷を負った者共", "05 来訪"],
   );
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ lines }) => lines.length),
-    [3, 3, 5, 3],
+    [3, 3, 5, 3, 3],
   );
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length),
-    [3, 3, 9, 11],
+    [3, 3, 9, 16, 4],
   );
   assert.equal(WORLD_GLOSSARY.length, 16);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);

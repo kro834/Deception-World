@@ -214,7 +214,7 @@ const ORBIT_REGIONS = [
   ["special", "サーガ"],
   ["stories", "物語"],
   ["riders", "人物"],
-  ["information", "ギャラリー・お知らせ"],
+  ["information", "ギャラリー", "・お知らせ"],
   ["system", "設定"],
 ] as const;
 const ORBIT_REGION_OF_GROUP: Record<string, string> = {
@@ -609,21 +609,24 @@ export function SideMenuLayer({
     : pathname === "/characters/dante"
       ? { title: "ダンテ／ヴァルグ", image: "/character-dante-thumb.webp" }
       : (menuPage ?? COMMAND_ATLAS_SCENES[context]);
-  // `orbitTurn` is unbounded, so the dial always takes the short way round;
-  // `orbitDrag` is the fractional position while a finger holds the dial.
+  // `orbitTurn` is unbounded, so the dial always takes the short way round.
+  // An active drag writes only the live CSS angle until the detent commits.
   const [orbitTurn, setOrbitTurn] = useState(1);
-  const [orbitDrag, setOrbitDrag] = useState<number | null>(null);
   const orbitDialRef = useRef<HTMLElement>(null);
+  const orbitDragFrameRef = useRef(0);
+  const orbitSkipClickRef = useRef(false);
   const orbitPointerRef = useRef<{
     id: number;
+    centerX: number;
+    centerY: number;
     angle: number;
     turn: number;
+    rotation: number;
     moved: boolean;
   } | null>(null);
   const orbitWheelLockRef = useRef(0);
-  const orbitShown = orbitDrag ?? orbitTurn;
   const orbitIndex =
-    ((Math.round(orbitShown) % ORBIT_REGIONS.length) + ORBIT_REGIONS.length) % ORBIT_REGIONS.length;
+    ((Math.round(orbitTurn) % ORBIT_REGIONS.length) + ORBIT_REGIONS.length) % ORBIT_REGIONS.length;
   const orbitRegion = ORBIT_REGIONS[orbitIndex][0];
   const turnOrbitTo = (index: number) =>
     setOrbitTurn((value) => {
@@ -632,25 +635,23 @@ export function SideMenuLayer({
       if (delta > count / 2) delta -= count;
       return Math.round(value + delta);
     });
-  const orbitPointerAngle = (event: { clientX: number; clientY: number }) => {
-    const box = orbitDialRef.current!.getBoundingClientRect();
-    return (
-      (Math.atan2(
-        event.clientY - (box.top + box.height / 2),
-        event.clientX - (box.left + box.width / 2),
-      ) *
-        180) /
-      Math.PI
-    );
-  };
+  const orbitPointerAngle = (event: PointerEvent<HTMLElement>, centerX: number, centerY: number) =>
+    (Math.atan2(event.clientY - centerY, event.clientX - centerX) * 180) / Math.PI;
   // The dial owns its own drag: it never starts the panel's swipe-to-close.
   const onOrbitPointerDown = (event: PointerEvent<HTMLElement>) => {
     event.stopPropagation();
-    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (orbitPointerRef.current || !event.isPrimary || event.button !== 0) return;
+    const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    orbitSkipClickRef.current = false;
     orbitPointerRef.current = {
       id: event.pointerId,
-      angle: orbitPointerAngle(event),
+      centerX,
+      centerY,
+      angle: orbitPointerAngle(event, centerX, centerY),
       turn: orbitTurn,
+      rotation: 0,
       moved: false,
     };
   };
@@ -658,32 +659,54 @@ export function SideMenuLayer({
     const state = orbitPointerRef.current;
     if (!state || state.id !== event.pointerId) return;
     event.stopPropagation();
-    let delta = orbitPointerAngle(event) - state.angle;
+    const angle = orbitPointerAngle(event, state.centerX, state.centerY);
+    let delta = angle - state.angle;
     if (delta > 180) delta -= 360;
     if (delta < -180) delta += 360;
-    if (!state.moved && Math.abs(delta) < ORBIT_DRAG_SLOP_DEG) return;
+    state.angle = angle;
+    state.rotation += delta;
+    if (!state.moved && Math.abs(state.rotation) < ORBIT_DRAG_SLOP_DEG) return;
     if (!state.moved) {
       state.moved = true;
+      orbitSkipClickRef.current = true;
+      panelRef.current?.setAttribute("data-orbit-dragging", "true");
       event.currentTarget.setPointerCapture(event.pointerId);
     }
-    setOrbitDrag(state.turn - delta / ORBIT_STEP_DEG);
-  };
-  const onOrbitPointerEnd = (event: PointerEvent<HTMLElement>) => {
-    const state = orbitPointerRef.current;
-    if (!state || state.id !== event.pointerId) return;
-    event.stopPropagation();
-    orbitPointerRef.current = null;
-    if (!state.moved) return;
-    if (event.currentTarget.hasPointerCapture(event.pointerId))
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    setOrbitDrag((value) => {
-      if (value !== null) setOrbitTurn(Math.round(value));
-      return null;
+    // Animate the dial while dragging, then seat the destination group once.
+    if (orbitDragFrameRef.current) return;
+    orbitDragFrameRef.current = window.requestAnimationFrame(() => {
+      orbitDragFrameRef.current = 0;
+      panelRef.current?.style.setProperty(
+        "--orbit-turn",
+        String(state.turn - state.rotation / ORBIT_STEP_DEG),
+      );
     });
+  };
+  function finishOrbitDrag(commit: boolean) {
+    const state = orbitPointerRef.current;
+    if (!state) return;
+    const dial = orbitDialRef.current;
+    orbitPointerRef.current = null;
+    window.cancelAnimationFrame(orbitDragFrameRef.current);
+    orbitDragFrameRef.current = 0;
+    if (dial?.hasPointerCapture(state.id)) dial.releasePointerCapture(state.id);
+    if (!state.moved) return;
+    const turn = Math.round(commit ? state.turn - state.rotation / ORBIT_STEP_DEG : state.turn);
+    panelRef.current?.removeAttribute("data-orbit-dragging");
+    panelRef.current?.style.setProperty("--orbit-turn", String(turn));
+    setOrbitTurn(turn);
+  }
+  const onOrbitPointerEnd = (event: PointerEvent<HTMLElement>) => {
+    if (orbitPointerRef.current?.id !== event.pointerId) return;
+    if (event.type === "lostpointercapture" && event.target !== event.currentTarget) return;
+    if (event.type === "pointerleave" && orbitPointerRef.current.moved) return;
+    event.stopPropagation();
+    finishOrbitDrag(event.type === "pointerup");
   };
   // A drag that ends on a planet must not also choose it.
   const onOrbitClickCapture = (event: MouseEvent<HTMLElement>) => {
-    if (orbitDrag === null) return;
+    if (!orbitSkipClickRef.current || event.detail === 0) return;
+    orbitSkipClickRef.current = false;
     event.preventDefault();
     event.stopPropagation();
   };
@@ -713,12 +736,17 @@ export function SideMenuLayer({
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const now = performance.now();
-      if (now < orbitWheelLockRef.current || Math.abs(event.deltaY) < 8) return;
+      if (orbitPointerRef.current || now < orbitWheelLockRef.current || Math.abs(event.deltaY) < 8)
+        return;
       orbitWheelLockRef.current = now + ORBIT_WHEEL_LOCK_MS;
       setOrbitTurn((value) => Math.round(value) + Math.sign(event.deltaY));
     };
     dial.addEventListener("wheel", onWheel, { passive: false });
-    return () => dial.removeEventListener("wheel", onWheel);
+    const stopWatching = watchSideMenuSwipeLifecycle(() => finishOrbitDrag(false));
+    return () => {
+      stopWatching();
+      dial.removeEventListener("wheel", onWheel);
+    };
   }, [isOpen]);
   // The menu opens on the region the reader is in: the page's own row when a
   // row is current, else this page's sections.
@@ -732,7 +760,6 @@ export function SideMenuLayer({
       ?.closest<HTMLElement>(".side-panel-group")?.dataset?.atlasGroup;
     const region = group ? (ORBIT_REGION_OF_GROUP[group] ?? group) : "sections";
     const index = ORBIT_REGIONS.findIndex(([id]) => id === region);
-    setOrbitDrag(null);
     setOrbitTurn(index < 0 ? 1 : index);
   }, [isOpen, pathname]);
   // First open of a session: one springy nudge (never under reduced motion
@@ -752,12 +779,10 @@ export function SideMenuLayer({
     let back = 0;
     const out = window.setTimeout(() => {
       if (orbitPointerRef.current) return;
-      setOrbitDrag(null);
       setOrbitTurn((value) => value + ORBIT_NUDGE_TURN);
-      back = window.setTimeout(
-        () => setOrbitTurn((value) => Math.round(value - ORBIT_NUDGE_TURN)),
-        ORBIT_NUDGE_HOLD_MS,
-      );
+      back = window.setTimeout(() => {
+        if (!orbitPointerRef.current) setOrbitTurn((value) => Math.round(value - ORBIT_NUDGE_TURN));
+      }, ORBIT_NUDGE_HOLD_MS);
     }, ORBIT_NUDGE_AFTER_MS);
     return () => {
       window.clearTimeout(out);
@@ -772,30 +797,41 @@ export function SideMenuLayer({
     const panel = panelRef.current;
     const dial = orbitDialRef.current;
     if (!panel || !dial || !isOpen) return;
+    let placed = new Set<HTMLElement>();
     const place = () => {
-      const rows = panel.querySelectorAll<HTMLElement>(
-        ".side-panel-group .side-panel-links > *, .side-panel-group .command-atlas-scene",
-      );
-      const wide = orbitMedia(ORBIT_SIDE_LAYOUT);
+      if (!orbitMedia(ORBIT_SIDE_LAYOUT)) {
+        for (const row of placed) row.style.removeProperty("--orbit-hug");
+        placed.clear();
+        return;
+      }
+      // Collect visible geometry before updating styles so one scroll frame
+      // never interleaves layout reads with row writes.
+      const visible = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          ".side-panel-group .side-panel-links > *, .side-panel-group .command-atlas-scene",
+        ),
+      ).filter((row) => row.getClientRects().length > 0);
       const box = dial.getBoundingClientRect();
       const centre = box.top + box.height / 2;
       // The rows hug the circle that passes through their column's edge.
-      const first = Array.from(rows).find((row) => row.getClientRects().length > 0);
-      const edge = first?.closest<HTMLElement>(".side-panel-group")?.getBoundingClientRect().left;
+      const edge = visible[0]?.closest<HTMLElement>(".side-panel-group")?.getBoundingClientRect().left;
       const radius = Math.max(
         box.width / 2 + ORBIT_HUG_MIN_GAP_PX,
         (edge ?? 0) - (box.left + box.width / 2),
       );
-      for (const row of rows) {
-        if (!wide || row.getClientRects().length === 0) {
-          row.style.removeProperty("--orbit-hug");
-          continue;
-        }
+      const positions = visible.map((row) => {
         const rect = row.getBoundingClientRect();
         const y = Math.min(radius - 1, Math.abs(rect.top + rect.height / 2 - centre));
         const hug = radius - Math.sqrt(radius ** 2 - y ** 2);
-        row.style.setProperty("--orbit-hug", `${(-Math.min(hug, ORBIT_HUG_MAX_PX)).toFixed(1)}px`);
+        return `${(-Math.min(hug, ORBIT_HUG_MAX_PX)).toFixed(1)}px`;
+      });
+      for (const [index, row] of visible.entries()) {
+        if (row.style.getPropertyValue("--orbit-hug") !== positions[index])
+          row.style.setProperty("--orbit-hug", positions[index]);
       }
+      const next = new Set(visible);
+      for (const row of placed) if (!next.has(row)) row.style.removeProperty("--orbit-hug");
+      placed = next;
     };
     place();
     // Rows that arrive after this pass (the page's chapters, RE DIVE) and a
@@ -811,6 +847,7 @@ export function SideMenuLayer({
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", onScroll);
       panel.removeEventListener("scroll", onScroll);
+      for (const row of placed) row.style.removeProperty("--orbit-hug");
     };
   }, [isOpen, orbitRegion, availableSectionIds]);
   // A jump scrolls this dialog only. Keyboard users land on the destination's
@@ -1392,8 +1429,7 @@ export function SideMenuLayer({
         data-command-atlas="true"
         data-orbit-menu="true"
         data-orbit-region={orbitRegion}
-        data-orbit-dragging={orbitDrag !== null ? "true" : undefined}
-        style={{ ["--orbit-turn" as string]: orbitShown }}
+        style={{ ["--orbit-turn" as string]: orbitTurn }}
         data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
         role="dialog"
@@ -1459,10 +1495,12 @@ export function SideMenuLayer({
             onPointerMove={onOrbitPointerMove}
             onPointerUp={onOrbitPointerEnd}
             onPointerCancel={onOrbitPointerEnd}
+            onPointerLeave={onOrbitPointerEnd}
+            onLostPointerCapture={onOrbitPointerEnd}
             onClickCapture={onOrbitClickCapture}
             onKeyDown={onOrbitKeyDown}
           >
-            {ORBIT_REGIONS.map(([group, label], index) => (
+            {ORBIT_REGIONS.map(([group, label, nextLine], index) => (
               <button
                 key={group}
                 type="button"
@@ -1470,6 +1508,7 @@ export function SideMenuLayer({
                 id={`command-atlas-tab-${group}`}
                 aria-selected={index === orbitIndex}
                 aria-controls={`command-atlas-${group}`}
+                aria-label={nextLine ? label + nextLine : undefined}
                 tabIndex={index === orbitIndex ? 0 : -1}
                 style={{ ["--orbit-i" as string]: index }}
                 onClick={(event) => {
@@ -1483,7 +1522,10 @@ export function SideMenuLayer({
                   }
                 }}
               >
-                <span>{label}</span>
+                <span>
+                  {label}
+                  {nextLine && <span className="command-atlas-label-line">{nextLine}</span>}
+                </span>
               </button>
             ))}
           </nav>
@@ -1882,7 +1924,9 @@ export function SideMenuLayer({
                     beforeNavigate={close}
                     aria-current={pathname === r.href ? "page" : undefined}
                   >
-                    <span>{r.name}</span>
+                    <span>
+                      <DisplayName value={r.name} />
+                    </span>
                     <i>{String(i + 1).padStart(2, "0")}</i>
                   </GuardedLink>
                 ) : null,
@@ -1910,7 +1954,9 @@ export function SideMenuLayer({
                     {isOpen ? (
                       <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
                     ) : null}
-                    <span>{file.name}</span>
+                    <span>
+                      <DisplayName value={file.name} />
+                    </span>
                     <i>{file.id}</i>
                   </GuardedLink>
                 ))}
@@ -1940,7 +1986,9 @@ export function SideMenuLayer({
                     {isOpen ? (
                       <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
                     ) : null}
-                    <span>{file.name}</span>
+                    <span>
+                      <DisplayName value={file.name} />
+                    </span>
                   </GuardedLink>
                 ))}
               </div>
@@ -1956,7 +2004,9 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={pathname === "/characters/dante" ? "page" : undefined}
             >
-              <span>ダンテ／ヴァルグ</span>
+              <span>
+                <DisplayName value="ダンテ／ヴァルグ" />
+              </span>
               <i>第二の犬</i>
             </GuardedLink>
           </div>

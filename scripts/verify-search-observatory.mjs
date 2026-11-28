@@ -33,7 +33,7 @@ async function overflow(page) {
 }
 
 try {
-  for (const width of [320, 390, 834, 1440]) {
+  for (const width of [320, 390, 768, 834, 1440]) {
     const page = await browser.newPage({
       viewport: { width, height: 900 },
       reducedMotion: "reduce",
@@ -140,6 +140,10 @@ try {
     await input.fill("zzzzzzzzzzzzzzzz");
     await page.locator(".search-empty").waitFor();
     await overflow(page);
+    assert.ok(
+      await page.evaluate(() => document.documentElement.scrollHeight < innerHeight * 6),
+      "a single empty classification does not expand the page",
+    );
     await page
       .locator(".search-empty")
       .getByRole("button", { name: "検索語を消す", exact: true })
@@ -162,6 +166,12 @@ try {
     await page.locator(".search-result-card").first().waitFor();
 
     await ready(page, "/library");
+    const libraryMenu = await page.locator(".library-topbar .side-panel-trigger").boundingBox();
+    assert.ok(
+      libraryMenu.x >= 0 && libraryMenu.x + libraryMenu.width <= width + 1,
+      "the library menu fits in the viewport beside the brand",
+    );
+    await overflow(page);
     await page.keyboard.press("Control+k");
     const dialog = page.locator("dialog.quick-search[open]");
     await dialog.waitFor();
@@ -194,6 +204,27 @@ try {
     );
     await page.close();
   }
+  const landscape = await browser.newPage({
+    viewport: { width: 667, height: 375 },
+    reducedMotion: "reduce",
+  });
+  await ready(landscape, "/search?q=zzzzzzzzzzzzzzzz");
+  await landscape
+    .locator(".search-empty")
+    .getByRole("button", { name: "検索語を消す", exact: true })
+    .click();
+  await landscape.waitForFunction(() => {
+    const field = document.getElementById("record-query");
+    const bar = document.querySelector(".search-topbar");
+    if (!field || !bar || field !== document.activeElement || field.value !== "") return false;
+    const box = field.getBoundingClientRect();
+    return box.top >= bar.getBoundingClientRect().bottom - 1 && box.bottom <= innerHeight;
+  });
+  await overflow(landscape);
+  await landscape.screenshot({ path: `${out}/667-landscape-after-clear.png` });
+  await landscape.close();
+  console.log(`PASS ${engine}/667×375: clearing an empty search returns to the visible field`);
+
   for (const mode of engine === "chromium" ? ["economy", "forced-colors"] : ["economy"]) {
     const page = await browser.newPage({
       viewport: { width: 320, height: 568 },

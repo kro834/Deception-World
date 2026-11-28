@@ -330,6 +330,17 @@ export function mountMetaUnitasBoost(
     gold: glowSprite(document, GOLD, 32),
   };
   const groups = metaUnitasBoostGroups();
+  // Cache each active group's silhouette in figure coordinates. Clipping
+  // the scan here keeps the split between the legs and open shoulder gaps.
+  const scanMasks = !entry && typeof Path2D === "function" ? groups.map((group) => {
+    const path = new Path2D();
+    for (const { xy } of group.loops) {
+      path.moveTo(xy[0], xy[1]);
+      for (let i = 2; i < xy.length; i += 2) path.lineTo(xy[i], xy[i + 1]);
+      path.closePath();
+    }
+    return path;
+  }) : null;
   const B = META_UNITAS_BOOST_BEATS;
   const windows = groups.map((group) => metaUnitasBoostWindow(group.beat));
 
@@ -576,6 +587,7 @@ export function mountMetaUnitasBoost(
     }
   };
 
+  const heads = new Float32Array(4 * Math.max(...groups.map((group) => group.loops.length)));
   const drawSeams = (
     context: CanvasRenderingContext2D,
     group: Group,
@@ -587,7 +599,7 @@ export function mountMetaUnitasBoost(
   ) => {
     if (alpha <= 0.004 || fraction <= 0) return;
     // Stride 4: [hx, hy, txDir, tyDir] per active scanning head.
-    const heads: number[] = [];
+    let headCount = 0;
     context.beginPath();
     for (const loop of group.loops) {
       const n = loop.xy.length / 2;
@@ -612,7 +624,10 @@ export function mountMetaUnitasBoost(
         context.lineTo(hx, hy);
         if (head) {
           const dLen = Math.hypot(x1 - x0, y1 - y0) || 1;
-          heads.push(hx, hy, (x1 - x0) / dLen, (y1 - y0) / dLen);
+          heads[headCount++] = hx;
+          heads[headCount++] = hy;
+          heads[headCount++] = (x1 - x0) / dLen;
+          heads[headCount++] = (y1 - y0) / dLen;
         }
       }
     }
@@ -627,10 +642,10 @@ export function mountMetaUnitasBoost(
     context.strokeStyle = rgba(SILVER, 0.65 * alpha);
     context.lineWidth = 0.75 * unit;
     context.stroke();
-    if (!heads.length) return;
+    if (!headCount) return;
     const size = 22 * unit;
     const dR = 4.6 * unit;
-    for (let h = 0; h < heads.length; h += 4) {
+    for (let h = 0; h < headCount; h += 4) {
       const hx = heads[h];
       const hy = heads[h + 1];
       const dx = heads[h + 2];
@@ -1061,6 +1076,14 @@ export function mountMetaUnitasBoost(
           const yy = toY(up ? by1 - (by1 - by0) * s : by0 + (by1 - by0) * s);
           const left = toX(bx0) - 12 * unit;
           const right = toX(bx1) + 12 * unit;
+          const mask = scanMasks?.[g];
+          if (mask) {
+            fctx.save();
+            fctx.translate(ox, oy);
+            fctx.scale(scale, scale);
+            fctx.clip(mask);
+            fctx.setTransform(fRatio, 0, 0, fRatio, 0, 0);
+          }
           const band = fctx.createLinearGradient(left, 0, right, 0);
           const fade = Math.sin(Math.PI * s);
           band.addColorStop(0, rgba(TEAL, 0));
@@ -1073,6 +1096,16 @@ export function mountMetaUnitasBoost(
           haze.addColorStop(1, rgba(TEAL, 0));
           fctx.fillStyle = haze;
           fctx.fillRect(left, up ? yy : yy - 26 * unit, right - left, 26 * unit);
+          if (mask) {
+            // Warm contact ridges cool into teal behind the moving front.
+            // Both colours follow the direction of travel over the artwork.
+            const sign = up ? 1 : -1;
+            for (let rib = 1; rib <= 3; rib += 1) {
+              fctx.fillStyle = rgba(rib === 1 ? ORANGE : TEAL, (0.56 / rib) * fade);
+              fctx.fillRect(left, yy + sign * (rib * rib + 2) * unit, right - left, unit * 1.6);
+            }
+            fctx.restore();
+          }
         }
         if (s < 1)
           drawSeams(
@@ -1259,9 +1292,20 @@ export function mountMetaUnitasBoost(
     lastNow = 0;
   };
   const wake = () => {
-    if (disposed || raf || !visible) return;
+    if (disposed || raf || !visible || document.hidden) return;
     raf = environment.requestAnimationFrame(tick);
   };
+  const syncVisibility = () => {
+    if (visible && !document.hidden) {
+      wake();
+      return;
+    }
+    if (raf) environment.cancelAnimationFrame(raf);
+    raf = 0;
+    lastNow = 0;
+    lastP = -1;
+  };
+  document.addEventListener("visibilitychange", syncVisibility);
   const onResize = () => {
     measured = false;
     wake();
@@ -1290,7 +1334,7 @@ export function mountMetaUnitasBoost(
     !entry && typeof environment.IntersectionObserver === "function"
       ? new environment.IntersectionObserver((records) => {
           visible = records[records.length - 1]?.isIntersecting ?? true;
-          if (visible) wake();
+          syncVisibility();
         })
       : null;
   viewer?.observe(runway);
@@ -1299,6 +1343,7 @@ export function mountMetaUnitasBoost(
     disposed = true;
     if (raf) environment.cancelAnimationFrame(raf);
     raf = 0;
+    document.removeEventListener("visibilitychange", syncVisibility);
     environment.removeEventListener("scroll", wake);
     environment.removeEventListener("resize", onResize);
     resizer?.disconnect();

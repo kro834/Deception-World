@@ -188,6 +188,8 @@ export function createIllusionculumScrollAccents(options: {
   core: readonly [number, number];
   seams: Readonly<Record<string, string>>;
   budget: IllusionculumAccentBudget;
+  entry?: boolean;
+  floatingSeams?: boolean;
 }): RexonanceAssemblyAccents {
   const { width: W, height: H } = options.size;
   const [coreX, coreY] = options.core;
@@ -201,6 +203,7 @@ export function createIllusionculumScrollAccents(options: {
   const box = new Float32Array(groupCount * 4); // cx, cy, half w, half h
   const lock = new Float32Array(groupCount);
   const allLoops: Float32Array[] = [];
+  const arcLengths = new Map<Float32Array, Float32Array>();
   for (let g = 0; g < groupCount; g += 1) {
     const spec = ILLUSIONCULUM_ACCENT_GROUPS[g];
     lock[g] = spec.window[1];
@@ -237,11 +240,14 @@ export function createIllusionculumScrollAccents(options: {
     loops.forEach((loop, index) => {
       let length = 0;
       const n = loop.length >> 1;
+      const arc = new Float32Array(n + 1);
       for (let k = 0; k < n; k += 1) {
         const j = (k + 1) % n;
         length += Math.hypot(loop[j * 2] - loop[k * 2], loop[j * 2 + 1] - loop[k * 2 + 1]);
+        arc[k + 1] = length;
       }
-      lengths[index] = length;
+      arcLengths.set(loop, arc);
+      lengths[index] = arc[n];
     });
     loopsByGroup.push(loops);
     lengthsByGroup.push(lengths);
@@ -514,53 +520,32 @@ export function createIllusionculumScrollAccents(options: {
   ) => {
     if (b - a <= 0.5 || total <= 0) return;
     const n = loop.length >> 1;
-    let start = ((a % total) + total) % total;
-    let remain = Math.min(total, b - a);
-    // Find the segment holding `start`.
-    let k = 0;
-    let along = 0;
-    for (; k < n; k += 1) {
-      const j = (k + 1) % n;
-      const seg = Math.hypot(loop[j * 2] - loop[k * 2], loop[j * 2 + 1] - loop[k * 2 + 1]);
-      if (along + seg >= start) {
-        const t = seg > 0 ? (start - along) / seg : 0;
-        context.moveTo(
-          loop[k * 2] + (loop[j * 2] - loop[k * 2]) * t,
-          loop[k * 2 + 1] + (loop[j * 2 + 1] - loop[k * 2 + 1]) * t,
-        );
-        start -= along;
-        // The rest of this segment.
-        const left = seg - start;
-        if (left >= remain) {
-          const t2 = seg > 0 ? (start + remain) / seg : 0;
-          context.lineTo(
-            loop[k * 2] + (loop[j * 2] - loop[k * 2]) * t2,
-            loop[k * 2 + 1] + (loop[j * 2 + 1] - loop[k * 2 + 1]) * t2,
-          );
-          return;
-        }
-        context.lineTo(loop[j * 2], loop[j * 2 + 1]);
-        remain -= left;
-        k = j;
-        break;
-      }
-      along += seg;
+    const arc = arcLengths.get(loop)!;
+    const start = ((a % total) + total) % total;
+    let lo = 0;
+    let hi = n;
+    while (lo + 1 < hi) {
+      const middle = (lo + hi) >> 1;
+      if (arc[middle] <= start) lo = middle;
+      else hi = middle;
     }
-    if (k >= n) return;
-    for (let step = 0; step < n && remain > 0; step += 1) {
+    let remain = Math.min(total, b - a);
+    let offset = start - arc[lo];
+    for (let step = 0; step <= n && remain > 0; step += 1) {
+      const k = (lo + step) % n;
       const j = (k + 1) % n;
-      const seg = Math.hypot(loop[j * 2] - loop[k * 2], loop[j * 2 + 1] - loop[k * 2 + 1]);
-      if (seg >= remain) {
-        const t = seg > 0 ? remain / seg : 0;
-        context.lineTo(
-          loop[k * 2] + (loop[j * 2] - loop[k * 2]) * t,
-          loop[k * 2 + 1] + (loop[j * 2 + 1] - loop[k * 2 + 1]) * t,
-        );
-        return;
-      }
-      context.lineTo(loop[j * 2], loop[j * 2 + 1]);
-      remain -= seg;
-      k = j;
+      const length = arc[k + 1] - arc[k];
+      if (length <= 0) continue;
+      const x = loop[k * 2];
+      const y = loop[k * 2 + 1];
+      const dx = loop[j * 2] - x;
+      const dy = loop[j * 2 + 1] - y;
+      if (!step) context.moveTo(x + dx * offset / length, y + dy * offset / length);
+      const used = Math.min(remain, length - offset);
+      const t = (offset + used) / length;
+      context.lineTo(x + dx * t, y + dy * t);
+      remain -= used;
+      offset = 0;
     }
   };
 
@@ -617,6 +602,37 @@ export function createIllusionculumScrollAccents(options: {
       // The construction scan: two heads from each outline's start, meeting,
       // with a trailing pink chromatic dispersion echo.
       const u = smooth(clamp01((p - (at - SCAN)) / SCAN));
+      // Violet facets lift off each plate's own seam, then meet the
+      // cyan tracing exactly at lock. The prism only occupies the section
+      // the two heads have already reached. No image or camera moves.
+      const lift = 12 * (1 - u);
+      if (options.floatingSeams && lift > 0.4) {
+        context.beginPath();
+        for (let k = 0; k < loops.length; k += 1) {
+          const loop = loops[k];
+          const arc = arcLengths.get(loop)!;
+          const n = loop.length >> 1;
+          const half = lengths[k] * u * 0.5;
+          const offsetX = (loop[0] < CX ? -0.72 : 0.72) * lift;
+          for (let i = 0; i < n; i += 1) {
+            const middle = (arc[i] + arc[i + 1]) * 0.5;
+            if (Math.min(middle, lengths[k] - middle) > half) continue;
+            const j = (i + 1) % n;
+            const x = loop[2 * i], y = loop[2 * i + 1];
+            const endX = loop[2 * j], endY = loop[2 * j + 1];
+            // Only outward-facing sides catch the refracted light.
+            if ((endX - x) * lift + (endY - y) * offsetX <= 0) continue;
+            context.moveTo(x, y);
+            context.lineTo(endX, endY);
+            context.lineTo(endX + offsetX, endY - lift);
+            context.lineTo(x + offsetX, y - lift);
+            context.closePath();
+          }
+        }
+        context.fillStyle = TONE_CSS[1];
+        context.globalAlpha = 0.26 * smooth(clamp01(u * 5));
+        context.fill();
+      }
       if (u > 0.08) {
         const lag = Math.max(0, u - 0.08);
         context.strokeStyle = TONE_CSS[1];
@@ -804,31 +820,30 @@ export function createIllusionculumScrollAccents(options: {
     const at = ILLUSIONCULUM_ACCENT_BEATS.clamp;
     if (p < at || p > at + 0.09) return;
     const v = clamp01((p - at) / 0.09);
+    // In the entry cover, ease the white seal in at a lower intensity
+    // so it leads into the blue reactor ignition.
+    const opacity = options.entry ? 0.4 * smooth(clamp01((p - at) / 0.015)) : 1;
     // Every seam glows with the seal and fades (the build's afterglow).
     if (allLoops.length) {
       const fade = (1 - v) * (1 - v);
       context.strokeStyle = TONE_CSS[0];
-      context.globalAlpha = 0.6 * fade;
+      context.globalAlpha = opacity * 0.6 * fade;
       context.lineWidth = 1 + 1.6 * fade;
       context.beginPath();
       for (let k = 0; k < allLoops.length; k += 1) wholeLoop(context, allLoops[k]);
       context.stroke();
     }
     if (calm) return;
-    // The bloom lasts, and stays lit, until the reactor's light (.9) has
-    // begun: gone at .895 (and mostly gone well before), the chest went dark
-    // for a few frames between the two and the entry read as two flashes in
-    // a second on a phone (verify-route-transitions); now the light takes
-    // over from it, one rise and one fall.
+    // Keep the seal's glow present as the reactor begins to light at .9.
     const w = clamp01((p - at) / 0.06);
     if (w < 1 && glows[groupCount]) {
       // The seal's bloom, from the reactor: the one larger glow, once.
       context.fillStyle = glows[groupCount] as CanvasGradient;
-      context.globalAlpha = 0.42 * Math.pow(1 - w, 0.8);
+      context.globalAlpha = opacity * 0.42 * Math.pow(1 - w, 0.8);
       const r = glowRadius[groupCount];
       context.fillRect(coreX - r, coreY - r, r * 2, r * 2);
       context.strokeStyle = WHITE;
-      context.globalAlpha = 0.8 * (1 - w);
+      context.globalAlpha = opacity * 0.8 * (1 - w);
       context.lineWidth = 1.5 + 3 * (1 - w);
       context.beginPath();
       context.ellipse(
