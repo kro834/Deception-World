@@ -116,6 +116,13 @@ try {
           get: () => (economy ? 2 : 8),
           configurable: true,
         });
+        // 2026-11-28 (stale since 2026-10-31, 6934a2e7): economy is the reader's
+        // saved 軽量 choice only, no longer guessed from cores and memory.
+        if (economy)
+          localStorage.setItem(
+            "deception-world:render-quality:v1",
+            JSON.stringify({ quality: "lightweight", revision: 1 }),
+          );
       },
       { economy: scenario.mode === "economy" },
     );
